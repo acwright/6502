@@ -85,7 +85,7 @@ U 1 1 605BBB99
 P 1750 2100
 F 0 "J?" H 1857 2967 50  0000 C CNN
 F 1 "USB_C_Receptacle_USB2.0" H 1857 2876 50  0001 C CNN
-F 2 "USB-C-Power:TYPE-C-31-M-17" H 1900 2100 50  0001 C CNN
+F 2 "" H 1900 2100 50  0001 C CNN
 F 3 "https://www.usb.org/sites/default/files/documents/usb_type-c.zip" H 1900 2100 50  0001 C CNN
 	1    1750 2100
 	1    0    0    -1  
@@ -170,19 +170,19 @@ F 3 "" H 2900 2500 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
-	2350 1500 2600 1500
+	2350 1500 2400 1500
 $Comp
 L power:PWR_FLAG #FLG?
 U 1 1 605C6250
-P 2600 1500
-F 0 "#FLG?" H 2600 1575 50  0001 C CNN
-F 1 "PWR_FLAG" H 2600 1673 50  0001 C CNN
-F 2 "" H 2600 1500 50  0001 C CNN
-F 3 "~" H 2600 1500 50  0001 C CNN
-	1    2600 1500
+P 2400 1500
+F 0 "#FLG?" H 2400 1575 50  0001 C CNN
+F 1 "PWR_FLAG" H 2400 1673 50  0001 C CNN
+F 2 "" H 2400 1500 50  0001 C CNN
+F 3 "~" H 2400 1500 50  0001 C CNN
+	1    2400 1500
 	1    0    0    -1  
 $EndComp
-Connection ~ 2600 1500
+Connection ~ 2400 1500
 $Comp
 L Connector_Generic:Conn_01x02 J?
 U 1 1 605F1A70
@@ -208,7 +208,7 @@ $EndComp
 Wire Wire Line
 	3300 1500 3300 1300
 Wire Wire Line
-	2600 1500 3150 1500
+	2400 1500 3150 1500
 Wire Wire Line
 	3200 1700 3150 1700
 Wire Wire Line
@@ -231,22 +231,7 @@ Wire Wire Line
 	2350 1800 2600 1800
 Wire Wire Line
 	2600 1800 2600 1950
-$Comp
-L Diode:1N4001 D?
-U 1 1 605F951E
-P 3900 1500
-F 0 "D?" H 3900 1283 50  0000 C CNN
-F 1 "1N4001" H 3900 1374 50  0000 C CNN
-F 2 "Diode_THT:D_DO-41_SOD81_P10.16mm_Horizontal" H 3900 1325 50  0001 C CNN
-F 3 "http://www.vishay.com/docs/88503/1n4001.pdf" H 3900 1500 50  0001 C CNN
-	1    3900 1500
-	-1   0    0    1   
-$EndComp
-Wire Wire Line
-	4050 1500 4200 1500
-Wire Wire Line
-	3550 1500 3750 1500
-Text GLabel 4200 1500 2    50   Output ~ 0
+Text GLabel 3850 1500 2    50   Output ~ 0
 VCC
 $Comp
 L Graphic:Logo_Open_Hardware_Small #LOGO?
@@ -985,4 +970,6 @@ Wire Bus Line
 Connection ~ 2350 6700
 Wire Bus Line
 	2350 6700 3850 6700
+Wire Wire Line
+	3550 1500 3850 1500
 $EndSCHEMATC
