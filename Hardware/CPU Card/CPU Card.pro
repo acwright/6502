@@ -1,4 +1,4 @@
-update=Friday, March 12, 2021 at 03:36:04 PM
+update=Saturday, March 27, 2021 at 10:55:35 AM
 version=1
 last_client=kicad
 [general]
@@ -33,7 +33,7 @@ LibDir=
 [eeschema/libraries]
 [schematic_editor]
 version=1
-PageLayoutDescrFile=
+PageLayoutDescrFile=CPU Card.kicad_wks
 PlotDirectoryName=
 SubpartIdSeparator=0
 SubpartFirstId=65

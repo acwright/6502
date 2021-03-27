@@ -1,4 +1,4 @@
-update=Friday, March 12, 2021 at 02:29:09 PM
+update=Saturday, March 27, 2021 at 12:36:06 PM
 version=1
 last_client=kicad
 [general]
@@ -33,7 +33,7 @@ LibDir=
 [eeschema/libraries]
 [schematic_editor]
 version=1
-PageLayoutDescrFile=empty.kicad_wks
+PageLayoutDescrFile=Memory Card.kicad_wks
 PlotDirectoryName=
 SubpartIdSeparator=0
 SubpartFirstId=65
