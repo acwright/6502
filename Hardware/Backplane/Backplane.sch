@@ -62,7 +62,7 @@ F 4 "571-5-5530843-4" H 6050 5150 50  0001 C CNN "Mouser"
 	1    0    0    -1  
 $EndComp
 $Comp
-L Connector:USB_C_Receptacle_USB2.0 J2
+L Backplane:USB_C_Receptacle_Power_Only J2
 U 1 1 605BBB99
 P 1450 1750
 F 0 "J2" H 1450 2550 50  0000 C CNN
@@ -73,25 +73,6 @@ F 4 "490-UJC-HP-3-SMT-TR" H 1450 1750 50  0001 C CNN "Mouser"
 	1    1450 1750
 	1    0    0    -1  
 $EndComp
-NoConn ~ 2050 1650
-NoConn ~ 2050 1750
-NoConn ~ 2050 1850
-NoConn ~ 2050 1950
-NoConn ~ 2050 2250
-NoConn ~ 2050 2350
-$Comp
-L Device:R R7
-U 1 1 605BEF4A
-P 1300 2850
-F 0 "R7" V 1093 2850 50  0000 C CNN
-F 1 "1M" V 1184 2850 50  0000 C CNN
-F 2 "Resistor_SMD:R_0805_2012Metric" V 1230 2850 50  0001 C CNN
-F 3 "~" H 1300 2850 50  0001 C CNN
-	1    1300 2850
-	0    1    1    0   
-$EndComp
-Wire Wire Line
-	1150 2650 1150 2850
 Wire Wire Line
 	1450 2650 1450 2850
 Wire Wire Line
@@ -131,7 +112,7 @@ F 3 "~" H 2600 1750 50  0001 C CNN
 	-1   0    0    1   
 $EndComp
 Wire Wire Line
-	2600 1350 2600 1600
+	2600 1400 2600 1600
 Wire Wire Line
 	2600 1900 2600 2000
 Wire Wire Line
@@ -204,11 +185,11 @@ Wire Wire Line
 	3200 1350 3200 1150
 Connection ~ 3200 1150
 Wire Wire Line
-	2050 1350 2600 1350
+	2050 1400 2600 1400
 Wire Wire Line
-	2050 1450 2300 1450
+	2050 1500 2300 1500
 Wire Wire Line
-	2300 1450 2300 1600
+	2300 1500 2300 1600
 Text GLabel 3650 1150 2    50   Output ~ 0
 VCC
 $Comp
@@ -253,17 +234,6 @@ F 1 "MountingHole" H 5350 7705 50  0001 L CNN
 F 2 "MountingHole:MountingHole_3.2mm_M3" H 5250 7750 50  0001 C CNN
 F 3 "~" H 5250 7750 50  0001 C CNN
 	1    5250 7750
-	1    0    0    -1  
-$EndComp
-$Comp
-L Mechanical:MountingHole H5
-U 1 1 605FF6E9
-P 5900 7750
-F 0 "H5" H 6000 7750 50  0000 L CNN
-F 1 "MountingHole" H 6000 7705 50  0001 L CNN
-F 2 "MountingHole:MountingHole_3.2mm_M3" H 5900 7750 50  0001 C CNN
-F 3 "~" H 5900 7750 50  0001 C CNN
-	1    5900 7750
 	1    0    0    -1  
 $EndComp
 $Comp
@@ -448,7 +418,7 @@ $Comp
 L 74xx:74HC04 U1
 U 2 1 6063D0C8
 P 4350 3100
-F 0 "U1" H 4350 3417 50  0000 C CNN
+F 0 "U1" V 4350 3417 50  0000 C CNN
 F 1 "74HC04" H 4350 3326 50  0000 C CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 4350 3100 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 4350 3100 50  0001 C CNN
@@ -516,10 +486,10 @@ Wire Wire Line
 Wire Wire Line
 	4000 3100 4050 3100
 $Comp
-L Device:R R8
+L Device:R R7
 U 1 1 6064992A
 P 3300 3500
-F 0 "R8" V 3507 3500 50  0000 C CNN
+F 0 "R7" V 3507 3500 50  0000 C CNN
 F 1 "1k" V 3416 3500 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 3230 3500 50  0001 C CNN
 F 3 "~" H 3300 3500 50  0001 C CNN
@@ -527,10 +497,10 @@ F 3 "~" H 3300 3500 50  0001 C CNN
 	0    -1   -1   0   
 $EndComp
 $Comp
-L Device:R R9
+L Device:R R8
 U 1 1 60649FD8
 P 4300 3500
-F 0 "R9" V 4507 3500 50  0000 C CNN
+F 0 "R8" V 4507 3500 50  0000 C CNN
 F 1 "1k" V 4416 3500 50  0000 C CNN
 F 2 "Resistor_SMD:R_0805_2012Metric" V 4230 3500 50  0001 C CNN
 F 3 "~" H 4300 3500 50  0001 C CNN
@@ -2535,7 +2505,7 @@ Wire Wire Line
 Wire Wire Line
 	2250 4450 1850 4450
 Wire Wire Line
-	2050 1150 2800 1150
+	2050 1150 2150 1150
 $Comp
 L power:PWR_FLAG #FLG02
 U 1 1 61720A93
@@ -2553,6 +2523,17 @@ Text GLabel 6250 3100 2    50   Output ~ 0
 PHI2
 Wire Wire Line
 	5800 2900 5800 3100
+Wire Wire Line
+	1350 2650 1350 2850
+Wire Wire Line
+	1350 2850 1450 2850
+Wire Wire Line
+	2050 1250 2150 1250
+Wire Wire Line
+	2150 1250 2150 1150
+Connection ~ 2150 1150
+Wire Wire Line
+	2150 1150 2800 1150
 Wire Bus Line
 	3850 4150 3850 6700
 Wire Bus Line
