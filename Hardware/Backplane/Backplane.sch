@@ -923,10 +923,8 @@ F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 9650 315
 	6    9650 3150
 	1    0    0    -1  
 $EndComp
-NoConn ~ 9350 2650
 NoConn ~ 9950 2650
 NoConn ~ 9950 3150
-NoConn ~ 9350 3150
 Connection ~ 1250 4250
 Entry Wire Line
 	850  4150 950  4250
@@ -2534,6 +2532,14 @@ Wire Wire Line
 Connection ~ 2150 1150
 Wire Wire Line
 	2150 1150 2800 1150
+Wire Wire Line
+	9350 2650 9250 2650
+Wire Wire Line
+	9250 2650 9250 3150
+Wire Wire Line
+	9250 3150 9350 3150
+Wire Wire Line
+	9250 3150 9250 3250
 Wire Bus Line
 	3850 4150 3850 6700
 Wire Bus Line
@@ -2548,4 +2554,16 @@ Wire Bus Line
 	9850 4150 9850 6700
 Wire Bus Line
 	8350 4150 8350 6700
+Connection ~ 9250 3150
+$Comp
+L power:GND #PWR?
+U 1 1 607311BD
+P 9250 3250
+F 0 "#PWR?" H 9250 3000 50  0001 C CNN
+F 1 "GND" H 9255 3077 50  0000 C CNN
+F 2 "" H 9250 3250 50  0001 C CNN
+F 3 "" H 9250 3250 50  0001 C CNN
+	1    9250 3250
+	1    0    0    -1  
+$EndComp
 $EndSCHEMATC
