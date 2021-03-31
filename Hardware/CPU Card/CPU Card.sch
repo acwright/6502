@@ -168,17 +168,17 @@ Wire Wire Line
 Wire Wire Line
 	4800 2750 4800 1900
 Wire Wire Line
-	4800 1900 5300 1900
+	4800 1900 5250 1900
 Wire Wire Line
 	4950 2950 4700 2950
 Wire Wire Line
 	4700 2950 4700 1800
 Wire Wire Line
-	4700 1800 5300 1800
+	4700 1800 5250 1800
 Wire Wire Line
-	5800 1800 5950 1800
+	5800 1800 5850 1800
 Wire Wire Line
-	5800 1900 5950 1900
+	5800 1900 5850 1900
 Text GLabel 5950 1900 2    50   Output ~ 0
 EXP0
 Text GLabel 5950 1800 2    50   Output ~ 0
@@ -662,10 +662,60 @@ $EndComp
 Connection ~ 8400 4600
 Wire Wire Line
 	8400 4600 8400 4750
+$Comp
+L Jumper:SolderJumper_2_Open JP2
+U 1 1 606F23BA
+P 5550 2150
+F 0 "JP2" H 5550 2263 50  0000 C CNN
+F 1 "SolderJumper_2_Open" H 5550 2264 50  0001 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" H 5550 2150 50  0001 C CNN
+F 3 "~" H 5550 2150 50  0001 C CNN
+	1    5550 2150
+	1    0    0    -1  
+$EndComp
+$Comp
+L Jumper:SolderJumper_2_Open JP1
+U 1 1 606F2C26
+P 5550 1550
+F 0 "JP1" H 5550 1663 50  0000 C CNN
+F 1 "SolderJumper_2_Open" H 5550 1664 50  0001 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" H 5550 1550 50  0001 C CNN
+F 3 "~" H 5550 1550 50  0001 C CNN
+	1    5550 1550
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5700 1550 5850 1550
+Wire Wire Line
+	5850 1550 5850 1800
+Connection ~ 5850 1800
+Wire Wire Line
+	5850 1800 5950 1800
+Wire Wire Line
+	5400 1550 5250 1550
+Wire Wire Line
+	5250 1550 5250 1800
+Connection ~ 5250 1800
+Wire Wire Line
+	5250 1800 5300 1800
+Wire Wire Line
+	5400 2150 5250 2150
+Wire Wire Line
+	5250 2150 5250 1900
+Connection ~ 5250 1900
+Wire Wire Line
+	5250 1900 5300 1900
+Wire Wire Line
+	5700 2150 5850 2150
+Wire Wire Line
+	5850 2150 5850 1900
 Wire Bus Line
 	4200 2650 4200 5300
 Wire Bus Line
 	6900 2650 6900 5300
 Wire Bus Line
 	1800 2650 1800 5300
+Connection ~ 5850 1900
+Wire Wire Line
+	5850 1900 5950 1900
 $EndSCHEMATC
