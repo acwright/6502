@@ -722,16 +722,14 @@ Text GLabel 9900 2750 2    50   Output ~ 0
 $Comp
 L 74xx:74HC00 U2
 U 4 1 60882FE8
-P 6850 5850
-F 0 "U2" H 6850 6175 50  0000 C CNN
-F 1 "74HC00" H 6850 6084 50  0000 C CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6850 5850 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74hc00" H 6850 5850 50  0001 C CNN
-	4    6850 5850
+P 5850 5850
+F 0 "U2" H 5850 6175 50  0000 C CNN
+F 1 "74HC00" H 5850 6084 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 5850 5850 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74hc00" H 5850 5850 50  0001 C CNN
+	4    5850 5850
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	7150 5850 7400 5850
 Text GLabel 7400 5850 2    50   Output ~ 0
 ~ROM_ENABLE
 $Comp
@@ -832,12 +830,6 @@ Wire Wire Line
 Connection ~ 6950 2150
 Wire Wire Line
 	6950 2150 7300 2150
-Wire Wire Line
-	6550 5950 6500 5950
-Wire Wire Line
-	6500 5950 6500 5850
-Wire Wire Line
-	6500 5750 6550 5750
 $Comp
 L 74xx:74HC00 U3
 U 1 1 608D22EB
@@ -918,29 +910,20 @@ $EndComp
 $Comp
 L 74xx:74HC00 U1
 U 4 1 608E2BC4
-P 5850 5850
-F 0 "U1" H 5850 6175 50  0000 C CNN
-F 1 "74HC00" H 5850 6084 50  0000 C CNN
-F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 5850 5850 50  0001 C CNN
-F 3 "http://www.ti.com/lit/gpn/sn74hc00" H 5850 5850 50  0001 C CNN
-	4    5850 5850
+P 6700 5850
+F 0 "U1" H 6700 6175 50  0000 C CNN
+F 1 "74HC00" H 6700 6084 50  0000 C CNN
+F 2 "Package_SO:SOIC-14_3.9x8.7mm_P1.27mm" H 6700 5850 50  0001 C CNN
+F 3 "http://www.ti.com/lit/gpn/sn74hc00" H 6700 5850 50  0001 C CNN
+	4    6700 5850
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	6150 5850 6500 5850
-Connection ~ 6500 5850
-Wire Wire Line
-	6500 5850 6500 5750
 Wire Wire Line
 	5150 5350 5300 5350
 Wire Wire Line
 	5300 5350 5300 5750
 Wire Wire Line
-	5300 5750 5550 5750
-Wire Wire Line
 	5300 6350 5300 5950
-Wire Wire Line
-	5300 5950 5550 5950
 Wire Wire Line
 	5150 6350 5300 6350
 Wire Wire Line
@@ -1155,9 +1138,9 @@ Wire Wire Line
 Wire Wire Line
 	3800 7400 3750 7400
 Text GLabel 3700 7300 0    50   Input ~ 0
-EXP0
-Text GLabel 3700 7400 0    50   Input ~ 0
 EXP1
+Text GLabel 3700 7400 0    50   Input ~ 0
+EXP0
 Wire Wire Line
 	4300 7300 4350 7300
 Wire Wire Line
@@ -1204,14 +1187,10 @@ Wire Wire Line
 	4350 7650 4200 7650
 Connection ~ 4350 7400
 Wire Wire Line
-	3850 7000 3750 7000
-Wire Wire Line
 	3750 7000 3750 7300
 Connection ~ 3750 7300
 Wire Wire Line
 	3750 7300 3700 7300
-Wire Wire Line
-	3850 7650 3750 7650
 Wire Wire Line
 	3750 7650 3750 7400
 Connection ~ 3750 7400
@@ -1237,6 +1216,27 @@ Wire Wire Line
 	2600 4850 2600 4750
 Text GLabel 2600 4750 1    50   Input ~ 0
 VCC
+Wire Wire Line
+	5300 5750 5550 5750
+Wire Wire Line
+	5550 5950 5300 5950
+Wire Wire Line
+	6400 5750 6300 5750
+Wire Wire Line
+	6300 5750 6300 5850
+Wire Wire Line
+	6300 5950 6400 5950
+Wire Wire Line
+	6150 5850 6300 5850
+Connection ~ 6300 5850
+Wire Wire Line
+	6300 5850 6300 5950
+Wire Wire Line
+	7000 5850 7400 5850
+Wire Wire Line
+	3750 7000 3900 7000
+Wire Wire Line
+	3750 7650 3900 7650
 Wire Bus Line
 	7400 2050 7400 4350
 Wire Bus Line
