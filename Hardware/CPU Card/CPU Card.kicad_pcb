@@ -2,7 +2,7 @@
 
   (general
     (thickness 1.6)
-    (drawings 21)
+    (drawings 23)
     (tracks 402)
     (zones 0)
     (modules 14)
@@ -66,6 +66,7 @@
     (pad_drill 0.762)
     (pad_to_mask_clearance 0)
     (aux_axis_origin 0 0)
+    (grid_origin 165.3011 133.8136)
     (visible_elements FFFFFF7F)
     (pcbplotparams
       (layerselection 0x010fc_ffffffff)
@@ -1951,6 +1952,9 @@
       ))
   )
 
+  (gr_circle (center 170.1271 90.2526) (end 170.3271 90.2526) (layer F.SilkS) (width 0.4))
+  (gr_arc (start 164.3011 132.8136) (end 164.3011 133.8136) (angle -90) (layer Edge.Cuts) (width 0.05))
+  (gr_arc (start 114.5011 132.8136) (end 113.5011 132.8136) (angle -90) (layer Edge.Cuts) (width 0.05))
   (gr_text EXP0 (at 181.737 104.267 90) (layer F.SilkS) (tstamp 60657E62)
     (effects (font (size 1 1) (thickness 0.15)) (justify right))
   )
@@ -1969,7 +1973,6 @@
   (gr_text "© 2021 A.C. Wright Design | acwrightdesign.com | Rev 1.0" (at 196.596 100.33 90) (layer F.SilkS)
     (effects (font (size 0.7 0.7) (thickness 0.1)))
   )
-  (gr_line (start 164.3011 133.8136) (end 165.3011 133.8136) (layer Edge.Cuts) (width 0.05) (tstamp 6064378E))
   (gr_line (start 166.3011 126.1936) (end 193.5011 126.1936) (layer Edge.Cuts) (width 0.05) (tstamp 60643793))
   (gr_arc (start 193.5011 121.1936) (end 193.5011 126.1936) (angle -90) (layer Edge.Cuts) (width 0.05) (tstamp 20650E0))
   (gr_line (start 198.5011 121.1936) (end 198.5011 81.1936) (layer Edge.Cuts) (width 0.05) (tstamp 2065170))
@@ -1980,9 +1983,9 @@
   (gr_arc (start 103.5011 121.1936) (end 98.5011 121.1936) (angle -90) (layer Edge.Cuts) (width 0.05) (tstamp 2065440))
   (gr_line (start 103.5011 126.1936) (end 112.5011 126.1936) (layer Edge.Cuts) (width 0.05) (tstamp 20654D0))
   (gr_arc (start 112.5011 127.1936) (end 113.5011 127.1936) (angle -90) (layer Edge.Cuts) (width 0.05) (tstamp 2065560))
-  (gr_line (start 113.5011 127.1936) (end 113.5011 133.8136) (layer Edge.Cuts) (width 0.05) (tstamp 20655F0))
-  (gr_line (start 113.5011 133.8136) (end 164.3011 133.8136) (layer Edge.Cuts) (width 0.05) (tstamp 2065680))
-  (gr_line (start 165.3011 133.8136) (end 165.3011 127.1936) (layer Edge.Cuts) (width 0.05) (tstamp 60643788))
+  (gr_line (start 113.5011 127.1936) (end 113.5011 132.8136) (layer Edge.Cuts) (width 0.05) (tstamp 20655F0))
+  (gr_line (start 114.5011 133.8136) (end 164.3011 133.8136) (layer Edge.Cuts) (width 0.05) (tstamp 2065680))
+  (gr_line (start 165.3011 132.8136) (end 165.3011 127.1936) (layer Edge.Cuts) (width 0.05) (tstamp 60643788))
   (gr_arc (start 166.3011 127.1936) (end 166.3011 126.1936) (angle -90) (layer Edge.Cuts) (width 0.05) (tstamp 20657A0))
 
   (via (at 162.306 125.349) (size 0.8) (drill 0.4) (layers Top Bottom) (net 1))
@@ -2388,7 +2391,7 @@
   (segment (start 184.15 96.901) (end 165.100002 96.901) (width 0.25) (layer Bottom) (net 41))
   (segment (start 165.100002 96.901) (end 165.1 96.900998) (width 0.25) (layer Bottom) (net 41))
 
-  (zone (net 28) (net_name GND) (layer Top) (tstamp 0) (hatch edge 0.508)
+  (zone (net 28) (net_name GND) (layer Top) (tstamp 606F48A6) (hatch edge 0.508)
     (connect_pads (clearance 0.254))
     (min_thickness 0.254)
     (fill yes (arc_segments 32) (thermal_gap 0.508) (thermal_bridge_width 0.508))
@@ -3052,7 +3055,7 @@
       )
     )
   )
-  (zone (net 28) (net_name GND) (layer Bottom) (tstamp 0) (hatch edge 0.508)
+  (zone (net 28) (net_name GND) (layer Bottom) (tstamp 606F48A3) (hatch edge 0.508)
     (connect_pads (clearance 0.254))
     (min_thickness 0.254)
     (fill yes (arc_segments 32) (thermal_gap 0.508) (thermal_bridge_width 0.508))
