@@ -6,7 +6,7 @@ encoding utf-8
 Sheet 1 1
 Title "6502 Backplane"
 Date "2021-03-24"
-Rev "1"
+Rev "1.1"
 Comp "A.C. Wright Design"
 Comment1 ""
 Comment2 ""
@@ -412,11 +412,11 @@ Wire Wire Line
 Wire Wire Line
 	8150 1600 8750 1600
 $Comp
-L 74xx:74HC04 U1
+L 74xx:74LS04 U1
 U 1 1 6063B361
 P 3350 3100
 F 0 "U1" H 3350 3417 50  0000 C CNN
-F 1 "74HC04" H 3350 3326 50  0000 C CNN
+F 1 "74LS04" H 3350 3326 50  0000 C CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 3350 3100 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 3350 3100 50  0001 C CNN
 F 4 "C5590" H 3350 3100 50  0001 C CNN "LCSC"
@@ -424,11 +424,11 @@ F 4 "C5590" H 3350 3100 50  0001 C CNN "LCSC"
 	1    0    0    -1  
 $EndComp
 $Comp
-L 74xx:74HC04 U1
+L 74xx:74LS04 U1
 U 2 1 6063D0C8
 P 4350 3100
 F 0 "U1" V 4350 3417 50  0000 C CNN
-F 1 "74HC04" H 4350 3326 50  0000 C CNN
+F 1 "74LS04" H 4350 3326 50  0000 C CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 4350 3100 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 4350 3100 50  0001 C CNN
 F 4 "C5590" H 4350 3100 50  0001 C CNN "LCSC"
@@ -436,11 +436,11 @@ F 4 "C5590" H 4350 3100 50  0001 C CNN "LCSC"
 	1    0    0    -1  
 $EndComp
 $Comp
-L 74xx:74HC04 U1
+L 74xx:74LS04 U1
 U 3 1 6063E40C
 P 5200 3100
 F 0 "U1" H 5200 3417 50  0000 C CNN
-F 1 "74HC04" H 5200 3326 50  0000 C CNN
+F 1 "74LS04" H 5200 3326 50  0000 C CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 5200 3100 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 5200 3100 50  0001 C CNN
 F 4 "C5590" H 5200 3100 50  0001 C CNN "LCSC"
@@ -448,11 +448,11 @@ F 4 "C5590" H 5200 3100 50  0001 C CNN "LCSC"
 	1    0    0    -1  
 $EndComp
 $Comp
-L 74xx:74HC04 U1
+L 74xx:74LS04 U1
 U 4 1 6063F660
 P 9050 1600
 F 0 "U1" H 9050 1917 50  0000 C CNN
-F 1 "74HC04" H 9050 1826 50  0000 C CNN
+F 1 "74LS04" H 9050 1826 50  0000 C CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 9050 1600 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 9050 1600 50  0001 C CNN
 F 4 "C5590" H 9050 1600 50  0001 C CNN "LCSC"
@@ -933,11 +933,11 @@ Wire Wire Line
 Wire Wire Line
 	3450 2000 2600 2000
 $Comp
-L 74xx:74HC04 U1
+L 74xx:74LS04 U1
 U 5 1 60628B7C
 P 9650 2650
 F 0 "U1" H 9650 2967 50  0000 C CNN
-F 1 "74HC04" H 9650 2876 50  0000 C CNN
+F 1 "74LS04" H 9650 2876 50  0000 C CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 9650 2650 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 9650 2650 50  0001 C CNN
 F 4 "C5590" H 9650 2650 50  0001 C CNN "LCSC"
@@ -945,11 +945,11 @@ F 4 "C5590" H 9650 2650 50  0001 C CNN "LCSC"
 	1    0    0    -1  
 $EndComp
 $Comp
-L 74xx:74HC04 U1
+L 74xx:74LS04 U1
 U 6 1 6062AF33
 P 9650 3150
 F 0 "U1" H 9650 3467 50  0000 C CNN
-F 1 "74HC04" H 9650 3376 50  0000 C CNN
+F 1 "74LS04" H 9650 3376 50  0000 C CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 9650 3150 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 9650 3150 50  0001 C CNN
 F 4 "C5590" H 9650 3150 50  0001 C CNN "LCSC"
@@ -2257,9 +2257,9 @@ D6
 Text Label 1000 5350 0    50   ~ 0
 D7
 Text Label 1000 5250 0    50   ~ 0
-SYNC
+EXP2
 Text Label 1000 5150 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 1000 5050 0    50   ~ 0
 PHI2
 Text Label 1000 4950 0    50   ~ 0
@@ -2291,9 +2291,9 @@ Text Label 2500 4950 0    50   ~ 0
 Text Label 2500 5050 0    50   ~ 0
 PHI2
 Text Label 2500 5150 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 2500 5250 0    50   ~ 0
-SYNC
+EXP2
 Text Label 2500 5350 0    50   ~ 0
 D7
 Text Label 2500 5450 0    50   ~ 0
@@ -2331,9 +2331,9 @@ D6
 Text Label 4000 5350 0    50   ~ 0
 D7
 Text Label 4000 5250 0    50   ~ 0
-SYNC
+EXP2
 Text Label 4000 5150 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 4000 5050 0    50   ~ 0
 PHI2
 Text Label 4000 4950 0    50   ~ 0
@@ -2367,9 +2367,9 @@ Text Label 5500 4950 0    50   ~ 0
 Text Label 5500 5050 0    50   ~ 0
 PHI2
 Text Label 5500 5150 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 5500 5250 0    50   ~ 0
-SYNC
+EXP2
 Text Label 5500 5350 0    50   ~ 0
 D7
 Text Label 5500 5450 0    50   ~ 0
@@ -2407,9 +2407,9 @@ D6
 Text Label 7000 5350 0    50   ~ 0
 D7
 Text Label 7000 5250 0    50   ~ 0
-SYNC
+EXP2
 Text Label 7000 5150 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 7000 5050 0    50   ~ 0
 PHI2
 Text Label 7000 4950 0    50   ~ 0
@@ -2443,9 +2443,9 @@ Text Label 8500 4950 0    50   ~ 0
 Text Label 8500 5050 0    50   ~ 0
 PHI2
 Text Label 8500 5150 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 8500 5250 0    50   ~ 0
-SYNC
+EXP2
 Text Label 8500 5350 0    50   ~ 0
 D7
 Text Label 8500 5450 0    50   ~ 0
@@ -2484,7 +2484,7 @@ L 74xx:74HC04 U1
 U 7 1 605ED7B9
 P 4800 1650
 F 0 "U1" H 5030 1696 50  0000 L CNN
-F 1 "74HC04" H 5030 1605 50  0000 L CNN
+F 1 "74LS04" H 5030 1605 50  0000 L CNN
 F 2 "Package_SO:SO-14_3.9x8.65mm_P1.27mm" H 4800 1650 50  0001 C CNN
 F 3 "https://assets.nexperia.com/documents/data-sheet/74HC_HCT04.pdf" H 4800 1650 50  0001 C CNN
 F 4 "C5590" H 4800 1650 50  0001 C CNN "LCSC"
