@@ -6,7 +6,7 @@ encoding utf-8
 Sheet 1 1
 Title "6502 Prototype Card"
 Date "2021-03-27"
-Rev "1"
+Rev "1.1"
 Comp "A.C. Wright Design"
 Comment1 ""
 Comment2 ""
@@ -637,9 +637,9 @@ Text Label 1400 2400 0    50   ~ 0
 Text Label 1400 2500 0    50   ~ 0
 PHI2
 Text Label 1400 2600 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 1400 2700 0    50   ~ 0
-SYNC
+EXP2
 Text Label 1400 2800 0    50   ~ 0
 D7
 Text Label 1400 2900 0    50   ~ 0
@@ -677,9 +677,9 @@ Text Label 3700 2400 0    50   ~ 0
 Text Label 3700 2500 0    50   ~ 0
 PHI2
 Text Label 3700 2600 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 3700 2700 0    50   ~ 0
-SYNC
+EXP2
 Text Label 3700 2800 0    50   ~ 0
 D7
 Text Label 3700 2900 0    50   ~ 0

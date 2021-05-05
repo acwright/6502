@@ -1,4 +1,4 @@
-update=Monday, March 29, 2021 at 04:52:48 PM
+update=Wednesday, May 05, 2021 at 04:11:42 PM
 version=1
 last_client=kicad
 [general]
@@ -24,7 +24,7 @@ LabSize=50
 ERC_TestSimilarLabels=1
 [pcbnew]
 version=1
-PageLayoutDescrFile=
+PageLayoutDescrFile=Prototype Card.kicad_wks
 LastNetListRead=Prototype Card.net
 CopperLayerCount=2
 BoardThickness=1.6

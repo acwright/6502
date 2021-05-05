@@ -6,7 +6,7 @@ encoding utf-8
 Sheet 1 1
 Title "6502 CPU Card"
 Date "2021-03-27"
-Rev "1"
+Rev "1.1"
 Comp "A.C. Wright Design"
 Comment1 ""
 Comment2 ""
@@ -176,19 +176,15 @@ Wire Wire Line
 Wire Wire Line
 	4800 1900 5250 1900
 Wire Wire Line
-	4950 2950 4700 2950
-Wire Wire Line
-	4700 2950 4700 1800
-Wire Wire Line
 	4700 1800 5250 1800
 Wire Wire Line
 	5800 1800 5850 1800
 Wire Wire Line
 	5800 1900 5850 1900
 Text GLabel 5950 1900 2    50   Output ~ 0
-EXP0
+EXP3
 Text GLabel 5950 1800 2    50   Output ~ 0
-PHI1O
+EXP2
 Wire Bus Line
 	4200 5300 6900 5300
 Wire Bus Line
@@ -196,8 +192,6 @@ Wire Bus Line
 Connection ~ 4200 5300
 Entry Wire Line
 	6900 2650 6800 2750
-Entry Wire Line
-	6900 2950 6800 3050
 Entry Wire Line
 	6900 3050 6800 3150
 Entry Wire Line
@@ -237,8 +231,6 @@ Entry Wire Line
 Entry Wire Line
 	4200 3150 4300 3250
 Entry Wire Line
-	4200 3250 4300 3350
-Entry Wire Line
 	4200 3350 4300 3450
 Entry Wire Line
 	4200 3450 4300 3550
@@ -264,8 +256,6 @@ Entry Wire Line
 	4200 4450 4300 4550
 Entry Wire Line
 	4200 4550 4300 4650
-Entry Wire Line
-	4200 2850 4100 2950
 Entry Wire Line
 	4200 2950 4100 3050
 Entry Wire Line
@@ -352,8 +342,6 @@ Entry Wire Line
 Wire Wire Line
 	6150 2750 6800 2750
 Wire Wire Line
-	6150 3050 6800 3050
-Wire Wire Line
 	6150 3150 6800 3150
 Wire Wire Line
 	6150 3350 6800 3350
@@ -392,8 +380,6 @@ Wire Wire Line
 Wire Wire Line
 	4300 3250 4950 3250
 Wire Wire Line
-	4950 3350 4300 3350
-Wire Wire Line
 	4300 3450 4950 3450
 Wire Wire Line
 	4950 3550 4300 3550
@@ -419,8 +405,6 @@ Wire Wire Line
 	4950 4550 4300 4550
 Wire Wire Line
 	4300 4650 4950 4650
-Wire Wire Line
-	4100 2950 3600 2950
 Wire Wire Line
 	3600 3050 4100 3050
 Wire Wire Line
@@ -512,9 +496,9 @@ Text Label 1950 3450 0    50   ~ 0
 Text Label 1950 3550 0    50   ~ 0
 PHI2
 Text Label 1950 3650 0    50   ~ 0
-PHI1O
+EXP3
 Text Label 1950 3750 0    50   ~ 0
-SYNC
+EXP2
 Text Label 1950 3850 0    50   ~ 0
 D7
 Text Label 1950 3950 0    50   ~ 0
@@ -533,8 +517,6 @@ Text Label 1950 4550 0    50   ~ 0
 D0
 Text Label 1950 4650 0    50   ~ 0
 VCC
-Text Label 4050 2950 2    50   ~ 0
-EXP0
 Text Label 4050 3050 2    50   ~ 0
 A15
 Text Label 4050 3150 2    50   ~ 0
@@ -569,8 +551,6 @@ Text Label 4050 4550 2    50   ~ 0
 A0
 Text Label 6750 2750 2    50   ~ 0
 ~RES
-Text Label 6750 3050 2    50   ~ 0
-PHI2
 Text Label 6750 3150 2    50   ~ 0
 BE
 Text Label 6750 3350 2    50   ~ 0
@@ -609,8 +589,6 @@ Text Label 4350 3150 0    50   ~ 0
 ~ML
 Text Label 4350 3250 0    50   ~ 0
 ~NMI
-Text Label 4350 3350 0    50   ~ 0
-SYNC
 Text Label 4350 3450 0    50   ~ 0
 VCC
 Text Label 4350 3550 0    50   ~ 0
@@ -718,10 +696,123 @@ Wire Wire Line
 Connection ~ 5850 1900
 Wire Wire Line
 	5850 1900 5950 1900
+NoConn ~ 4950 2950
+Entry Wire Line
+	6900 2950 6800 3050
+Text Label 6750 3050 2    50   ~ 0
+PHI2
+Wire Wire Line
+	6150 3050 6800 3050
+Wire Wire Line
+	4700 3350 4950 3350
+Wire Wire Line
+	4700 1800 4700 3350
+$Comp
+L Oscillator:CXO_DIP14 X1
+U 1 1 609BE213
+P 2500 6650
+F 0 "X1" H 2200 6950 50  0000 L CNN
+F 1 "CXO_DIP14" H 2844 6605 50  0001 L CNN
+F 2 "Oscillator:Oscillator_DIP-14" H 2950 6300 50  0001 C CNN
+F 3 "http://cdn-reichelt.de/documents/datenblatt/B400/OSZI.pdf" H 2400 6650 50  0001 C CNN
+	1    2500 6650
+	1    0    0    -1  
+$EndComp
+NoConn ~ 2200 6650
+Text GLabel 2500 6100 1    50   Input ~ 0
+VCC
+Wire Wire Line
+	2500 6350 2500 6200
+Wire Wire Line
+	2500 6950 2500 7100
+$Comp
+L power:GND #PWR01
+U 1 1 609D8514
+P 2500 7200
+F 0 "#PWR01" H 2500 6950 50  0001 C CNN
+F 1 "GND" H 2505 7027 50  0000 C CNN
+F 2 "" H 2500 7200 50  0001 C CNN
+F 3 "" H 2500 7200 50  0001 C CNN
+	1    2500 7200
+	1    0    0    -1  
+$EndComp
+Text GLabel 3550 6650 2    50   Output ~ 0
+PHI2
+$Comp
+L Connector_Generic:Conn_01x02 J2
+U 1 1 609FEB8E
+P 3100 6350
+F 0 "J2" V 3100 6550 50  0000 R CNN
+F 1 "Conn_01x02" V 2973 6162 50  0001 R CNN
+F 2 "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical" H 3100 6350 50  0001 C CNN
+F 3 "~" H 3100 6350 50  0001 C CNN
+	1    3100 6350
+	0    -1   -1   0   
+$EndComp
+$Comp
+L Jumper:SolderJumper_2_Open JP3
+U 1 1 609FF8D2
+P 3150 6850
+F 0 "JP3" H 3150 6963 50  0000 C CNN
+F 1 "SolderJumper_2_Open" H 3150 6964 50  0001 C CNN
+F 2 "Jumper:SolderJumper-2_P1.3mm_Open_RoundedPad1.0x1.5mm" H 3150 6850 50  0001 C CNN
+F 3 "~" H 3150 6850 50  0001 C CNN
+	1    3150 6850
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	3100 6650 3100 6550
+Wire Wire Line
+	2800 6650 2900 6650
+Wire Wire Line
+	3200 6550 3200 6650
+Wire Wire Line
+	3200 6650 3400 6650
+Wire Wire Line
+	3300 6850 3400 6850
+Wire Wire Line
+	3400 6850 3400 6650
+Connection ~ 3400 6650
+Wire Wire Line
+	3400 6650 3550 6650
+Wire Wire Line
+	3000 6850 2900 6850
+Wire Wire Line
+	2900 6850 2900 6650
+Connection ~ 2900 6650
+Wire Wire Line
+	2900 6650 3100 6650
+$Comp
+L Device:C C2
+U 1 1 60A38D35
+P 1800 6650
+F 0 "C2" H 1915 6696 50  0000 L CNN
+F 1 "100nF" H 1915 6605 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric" H 1838 6500 50  0001 C CNN
+F 3 "~" H 1800 6650 50  0001 C CNN
+F 4 "C49678" H 1800 6650 50  0001 C CNN "LCSC"
+	1    1800 6650
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	1800 6500 1800 6200
+Wire Wire Line
+	1800 6200 2500 6200
+Connection ~ 2500 6200
+Wire Wire Line
+	2500 6200 2500 6100
+Wire Wire Line
+	1800 6800 1800 7100
+Wire Wire Line
+	1800 7100 2500 7100
+Connection ~ 2500 7100
+Wire Wire Line
+	2500 7100 2500 7200
+NoConn ~ 3600 2950
 Wire Bus Line
 	4200 2650 4200 5300
 Wire Bus Line
-	6900 2650 6900 5300
-Wire Bus Line
 	1800 2650 1800 5300
+Wire Bus Line
+	6900 2650 6900 5300
 $EndSCHEMATC

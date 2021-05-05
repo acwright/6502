@@ -1,4 +1,4 @@
-update=Monday, March 29, 2021 at 05:07:08 PM
+update=Wednesday, May 05, 2021 at 04:17:59 PM
 version=1
 last_client=kicad
 [general]
@@ -24,7 +24,7 @@ LabSize=50
 ERC_TestSimilarLabels=1
 [pcbnew]
 version=1
-PageLayoutDescrFile=
+PageLayoutDescrFile=Memory Card.kicad_wks
 LastNetListRead=Memory Card.net
 CopperLayerCount=2
 BoardThickness=1.6
