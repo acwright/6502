@@ -96,7 +96,7 @@
         "skew_out_of_range": "error",
         "solder_mask_bridge": "error",
         "starved_thermal": "error",
-        "text_height": "warning",
+        "text_height": "ignore",
         "text_thickness": "warning",
         "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
@@ -218,7 +218,9 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      "lib_symbol_issues|533400|520700|00000000-0000-0000-0000-000060623f64|00000000-0000-0000-0000-000000000000|||"
+    ],
     "meta": {
       "version": 0
     },
@@ -413,7 +415,7 @@
       "missing_power_pin": "error",
       "missing_unit": "warning",
       "multiple_net_names": "warning",
-      "net_not_bus_member": "warning",
+      "net_not_bus_member": "ignore",
       "no_connect_connected": "warning",
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
@@ -990,7 +992,7 @@
     },
     "net_format_name": "Pcbnew",
     "page_layout_descr_file": "Serial Card.kicad_wks",
-    "plot_directory": "../../Schematics/Serial Card/Rev 1.1/",
+    "plot_directory": "../../Schematics/Serial Card/Rev 2.0/",
     "spice_adjust_passive_values": false,
     "spice_current_sheet_as_root": false,
     "spice_external_command": "spice \"%I\"",
