@@ -111,8 +111,6 @@
       "rule_severitieslegacy_courtyards_overlap": true,
       "rule_severitieslegacy_no_courtyard_defined": false,
       "rules": {
-        "allow_blind_buried_vias": false,
-        "allow_microvias": false,
         "max_error": 0.005,
         "min_clearance": 0.0,
         "min_connection": 0.0,
@@ -129,11 +127,7 @@
         "min_track_width": 0.2,
         "min_via_annular_width": 0.1,
         "min_via_diameter": 0.4,
-        "solder_mask_clearance": 0.0,
-        "solder_mask_min_width": 0.0,
         "solder_mask_to_copper_clearance": 0.0,
-        "solder_paste_clearance": 0.0,
-        "solder_paste_margin_ratio": -0.0,
         "use_height_for_length_calcs": true
       },
       "teardrop_options": [
@@ -401,7 +395,6 @@
     "rule_severities": {
       "bus_definition_conflict": "error",
       "bus_entry_needed": "error",
-      "bus_label_syntax": "error",
       "bus_to_bus_conflict": "error",
       "bus_to_net_conflict": "error",
       "conflicting_netclasses": "error",
@@ -440,7 +433,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Backplane.kicad_pro",
+    "filename": "Serial Card.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -471,6 +464,38 @@
     "netclass_patterns": [
       {
         "netclass": "Default",
+        "pattern": "/$8000"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$8400"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$8800"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$8C00"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9000"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9400"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9800"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9C00"
+      },
+      {
+        "netclass": "Default",
         "pattern": "/A0"
       },
       {
@@ -479,63 +504,11 @@
       },
       {
         "netclass": "Default",
-        "pattern": "/A10"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A11"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A12"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A13"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A14"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A15"
-      },
-      {
-        "netclass": "Default",
         "pattern": "/A2"
       },
       {
         "netclass": "Default",
-        "pattern": "/A3"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A4"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A5"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A6"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A7"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A8"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A9"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/BE"
+        "pattern": "/CTS"
       },
       {
         "netclass": "Default",
@@ -571,23 +544,23 @@
       },
       {
         "netclass": "Default",
-        "pattern": "/EXP0"
+        "pattern": "/DCD"
       },
       {
         "netclass": "Default",
-        "pattern": "/EXP1"
+        "pattern": "/DSR"
       },
       {
         "netclass": "Default",
-        "pattern": "/EXP2"
+        "pattern": "/DTR"
       },
       {
         "netclass": "Default",
-        "pattern": "/EXP3"
+        "pattern": "/RTS"
       },
       {
         "netclass": "Default",
-        "pattern": "/RDY"
+        "pattern": "/RX"
       },
       {
         "netclass": "Default",
@@ -595,15 +568,39 @@
       },
       {
         "netclass": "Default",
-        "pattern": "/~{IRQ}"
+        "pattern": "/TX"
       },
       {
         "netclass": "Default",
-        "pattern": "/~{ML}"
+        "pattern": "/~{RXLED}"
       },
       {
         "netclass": "Default",
-        "pattern": "/~{NMI}"
+        "pattern": "/~{TXLED}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A10"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A11"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A12"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A13"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A14"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A15"
       },
       {
         "netclass": "Default",
@@ -611,7 +608,23 @@
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(C2-Pad1)"
+        "pattern": "Net-(C1-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(C10-Pad2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(C11-Pad2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(C3-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(C3-Pad2)"
       },
       {
         "netclass": "Default",
@@ -619,7 +632,7 @@
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(C5-Pad1)"
+        "pattern": "Net-(C4-Pad2)"
       },
       {
         "netclass": "Default",
@@ -627,51 +640,187 @@
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(D1-Pad1)"
+        "pattern": "Net-(C7-Pad2)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(J1-Pad1)"
+        "pattern": "Net-(C8-Pad2)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(J2-PadA5)"
+        "pattern": "Net-(C9-Pad2)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(J2-PadB5)"
+        "pattern": "Net-(CONN1-PadA3)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(J4-Pad1)"
+        "pattern": "Net-(CONN1-PadA4)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(R7-Pad1)"
+        "pattern": "Net-(CONN1-PadA5)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(R8-Pad2)"
+        "pattern": "Net-(CONN1-PadA6)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(U1-Pad10)"
+        "pattern": "Net-(CONN1-PadA7)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(U1-Pad12)"
+        "pattern": "Net-(CONN1-PadA8)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(U1-Pad9)"
+        "pattern": "Net-(CONN1-PadA9)"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(U2-Pad5)"
+        "pattern": "Net-(CONN1-PadBE)"
       },
       {
         "netclass": "Default",
-        "pattern": "PHI2"
+        "pattern": "Net-(CONN1-PadEXP0)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(CONN1-PadEXP1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(CONN1-PadEXP2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(CONN1-PadEXP3)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(CONN1-PadPHI2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(CONN1-PadRDY)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(CONN1-Pad~{ML})"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(D1-Pad2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(D2-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(D3-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(J2-Pad9)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(J3-Pad2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(P1-PadA5)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(P1-PadB5)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(R1-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(R2-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U2-Pad20)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U2-Pad21)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U3-Pad1)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U3-Pad10)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U3-Pad13)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U4-Pad2)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U4-Pad34)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U4-Pad5)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U4-Pad6)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-Pad12)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-Pad13)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-Pad14)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-Pad27)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-Pad28)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "Net-(U5-Pad6)"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "RXD1"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "RXD2"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "TXD1"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "TXD2"
       },
       {
         "netclass": "Default",
@@ -679,7 +828,63 @@
       },
       {
         "netclass": "Default",
+        "pattern": "~{CS}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{CTS1}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{CTS2}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{DCD2}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{DSR1}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{DSR2}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{DTR1}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{DTR2}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{IRQ}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{IRQ1}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{IRQ2}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{NMI}"
+      },
+      {
+        "netclass": "Default",
         "pattern": "~{RES}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{RTS1}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "~{RTS2}"
       }
     ]
   },
@@ -687,7 +892,7 @@
     "last_paths": {
       "gencad": "",
       "idf": "",
-      "netlist": "Backplane.net",
+      "netlist": "Serial Card.net",
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
@@ -695,7 +900,7 @@
       "svg": "",
       "vrml": ""
     },
-    "page_layout_descr_file": "Backplane.kicad_wks"
+    "page_layout_descr_file": "Serial Card.kicad_wks"
   },
   "schematic": {
     "annotate_start_num": 0,
@@ -775,7 +980,7 @@
       "operating_point_overlay_v_precision": 3,
       "operating_point_overlay_v_range": "~V",
       "overbar_offset_ratio": 1.23,
-      "pin_symbol_size": 25.0,
+      "pin_symbol_size": 0.0,
       "text_offset_ratio": 0.08
     },
     "legacy_lib_dir": "",
@@ -784,17 +989,8 @@
       "version": 1
     },
     "net_format_name": "Pcbnew",
-    "ngspice": {
-      "fix_include_paths": true,
-      "fix_passive_vals": false,
-      "meta": {
-        "version": 0
-      },
-      "model_mode": 0,
-      "workbook_filename": ""
-    },
-    "page_layout_descr_file": "Backplane.kicad_wks",
-    "plot_directory": "../../../../../../../../../Downloads/",
+    "page_layout_descr_file": "Serial Card.kicad_wks",
+    "plot_directory": "../../Schematics/Serial Card/Rev 1.1/",
     "spice_adjust_passive_values": false,
     "spice_current_sheet_as_root": false,
     "spice_external_command": "spice \"%I\"",
@@ -807,7 +1003,7 @@
   },
   "sheets": [
     [
-      "5d95bc66-f610-41ca-b1ae-73f5b5edc5a7",
+      "23e72bd4-dcc6-49f5-b48f-f285bfeb6ba5",
       "Root"
     ]
   ],
