@@ -641,6 +641,60 @@
 					)
 				)
 				(pin bidirectional line
+					(at -15.24 17.78 0)
+					(length 5.08)
+					(name "IRQB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "IRQB"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -15.24 5.08 0)
+					(length 5.08)
+					(name "MLB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "MLB"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -15.24 15.24 0)
+					(length 5.08)
+					(name "NMIB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "NMIB"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
 					(at -15.24 2.54 0)
 					(length 5.08)
 					(name "PHI2"
@@ -677,16 +731,34 @@
 					)
 				)
 				(pin bidirectional line
-					(at -15.24 7.62 0)
+					(at -15.24 20.32 0)
 					(length 5.08)
-					(name "R~{W}"
+					(name "RESB"
 						(effects
 							(font
 								(size 1.27 1.27)
 							)
 						)
 					)
-					(number "R~{W}"
+					(number "RESB"
+						(effects
+							(font
+								(size 0 0)
+							)
+						)
+					)
+				)
+				(pin bidirectional line
+					(at -15.24 7.62 0)
+					(length 5.08)
+					(name "RWB"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "RWB"
 						(effects
 							(font
 								(size 0 0)
@@ -723,78 +795,6 @@
 						)
 					)
 					(number "VCC"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 17.78 0)
-					(length 5.08)
-					(name "~{IRQ}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "~{IRQ}"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 5.08 0)
-					(length 5.08)
-					(name "~{ML}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "~{ML}"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 15.24 0)
-					(length 5.08)
-					(name "~{NMI}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "~{NMI}"
-						(effects
-							(font
-								(size 0 0)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at -15.24 20.32 0)
-					(length 5.08)
-					(name "~{RES}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "~{RES}"
 						(effects
 							(font
 								(size 0 0)
@@ -4090,6 +4090,16 @@
 	)
 	(wire
 		(pts
+			(xy 227.33 95.25) (xy 233.68 95.25)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "67f3c221-a47a-40c6-aae2-80bc00136b02")
+	)
+	(wire
+		(pts
 			(xy 148.59 54.61) (xy 148.59 48.26)
 		)
 		(stroke
@@ -4507,16 +4517,6 @@
 			(type default)
 		)
 		(uuid "a30709c8-84ae-491f-899c-153243484665")
-	)
-	(wire
-		(pts
-			(xy 227.33 95.25) (xy 233.68 95.25)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a467bfd8-2fde-4f43-8f8b-d0a6fa0179cb")
 	)
 	(wire
 		(pts
@@ -5158,7 +5158,7 @@
 		)
 		(uuid "fe883e0a-09c5-4326-af2a-6928d5dd735e")
 	)
-	(label "~{NMI}"
+	(label "NMIB"
 		(at 110.49 82.55 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5191,7 +5191,7 @@
 		)
 		(uuid "0f74c21f-71ec-48f0-b82e-0a487c4a89c3")
 	)
-	(label "~{RES}"
+	(label "RESB"
 		(at 171.45 69.85 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5224,7 +5224,7 @@
 		)
 		(uuid "1af23c3f-a449-4ea7-a296-eaeb2e84e8eb")
 	)
-	(label "~{ML}"
+	(label "MLB"
 		(at 49.53 87.63 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5246,7 +5246,7 @@
 		)
 		(uuid "1d94c30e-12ae-4457-ae75-f72f7fcb1f93")
 	)
-	(label "~{IRQ}"
+	(label "IRQB"
 		(at 110.49 77.47 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5290,7 +5290,7 @@
 		)
 		(uuid "23db4a48-71be-4bf5-b2b3-ca2cb7cec6db")
 	)
-	(label "~{IRQ}"
+	(label "IRQB"
 		(at 49.53 74.93 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5301,8 +5301,8 @@
 		)
 		(uuid "253483d5-74e6-468a-b562-9d643125f523")
 	)
-	(label "~{SO}"
-		(at 168.91 74.93 0)
+	(label "SOB"
+		(at 167.64 74.93 0)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -5356,7 +5356,7 @@
 		)
 		(uuid "3a446738-8ef3-4071-b365-062b0d74c48d")
 	)
-	(label "R~{W}"
+	(label "RWB"
 		(at 49.53 85.09 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5576,7 +5576,7 @@
 		)
 		(uuid "69ef2c74-45b8-4103-b835-4f69d05efdb7")
 	)
-	(label "~{NMI}"
+	(label "NMIB"
 		(at 49.53 77.47 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5675,7 +5675,7 @@
 		)
 		(uuid "b3e6858f-2f99-4e11-ba56-230ce3429589")
 	)
-	(label "~{ML}"
+	(label "MLB"
 		(at 110.49 80.01 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5719,7 +5719,7 @@
 		)
 		(uuid "c9b89f1d-cf65-437c-85ec-7696a149365b")
 	)
-	(label "~{RES}"
+	(label "RESB"
 		(at 49.53 72.39 0)
 		(fields_autoplaced yes)
 		(effects
@@ -5741,7 +5741,7 @@
 		)
 		(uuid "cbaa6bea-15b7-4d9f-90a7-4a42cfc485e5")
 	)
-	(label "R~{W}"
+	(label "RWB"
 		(at 171.45 85.09 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5939,7 +5939,7 @@
 		)
 		(uuid "fd74c2a9-d7e0-4564-b013-4c2a065fb64e")
 	)
-	(global_label "~{NMI}"
+	(global_label "NMIB"
 		(shape output)
 		(at 233.68 95.25 0)
 		(effects
@@ -5959,7 +5959,7 @@
 			)
 		)
 	)
-	(global_label "~{SO}"
+	(global_label "SOB"
 		(shape output)
 		(at 233.68 110.49 0)
 		(effects
@@ -6019,7 +6019,7 @@
 			)
 		)
 	)
-	(global_label "~{RES}"
+	(global_label "RESB"
 		(shape output)
 		(at 233.68 72.39 0)
 		(effects
@@ -6039,7 +6039,7 @@
 			)
 		)
 	)
-	(global_label "~{IRQ}"
+	(global_label "IRQB"
 		(shape output)
 		(at 233.68 87.63 0)
 		(effects
@@ -6252,10 +6252,10 @@
 		(pin "PHI2"
 			(uuid "a2086a25-fdf0-4298-aaf4-bd062730a35a")
 		)
-		(pin "~{NMI}"
+		(pin "RWB"
 			(uuid "66083a6b-a570-4d08-bb51-0c268b90f5e9")
 		)
-		(pin "~{RES}"
+		(pin "IRQB"
 			(uuid "7a77d418-0648-4c74-b701-598010113705")
 		)
 		(pin "A0"
@@ -6276,7 +6276,7 @@
 		(pin "A8"
 			(uuid "5c865cb7-4081-40fc-9b1e-297aec658127")
 		)
-		(pin "R~{W}"
+		(pin "MLB"
 			(uuid "1e9e5159-9a8a-4e51-8783-53eda7e32f33")
 		)
 		(pin "VCC"
@@ -6285,10 +6285,10 @@
 		(pin "VCC"
 			(uuid "1711e68b-16f2-4caf-b21e-3c094895bef9")
 		)
-		(pin "~{IRQ}"
+		(pin "NMIB"
 			(uuid "054b7e6b-23f1-438f-9acc-3a07fe0b06f6")
 		)
-		(pin "~{ML}"
+		(pin "RESB"
 			(uuid "79d050d4-d79c-4201-ad01-153b79c178d8")
 		)
 		(instances
