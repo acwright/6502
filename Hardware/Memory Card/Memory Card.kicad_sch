@@ -979,6 +979,108 @@
 				)
 			)
 		)
+		(symbol "Connector:TestPoint"
+			(pin_numbers hide)
+			(pin_names
+				(offset 0.762) hide)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "TP"
+				(at 0 6.858 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "TestPoint"
+				(at 0 5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 5.08 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 5.08 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "test point"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "test point tp"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Pin* Test*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "TestPoint_0_1"
+				(circle
+					(center 0 3.302)
+					(radius 0.762)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "TestPoint_1_1"
+				(pin passive line
+					(at 0 0 90)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "Connector_Generic:Conn_02x01"
 			(pin_names
 				(offset 1.016) hide)
@@ -4028,10 +4130,28 @@
 		(uuid "adcb194e-977f-48ab-b248-e972622a4da7")
 	)
 	(junction
+		(at 251.46 54.61)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b0248d00-a120-4c72-9d36-9cc69d8d5405")
+	)
+	(junction
+		(at 182.88 148.59)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b181de13-b75d-4c99-9332-2550fbd1ebbe")
+	)
+	(junction
 		(at 208.28 125.73)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "b3a837b9-4216-46c6-a631-77a9f9595733")
+	)
+	(junction
+		(at 49.53 133.35)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b5e2794f-4282-4f5c-98f9-05b4742ac75e")
 	)
 	(junction
 		(at 110.49 187.96)
@@ -4086,6 +4206,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "e2e6dc22-268a-4f7e-921c-d3c9cbc0386c")
+	)
+	(junction
+		(at 251.46 69.85)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "e87027b9-6e89-474d-8237-f3fad9c3eb30")
 	)
 	(junction
 		(at 176.53 54.61)
@@ -6115,6 +6241,16 @@
 	)
 	(wire
 		(pts
+			(xy 49.53 133.35) (xy 38.1 133.35)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6959b550-db27-4c8a-8257-cec5d81be6aa")
+	)
+	(wire
+		(pts
 			(xy 67.31 87.63) (xy 78.74 87.63)
 		)
 		(stroke
@@ -6125,6 +6261,16 @@
 	)
 	(wire
 		(pts
+			(xy 251.46 54.61) (xy 256.54 54.61)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6f607e3d-82e7-4080-97ed-730861df776c")
+	)
+	(wire
+		(pts
 			(xy 110.49 177.8) (xy 110.49 185.42)
 		)
 		(stroke
@@ -6132,6 +6278,16 @@
 			(type default)
 		)
 		(uuid "7254800a-e310-4b61-a160-ede4a39145b8")
+	)
+	(wire
+		(pts
+			(xy 182.88 148.59) (xy 191.77 148.59)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "72dbbcd5-7842-41bd-b103-7fb5f0d4dedd")
 	)
 	(wire
 		(pts
@@ -6285,7 +6441,7 @@
 	)
 	(wire
 		(pts
-			(xy 177.8 148.59) (xy 187.96 148.59)
+			(xy 177.8 148.59) (xy 182.88 148.59)
 		)
 		(stroke
 			(width 0)
@@ -6635,7 +6791,7 @@
 	)
 	(wire
 		(pts
-			(xy 66.04 133.35) (xy 38.1 133.35)
+			(xy 66.04 133.35) (xy 49.53 133.35)
 		)
 		(stroke
 			(width 0)
@@ -7092,6 +7248,16 @@
 			(type default)
 		)
 		(uuid "c7c84028-3ffd-4549-83e5-4cc64a9e2326")
+	)
+	(wire
+		(pts
+			(xy 251.46 69.85) (xy 256.54 69.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c89af6f6-da0b-46d9-8d24-28af61e19d84")
 	)
 	(bus
 		(pts
@@ -8597,7 +8763,7 @@
 	)
 	(global_label "~{ROM_ENABLE}"
 		(shape output)
-		(at 187.96 148.59 0)
+		(at 191.77 148.59 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -8606,7 +8772,7 @@
 		)
 		(uuid "2077f24c-b117-4db7-8fc1-fa1603c9078f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 187.96 148.59 0)
+			(at 191.77 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8617,7 +8783,7 @@
 	)
 	(global_label "~{WRITE}"
 		(shape output)
-		(at 251.46 69.85 0)
+		(at 256.54 69.85 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -8626,7 +8792,7 @@
 		)
 		(uuid "2b5822ac-e81c-4bd0-bb05-73ba69b427db")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 251.46 69.85 0)
+			(at 256.54 69.85 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8777,7 +8943,7 @@
 	)
 	(global_label "~{READ}"
 		(shape output)
-		(at 251.46 54.61 0)
+		(at 256.54 54.61 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -8786,7 +8952,7 @@
 		)
 		(uuid "7affe5ca-a76c-44b3-bec7-8d5232b84d45")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 251.46 54.61 0)
+			(at 256.54 54.61 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10138,7 +10304,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00006088bb28")
 		(property "Reference" "U1"
-			(at 212.09 99.06 0)
+			(at 210.82 99.06 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10147,7 +10313,7 @@
 			)
 		)
 		(property "Value" "74HC00"
-			(at 212.09 101.6 0)
+			(at 210.82 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11378,7 +11544,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000060a19523")
 		(property "Reference" "U2"
-			(at 236.22 99.06 0)
+			(at 234.696 99.06 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11387,7 +11553,7 @@
 			)
 		)
 		(property "Value" "74HC00"
-			(at 236.22 101.6 0)
+			(at 234.696 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11492,7 +11658,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000060a1c055")
 		(property "Reference" "U3"
-			(at 259.08 99.06 0)
+			(at 257.556 99.06 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11501,7 +11667,7 @@
 			)
 		)
 		(property "Value" "74HC00"
-			(at 259.08 101.6 0)
+			(at 257.556 101.6 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11972,7 +12138,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000060b7a29a")
 		(property "Reference" "R2"
-			(at 62.23 125.73 0)
+			(at 61.722 126.746 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11981,7 +12147,7 @@
 			)
 		)
 		(property "Value" "1k"
-			(at 62.23 128.27 0)
+			(at 67.818 126.746 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12041,6 +12207,204 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 182.88 148.59 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1b6d9e65-fe15-4c2b-acde-25b39d58cb18")
+		(property "Reference" "TP1"
+			(at 180.848 140.208 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "~{ROM_ENABLE}"
+			(at 176.784 142.748 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
+			(at 187.96 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 187.96 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 182.88 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "20ce19d2-0b12-4297-9d90-27fc15b42d54")
+		)
+		(instances
+			(project "Memory Card"
+				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
+					(reference "TP1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 251.46 54.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "25c9bb82-dd26-4dd3-8172-33b9b740cb77")
+		(property "Reference" "TP3"
+			(at 249.428 46.482 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "~{READ}"
+			(at 248.92 48.768 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
+			(at 256.54 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 256.54 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 251.46 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "20ce19d2-0b12-4297-9d90-27fc15b42d54")
+		)
+		(instances
+			(project "Memory Card"
+				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
+					(reference "TP3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 49.53 133.35 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "271de3f4-00d7-4481-821e-76db8ac7b4d7")
+		(property "Reference" "TP2"
+			(at 47.752 125.222 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "~{HI_ROM_DISABLE}"
+			(at 41.656 127.762 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
+			(at 54.61 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 54.61 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 49.53 133.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4a6a122e-fc36-44af-a16b-6f645afef531")
+		)
+		(instances
+			(project "Memory Card"
+				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
+					(reference "TP2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:GND")
 		(at 255.27 128.27 0)
 		(unit 1)
@@ -12048,7 +12412,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "2e49f277-6276-44d0-a0c8-8d8960d8af24")
 		(property "Reference" "#PWR01"
 			(at 255.27 134.62 0)
@@ -12060,7 +12423,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 255.27 133.35 0)
+			(at 255.27 133.604 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12169,6 +12532,137 @@
 			(project "Memory Card"
 				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
 					(reference "#FLG01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 251.46 69.85 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "b0ffe510-2c91-48bc-9871-50e43e6c18f9")
+		(property "Reference" "TP4"
+			(at 249.682 61.468 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "~{WRITE}"
+			(at 251.46 63.754 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
+			(at 256.54 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 256.54 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 251.46 69.85 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "20ce19d2-0b12-4297-9d90-27fc15b42d54")
+		)
+		(instances
+			(project "Memory Card"
+				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
+					(reference "TP4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Connector:TestPoint")
+		(at 243.84 125.73 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "ce417886-a287-4f2d-9028-690e78df142b")
+		(property "Reference" "TP5"
+			(at 245.618 131.572 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GND"
+			(at 245.872 133.604 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "TestPoint:TestPoint_Pad_1.0x1.0mm"
+			(at 238.76 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 238.76 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "test point"
+			(at 243.84 125.73 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "41f34f36-2d19-4640-930a-cb877a4d9c20")
+		)
+		(instances
+			(project "Memory Card"
+				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
+					(reference "TP5")
 					(unit 1)
 				)
 			)
