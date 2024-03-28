@@ -48,11 +48,29 @@
         "silk_text_thickness": 0.1,
         "silk_text_upright": false,
         "zones": {
-          "min_clearance": 0.5
+          "min_clearance": 0.254
         }
       },
-      "diff_pair_dimensions": [],
-      "drc_exclusions": [],
+      "diff_pair_dimensions": [
+        {
+          "gap": 0.0,
+          "via_gap": 0.0,
+          "width": 0.0
+        }
+      ],
+      "drc_exclusions": [
+        "text_height|123300000|79970000|e1f6c018-929f-4524-ad22-ca909c017764|00000000-0000-0000-0000-000000000000",
+        "text_height|123300000|82510000|80754311-a327-47c7-934e-becf2557c608|00000000-0000-0000-0000-000000000000",
+        "text_height|123300000|85050000|a4845d66-c48e-4b40-adcc-4398efd2d377|00000000-0000-0000-0000-000000000000",
+        "text_height|123300000|87590000|c2780ca3-2c9f-46a3-8d28-a63b0e072178|00000000-0000-0000-0000-000000000000",
+        "text_height|123300000|90130000|2d0720d3-6570-454d-8a55-d69470724cbd|00000000-0000-0000-0000-000000000000",
+        "text_height|123300000|92670000|5ef83746-8d80-42c1-86d9-efeb2f34da8c|00000000-0000-0000-0000-000000000000",
+        "text_height|123300000|95210000|56b15f0a-c8cc-4967-9b80-a53711edf794|00000000-0000-0000-0000-000000000000",
+        "text_height|123300000|97750000|f9f5060f-29b8-4db7-8491-2f10f86db9d2|00000000-0000-0000-0000-000000000000",
+        "text_height|194000000|89000000|7abb9679-ef45-4b05-a083-96748882efff|00000000-0000-0000-0000-000000000000",
+        "text_height|199000000|95250000|2528baed-486d-45eb-93fa-a4d968a697c9|00000000-0000-0000-0000-000000000000",
+        "text_thickness|199000000|95250000|2528baed-486d-45eb-93fa-a4d968a697c9|00000000-0000-0000-0000-000000000000"
+      ],
       "meta": {
         "version": 2
       },
@@ -170,7 +188,9 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [],
+      "track_widths": [
+        0.0
+      ],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
           "corner_radius_percentage": 80,
@@ -197,7 +217,12 @@
           "spacing": 0.6
         }
       },
-      "via_dimensions": [],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        }
+      ],
       "zones_allow_external_fillets": false
     },
     "ipc2581": {
@@ -215,10 +240,7 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [
-      "lib_symbol_issues|2159000|1270000|93b983e6-3858-4038-b325-0d5388edf864|00000000-0000-0000-0000-000000000000|||",
-      "lib_symbol_issues|2197100|1308100|93b983e6-3858-4038-b325-0d5388edf864|00000000-0000-0000-0000-000000000000|||"
-    ],
+    "erc_exclusions": [],
     "meta": {
       "version": 0
     },

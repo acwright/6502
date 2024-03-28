@@ -3,7 +3,7 @@
 	(generator "pcbnew")
 	(generator_version "8.0")
 	(layer "F.Cu")
-	(descr "<b>5-5530843-4</b><br>\r")
+	(descr "<b>5-5530843-4</b><br>\n")
 	(property "Reference" "J5"
 		(at -6.35 1.27 90)
 		(layer "F.SilkS")
@@ -66,17 +66,7 @@
 	)
 	(attr through_hole)
 	(fp_line
-		(start -4.699 -7.162)
-		(end -4.699 0)
-		(stroke
-			(width 0.2)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "4f63b434-5f79-492c-b0ec-bff2f1af69a4")
-	)
-	(fp_line
-		(start 0 2.312)
+		(start -4.7 2.3)
 		(end 52.959 2.312)
 		(stroke
 			(width 0.2)
@@ -84,6 +74,16 @@
 		)
 		(layer "F.SilkS")
 		(uuid "22a6f2d1-37c1-4416-8058-961a0cb4daf6")
+	)
+	(fp_line
+		(start -4.699 -7.162)
+		(end -4.7 2.3)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "4f63b434-5f79-492c-b0ec-bff2f1af69a4")
 	)
 	(fp_line
 		(start 52.959 -7.162)
@@ -545,7 +545,7 @@
 		(solder_mask_margin 0.1016)
 		(uuid "f166d080-cf61-4fd7-a5bf-6dee80a62395")
 	)
-	(model "/Users/acwright/Library/Mobile Documents/com~apple~CloudDocs/Documents/Projects/6502 8-Bit Computer/6502/CAD/5-5530843-4.step"
+	(model "${KIPRJMOD}/../../CAD/5-5530843-4.step"
 		(offset
 			(xyz 24.5 2.5 15.5)
 		)

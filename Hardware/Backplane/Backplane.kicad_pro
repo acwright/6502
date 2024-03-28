@@ -58,14 +58,37 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        "silk_overlap|121900000|123500000|30c90186-14db-4391-b2fc-d2f1f941494a|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
+        "silk_overlap|121900000|124500000|51382c83-87ee-4eaa-8eb7-41136a797327|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
+        "silk_overlap|122100000|144300000|3d8a679f-7838-4b04-90f1-02a0eb6b6df3|54998157-8fc0-4a98-b26d-e4a188103589",
+        "silk_overlap|122100000|145300000|eb3af22f-0eb3-4a41-b053-6c0138d1e874|54998157-8fc0-4a98-b26d-e4a188103589",
+        "silk_overlap|122900000|123500000|dd9da9b8-12c3-4ce9-9bad-1bc02525489e|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
+        "silk_overlap|122900000|124500000|a9c559b4-14b1-48a4-82d2-26da8de68450|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
+        "silk_overlap|123100000|144300000|d447c226-f247-4ca7-bedd-3961b0a39eb6|54998157-8fc0-4a98-b26d-e4a188103589",
+        "silk_overlap|123100000|145300000|a646498f-410f-426a-8a0e-50d73b9727e7|54998157-8fc0-4a98-b26d-e4a188103589",
+        "silk_overlap|128500000|126700000|0ba7b967-5c4a-45fc-bb46-69747a2fa60c|140c6e52-c165-4fd6-9709-5abe2529ad35",
+        "silk_overlap|128500000|127700000|b9cb22e2-c4ef-4f50-b643-4e4b781d3421|140c6e52-c165-4fd6-9709-5abe2529ad35",
+        "silk_overlap|129500000|126700000|8e086872-e7e5-4b92-9db2-599ccc5e0d83|140c6e52-c165-4fd6-9709-5abe2529ad35",
+        "silk_overlap|129500000|127700000|fd290823-0f82-4511-95cc-cb2fc8b5e9a9|140c6e52-c165-4fd6-9709-5abe2529ad35",
+        "silk_overlap|172700000|119500000|2144dc9e-c064-438e-8ae8-91d80f79c3d6|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
+        "silk_overlap|172700000|120500000|d5cff7fe-7a58-4fa6-af6e-7598b17fa63f|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
+        "silk_overlap|173700000|119500000|92bf32cb-a1dc-429d-92ec-5ca3a16459c3|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
+        "silk_overlap|173700000|120500000|f434448b-c439-4e83-8e6a-232502b40223|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
+        "text_height|100203000|89027000|88067903-7154-4079-ac02-e65c03b2efe0|00000000-0000-0000-0000-000000000000",
+        "text_thickness|113030000|59650000|ae79a219-60fc-47aa-b0b2-09de187e042b|00000000-0000-0000-0000-000000000000",
+        "text_thickness|129530000|59650000|09ba4642-21e8-4b0d-8cc9-eddf4223bae3|00000000-0000-0000-0000-000000000000",
+        "text_thickness|146030000|59650000|d900a6a2-6e80-4633-8d52-cbe42219a1af|00000000-0000-0000-0000-000000000000",
+        "text_thickness|162530000|59650000|e99aba27-0a1f-4386-87f0-b03343f22156|00000000-0000-0000-0000-000000000000",
+        "text_thickness|96530000|59650000|7e305497-ac2a-4050-9747-11f38f064b03|00000000-0000-0000-0000-000000000000"
+      ],
       "meta": {
         "filename": "board_design_settings.json",
         "version": 2
       },
       "rule_severities": {
         "annular_width": "error",
-        "clearance": "error",
+        "clearance": "warning",
         "connection_width": "warning",
         "copper_edge_clearance": "error",
         "copper_sliver": "warning",
