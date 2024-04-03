@@ -8,7 +8,7 @@
 	)
 	(paper "A4")
 	(title_block
-		(title "Pi Card")
+		(title "6502 Pi Card")
 		(date "2024-03-22")
 		(rev "1.0")
 		(company "A.C. Wright Design")
@@ -675,7 +675,9 @@
 			)
 		)
 		(path "/ec096fd3-2b62-44f1-b7a9-595f3e5f9ac9")
-		(attr through_hole)
+		(sheetname "Root")
+		(sheetfile "Pi Card.kicad_sch")
+		(attr through_hole exclude_from_bom)
 		(fp_line
 			(start 32.5 12)
 			(end 32.5 -12)
@@ -4252,7 +4254,7 @@
 		(path "/7aac6e94-6943-4fa5-81f8-8627ee5bb311")
 		(sheetname "Root")
 		(sheetfile "Pi Card.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_bom)
 		(fp_line
 			(start -1.33 -1.33)
 			(end 0 -1.33)
@@ -5437,7 +5439,7 @@
 		(path "/93b983e6-3858-4038-b325-0d5388edf864")
 		(sheetname "Root")
 		(sheetfile "Pi Card.kicad_sch")
-		(attr smd)
+		(attr smd exclude_from_bom)
 		(pad "A0" smd rect
 			(at 45.72 -2.54 90)
 			(size 5.08 1.27)

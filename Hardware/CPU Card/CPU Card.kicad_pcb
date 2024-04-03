@@ -8,7 +8,7 @@
 	)
 	(paper "USLetter")
 	(title_block
-		(title "CPU Card")
+		(title "6502 CPU Card")
 		(date "2024-03-19")
 		(rev "1.0")
 		(company "A.C. Wright Design")
@@ -861,7 +861,7 @@
 		(path "/00000000-0000-0000-0000-0000605f5b01")
 		(sheetname "Root")
 		(sheetfile "CPU Card.kicad_sch")
-		(attr smd)
+		(attr smd exclude_from_bom)
 		(pad "A0" smd rect
 			(at 45.72 -2.54 90)
 			(size 5.08 1.27)
@@ -1331,7 +1331,7 @@
 		(path "/00000000-0000-0000-0000-0000605f7ff5")
 		(sheetname "Root")
 		(sheetfile "CPU Card.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_bom)
 		(fp_line
 			(start -1.44 49.65)
 			(end 16.68 49.65)
@@ -3864,7 +3864,7 @@
 		(path "/d3e56938-b84d-492e-ba6d-93e831a95f82")
 		(sheetname "Root")
 		(sheetfile "CPU Card.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_bom)
 		(fp_line
 			(start -1.33 3.87)
 			(end 1.33 3.87)
@@ -4130,7 +4130,7 @@
 		(sheetname "Root")
 		(sheetfile "CPU Card.kicad_sch")
 		(zone_connect 1)
-		(attr exclude_from_pos_files)
+		(attr exclude_from_pos_files exclude_from_bom)
 		(fp_line
 			(start -0.7 -1)
 			(end 0.7 -1)
@@ -5071,7 +5071,7 @@
 		(path "/28e01583-0a34-4b12-a415-3b23fbd437f4")
 		(sheetname "Root")
 		(sheetfile "CPU Card.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_bom)
 		(fp_line
 			(start -1.33 -1.33)
 			(end 0 -1.33)
