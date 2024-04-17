@@ -1,0 +1,1 @@
+../fos-rom/common/regs.inc
