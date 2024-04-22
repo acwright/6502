@@ -362,10 +362,10 @@ void setup()
   Serial.begin(0);
   while (!Serial);
 
-  Serial.write(27);       // ESC command
-  Serial.print("[2J");    // clear screen command
-  Serial.write(27);
-  Serial.print("[H");
+  // Serial.write(27);       // ESC command
+  // Serial.print("[2J");    // clear screen command
+  // Serial.write(27);
+  // Serial.print("[H");
   Serial.println("\n");
   Serial.println("Configuration:");
   Serial.println("==============");
