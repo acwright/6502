@@ -37,9 +37,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.0,
-          "height": 1.0,
-          "width": 1.0
+          "drill": 0.762,
+          "height": 1.524,
+          "width": 1.524
         },
         "silk_line_width": 0.12,
         "silk_text_italic": false,
@@ -51,39 +51,15 @@
           "min_clearance": 0.254
         }
       },
-      "diff_pair_dimensions": [
-        {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
-        }
-      ],
-      "drc_exclusions": [
-        "silk_overlap|121900000|123500000|30c90186-14db-4391-b2fc-d2f1f941494a|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
-        "silk_overlap|121900000|124500000|51382c83-87ee-4eaa-8eb7-41136a797327|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
-        "silk_overlap|122100000|144300000|3d8a679f-7838-4b04-90f1-02a0eb6b6df3|54998157-8fc0-4a98-b26d-e4a188103589",
-        "silk_overlap|122100000|145300000|eb3af22f-0eb3-4a41-b053-6c0138d1e874|54998157-8fc0-4a98-b26d-e4a188103589",
-        "silk_overlap|122900000|123500000|dd9da9b8-12c3-4ce9-9bad-1bc02525489e|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
-        "silk_overlap|122900000|124500000|a9c559b4-14b1-48a4-82d2-26da8de68450|b61af03e-72c0-4a03-8878-fa2d8dbb6990",
-        "silk_overlap|123100000|144300000|d447c226-f247-4ca7-bedd-3961b0a39eb6|54998157-8fc0-4a98-b26d-e4a188103589",
-        "silk_overlap|123100000|145300000|a646498f-410f-426a-8a0e-50d73b9727e7|54998157-8fc0-4a98-b26d-e4a188103589",
-        "silk_overlap|128500000|126700000|0ba7b967-5c4a-45fc-bb46-69747a2fa60c|140c6e52-c165-4fd6-9709-5abe2529ad35",
-        "silk_overlap|128500000|127700000|b9cb22e2-c4ef-4f50-b643-4e4b781d3421|140c6e52-c165-4fd6-9709-5abe2529ad35",
-        "silk_overlap|129500000|126700000|8e086872-e7e5-4b92-9db2-599ccc5e0d83|140c6e52-c165-4fd6-9709-5abe2529ad35",
-        "silk_overlap|129500000|127700000|fd290823-0f82-4511-95cc-cb2fc8b5e9a9|140c6e52-c165-4fd6-9709-5abe2529ad35",
-        "silk_overlap|172700000|119500000|2144dc9e-c064-438e-8ae8-91d80f79c3d6|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
-        "silk_overlap|172700000|120500000|d5cff7fe-7a58-4fa6-af6e-7598b17fa63f|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
-        "silk_overlap|173700000|119500000|92bf32cb-a1dc-429d-92ec-5ca3a16459c3|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
-        "silk_overlap|173700000|120500000|f434448b-c439-4e83-8e6a-232502b40223|b12315eb-27a4-4b8a-aa8b-8c35f04b1aca",
-        "text_height|100203000|89027000|88067903-7154-4079-ac02-e65c03b2efe0|00000000-0000-0000-0000-000000000000"
-      ],
+      "diff_pair_dimensions": [],
+      "drc_exclusions": [],
       "meta": {
         "filename": "board_design_settings.json",
         "version": 2
       },
       "rule_severities": {
         "annular_width": "error",
-        "clearance": "warning",
+        "clearance": "error",
         "connection_width": "warning",
         "copper_edge_clearance": "error",
         "copper_sliver": "warning",
@@ -116,12 +92,12 @@
         "shorting_items": "error",
         "silk_edge_clearance": "warning",
         "silk_over_copper": "warning",
-        "silk_overlap": "warning",
+        "silk_overlap": "ignore",
         "skew_out_of_range": "error",
         "solder_mask_bridge": "error",
         "starved_thermal": "error",
-        "text_height": "warning",
-        "text_thickness": "warning",
+        "text_height": "ignore",
+        "text_thickness": "ignore",
         "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
         "track_dangling": "warning",
@@ -135,8 +111,6 @@
       "rule_severitieslegacy_courtyards_overlap": true,
       "rule_severitieslegacy_no_courtyard_defined": false,
       "rules": {
-        "allow_blind_buried_vias": false,
-        "allow_microvias": false,
         "max_error": 0.005,
         "min_clearance": 0.0,
         "min_connection": 0.0,
@@ -153,11 +127,7 @@
         "min_track_width": 0.2,
         "min_via_annular_width": 0.1,
         "min_via_diameter": 0.4,
-        "solder_mask_clearance": 0.0,
-        "solder_mask_min_width": 0.0,
         "solder_mask_to_copper_clearance": 0.005,
-        "solder_paste_clearance": 0.0,
-        "solder_paste_margin_ratio": -0.0,
         "use_height_for_length_calcs": true
       },
       "teardrop_options": [
@@ -203,9 +173,7 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [
-        0.0
-      ],
+      "track_widths": [],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
           "corner_radius_percentage": 80,
@@ -232,12 +200,7 @@
           "spacing": 0.6
         }
       },
-      "via_dimensions": [
-        {
-          "diameter": 0.0,
-          "drill": 0.0
-        }
-      ],
+      "via_dimensions": [],
       "zones_allow_external_fillets": false
     },
     "ipc2581": {
@@ -255,7 +218,9 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      "lib_symbol_issues|495300|1536700|00000000-0000-0000-0000-000060623f64|00000000-0000-0000-0000-000000000000|||"
+    ],
     "meta": {
       "version": 0
     },
@@ -432,7 +397,6 @@
     "rule_severities": {
       "bus_definition_conflict": "error",
       "bus_entry_needed": "error",
-      "bus_label_syntax": "error",
       "bus_to_bus_conflict": "error",
       "bus_to_net_conflict": "error",
       "conflicting_netclasses": "error",
@@ -471,7 +435,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Backplane.kicad_pro",
+    "filename": "Blinkenlights Card.kicad_pro",
     "version": 1
   },
   "net_settings": {
@@ -492,23 +456,6 @@
         "via_diameter": 0.8,
         "via_drill": 0.4,
         "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.127,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "VCC",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.5,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
-        "wire_width": 6
       }
     ],
     "meta": {
@@ -519,35 +466,43 @@
     "netclass_patterns": [
       {
         "netclass": "Default",
+        "pattern": "/$8000"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$8400"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$8800"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$8C00"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9000"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9400"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9800"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "/$9C00"
+      },
+      {
+        "netclass": "Default",
         "pattern": "/A0"
       },
       {
         "netclass": "Default",
         "pattern": "/A1"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A10"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A11"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A12"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A13"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A14"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A15"
       },
       {
         "netclass": "Default",
@@ -635,6 +590,10 @@
       },
       {
         "netclass": "Default",
+        "pattern": "/PHI2"
+      },
+      {
+        "netclass": "Default",
         "pattern": "/RDY"
       },
       {
@@ -655,79 +614,39 @@
       },
       {
         "netclass": "Default",
+        "pattern": "/~{RES}"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A10"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A11"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A12"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A13"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A14"
+      },
+      {
+        "netclass": "Default",
+        "pattern": "A15"
+      },
+      {
+        "netclass": "Default",
         "pattern": "GND"
       },
       {
         "netclass": "Default",
-        "pattern": "Net-(C2-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(C4-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(C5-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(C5-Pad2)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(D1-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(J1-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(J2-PadA5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(J2-PadB5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(J4-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(R7-Pad1)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(R8-Pad2)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U1-Pad10)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U1-Pad12)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U1-Pad9)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U2-Pad5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "PHI2"
-      },
-      {
-        "netclass": "VCC",
         "pattern": "VCC"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "~{RES}"
       }
     ]
   },
@@ -735,7 +654,7 @@
     "last_paths": {
       "gencad": "",
       "idf": "",
-      "netlist": "Backplane.net",
+      "netlist": "Prototype Card.net",
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
@@ -796,41 +715,11 @@
           "label": "DNP",
           "name": "${DNP}",
           "show": true
-        },
-        {
-          "group_by": false,
-          "label": "#",
-          "name": "${ITEM_NUMBER}",
-          "show": false
-        },
-        {
-          "group_by": false,
-          "label": "Digikey",
-          "name": "Digikey",
-          "show": false
-        },
-        {
-          "group_by": false,
-          "label": "LCSC",
-          "name": "LCSC",
-          "show": true
-        },
-        {
-          "group_by": false,
-          "label": "Mouser",
-          "name": "Mouser",
-          "show": false
-        },
-        {
-          "group_by": false,
-          "label": "Description",
-          "name": "Description",
-          "show": false
         }
       ],
       "filter_string": "",
       "group_symbols": true,
-      "name": "",
+      "name": "Grouped By Value",
       "sort_asc": true,
       "sort_field": "Reference"
     },
@@ -853,7 +742,7 @@
       "operating_point_overlay_v_precision": 3,
       "operating_point_overlay_v_range": "~V",
       "overbar_offset_ratio": 1.23,
-      "pin_symbol_size": 25.0,
+      "pin_symbol_size": 0.0,
       "text_offset_ratio": 0.08
     },
     "legacy_lib_dir": "",
@@ -862,17 +751,8 @@
       "version": 1
     },
     "net_format_name": "Pcbnew",
-    "ngspice": {
-      "fix_include_paths": true,
-      "fix_passive_vals": false,
-      "meta": {
-        "version": 0
-      },
-      "model_mode": 0,
-      "workbook_filename": ""
-    },
     "page_layout_descr_file": "${KIPRJMOD}/../../Worksheets/6502.kicad_wks",
-    "plot_directory": "../../Schematics/Backplane/Rev 1.0/",
+    "plot_directory": "../../Schematics/Blinkenlights Card/Rev 1.0/",
     "spice_adjust_passive_values": false,
     "spice_current_sheet_as_root": false,
     "spice_external_command": "spice \"%I\"",
@@ -885,7 +765,7 @@
   },
   "sheets": [
     [
-      "5d95bc66-f610-41ca-b1ae-73f5b5edc5a7",
+      "1eb588e8-a8a6-45d4-8449-ed494748d485",
       "Root"
     ]
   ],

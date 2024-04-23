@@ -9,8 +9,8 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Serial Card")
-		(date "2024-04-21")
-		(rev "1.1")
+		(date "2024-04-22")
+		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
 	(layers
@@ -3619,7 +3619,7 @@
 		)
 		(fp_arc
 			(start 8.76046 -9.58342)
-			(mid 8.311445 -9.769416)
+			(mid 8.31148 -9.769423)
 			(end 8.12546 -10.21842)
 			(stroke
 				(width 0.2032)
@@ -7779,7 +7779,7 @@
 			)
 		)
 	)
-	(gr_text "© 2024 A.C. Wright Design | acwrightdesign.com | Rev 1.1"
+	(gr_text "© 2024 A.C. Wright Design | acwrightdesign.com | Rev 1.0"
 		(at 124.841 77.978 0)
 		(layer "F.SilkS")
 		(uuid "00000000-0000-0000-0000-0000606d39e3")
@@ -7885,6 +7885,15 @@
 		(layer "F.Cu")
 		(net 1)
 		(uuid "a00311a5-2456-4ed0-9433-61e8c29f0c02")
+	)
+	(via
+		(at 115.1011 123.0136)
+		(size 0.8)
+		(drill 0.4)
+		(layers "F.Cu" "B.Cu")
+		(free yes)
+		(net 1)
+		(uuid "007406d7-1773-4fbf-982f-9b473f80a7ea")
 	)
 	(via
 		(at 132.3011 123.0136)

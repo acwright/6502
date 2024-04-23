@@ -7,14 +7,28 @@
 
 #define RAM_START   0x0000
 #define RAM_END     0x7FFF
-#define ROM_START   0x8000
+#define IO_START    0x8000
+#define IO_END      0x9FFF
+#define ROM_START   0xA000
 #define ROM_END     0xFFFF
 
-#define PERIOD    1 // 1 uS
-#define FREQ      1 // 0 - 1000000 Hz
-#define DELAY     (unsigned long) (FREQ > 0 ? (((1.0 / FREQ) * 1000000) / PERIOD) / 2 : ULONG_MAX)
+#define PERIOD          1 // 1 uS
+#define FREQ_MIN        1 // 1 Hz
+#define FREQ_MAX        1000000 // 1 Mhz
+#define FREQ_MAX_DEBUG  2048 // 2048 Hz
+#define DELAY(freq)     (unsigned long) ((((1.0 / freq) * 1000000) / PERIOD) / 2)
 
 #define DEBOUNCE  5 // 5 milliseconds
+
+#define BYTE_TO_BINARY(byte)  \
+  ((byte) & 0x80 ? '1' : '0'), \
+  ((byte) & 0x40 ? '1' : '0'), \
+  ((byte) & 0x20 ? '1' : '0'), \
+  ((byte) & 0x10 ? '1' : '0'), \
+  ((byte) & 0x08 ? '1' : '0'), \
+  ((byte) & 0x04 ? '1' : '0'), \
+  ((byte) & 0x02 ? '1' : '0'), \
+  ((byte) & 0x01 ? '1' : '0')
 
 const byte ADDR_PINS[] = { A15, A14, A13, A12, A11, A10, A9, A8, A7, A6, A5, A4, A3, A2, A1, A0 };
 const byte DATA_PINS[] = { D7, D6, D5, D4, D3, D2, D1, D0 };
@@ -30,63 +44,124 @@ void onTick();
 void onLow();
 void onHigh();
 
-void initPins();
-void initButtons();
 void initRAM();
 void initROM();
+void initPins();
+void initButtons();
 void disableOutputs();
 void enableOutputs();
 void setAddrDirIn();
 void setDataDirIn();
 void setDataDirOut();
+
 word readAddress();
 byte readData();
 void writeData(byte d);
 
+void reset();
 void debug();
+void toggleRunStop();
+void toggleDebug();
+void changeFrequency();
+void step();
+void info();
 
+unsigned int freq = 1;
 unsigned int ticks = 0;
+bool isDebugging = true;
 bool isRunning = false;
 
-void setup() {
-  disableOutputs();
+word address = 0;
+byte data = 0;
+byte readWrite = HIGH;
 
+void setup() {
   initPins();
   initButtons();
   initRAM();
   initROM();
 
-  enableOutputs();
-
   pinMode(PHI2, OUTPUT);
-  digitalWriteFast(PHI2, LOW);
+  digitalWriteFast(PHI2, HIGH);
+
+  enableOutputs();
 
   Timer1.initialize(PERIOD);
   Timer1.attachInterrupt(onTick);
 
   Serial.begin(9600);
+
+  delay(500);
+
+  Serial.println();
+  Serial.println("eeee  eeeee eeeeee eeee   888888               888888                            ");                        
+  Serial.println("8  8  8     8    8    8   8    8 eeee ee   e   8    8   eeeee eeeee eeeee  eeeee ");
+  Serial.println("8     8eeee 8    8    8   8e   8 8    88   8   8eeee8ee 8  88 8   8 8   8  8   8 ");
+  Serial.println("8eeee     8 8    8 eee8   88   8 8eee 88  e8   88     8 8   8 8eee8 8eee8e 8e  8 ");
+  Serial.println("8   8     8 8    8 8      88   8 88    8  8    88     8 8   8 88  8 88   8 88  8 ");
+  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88ee  8ee8    88eeeee8 8eee8 88  8 88   8 88ee8 ");
+  Serial.println();
+  Serial.println("---------------------------------");
+  Serial.println("| Created by A.C. Wright © 2024 |");
+  Serial.println("---------------------------------");
+
+  info();
 }
 
 void loop() {
   stepButton.update();
   runStopButton.update();
+  intButton.update();
 
   if (stepButton.pressed()) {
-    onHigh();
-    onLow();
+    step();
   }
   if (runStopButton.pressed()) {
-    isRunning = !isRunning;
+    toggleRunStop();
+  }
+  if (intButton.pressed()) {
+    changeFrequency();
+  }
+
+  if (Serial.available()) 
+  {
+    switch (Serial.read())
+    {
+      case 'r':
+      case 'R':
+        toggleRunStop();
+        break;
+      case 's':
+      case 'S':
+        step();
+        break;
+      case 't':
+      case 'T':
+        reset();
+        break;
+      case 'f':
+      case 'F':
+        changeFrequency();
+        break;
+      case 'd':
+      case 'D':
+        toggleDebug();
+        break;
+      case 'i':
+      case 'I':
+        info();
+        break;
+    }
   }
 }
 
 void onTick()
 {
-  if (ticks == DELAY) {
+  if (ticks == DELAY(freq)) {
     if (isRunning) {
       digitalReadFast(PHI2) ? onLow() : onHigh();
-    } else if (digitalReadFast(PHI2)) { 
-      onLow();
+    } else if (!digitalReadFast(PHI2)) { 
+      onHigh();
     }
 
     ticks = 0;
@@ -98,61 +173,133 @@ void onTick()
 void onLow() {
   digitalWriteFast(PHI2, LOW);
 
-  // Data hold time?
-  // DELAY_FACTOR_L();
-
   setDataDirIn();
+
+  if (readWrite == LOW) { // WRITING
+    data = readData();
+
+    if ((RAM_START <= address) && (address <= RAM_END)) {
+      RAM[address] = data;
+    } else if ((IO_START <= address) && (address <= IO_END)) {
+      // TODO: Handle IO
+    }
+  }
+
+  if (freq <= FREQ_MAX_DEBUG && isDebugging) {
+    debug();
+  }
 }
 
 void onHigh() {
   digitalWriteFast(PHI2, HIGH);
 
-  // Address setup time?
-  // DELAY_FACTOR_H();
+  address = readAddress();
+  readWrite = digitalReadFast(RWB);
 
-  word address = readAddress();
-
-  if (digitalReadFast(RWB)) { // READ
+  if (readWrite == HIGH) { // READING
     setDataDirOut();
 
     if ((ROM_START <= address) && (address <= ROM_END)) { // ROM
-      writeData(ROM[address - ROM_START]);
+      data = ROM[address - ROM_START];
+
+      writeData(data);
     } else if ((RAM_START <= address) && (address <= RAM_END)) { // RAM
-      writeData(RAM[address - RAM_START]);
-    } else {
-      // Do nothing for now...
-    }
-  } else { // WRITE
-    if ((RAM_START <= address) && (address <= RAM_END)) {
-      RAM[address] = readData();
+      data = RAM[address - RAM_START];
+
+      writeData(data);
+    } else if ((IO_START <= address) && (address <= IO_END)) {
+      // TODO: Handle IO
     }
   }
+}
 
-  debug();
+void reset() {
+  pinMode(RESB, OUTPUT);
+  digitalWriteFast(RESB, LOW);
+  digitalWriteFast(PHI2, LOW);
+  delay(100);
+  digitalWriteFast(PHI2, HIGH);
+  delay(100);
+  digitalWriteFast(PHI2, LOW);
+  delay(100);
+  digitalWriteFast(PHI2, HIGH);
+  delay(100);
+  digitalWriteFast(RESB, HIGH);
+  pinMode(RESB, INPUT);
+}
+
+void changeFrequency() {
+  if (freq < FREQ_MAX) {
+    freq *= 2;
+  } else {
+    freq = FREQ_MIN;
+  }
+  ticks = 0;
+
+  Serial.print("Frequency: ");
+  Serial.print(freq);
+  Serial.println(" Hz");
+}
+
+void toggleRunStop() {
+  if (isRunning) {
+    isRunning = false;
+    Serial.println("Stopped");
+  } else {
+    isRunning = true;
+    Serial.println("Running…");
+  }
+}
+
+void toggleDebug() {
+  if (isDebugging) {
+    isDebugging = false;
+  } else {
+    isDebugging = true;
+  }
+  Serial.print("Debug: ");
+  Serial.println(isDebugging ? "Enabled" : "Disabled");
+}
+
+void step() {
+  onLow();
+  if (!isDebugging) {
+    Serial.print("Tick…  ");
+  }
+  delay(100);
+  onHigh();
+  if (!isDebugging) {
+    Serial.println("Tock…");
+  }
+}
+
+void info() {
+  Serial.println();
+  Serial.print("Frequency: ");
+  Serial.print(freq);
+  Serial.println(" Hz");
+  Serial.print("Debug: ");
+  Serial.println(isDebugging ? "Enabled" : "Disabled");
+  Serial.println();
+  Serial.println("(R)un / Stop | (S)tep | Rese(T) | Change (F)requency | Toggle (D)ebug | (I)nfo");
+  Serial.println();
 }
 
 void debug() {
-  char output[24];
-
-  unsigned int address = 0;
-  for (int n = 0; n < 16; n += 1) {
-    int bit = digitalReadFast(ADDR_PINS[n]) ? 1 : 0;
-    Serial.print(bit);
-    address = (address << 1) + bit;
-  }
+  char output[64];
   
-  Serial.print("   ");
-  
-  unsigned int data = 0;
-  for (int n = 0; n < 8; n += 1) {
-    int bit = digitalReadFast(DATA_PINS[n]) ? 1 : 0;
-    Serial.print(bit);
-    data = (data << 1) + bit;
-  }
+  sprintf(
+    output, 
+    "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c  %c%c%c%c%c%c%c%c  %01X  0x%04X  0x%02X  %c", 
+    BYTE_TO_BINARY((address >> 8) & 0xFF),
+    BYTE_TO_BINARY(address & 0xFF), 
+    BYTE_TO_BINARY(data),
+    readWrite, 
+    address, 
+    data, 
+    readWrite ? 'r' : 'W'
+  );
 
-  unsigned int rw = digitalReadFast(RWB);
-
-  sprintf(output, "   %04x  %01x  %c %02x", address, rw, rw ? 'r' : 'W', data);
   Serial.println(output); 
 }
 
@@ -168,23 +315,25 @@ void initROM() {
   unsigned int i;
 
   for (i = 0; i < sizeof(ROM) ; i++){ 
-    ROM[i] = 0xEA; 
+    ROM[i] = 0xEA;
   }
 }
 
 void initPins() {
+  pinMode(OE1, OUTPUT);
+  pinMode(OE2, OUTPUT);
+  pinMode(OE3, OUTPUT);
+
+  disableOutputs();
+
   pinMode(RESB, INPUT);
   pinMode(SYNC, INPUT);
   pinMode(RWB, INPUT);
   pinMode(RDY, INPUT);
   pinMode(BE, INPUT);
-  pinMode(PHI2, INPUT);
+  pinMode(PHI2, OUTPUT);
   pinMode(NMIB, INPUT);
   pinMode(IRQB, INPUT);
-
-  pinMode(OE1, OUTPUT);
-  pinMode(OE2, OUTPUT);
-  pinMode(OE3, OUTPUT);
 
   pinMode(INT_SWB, INPUT);
   pinMode(STEP_SWB, INPUT);
@@ -197,8 +346,6 @@ void initPins() {
 
   setAddrDirIn();
   setDataDirIn();
-  
-  disableOutputs();
 }
 
 void initButtons() {
