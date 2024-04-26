@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <TimerOne.h>
 #include <Bounce2.h>
-#include <climits>
+#include <SD.h>
 
 #include "pins.h"
 
@@ -9,7 +9,9 @@
 #define RAM_END     0x7FFF
 #define IO_START    0x8000
 #define IO_END      0x9FFF
-#define ROM_START   0xA000
+#define DEVIO_START 0x9800
+#define DEVIO_END   0x9BFF
+#define ROM_START   0x8000
 #define ROM_END     0xFFFF
 
 #define PERIOD          1 // 1 uS
@@ -18,7 +20,7 @@
 #define FREQ_MAX_DEBUG  2048 // 2048 Hz
 #define DELAY(freq)     (unsigned long) ((((1.0 / freq) * 1000000) / PERIOD) / 2)
 
-#define DEBOUNCE  5 // 5 milliseconds
+#define DEBOUNCE  5     // 5 milliseconds
 
 #define BYTE_TO_BINARY(byte)  \
   ((byte) & 0x80 ? '1' : '0'), \
@@ -48,6 +50,7 @@ void initRAM();
 void initROM();
 void initPins();
 void initButtons();
+void initSD();
 void disableOutputs();
 void enableOutputs();
 void setAddrDirIn();
@@ -60,20 +63,28 @@ void writeData(byte d);
 
 void reset();
 void debug();
+void step();
 void toggleRunStop();
 void toggleDebug();
+void toggleRAM();
+void toggleROM();
+void listROMs();
+void loadROM(unsigned int index);
 void changeFrequency();
-void step();
 void info();
 
 unsigned int freq = 1;
 unsigned int ticks = 0;
 bool isDebugging = true;
 bool isRunning = false;
+bool RAMEnabled = true;
+bool ROMEnabled = true;
 
 word address = 0;
 byte data = 0;
 byte readWrite = HIGH;
+
+String ROMs[10];
 
 void setup() {
   initPins();
@@ -91,21 +102,12 @@ void setup() {
 
   Serial.begin(9600);
 
-  delay(500);
+  initSD();
 
-  Serial.println();
-  Serial.println("eeee  eeeee eeeeee eeee   888888               888888                            ");                        
-  Serial.println("8  8  8     8    8    8   8    8 eeee ee   e   8    8   eeeee eeeee eeeee  eeeee ");
-  Serial.println("8     8eeee 8    8    8   8e   8 8    88   8   8eeee8ee 8  88 8   8 8   8  8   8 ");
-  Serial.println("8eeee     8 8    8 eee8   88   8 8eee 88  e8   88     8 8   8 8eee8 8eee8e 8e  8 ");
-  Serial.println("8   8     8 8    8 8      88   8 88    8  8    88     8 8   8 88  8 88   8 88  8 ");
-  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88ee  8ee8    88eeeee8 8eee8 88  8 88   8 88ee8 ");
-  Serial.println();
-  Serial.println("---------------------------------");
-  Serial.println("| Created by A.C. Wright © 2024 |");
-  Serial.println("---------------------------------");
+  delay(1000);
 
   info();
+  reset();
 }
 
 void loop() {
@@ -127,6 +129,36 @@ void loop() {
   {
     switch (Serial.read())
     {
+      case '0':
+        loadROM(0);
+        break;
+      case '1':
+        loadROM(1);
+        break;
+      case '2':
+        loadROM(2);
+        break;
+      case '3':
+        loadROM(3);
+        break;
+      case '4':
+        loadROM(4);
+        break;
+      case '5':
+        loadROM(5);
+        break;
+      case '6':
+        loadROM(6);
+        break;
+      case '7':
+        loadROM(7);
+        break;
+      case '8':
+        loadROM(8);
+        break;
+      case '9':
+        loadROM(9);
+        break;
       case 'r':
       case 'R':
         toggleRunStop();
@@ -138,6 +170,18 @@ void loop() {
       case 't':
       case 'T':
         reset();
+        break;
+      case 'a':
+      case 'A':
+        toggleRAM();
+        break;
+      case 'o':
+      case 'O':
+        toggleROM();
+        break;
+      case 'l':
+      case 'L':
+        listROMs();
         break;
       case 'f':
       case 'F':
@@ -161,7 +205,7 @@ void onTick()
     if (isRunning) {
       digitalReadFast(PHI2) ? onLow() : onHigh();
     } else if (!digitalReadFast(PHI2)) { 
-      onHigh();
+      digitalWriteFast(PHI2, HIGH);
     }
 
     ticks = 0;
@@ -173,16 +217,17 @@ void onTick()
 void onLow() {
   digitalWriteFast(PHI2, LOW);
 
-  setDataDirIn();
-
   if (readWrite == LOW) { // WRITING
-    data = readData();
-
-    if ((RAM_START <= address) && (address <= RAM_END)) {
+    if ((address >= IO_START) && (address <= IO_END)) {
+      if ((address >= DEVIO_START) && (address <= DEVIO_END)) {
+        // 6502 is writing to Dev Board IO space
+        // TODO: Handle IO
+      } else {
+        // 6502 is writing to other IO space
+      }
+    } else if ((address >= RAM_START) && (address <= RAM_END)) {
       RAM[address] = data;
-    } else if ((IO_START <= address) && (address <= IO_END)) {
-      // TODO: Handle IO
-    }
+    } 
   }
 
   if (freq <= FREQ_MAX_DEBUG && isDebugging) {
@@ -192,28 +237,42 @@ void onLow() {
 
 void onHigh() {
   digitalWriteFast(PHI2, HIGH);
+  
+  setDataDirIn();
 
-  address = readAddress();
   readWrite = digitalReadFast(RWB);
+  address = readAddress();
+  data = readData();
 
   if (readWrite == HIGH) { // READING
-    setDataDirOut();
-
-    if ((ROM_START <= address) && (address <= ROM_END)) { // ROM
+    if ((address >= IO_START) && (address <= IO_END)) {
+      if ((address >= DEVIO_START) && (address <= DEVIO_END)) {
+        // 6502 is reading from Dev Board IO space
+        // TODO: Handle IO
+      } else {
+        // 6502 is reading from other IO space
+      }
+    } else if ((address >= ROM_START) && (address <= ROM_END) && ROMEnabled) { // ROM
       data = ROM[address - ROM_START];
 
+      setDataDirOut();
       writeData(data);
-    } else if ((RAM_START <= address) && (address <= RAM_END)) { // RAM
+    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       data = RAM[address - RAM_START];
 
+      setDataDirOut();
       writeData(data);
-    } else if ((IO_START <= address) && (address <= IO_END)) {
-      // TODO: Handle IO
-    }
+    } 
   }
 }
 
 void reset() {
+  bool isCurrentlyRunning = isRunning;
+
+  if (isCurrentlyRunning) {
+    isRunning = false;
+  }
+
   pinMode(RESB, OUTPUT);
   digitalWriteFast(RESB, LOW);
   digitalWriteFast(PHI2, LOW);
@@ -226,6 +285,10 @@ void reset() {
   delay(100);
   digitalWriteFast(RESB, HIGH);
   pinMode(RESB, INPUT);
+
+  if (isCurrentlyRunning) {
+    isRunning = true;
+  }
 }
 
 void changeFrequency() {
@@ -242,23 +305,79 @@ void changeFrequency() {
 }
 
 void toggleRunStop() {
-  if (isRunning) {
-    isRunning = false;
-    Serial.println("Stopped");
-  } else {
-    isRunning = true;
-    Serial.println("Running…");
-  }
+  isRunning = !isRunning;
+
+  Serial.println(isRunning ? "Running…" : "Stopped");
 }
 
 void toggleDebug() {
-  if (isDebugging) {
-    isDebugging = false;
-  } else {
-    isDebugging = true;
-  }
+  isDebugging = !isDebugging;
+
   Serial.print("Debug: ");
   Serial.println(isDebugging ? "Enabled" : "Disabled");
+}
+
+void toggleRAM() {
+  RAMEnabled = !RAMEnabled;
+
+  Serial.print("RAM: ");
+  Serial.println(RAMEnabled ? "Enabled" : "Disabled");
+}
+
+void toggleROM() {
+  ROMEnabled = !ROMEnabled;
+
+  Serial.print("ROM: ");
+  Serial.println(ROMEnabled ? "Enabled" : "Disabled");
+}
+
+void listROMs() {
+  File ROMDirectory = SD.open("/ROMS");
+
+  for (unsigned int i = 0; i < 10; i++) {
+    File file = ROMDirectory.openNextFile();
+
+    if (file) {
+      ROMs[i] = String(file.name());
+      file.close();
+    } else {
+      ROMs[i] = "?";
+    }
+  }
+
+  for (unsigned int j = 0; j < 10; j++) {
+    Serial.print("(");
+    Serial.print(j);
+    Serial.print(")");
+    Serial.print(" - ");
+    Serial.println(ROMs[j]);
+  }
+  Serial.println();
+
+  ROMDirectory.close();
+}
+
+void loadROM(unsigned int index) {
+  String directory = "/ROMS/";
+  String path = directory + ROMs[index];
+
+  File file = SD.open(path.c_str());
+
+  if (file) {
+    unsigned int i = 0;
+
+    while(file.available()) {
+      ROM[i] = file.read();
+      i++;
+    }
+
+    Serial.print("Loaded ROM: ");
+    Serial.println(ROMs[index]);
+  } else {
+    Serial.println("Invalid ROM!");
+  }
+
+  file.close();
 }
 
 void step() {
@@ -271,17 +390,39 @@ void step() {
   if (!isDebugging) {
     Serial.println("Tock…");
   }
+  delay(100);
 }
 
 void info() {
   Serial.println();
+  Serial.println("eeee  eeeee eeeeee eeee   888888               888888                            ");                        
+  Serial.println("8  8  8     8    8    8   8    8 eeee ee   e   8    8   eeeee eeeee eeeee  eeeee ");
+  Serial.println("8     8eeee 8    8    8   8e   8 8    88   8   8eeee8ee 8  88 8   8 8   8  8   8 ");
+  Serial.println("8eeee     8 8    8 eee8   88   8 8eee 88  e8   88     8 8   8 8eee8 8eee8e 8e  8 ");
+  Serial.println("8   8     8 8    8 8      88   8 88    8  8    88     8 8   8 88  8 88   8 88  8 ");
+  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88ee  8ee8    88eeeee8 8eee8 88  8 88   8 88ee8 ");
+  Serial.println();
+  Serial.println("---------------------------------");
+  Serial.println("| Created by A.C. Wright © 2024 |");
+  Serial.println("---------------------------------");
+  Serial.println();
+  Serial.print("RAM: ");
+  Serial.println(RAMEnabled ? "Enabled" : "Disabled");
+  Serial.print("ROM: ");
+  Serial.println(ROMEnabled ? "Enabled" : "Disabled");
+  Serial.print("Debug: ");
+  Serial.println(isDebugging ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
   Serial.print(freq);
   Serial.println(" Hz");
-  Serial.print("Debug: ");
-  Serial.println(isDebugging ? "Enabled" : "Disabled");
   Serial.println();
-  Serial.println("(R)un / Stop | (S)tep | Rese(T) | Change (F)requency | Toggle (D)ebug | (I)nfo");
+  Serial.println("-------------------------------------------------------");
+  Serial.println("| (R)un / Stop        | (S)tep          | Rese(T)     |");
+  Serial.println("-------------------------------------------------------");
+  Serial.println("| Toggle R(A)M        | Toggle R(O)M    | (L)ist ROMs |");
+  Serial.println("-------------------------------------------------------");
+  Serial.println("| Change (F)requency  | Toggle (D)ebug  | (I)nfo      |");
+  Serial.println("-------------------------------------------------------");
   Serial.println();
 }
 
@@ -297,7 +438,7 @@ void debug() {
     readWrite, 
     address, 
     data, 
-    readWrite ? 'r' : 'W'
+    readWrite ? 'R' : 'W'
   );
 
   Serial.println(output); 
@@ -360,6 +501,10 @@ void initButtons() {
   runStopButton.attach(RS_SWB, INPUT);
   runStopButton.interval(DEBOUNCE);
   runStopButton.setPressedState(LOW);
+}
+
+void initSD() {
+  SD.begin(BUILTIN_SDCARD);
 }
 
 void disableOutputs() {
