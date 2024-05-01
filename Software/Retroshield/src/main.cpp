@@ -34,13 +34,9 @@
   ((byte) & 0x02 ? '1' : '0'), \
   ((byte) & 0x01 ? '1' : '0')
 
-const byte ADDR_PINS[] = { A15, A14, A13, A12, A11, A10, A9, A8, A7, A6, A5, A4, A3, A2, A1, A0 };
-const byte DATA_PINS[] = { D7, D6, D5, D4, D3, D2, D1, D0 };
-
 byte RAM[RAM_END-RAM_START+1];
 byte ROM[ROM_END-ROM_START+1];
 
-Button intButton = Button();
 Button stepButton = Button();
 Button runStopButton = Button();
 
@@ -53,8 +49,6 @@ void initROM();
 void initPins();
 void initButtons();
 void initSD();
-void disableOutputs();
-void enableOutputs();
 void setAddrDirIn();
 void setDataDirIn();
 void setDataDirOut();
@@ -94,10 +88,11 @@ void setup() {
   initRAM();
   initROM();
 
-  pinMode(PHI2, OUTPUT);
+  digitalWriteFast(IRQB, HIGH);
+  digitalWriteFast(NMIB, HIGH);
+  digitalWriteFast(RDY, HIGH);
+  digitalWriteFast(SOB, HIGH);
   digitalWriteFast(PHI2, HIGH);
-  
-  enableOutputs();
 
   Timer1.initialize(PERIOD);
   Timer1.attachInterrupt(onTick);
@@ -115,16 +110,12 @@ void setup() {
 void loop() {
   stepButton.update();
   runStopButton.update();
-  intButton.update();
 
   if (stepButton.pressed()) {
     step();
   }
   if (runStopButton.pressed()) {
     toggleRunStop();
-  }
-  if (intButton.pressed()) {
-    changeFrequency();
   }
 
   if (Serial.available()) 
@@ -273,7 +264,6 @@ void reset() {
     isRunning = false;
   }
 
-  pinMode(RESB, OUTPUT);
   digitalWriteFast(RESB, LOW);
   digitalWriteFast(PHI2, LOW);
   delay(100);
@@ -284,7 +274,6 @@ void reset() {
   digitalWriteFast(PHI2, HIGH);
   delay(100);
   digitalWriteFast(RESB, HIGH);
-  pinMode(RESB, INPUT);
 
   if (isCurrentlyRunning) {
     isRunning = true;
@@ -464,39 +453,23 @@ void initROM() {
 }
 
 void initPins() {
-  pinMode(OE1, OUTPUT);
-  pinMode(OE2, OUTPUT);
-  pinMode(OE3, OUTPUT);
+  pinMode(RESB, OUTPUT);
+  pinMode(GPIO0, OUTPUT);
+  pinMode(RWB, INPUT_PULLUP);
+  pinMode(RDY, OUTPUT);
+  pinMode(SOB, OUTPUT);
+  pinMode(PHI2, OUTPUT);
+  pinMode(NMIB, OUTPUT);
+  pinMode(IRQB, OUTPUT);
 
-  disableOutputs();
-
-  pinMode(RESB, INPUT);
-  pinMode(SYNC, INPUT);
-  pinMode(RWB, INPUT);
-  pinMode(RDY, INPUT);
-  pinMode(BE, INPUT);
-  pinMode(PHI2, INPUT);
-  pinMode(NMIB, INPUT);
-  pinMode(IRQB, INPUT);
-
-  pinMode(INT_SWB, INPUT);
   pinMode(STEP_SWB, INPUT);
   pinMode(RS_SWB, INPUT);
-
-  pinMode(GPIO_0, INPUT);
-  pinMode(GPIO_1, INPUT);
-  pinMode(GPIO_2, INPUT);
-  pinMode(GPIO_3, INPUT);
 
   setAddrDirIn();
   setDataDirIn();
 }
 
 void initButtons() {
-  intButton.attach(INT_SWB, INPUT);
-  intButton.interval(DEBOUNCE);
-  intButton.setPressedState(LOW);
-
   stepButton.attach(STEP_SWB, INPUT);
   stepButton.interval(DEBOUNCE);
   stepButton.setPressedState(LOW);
@@ -508,18 +481,6 @@ void initButtons() {
 
 void initSD() {
   SD.begin(BUILTIN_SDCARD);
-}
-
-void disableOutputs() {
-  digitalWriteFast(OE1, LOW);
-  digitalWriteFast(OE2, LOW);
-  digitalWriteFast(OE3, LOW);
-}
-
-void enableOutputs() {
-  digitalWriteFast(OE1, HIGH);
-  digitalWriteFast(OE2, HIGH);
-  digitalWriteFast(OE3, HIGH);
 }
 
 void setAddrDirIn() {
