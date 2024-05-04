@@ -2,14 +2,17 @@
 #include <TimerOne.h>
 #include <Bounce2.h>
 #include <SD.h>
+#include <QNEthernet.h>
 
 #include "pins.h"
+
+using namespace qindesign::network;
 
 #define VERSION     "1.0"
 
 #define RAM_START   0x0000
 #define RAM_END     0x7FFF
-#define IO_START    0x8000
+#define IO_START    0x9C00
 #define IO_END      0x9FFF
 #define ROM_START   0x8000
 #define ROM_END     0xFFFF
@@ -33,6 +36,7 @@
   ((byte) & 0x01 ? '1' : '0')
 
 byte RAM[RAM_END-RAM_START+1];
+byte IO[IO_END-IO_START+1];
 byte ROM[ROM_END-ROM_START+1];
 
 Button intButton = Button();
@@ -44,10 +48,12 @@ void onLow();
 void onHigh();
 
 void initRAM();
+void initIO();
 void initROM();
 void initPins();
 void initButtons();
 void initSD();
+void initEthernet();
 void disableOutputs();
 void enableOutputs();
 void setAddrDirIn();
@@ -64,6 +70,7 @@ void step();
 void toggleRunStop();
 void toggleDebug();
 void toggleRAM();
+void toggleIO();
 void toggleROM();
 void listROMs();
 void loadROM(unsigned int index);
@@ -76,6 +83,7 @@ unsigned int ticks = 0;
 bool isDebugging = true;
 bool isRunning = false;
 bool RAMEnabled = true;
+bool IOEnabled = true;
 bool ROMEnabled = true;
 String romFile = "None";
 
@@ -85,10 +93,13 @@ byte readWrite = HIGH;
 
 String ROMs[10];
 
+EthernetClient ethClient;
+
 void setup() {
   initPins();
   initButtons();
   initRAM();
+  initIO();
   initROM();
 
   pinMode(PHI2, OUTPUT);
@@ -101,9 +112,10 @@ void setup() {
 
   Serial.begin(9600);
 
-  while(!Serial); // Wait for Serial.begin()
+  delay(1500);
 
   initSD();
+  initEthernet();
 
   info();
   reset();
@@ -174,6 +186,10 @@ void loop() {
       case 'A':
         toggleRAM();
         break;
+      case 'i':
+      case 'I':
+        toggleIO();
+        break;
       case 'o':
       case 'O':
         toggleROM();
@@ -192,8 +208,8 @@ void loop() {
       case 'D':
         toggleDebug();
         break;
-      case 'i':
-      case 'I':
+      case 'f':
+      case 'F':
         info();
         break;
     }
@@ -220,10 +236,9 @@ void onLow() {
   data = readData();
 
   if (readWrite == LOW) { // WRITING
-    if ((address >= IO_START) && (address <= IO_END)) {
-      // 6502 is writing to IO space
-      // TODO: Handle IO
-    } else if ((address >= RAM_START) && (address <= RAM_END)) {
+    if ((address >= IO_START) && (address <= IO_END) && IOEnabled) {
+      IO[address - IO_START] = data;
+    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) {
       RAM[address - RAM_START] = data;
     }
   }
@@ -244,9 +259,9 @@ void onHigh() {
   address = readAddress();
 
   if (readWrite == HIGH) { // READING
-    if ((address >= IO_START) && (address <= IO_END)) {
-      // 6502 is reading from IO space
-      // TODO: Handle IO
+    if ((address >= IO_START) && (address <= IO_END) && IOEnabled) {
+      setDataDirOut();
+      writeData(IO[address - IO_START]);
     } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       setDataDirOut();
       writeData(RAM[address - RAM_START]);
@@ -326,6 +341,13 @@ void toggleRAM() {
 
   Serial.print("RAM: ");
   Serial.println(RAMEnabled ? "Enabled" : "Disabled");
+}
+
+void toggleIO() {
+  IOEnabled = !IOEnabled;
+
+  Serial.print("IO: ");
+  Serial.println(IOEnabled ? "Enabled" : "Disabled");
 }
 
 void toggleROM() {
@@ -420,8 +442,10 @@ void info() {
   Serial.println();
   Serial.print("RAM: ");
   Serial.println(RAMEnabled ? "Enabled" : "Disabled");
+  Serial.print("IO: ");
+  Serial.println(IOEnabled ? "Enabled" : "Disabled");
   Serial.print("ROM: ");
-  Serial.println(ROMEnabled ? "Enabled" : "Disabled");
+  Serial.print(ROMEnabled ? "Enabled" : "Disabled");
   Serial.print(" (");
   Serial.print(romFile);
   Serial.println(")");
@@ -430,13 +454,17 @@ void info() {
   Serial.print("Frequency: ");
   Serial.print(freq);
   Serial.println(" Hz");
+  Serial.print("IP address: ");
+  Serial.println(Ethernet.localIP());
   Serial.println();
   Serial.println("-------------------------------------------------------");
   Serial.println("| (R)un / Stop        | (S)tep          | Rese(T)     |");
   Serial.println("-------------------------------------------------------");
   Serial.println("| Toggle R(A)M        | Toggle R(O)M    | (L)ist ROMs |");
   Serial.println("-------------------------------------------------------");
-  Serial.println("| (+/-) Clk Frequency | Toggle (D)ebug  | (I)nfo      |");
+  Serial.println("| Toggle (I)O         |                 |             |");
+  Serial.println("-------------------------------------------------------");
+  Serial.println("| (+/-) Clk Frequency | Toggle (D)ebug  | In(F)o      |");
   Serial.println("-------------------------------------------------------");
   Serial.println();
 }
@@ -446,13 +474,13 @@ void debug() {
   
   sprintf(
     output, 
-    "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c  %c%c%c%c%c%c%c%c  %01X  0x%04X  0x%02X  %c", 
+    "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c  %c%c%c%c%c%c%c%c  %01X  0x%04X  0x%02X  %c",
     BYTE_TO_BINARY((address >> 8) & 0xFF),
-    BYTE_TO_BINARY(address & 0xFF), 
+    BYTE_TO_BINARY(address & 0xFF),
     BYTE_TO_BINARY(data),
-    readWrite, 
-    address, 
-    data, 
+    readWrite,
+    address,
+    data,
     readWrite ? 'R' : 'W'
   );
 
@@ -464,6 +492,14 @@ void initRAM() {
   
   for (i = 0; i < sizeof(RAM) ; i++){ 
     RAM[i] = 0x00; 
+  }
+}
+
+void initIO() {
+  unsigned int i;
+  
+  for (i = 0; i < sizeof(IO) ; i++) {
+    IO[i] = 0x00; 
   }
 }
 
@@ -520,6 +556,12 @@ void initButtons() {
 
 void initSD() {
   SD.begin(BUILTIN_SDCARD);
+}
+
+void initEthernet() {
+  Ethernet.begin();
+
+  delay(1500);
 }
 
 void disableOutputs() {

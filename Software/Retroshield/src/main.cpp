@@ -57,8 +57,8 @@ void initROM();
 void initPins();
 void initButtons();
 void initSD();
+void initEthernet();
 void initMQTT();
-void toggleMQTT();
 void setAddrDirIn();
 void setDataDirIn();
 void setDataDirOut();
@@ -69,12 +69,13 @@ void writeData(byte d);
 
 void reset();
 void debug();
-void step();
+void step(); 
 void toggleRunStop();
 void toggleDebug();
 void toggleRAM();
 void toggleIO();
 void toggleROM();
+void toggleMQTT();
 void listROMs();
 void loadROM(unsigned int index);
 void decreaseFrequency();
@@ -121,6 +122,7 @@ void setup() {
   delay(1500);
 
   initSD();
+  initEthernet();
   initMQTT();
 
   info();
@@ -130,6 +132,8 @@ void setup() {
 void loop() {
   stepButton.update();
   runStopButton.update();
+
+  client.loop();
 
   if (stepButton.pressed()) {
     step();
@@ -220,8 +224,6 @@ void loop() {
         break;
     }
   }
-
-  client.loop();
 }
 
 void onTick()
@@ -553,11 +555,13 @@ void initSD() {
   SD.begin(BUILTIN_SDCARD);
 }
 
-void initMQTT() {
+void initEthernet() {
   Ethernet.begin();
 
   delay(1500);
+}
 
+void initMQTT() {
   client.setClient(ethClient);
   client.setServer(MQTT_BROKER, 1883);
   
