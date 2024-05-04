@@ -39,7 +39,7 @@ reset:
   lda #%00011111  ; N-8-1, 19200 baud
   sta ACIA_CTRL
 
-  lda #%00001011  ; No parity, No echo, No interrupts
+  lda #%00011011  ; No parity, No echo, No interrupts
   sta ACIA_CMD
 
 rx_wait:

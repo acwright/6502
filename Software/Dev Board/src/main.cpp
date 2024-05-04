@@ -11,8 +11,6 @@
 #define RAM_END     0x7FFF
 #define IO_START    0x8000
 #define IO_END      0x9FFF
-#define DEVIO_START 0x9800
-#define DEVIO_END   0x9BFF
 #define ROM_START   0x8000
 #define ROM_END     0xFFFF
 
@@ -33,9 +31,6 @@
   ((byte) & 0x04 ? '1' : '0'), \
   ((byte) & 0x02 ? '1' : '0'), \
   ((byte) & 0x01 ? '1' : '0')
-
-const byte ADDR_PINS[] = { A15, A14, A13, A12, A11, A10, A9, A8, A7, A6, A5, A4, A3, A2, A1, A0 };
-const byte DATA_PINS[] = { D7, D6, D5, D4, D3, D2, D1, D0 };
 
 byte RAM[RAM_END-RAM_START+1];
 byte ROM[ROM_END-ROM_START+1];
@@ -72,7 +67,8 @@ void toggleRAM();
 void toggleROM();
 void listROMs();
 void loadROM(unsigned int index);
-void changeFrequency();
+void decreaseFrequency();
+void increaseFrequency();
 void info();
 
 unsigned int freq = 1;
@@ -81,6 +77,7 @@ bool isDebugging = true;
 bool isRunning = false;
 bool RAMEnabled = true;
 bool ROMEnabled = true;
+String romFile = "None";
 
 word address = 0;
 byte data = 0;
@@ -104,9 +101,9 @@ void setup() {
 
   Serial.begin(9600);
 
-  initSD();
+  while(!Serial); // Wait for Serial.begin()
 
-  delay(1000);
+  initSD();
 
   info();
   reset();
@@ -124,7 +121,7 @@ void loop() {
     toggleRunStop();
   }
   if (intButton.pressed()) {
-    changeFrequency();
+    increaseFrequency();
   }
 
   if (Serial.available()) 
@@ -185,9 +182,11 @@ void loop() {
       case 'L':
         listROMs();
         break;
-      case 'f':
-      case 'F':
-        changeFrequency();
+      case '-':
+        decreaseFrequency();
+        break;
+      case '+':
+        increaseFrequency();
         break;
       case 'd':
       case 'D':
@@ -222,14 +221,10 @@ void onLow() {
 
   if (readWrite == LOW) { // WRITING
     if ((address >= IO_START) && (address <= IO_END)) {
-      if ((address >= DEVIO_START) && (address <= DEVIO_END)) {
-        // 6502 is writing to Dev Board IO space
-        // TODO: Handle IO
-      } else {
-        // 6502 is writing to other IO space
-      }
+      // 6502 is writing to IO space
+      // TODO: Handle IO
     } else if ((address >= RAM_START) && (address <= RAM_END)) {
-      RAM[address] = data;
+      RAM[address - RAM_START] = data;
     }
   }
 
@@ -250,19 +245,15 @@ void onHigh() {
 
   if (readWrite == HIGH) { // READING
     if ((address >= IO_START) && (address <= IO_END)) {
-      if ((address >= DEVIO_START) && (address <= DEVIO_END)) {
-        // 6502 is reading from Dev Board IO space
-        // TODO: Handle IO
-      } else {
-        // 6502 is reading from other IO space
-      }
-    } else if ((address >= ROM_START) && (address <= ROM_END) && ROMEnabled) { // ROM
-      setDataDirOut();
-      writeData(ROM[address - ROM_START]);
+      // 6502 is reading from IO space
+      // TODO: Handle IO
     } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       setDataDirOut();
       writeData(RAM[address - RAM_START]);
-    } 
+    } else if ((address >= ROM_START) && (address <= ROM_END) && ROMEnabled) { // ROM
+      setDataDirOut();
+      writeData(ROM[address - ROM_START]);
+    }
   }
 }
 
@@ -291,7 +282,20 @@ void reset() {
   }
 }
 
-void changeFrequency() {
+void decreaseFrequency() {
+  if (freq > FREQ_MIN) {
+    freq /= 2;
+  } else {
+    freq = FREQ_MAX;
+  }
+  ticks = 0;
+
+  Serial.print("Frequency: ");
+  Serial.print(freq);
+  Serial.println(" Hz");
+}
+
+void increaseFrequency() {
   if (freq < FREQ_MAX) {
     freq *= 2;
   } else {
@@ -338,7 +342,10 @@ void listROMs() {
     File file = ROMDirectory.openNextFile();
 
     if (file) {
-      ROMs[i] = String(file.name());
+      String filename = String(file.name());
+      if (!filename.startsWith(".")) {
+        ROMs[i] = filename;
+      }
       file.close();
     } else {
       ROMs[i] = "?";
@@ -371,8 +378,10 @@ void loadROM(unsigned int index) {
       i++;
     }
 
+    romFile  = ROMs[index];
+
     Serial.print("Loaded ROM: ");
-    Serial.println(ROMs[index]);
+    Serial.println(romFile);
   } else {
     Serial.println("Invalid ROM!");
   }
@@ -402,17 +411,20 @@ void info() {
   Serial.println("8   8     8 8    8 8      88   8 88    8  8    88     8 8   8 88  8 88   8 88  8 ");
   Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88ee  8ee8    88eeeee8 8eee8 88  8 88   8 88ee8 ");
   Serial.println();
+  Serial.print("6502 Dev Board Debugger | Version: ");
+  Serial.println(VERSION);
+  Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
   Serial.println("---------------------------------");
-  Serial.println();
-  Serial.print("6502 Dev Board Debugger | Version: ");
-  Serial.println(VERSION);
   Serial.println();
   Serial.print("RAM: ");
   Serial.println(RAMEnabled ? "Enabled" : "Disabled");
   Serial.print("ROM: ");
   Serial.println(ROMEnabled ? "Enabled" : "Disabled");
+  Serial.print(" (");
+  Serial.print(romFile);
+  Serial.println(")");
   Serial.print("Debug: ");
   Serial.println(isDebugging ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
@@ -424,7 +436,7 @@ void info() {
   Serial.println("-------------------------------------------------------");
   Serial.println("| Toggle R(A)M        | Toggle R(O)M    | (L)ist ROMs |");
   Serial.println("-------------------------------------------------------");
-  Serial.println("| Change (F)requency  | Toggle (D)ebug  | (I)nfo      |");
+  Serial.println("| (+/-) Clk Frequency | Toggle (D)ebug  | (I)nfo      |");
   Serial.println("-------------------------------------------------------");
   Serial.println();
 }

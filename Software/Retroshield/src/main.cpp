@@ -2,17 +2,19 @@
 #include <TimerOne.h>
 #include <Bounce2.h>
 #include <SD.h>
+#include <QNEthernet.h>
+#include <PubSubClient.h>
 
 #include "pins.h"
 
-#define VERSION     "1.0"
+using namespace qindesign::network;
+
+#define VERSION         "1.0"
 
 #define RAM_START   0x0000
-#define RAM_END     0x7FFF
-#define IO_START    0x8000
+#define RAM_END     0x9BFF
+#define IO_START    0x9C00
 #define IO_END      0x9FFF
-#define DEVIO_START 0x9800
-#define DEVIO_END   0x9BFF
 #define ROM_START   0x8000
 #define ROM_END     0xFFFF
 
@@ -23,6 +25,10 @@
 #define DELAY(freq)     (unsigned long) ((((1.0 / freq) * 1000000) / PERIOD) / 2)
 
 #define DEBOUNCE  5     // 5 milliseconds
+
+#define MQTT_BROKER     "macmini.local"
+#define MQTT_CLIENT_ID  "6502 Retroshield"
+#define MQTT_TOPIC      "6502"
 
 #define BYTE_TO_BINARY(byte)  \
   ((byte) & 0x80 ? '1' : '0'), \
@@ -35,6 +41,7 @@
   ((byte) & 0x01 ? '1' : '0')
 
 byte RAM[RAM_END-RAM_START+1];
+byte IO[IO_END-IO_START+1];
 byte ROM[ROM_END-ROM_START+1];
 
 Button stepButton = Button();
@@ -45,10 +52,13 @@ void onLow();
 void onHigh();
 
 void initRAM();
+void initIO();
 void initROM();
 void initPins();
 void initButtons();
 void initSD();
+void initMQTT();
+void toggleMQTT();
 void setAddrDirIn();
 void setDataDirIn();
 void setDataDirOut();
@@ -63,10 +73,12 @@ void step();
 void toggleRunStop();
 void toggleDebug();
 void toggleRAM();
+void toggleIO();
 void toggleROM();
 void listROMs();
 void loadROM(unsigned int index);
-void changeFrequency();
+void decreaseFrequency();
+void increaseFrequency();
 void info();
 
 unsigned int freq = 1;
@@ -74,7 +86,10 @@ unsigned int ticks = 0;
 bool isDebugging = true;
 bool isRunning = false;
 bool RAMEnabled = true;
+bool IOEnabled = true;
 bool ROMEnabled = true;
+bool MQTTConnected = false;
+String romFile = "None";
 
 word address = 0;
 byte data = 0;
@@ -82,10 +97,14 @@ byte readWrite = HIGH;
 
 String ROMs[10];
 
+EthernetClient ethClient;
+PubSubClient client;
+
 void setup() {
   initPins();
   initButtons();
   initRAM();
+  initIO();
   initROM();
 
   digitalWriteFast(IRQB, HIGH);
@@ -99,9 +118,10 @@ void setup() {
 
   Serial.begin(9600);
 
-  initSD();
+  delay(1500);
 
-  delay(1000);
+  initSD();
+  initMQTT();
 
   info();
   reset();
@@ -168,28 +188,40 @@ void loop() {
       case 'A':
         toggleRAM();
         break;
+      case 'i':
+      case 'I':
+        toggleIO();
+        break;
       case 'o':
       case 'O':
         toggleROM();
+        break;
+      case 'q':
+      case 'Q':
+        toggleMQTT();
         break;
       case 'l':
       case 'L':
         listROMs();
         break;
-      case 'f':
-      case 'F':
-        changeFrequency();
+      case '-':
+        decreaseFrequency();
+        break;
+      case '+':
+        increaseFrequency();
         break;
       case 'd':
       case 'D':
         toggleDebug();
         break;
-      case 'i':
-      case 'I':
+      case 'f':
+      case 'F':
         info();
         break;
     }
   }
+
+  client.loop();
 }
 
 void onTick()
@@ -212,15 +244,12 @@ void onLow() {
   data = readData();
 
   if (readWrite == LOW) { // WRITING
-    if ((address >= IO_START) && (address <= IO_END)) {
-      if ((address >= DEVIO_START) && (address <= DEVIO_END)) {
-        // 6502 is writing to Dev Board IO space
-        // TODO: Handle IO
-      } else {
-        // 6502 is writing to other IO space
-      }
-    } else if ((address >= RAM_START) && (address <= RAM_END)) {
-      RAM[address] = data;
+    if ((address >= IO_START) && (address <= IO_END) && IOEnabled) {
+      IO[address - IO_START] = data;
+
+      // Publish IO data to MQTT
+    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) {
+      RAM[address - RAM_START] = data;
     }
   }
 
@@ -240,20 +269,16 @@ void onHigh() {
   address = readAddress();
 
   if (readWrite == HIGH) { // READING
-    if ((address >= IO_START) && (address <= IO_END)) {
-      if ((address >= DEVIO_START) && (address <= DEVIO_END)) {
-        // 6502 is reading from Dev Board IO space
-        // TODO: Handle IO
-      } else {
-        // 6502 is reading from other IO space
-      }
-    } else if ((address >= ROM_START) && (address <= ROM_END) && ROMEnabled) { // ROM
+    if ((address >= IO_START) && (address <= IO_END) && IOEnabled) {
       setDataDirOut();
-      writeData(ROM[address - ROM_START]);
+      writeData(IO[address - IO_START]);
     } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       setDataDirOut();
       writeData(RAM[address - RAM_START]);
-    } 
+    } else if ((address >= ROM_START) && (address <= ROM_END) && ROMEnabled) { // ROM
+      setDataDirOut();
+      writeData(ROM[address - ROM_START]);
+    }
   }
 }
 
@@ -280,7 +305,20 @@ void reset() {
   }
 }
 
-void changeFrequency() {
+void decreaseFrequency() {
+  if (freq > FREQ_MIN) {
+    freq /= 2;
+  } else {
+    freq = FREQ_MAX;
+  }
+  ticks = 0;
+
+  Serial.print("Frequency: ");
+  Serial.print(freq);
+  Serial.println(" Hz");
+}
+
+void increaseFrequency() {
   if (freq < FREQ_MAX) {
     freq *= 2;
   } else {
@@ -313,6 +351,13 @@ void toggleRAM() {
   Serial.println(RAMEnabled ? "Enabled" : "Disabled");
 }
 
+void toggleIO() {
+  IOEnabled = !IOEnabled;
+
+  Serial.print("IO: ");
+  Serial.println(IOEnabled ? "Enabled" : "Disabled");
+}
+
 void toggleROM() {
   ROMEnabled = !ROMEnabled;
 
@@ -327,7 +372,10 @@ void listROMs() {
     File file = ROMDirectory.openNextFile();
 
     if (file) {
-      ROMs[i] = String(file.name());
+      String filename = String(file.name());
+      if (!filename.startsWith(".")) {
+        ROMs[i] = filename;
+      }
       file.close();
     } else {
       ROMs[i] = "?";
@@ -360,8 +408,10 @@ void loadROM(unsigned int index) {
       i++;
     }
 
+    romFile  = ROMs[index];
+
     Serial.print("Loaded ROM: ");
-    Serial.println(ROMs[index]);
+    Serial.println(romFile);
   } else {
     Serial.println("Invalid ROM!");
   }
@@ -384,36 +434,47 @@ void step() {
 
 void info() {
   Serial.println();
-  Serial.println("eeee  eeeee eeeeee eeee   888888               888888                            ");                        
-  Serial.println("8  8  8     8    8    8   8    8 eeee ee   e   8    8   eeeee eeeee eeeee  eeeee ");
-  Serial.println("8     8eeee 8    8    8   8e   8 8    88   8   8eeee8ee 8  88 8   8 8   8  8   8 ");
-  Serial.println("8eeee     8 8    8 eee8   88   8 8eee 88  e8   88     8 8   8 8eee8 8eee8e 8e  8 ");
-  Serial.println("8   8     8 8    8 8      88   8 88    8  8    88     8 8   8 88  8 88   8 88  8 ");
-  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88ee  8ee8    88eeeee8 8eee8 88  8 88   8 88ee8 ");
+  Serial.println("eeeee                                                          ");                        
+  Serial.println("8   8  eeee eeeee eeeee  eeeee eeeee e   e e  eeee e     eeeee ");
+  Serial.println("8eee8e 8      8   8   8  8  88 8   e 8   8 8  8    8     8   8 ");
+  Serial.println("88   8 8eee   8e  8eee8e 8   8 8eeee 8eee8 8e 8eee 8e    8e  8 ");
+  Serial.println("88   8 88     88  88   8 8   8    88 88  8 88 88   88    88  8 ");
+  Serial.println("88   8 88ee   88  88   8 8eee8 8ee88 88  8 88 88ee 88eee 88ee8 ");
+  Serial.println();
+  Serial.print("6502 Retroshield Debugger | Version: ");
+  Serial.println(VERSION);
   Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
   Serial.println("---------------------------------");
   Serial.println();
-  Serial.print("6502 Dev Board Debugger | Version: ");
-  Serial.println(VERSION);
-  Serial.println();
   Serial.print("RAM: ");
   Serial.println(RAMEnabled ? "Enabled" : "Disabled");
+  Serial.print("IO: ");
+  Serial.println(IOEnabled ? "Enabled" : "Disabled");
   Serial.print("ROM: ");
-  Serial.println(ROMEnabled ? "Enabled" : "Disabled");
+  Serial.print(ROMEnabled ? "Enabled" : "Disabled");
+  Serial.print(" (");
+  Serial.print(romFile);
+  Serial.println(")");
   Serial.print("Debug: ");
   Serial.println(isDebugging ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
   Serial.print(freq);
   Serial.println(" Hz");
+  Serial.print("IP address: ");
+  Serial.println(Ethernet.localIP());
+  Serial.print("MQTT: ");
+  Serial.println(MQTTConnected ? "Connected" : "Disconnected");
   Serial.println();
   Serial.println("-------------------------------------------------------");
   Serial.println("| (R)un / Stop        | (S)tep          | Rese(T)     |");
   Serial.println("-------------------------------------------------------");
   Serial.println("| Toggle R(A)M        | Toggle R(O)M    | (L)ist ROMs |");
   Serial.println("-------------------------------------------------------");
-  Serial.println("| Change (F)requency  | Toggle (D)ebug  | (I)nfo      |");
+  Serial.println("| Toggle (I)O         | Toggle M(Q)TT   |             |");
+  Serial.println("-------------------------------------------------------");
+  Serial.println("| (+/-) Clk Frequency | Toggle (D)ebug  | In(F)o      |");
   Serial.println("-------------------------------------------------------");
   Serial.println();
 }
@@ -439,15 +500,24 @@ void debug() {
 void initRAM() {
   unsigned int i;
   
-  for (i = 0; i < sizeof(RAM) ; i++){ 
+  for (i = 0; i < sizeof(RAM) ; i++) {
     RAM[i] = 0x00; 
+  }
+}
+
+void initIO() {
+  unsigned int i;
+  
+  for (i = 0; i < sizeof(IO) ; i++) {
+    IO[i] = 0x00; 
   }
 }
 
 void initROM() {
   unsigned int i;
 
-  for (i = 0; i < sizeof(ROM) ; i++){ 
+  // Fill ROM with NOPs by default
+  for (i = 0; i < sizeof(ROM) ; i++) {
     ROM[i] = 0xEA;
   }
 }
@@ -481,6 +551,42 @@ void initButtons() {
 
 void initSD() {
   SD.begin(BUILTIN_SDCARD);
+}
+
+void initMQTT() {
+  Ethernet.begin();
+
+  delay(1500);
+
+  client.setClient(ethClient);
+  client.setServer(MQTT_BROKER, 1883);
+  
+  delay(1500);
+}
+
+void toggleMQTT() {
+  if (!client.connected()) {
+    Serial.print("Connecting MQTT... ");
+
+    if (client.connect(MQTT_CLIENT_ID)) {
+      Serial.println("Connected");
+      client.publish(MQTT_TOPIC, "Hello, 6502!");
+      client.subscribe(MQTT_TOPIC);
+
+      MQTTConnected = true;
+    } else {
+      Serial.print("Error ");
+      Serial.print(client.state());
+
+      MQTTConnected = false;
+    }
+  } else {
+    Serial.print("Disconnecting MQTT... ");
+    client.disconnect();
+    Serial.println("Disconnected");
+
+    MQTTConnected = false;
+  }
 }
 
 void setAddrDirIn() {
