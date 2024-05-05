@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <TimerOne.h>
 #include <Bounce2.h>
 #include <SD.h>
@@ -13,7 +14,7 @@ using namespace qindesign::network;
 
 #define RAM_START   0x0000
 #define RAM_END     0x9BFF
-#define IO_START    0x9C00
+#define IO_START    0x8000
 #define IO_END      0x9FFF
 #define ROM_START   0x8000
 #define ROM_END     0xFFFF
@@ -28,7 +29,10 @@ using namespace qindesign::network;
 
 #define MQTT_BROKER     "macmini.local"
 #define MQTT_CLIENT_ID  "6502 Retroshield"
-#define MQTT_TOPIC      "6502"
+#define MQTT_IO_TOPIC   "6502/IO"
+#define MQTT_CMD_TOPIC   "6502/CMD"
+
+#define IO_BUFFER_SIZE  255
 
 #define BYTE_TO_BINARY(byte)  \
   ((byte) & 0x80 ? '1' : '0'), \
@@ -44,9 +48,14 @@ byte RAM[RAM_END-RAM_START+1];
 byte IO[IO_END-IO_START+1];
 byte ROM[ROM_END-ROM_START+1];
 
+byte IOPayloadReadPointer = 0;
+byte IOPayloadWritePointer = 0;
+JsonDocument IOPayloads[IO_BUFFER_SIZE];
+
 Button stepButton = Button();
 Button runStopButton = Button();
 
+void onCommand(char command);
 void onTick();
 void onLow();
 void onHigh();
@@ -76,6 +85,9 @@ void toggleRAM();
 void toggleIO();
 void toggleROM();
 void toggleMQTT();
+void connectMQTT();
+void disconnectMQTT();
+void onMQTT(char* topic, byte* payload, unsigned int length);
 void listROMs();
 void loadROM(unsigned int index);
 void decreaseFrequency();
@@ -89,7 +101,7 @@ bool isRunning = false;
 bool RAMEnabled = true;
 bool IOEnabled = true;
 bool ROMEnabled = true;
-bool MQTTConnected = false;
+bool MQTTEnabled = false;
 String romFile = "None";
 
 word address = 0;
@@ -133,7 +145,29 @@ void loop() {
   stepButton.update();
   runStopButton.update();
 
-  client.loop();
+  if (MQTTEnabled) {
+    if (!client.connected()) {
+      connectMQTT();
+    } else {
+      while (IOPayloadReadPointer != IOPayloadWritePointer) {
+       String payload;
+
+        serializeJson(IOPayloads[IOPayloadReadPointer], payload);
+
+        client.publish(MQTT_IO_TOPIC, payload.c_str());
+        
+        if (IOPayloadReadPointer < IO_BUFFER_SIZE) {
+          IOPayloadReadPointer++;
+        } else {
+          IOPayloadReadPointer = 0;
+        }
+      }
+
+      client.loop();
+    }
+  } else if (client.connected()) {
+    disconnectMQTT();
+  }
 
   if (stepButton.pressed()) {
     step();
@@ -144,7 +178,12 @@ void loop() {
 
   if (Serial.available()) 
   {
-    switch (Serial.read())
+    onCommand(Serial.read());
+  }
+}
+
+void onCommand(char command) {
+  switch (command)
     {
       case '0':
         loadROM(0);
@@ -223,7 +262,6 @@ void loop() {
         info();
         break;
     }
-  }
 }
 
 void onTick()
@@ -249,7 +287,17 @@ void onLow() {
     if ((address >= IO_START) && (address <= IO_END) && IOEnabled) {
       IO[address - IO_START] = data;
 
-      // Publish IO data to MQTT
+      // Push IO data on to IOPayloads buffer
+      if (MQTTEnabled && client.connected()) {
+        IOPayloads[IOPayloadWritePointer]["address"] = address;
+        IOPayloads[IOPayloadWritePointer]["data"] = data;
+
+        if (IOPayloadWritePointer < IO_BUFFER_SIZE) {
+          IOPayloadWritePointer++;
+        } else {
+          IOPayloadWritePointer = 0;
+        }
+      }
     } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) {
       RAM[address - RAM_START] = data;
     }
@@ -367,6 +415,13 @@ void toggleROM() {
   Serial.println(ROMEnabled ? "Enabled" : "Disabled");
 }
 
+void toggleMQTT() {
+  MQTTEnabled = !MQTTEnabled;
+
+  Serial.print("MQTT: ");
+  Serial.println(MQTTEnabled ? "Enabled" : "Disabled");
+}
+
 void listROMs() {
   File ROMDirectory = SD.open("/ROMS");
 
@@ -467,7 +522,7 @@ void info() {
   Serial.print("IP address: ");
   Serial.println(Ethernet.localIP());
   Serial.print("MQTT: ");
-  Serial.println(MQTTConnected ? "Connected" : "Disconnected");
+  Serial.println(MQTTEnabled ? (client.connected() ? "Enabled (Connected)" : "Enabled (Disconnected)") : "Disabled");
   Serial.println();
   Serial.println("-------------------------------------------------------");
   Serial.println("| (R)un / Stop        | (S)tep          | Rese(T)     |");
@@ -564,32 +619,48 @@ void initEthernet() {
 void initMQTT() {
   client.setClient(ethClient);
   client.setServer(MQTT_BROKER, 1883);
-  
+  client.setCallback(onMQTT);
+
   delay(1500);
 }
 
-void toggleMQTT() {
-  if (!client.connected()) {
-    Serial.print("Connecting MQTT... ");
+void connectMQTT() {
+  Serial.print("Connecting MQTT... ");
 
-    if (client.connect(MQTT_CLIENT_ID)) {
-      Serial.println("Connected");
-      client.publish(MQTT_TOPIC, "Hello, 6502!");
-      client.subscribe(MQTT_TOPIC);
-
-      MQTTConnected = true;
-    } else {
-      Serial.print("Error ");
-      Serial.print(client.state());
-
-      MQTTConnected = false;
-    }
+  if (client.connect(MQTT_CLIENT_ID)) {
+    Serial.println("Connected");
+    client.subscribe(MQTT_IO_TOPIC);
+    client.subscribe(MQTT_CMD_TOPIC);
   } else {
-    Serial.print("Disconnecting MQTT... ");
-    client.disconnect();
-    Serial.println("Disconnected");
+    Serial.print("Error ");
+    Serial.print(client.state());
+  }
+}
 
-    MQTTConnected = false;
+void disconnectMQTT() {
+  Serial.print("Disconnecting MQTT... ");
+  client.disconnect();
+  Serial.println("Disconnected");
+}
+
+void onMQTT(char* topic, byte* payload, unsigned int length) {
+  char documentPayload[length + 1];
+
+  for (unsigned int i = 0; i < length; i++) {
+    documentPayload[i]=(char)payload[i];
+  }
+
+  JsonDocument doc;
+
+  deserializeJson(doc, documentPayload);
+
+  if (strcmp(topic, MQTT_IO_TOPIC) == 0) {
+    word address = doc["address"];
+    byte data = doc["data"];
+
+    IO[address] = data;
+  } else if (strcmp(topic, MQTT_CMD_TOPIC) == 0) {
+    onCommand(String(doc["command"])[0]);
   }
 }
 
