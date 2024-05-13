@@ -6,7 +6,7 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Serial Card")
-		(date "2024-05-08")
+		(date "2024-05-11")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
@@ -4561,6 +4561,12 @@
 		(uuid "93270abc-20ab-4d23-8612-3ed704e04ac3")
 	)
 	(junction
+		(at 214.63 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a88aa845-0c67-4dd5-bf40-c105aeb7a05f")
+	)
+	(junction
 		(at 243.84 130.81)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4575,10 +4581,6 @@
 	(no_connect
 		(at 41.91 41.91)
 		(uuid "0489dbf7-f1b1-4b49-af58-d3d1a649a3ce")
-	)
-	(no_connect
-		(at 227.33 55.88)
-		(uuid "1cfa2949-f53b-4308-976b-f55b8bf81506")
 	)
 	(no_connect
 		(at 175.26 83.82)
@@ -4629,16 +4631,8 @@
 		(uuid "8178dd67-fb5f-42aa-ac67-c483522ff275")
 	)
 	(no_connect
-		(at 227.33 71.12)
-		(uuid "86ab58d1-9c62-4c0e-86e3-11933a32d960")
-	)
-	(no_connect
 		(at 134.62 83.82)
 		(uuid "9066b80e-69c5-4251-adce-0e8937da7f7b")
-	)
-	(no_connect
-		(at 227.33 58.42)
-		(uuid "9d2c033b-f4f5-4816-81dd-b494f55b5f6b")
 	)
 	(no_connect
 		(at 72.39 31.75)
@@ -4661,10 +4655,6 @@
 		(uuid "bed39f46-742e-448b-ba4f-228b93b20757")
 	)
 	(no_connect
-		(at 227.33 68.58)
-		(uuid "c37c242b-1bbc-443b-b140-1430bb96abf3")
-	)
-	(no_connect
 		(at 72.39 67.31)
 		(uuid "ce473f80-6a71-40ce-a631-66f049522dc0")
 	)
@@ -4679,10 +4669,6 @@
 	(no_connect
 		(at 72.39 57.15)
 		(uuid "d79374c1-66e0-4958-9ca2-b33c57fc92cf")
-	)
-	(no_connect
-		(at 227.33 63.5)
-		(uuid "d7c0f378-d476-4809-b7ec-b4d06ea38108")
 	)
 	(no_connect
 		(at 175.26 73.66)
@@ -4910,6 +4896,16 @@
 	)
 	(wire
 		(pts
+			(xy 214.63 58.42) (xy 214.63 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "25002602-a746-4716-af8a-59d63ca104ff")
+	)
+	(wire
+		(pts
 			(xy 38.1 77.47) (xy 41.91 77.47)
 		)
 		(stroke
@@ -4917,6 +4913,16 @@
 			(type default)
 		)
 		(uuid "2cb8abc5-07a7-4eda-8b41-74b53eae1082")
+	)
+	(wire
+		(pts
+			(xy 214.63 71.12) (xy 227.33 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2ccc2370-447f-438a-b215-368090e72a50")
 	)
 	(wire
 		(pts
@@ -5000,6 +5006,16 @@
 	)
 	(wire
 		(pts
+			(xy 214.63 58.42) (xy 227.33 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "389f9e52-86b0-4abf-bada-93484538d87f")
+	)
+	(wire
+		(pts
 			(xy 24.13 118.11) (xy 27.94 118.11)
 		)
 		(stroke
@@ -5017,6 +5033,16 @@
 			(type default)
 		)
 		(uuid "3a969169-9529-495f-a013-91fd4870e165")
+	)
+	(wire
+		(pts
+			(xy 217.17 68.58) (xy 227.33 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3b87c2bf-47c9-45ac-87f3-be1425c83b8b")
 	)
 	(wire
 		(pts
@@ -5090,6 +5116,16 @@
 	)
 	(wire
 		(pts
+			(xy 217.17 63.5) (xy 217.17 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "43f3ae76-3a72-4632-818e-b17561fe1114")
+	)
+	(wire
+		(pts
 			(xy 38.1 49.53) (xy 41.91 49.53)
 		)
 		(stroke
@@ -5140,6 +5176,16 @@
 	)
 	(wire
 		(pts
+			(xy 217.17 63.5) (xy 227.33 63.5)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4c7f9578-1094-4b79-a744-dfb5d0077132")
+	)
+	(wire
+		(pts
 			(xy 130.81 78.74) (xy 134.62 78.74)
 		)
 		(stroke
@@ -5187,6 +5233,16 @@
 			(type default)
 		)
 		(uuid "5951ca61-ba19-4f15-824f-2f6b5c49d389")
+	)
+	(wire
+		(pts
+			(xy 214.63 55.88) (xy 227.33 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "605e4560-989d-46db-bb2a-1cfa63552b2c")
 	)
 	(wire
 		(pts
@@ -5960,6 +6016,16 @@
 	)
 	(wire
 		(pts
+			(xy 214.63 55.88) (xy 214.63 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "efc64dcf-0bf8-465e-8db6-5c588b49ffe9")
+	)
+	(wire
+		(pts
 			(xy 191.77 128.27) (xy 189.23 128.27)
 		)
 		(stroke
@@ -6098,7 +6164,7 @@
 		)
 		(uuid "fe71db2d-268c-4543-bb0f-74722a553771")
 	)
-	(text "Close J5 & J6 for WDC W65C51"
+	(text "Close J4 & J5 for WDC W65C51"
 		(exclude_from_sim no)
 		(at 105.918 106.426 0)
 		(effects
@@ -8316,7 +8382,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "63e20957-0632-462b-866f-f1912e2b3128")
-		(property "Reference" "JP6"
+		(property "Reference" "JP5"
 			(at 124.46 126.9999 90)
 			(effects
 				(font
@@ -8371,7 +8437,7 @@
 		(instances
 			(project "Serial Card"
 				(path "/23e72bd4-dcc6-49f5-b48f-f285bfeb6ba5"
-					(reference "JP6")
+					(reference "JP5")
 					(unit 1)
 				)
 			)
@@ -8387,7 +8453,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "737d0f45-5891-42a8-8a3e-1ffe87ef32e8")
-		(property "Reference" "JP5"
+		(property "Reference" "JP4"
 			(at 97.79 120.6499 90)
 			(effects
 				(font
@@ -8442,7 +8508,7 @@
 		(instances
 			(project "Serial Card"
 				(path "/23e72bd4-dcc6-49f5-b48f-f285bfeb6ba5"
-					(reference "JP5")
+					(reference "JP4")
 					(unit 1)
 				)
 			)
@@ -8754,7 +8820,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "861d3725-41b1-443a-b48b-d2f1a134daea")
-		(property "Reference" "#PWR07"
+		(property "Reference" "#PWR08"
 			(at 204.47 163.83 0)
 			(effects
 				(font
@@ -8805,7 +8871,7 @@
 		(instances
 			(project "Serial Card"
 				(path "/23e72bd4-dcc6-49f5-b48f-f285bfeb6ba5"
-					(reference "#PWR07")
+					(reference "#PWR08")
 					(unit 1)
 				)
 			)
@@ -9077,7 +9143,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a7fe0233-827c-4e18-9719-1361067b9b90")
-		(property "Reference" "#PWR09"
+		(property "Reference" "#PWR07"
 			(at 78.74 160.02 0)
 			(effects
 				(font
@@ -9128,7 +9194,7 @@
 		(instances
 			(project "Serial Card"
 				(path "/23e72bd4-dcc6-49f5-b48f-f285bfeb6ba5"
-					(reference "#PWR09")
+					(reference "#PWR07")
 					(unit 1)
 				)
 			)
@@ -9517,7 +9583,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "cdb9f800-70ae-4464-894c-61f7a1a44135")
-		(property "Reference" "#PWR08"
+		(property "Reference" "#PWR09"
 			(at 59.69 182.88 0)
 			(effects
 				(font
@@ -9568,7 +9634,7 @@
 		(instances
 			(project "Serial Card"
 				(path "/23e72bd4-dcc6-49f5-b48f-f285bfeb6ba5"
-					(reference "#PWR08")
+					(reference "#PWR09")
 					(unit 1)
 				)
 			)

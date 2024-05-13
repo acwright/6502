@@ -4,6 +4,9 @@
 #include <Bounce2.h>
 #include <SD.h>
 #include <QNEthernet.h>
+#include <TimeLib.h>
+#include <EEPROM.h>
+#include <USBHost_t36.h>
 
 #if DEVBOARD
 #include "devboard.h"
@@ -16,17 +19,20 @@ using namespace qindesign::network;
 
 #define RAM_START   0x0000
 #define RAM_END     0x7FFF
-#define IO_START    0x9BFF
+#define IO_START    0x9C00
 #define IO_END      0x9FFF
 #define ROM_START   0x8000
 #define ROM_CODE    0xA000
 #define ROM_END     0xFFFF
+                                  // | bit 7 | bit 6 | bit 5 | bit 4 | bit 3 | bit 2 | bit 1 | bit 0 |  USB Keyboard input can be read by software using either a polling or interrupt strategy
+#define KBD_DATA    0x9C00        // | DRDY  |                 ASCII KEY CODE                        |  Data Ready (Bit 7) -> [ Ascii Key Code (Bit 6-0) ] (Read from KBD_DATA to clear INT)
+#define KBD_CTRL    0x9C01        // |                         NA                            | INTEN |  (Bit 6-0 unused) -> Enable (1) / Disable (0) Keyboard Interrupts (Bit 0)
 
 #define TIMER_PERIOD              1 // 1 uS
 #define FREQS                     (String[20])  {"1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz"}
 #define FREQ_DELAYS               (int[20])     {250000, 125000, 62500, 31250, 15625, 7812, 3906, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0}
 
-#define DEBOUNCE  5     // 5 milliseconds
+#define DEBOUNCE  5               // 5 milliseconds
 #define IO_BUFFER_SIZE  255
 
 byte RAM[RAM_END-RAM_START+1];
@@ -45,6 +51,7 @@ void onTick();
 void onLow();
 void onHigh();
 void onCommand(char command);
+void onKey(int key);
 
 void initPins();
 void initButtons();
@@ -53,6 +60,7 @@ void initIO();
 void initROM();
 void initSD();
 void initEthernet();
+void initUSB();
 
 void setAddrDirIn();
 void setDataDirIn();
@@ -65,6 +73,7 @@ void reset();
 void info();
 void debug();
 void step(); 
+void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
 void toggleRunStop();
@@ -74,11 +83,16 @@ void toggleIO();
 void toggleROM();
 void listROMs();
 void loadROM(unsigned int index);
+void prevPage();
+void nextPage();
 
-unsigned int freqIndex = 0; // 1 Hz
+String formatDateTime();
+time_t syncTime();
+
+unsigned int freqIndex = 19;      // 500 kHz
 unsigned int freqCounter = 0;
 
-bool isDebugging = true;
+bool isDebugging = false;
 bool isRunning = false;
 bool RAMEnabled = true;
 bool IOEnabled = true;
@@ -89,9 +103,17 @@ word address = 0;
 byte data = 0;
 byte readWrite = HIGH;
 
-String ROMs[10];
+String ROMs[100];
+unsigned int romPage = 0;
 
 EthernetClient ethClient;
+
+USBHost usb;
+USBHub hub1(usb);
+USBHIDParser hid1(usb);
+USBHIDParser hid2(usb);
+KeyboardController keyboard(usb);
+MouseController mouse(usb);
 
 //
 // MAIN
@@ -104,6 +126,8 @@ void setup() {
   initIO();
   initROM();
 
+  setSyncProvider(syncTime);
+
   Timer1.initialize(TIMER_PERIOD);
   Timer1.attachInterrupt(onTick);
 
@@ -113,6 +137,7 @@ void setup() {
 
   initSD();
   initEthernet();
+  initUSB();
 
   info();
   reset();
@@ -137,6 +162,8 @@ void loop() {
   {
     onCommand(Serial.read());
   }
+
+  usb.Task();
 }
 
 //
@@ -189,6 +216,16 @@ void onHigh() {
     if ((address >= IO_START) && (address <= IO_END) && IOEnabled) {
       setDataDirOut();
       writeData(IO[address - IO_START]);
+
+      switch(address) {
+        case KBD_DATA: {
+           // Disable interrupt if keyboard interrupts are enabled
+          if ((IO[KBD_CTRL-IO_START] & 0x01) != 0) {
+            digitalWriteFast(IRQB, HIGH);
+          }
+          break;
+        }
+      }
     } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       setDataDirOut();
       writeData(RAM[address - RAM_START]);
@@ -200,81 +237,120 @@ void onHigh() {
 }
 
 void onCommand(char command) {
-  switch (command)
-    {
-      case '0':
-        loadROM(0);
-        break;
-      case '1':
-        loadROM(1);
-        break;
-      case '2':
-        loadROM(2);
-        break;
-      case '3':
-        loadROM(3);
-        break;
-      case '4':
-        loadROM(4);
-        break;
-      case '5':
-        loadROM(5);
-        break;
-      case '6':
-        loadROM(6);
-        break;
-      case '7':
-        loadROM(7);
-        break;
-      case '8':
-        loadROM(8);
-        break;
-      case '9':
-        loadROM(9);
-        break;
-      case 'r':
-      case 'R':
-        toggleRunStop();
-        break;
-      case 's':
-      case 'S':
-        step();
-        break;
-      case 't':
-      case 'T':
-        reset();
-        break;
-      case 'a':
-      case 'A':
-        toggleRAM();
-        break;
-      case 'i':
-      case 'I':
-        toggleIO();
-        break;
-      case 'o':
-      case 'O':
-        toggleROM();
-        break;
-      case 'l':
-      case 'L':
-        listROMs();
-        break;
-      case '-':
-        decreaseFrequency();
-        break;
-      case '+':
-        increaseFrequency();
-        break;
-      case 'd':
-      case 'D':
-        toggleDebug();
-        break;
-      case 'f':
-      case 'F':
-        info();
-        break;
-    }
+  switch (command) {
+    case '0':
+      loadROM(0);
+      break;
+    case '1':
+      loadROM(1);
+      break;
+    case '2':
+      loadROM(2);
+      break;
+    case '3':
+      loadROM(3);
+      break;
+    case '4':
+      loadROM(4);
+      break;
+    case '5':
+      loadROM(5);
+      break;
+    case '6':
+      loadROM(6);
+      break;
+    case '7':
+      loadROM(7);
+      break;
+    case '8':
+      loadROM(8);
+      break;
+    case '9':
+      loadROM(9);
+      break;
+    case 'r':
+    case 'R':
+      toggleRunStop();
+      break;
+    case 's':
+    case 'S':
+      step();
+      break;
+    case 't':
+    case 'T':
+      reset();
+      break;
+    case 'p':
+    case 'P':
+      snapshot();
+      break;
+    case 'a':
+    case 'A':
+      toggleRAM();
+      break;
+    case 'i':
+    case 'I':
+      toggleIO();
+      break;
+    case 'o':
+    case 'O':
+      toggleROM();
+      break;
+    case 'l':
+    case 'L':
+      listROMs();
+      break;
+    case 'b':
+    case 'B':
+      toggleDebug();
+      break;
+    case 'f':
+    case 'F':
+      info();
+      break;
+    case '-':
+      decreaseFrequency();
+      break;
+    case '+':
+      increaseFrequency();
+      break;
+      break;
+    case '[':
+      prevPage();
+      break;
+    case ']':
+      nextPage();
+      break;
+  }
+}
+
+void onKey(int key) {
+  // If bit 7 is set (Non-ASCII) we should ignore the key press
+  if (key > 127) { return; }
+
+  // Otherwise, we set the keyboard data register to key value and set data ready bit
+  IO[KBD_DATA-IO_START] = (key | 0x80);
+
+  // And set interrupt if keyboard interrupts are enabled
+  if ((IO[KBD_CTRL-IO_START] & 0x01) != 0) {
+    digitalWriteFast(IRQB, LOW);
+  }
+
+  if (isDebugging) {
+    Serial.print("Key Pressed: ");
+    Serial.print((char)key);
+
+    char output[64];
+
+    sprintf(
+      output, 
+      " | %c%c%c%c%c%c%c%c | 0x%02X",
+      BYTE_TO_BINARY(key),
+      key
+    );
+
+    Serial.println(output);
+  }
 }
 
 //
@@ -312,16 +388,18 @@ void info() {
   Serial.println(FREQS[freqIndex]);
   Serial.print("IP address: ");
   Serial.println(Ethernet.localIP());
+  Serial.print("Date / Time: ");
+  Serial.println(formatDateTime());
   Serial.println();
-  Serial.println("-------------------------------------------------------");
-  Serial.println("| (R)un / Stop        | (S)tep          | Rese(T)     |");
-  Serial.println("-------------------------------------------------------");
-  Serial.println("| Toggle R(A)M        | Toggle R(O)M    | (L)ist ROMs |");
-  Serial.println("-------------------------------------------------------");
-  Serial.println("| Toggle (I)O         |                 |             |");
-  Serial.println("-------------------------------------------------------");
-  Serial.println("| (+/-) Clk Frequency | Toggle (D)ebug  | In(F)o      |");
-  Serial.println("-------------------------------------------------------");
+  Serial.println("----------------------------------------------------------");
+  Serial.println("| (R)un / Stop        | (S)tep          | Rese(T)        |");
+  Serial.println("----------------------------------------------------------");
+  Serial.println("| Toggle R(A)M        | Toggle R(O)M    | (L)ist ROMs    |");
+  Serial.println("----------------------------------------------------------");
+  Serial.println("| Toggle (I)O         | Sna(P)shot RAM / IO              |");
+  Serial.println("----------------------------------------------------------");
+  Serial.println("| (+/-) Clk Frequency | Toggle De(B)ug  | In(F)o         |");
+  Serial.println("----------------------------------------------------------");
   Serial.println();
 }
 
@@ -383,6 +461,50 @@ void step() {
   delay(100);
 }
 
+void snapshot() {
+  Serial.print("Creating snapshot... ");
+
+  if (!SD.mediaPresent()) {
+    Serial.print("No Card Detected!");
+    return;
+  }
+
+  if (!SD.exists("Snapshots")) {
+    SD.mkdir("Snapshots");
+  }
+
+  time_t time = now();
+  String RAMpath = "Snapshots/";
+  String IOpath = "Snapshots/";
+
+  RAMpath.append(time);
+  RAMpath.append(" - RAM.bin");
+  IOpath.append(time);
+  IOpath.append(" - IO.bin");
+
+  File ramSnapshot = SD.open(RAMpath.c_str(), FILE_WRITE);
+
+  if (ramSnapshot) {
+    for(unsigned int i = 0; i < (RAM_END - RAM_START); i++) {
+      ramSnapshot.write(RAM[i]);
+    }
+    ramSnapshot.close();
+  }
+
+  File ioSnapshot = SD.open(IOpath.c_str(), FILE_WRITE);
+
+  if (ioSnapshot) {
+    for(unsigned int i = 0; i < (IO_END - IO_START); i++) {
+      ioSnapshot.write(IO[i]);
+    }
+    ioSnapshot.close();
+  }
+
+  Serial.print("Success! (");
+  Serial.print(time);
+  Serial.println(")");
+}
+
 void decreaseFrequency() {
   if (freqIndex > 0) {
     freqIndex--;
@@ -440,37 +562,59 @@ void toggleROM() {
 }
 
 void listROMs() {
-  File ROMDirectory = SD.open("/ROMS");
+  if (!SD.exists("ROMS")) {
+    SD.mkdir("ROMS");
+  }
 
-  for (unsigned int i = 0; i < 10; i++) {
+  for (unsigned int i = 0; i < 100; i++) {
+    ROMs[i] = "?";
+  }
+
+  File ROMDirectory = SD.open("ROMS");
+
+  unsigned int index = 0;
+
+  while(true) {
     File file = ROMDirectory.openNextFile();
 
     if (file) {
       String filename = String(file.name());
       if (!filename.startsWith(".")) {
-        ROMs[i] = filename;
+        ROMs[index] = filename;
+        index++;
       }
       file.close();
     } else {
-      ROMs[i] = "?";
+      ROMDirectory.close();
+      break;
     }
   }
 
-  for (unsigned int j = 0; j < 10; j++) {
+  for (unsigned int j = (romPage * 10); j < ((romPage * 10) + 10); j++) {
     Serial.print("(");
-    Serial.print(j);
+    Serial.print(j - (romPage * 10));
     Serial.print(")");
     Serial.print(" - ");
     Serial.println(ROMs[j]);
   }
-  Serial.println();
 
-  ROMDirectory.close();
+  Serial.println();
+  Serial.print("Page: ");
+  Serial.print(romPage + 1);
+  Serial.println(" | ([) Prev Page | Next Page (]) |");
+  Serial.println();
 }
 
 void loadROM(unsigned int index) {
-  String directory = "/ROMS/";
-  String path = directory + ROMs[index];
+  String directory = "ROMS/";
+  String filename = ROMs[(romPage * 10) + index];
+
+  if (!filename.length()) { 
+    Serial.println("Invalid ROM! (L)ist ROMs before loading.");
+    return;
+  }
+
+  String path = directory + filename;
 
   File file = SD.open(path.c_str());
 
@@ -482,7 +626,7 @@ void loadROM(unsigned int index) {
       i++;
     }
 
-    romFile  = ROMs[index];
+    romFile = ROMs[index];
 
     Serial.print("Loaded ROM: ");
     Serial.println(romFile);
@@ -491,6 +635,50 @@ void loadROM(unsigned int index) {
   }
 
   file.close();
+}
+
+void prevPage() {
+  if (romPage > 0)  {
+    romPage--;
+  } else {
+    romPage = 9;
+  }
+
+  listROMs();
+}
+
+void nextPage() {
+  if (romPage < 9) {
+    romPage++;
+  } else {
+    romPage = 0;
+  }
+
+  listROMs();
+}
+
+String formatDateTime() {
+  String time;
+
+  time.append(month());
+  time.append("/");
+  time.append(day());
+  time.append("/");
+  time.append(year());
+  time.append(" ");
+  time.append(hour());
+  time.append(":");
+  time.append(minute() < 10 ? "0": "");
+  time.append(minute());
+  time.append(":");
+  time.append(second() < 10 ? "0": "");
+  time.append(second());
+
+  return time;
+}
+
+time_t syncTime() {
+  return Teensy3Clock.get();
 }
 
 //
@@ -524,14 +712,14 @@ void initROM() {
 
 #if DEVBOARD
 void initPins() {
-  pinMode(RESB, INPUT);
+  pinMode(RESB, OUTPUT);
   pinMode(SYNC, INPUT);
   pinMode(RWB, INPUT);
-  pinMode(RDY, INPUT);
-  pinMode(BE, INPUT);
+  pinMode(RDY, OUTPUT);
+  pinMode(BE, OUTPUT);
   pinMode(PHI2, OUTPUT);
-  pinMode(NMIB, INPUT);
-  pinMode(IRQB, INPUT);
+  pinMode(NMIB, OUTPUT);
+  pinMode(IRQB, OUTPUT);
 
   pinMode(OE1, OUTPUT);
   pinMode(OE2, OUTPUT);
@@ -608,6 +796,11 @@ void initEthernet() {
   Ethernet.begin();
 
   delay(1500);
+}
+
+void initUSB() {
+  usb.begin();
+  keyboard.attachPress(onKey);
 }
 
 //

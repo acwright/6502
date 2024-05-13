@@ -1,0 +1,99 @@
+ca65 V2.18 - N/A
+Main file   : ./src/Keyboard Polling.asm
+Current file: ./src/Keyboard Polling.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               PORTB     = $8000
+000000r 1               PORTA     = $8001
+000000r 1               DDRB      = $8002
+000000r 1               DDRA      = $8003
+000000r 1               
+000000r 1               KBD_DATA  = $9C00
+000000r 1               KBD_CTRL  = $9C01
+000000r 1               
+000000r 1               E         = %10000000
+000000r 1               RW        = %01000000
+000000r 1               RS        = %00100000
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1  A9 00          lda #00000000  ; Disable keyboard interrupts
+000005r 1  8D 01 9C       sta KBD_CTRL
+000008r 1               
+000008r 1  A9 FF          lda #%11111111 ; Set all pins on port B to output
+00000Ar 1  8D 02 80       sta DDRB
+00000Dr 1  A9 E0          lda #%11100000 ; Set top 3 pins on port A to output
+00000Fr 1  8D 03 80       sta DDRA
+000012r 1               
+000012r 1  A9 38          lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
+000014r 1  20 rr rr       jsr lcd_instruction
+000017r 1  A9 0E          lda #%00001110 ; Display on; cursor on; blink off
+000019r 1  20 rr rr       jsr lcd_instruction
+00001Cr 1  A9 06          lda #%00000110 ; Increment and shift cursor; don't shift display
+00001Er 1  20 rr rr       jsr lcd_instruction
+000021r 1               
+000021r 1               clear:
+000021r 1  A9 01          lda #$00000001 ; Clear display
+000023r 1  20 rr rr       jsr lcd_instruction
+000026r 1               
+000026r 1               loop:
+000026r 1  AD 00 9C       lda KBD_DATA
+000029r 1  89 80          bit #%10000000  ; Is data ready?
+00002Br 1  F0 F9          beq loop
+00002Dr 1  29 7F          and #%01111111  ; Clear the data ready bit
+00002Fr 1  8D 00 9C       sta KBD_DATA    ; Store back to data register to ack handling
+000032r 1  20 rr rr       jsr print_char
+000035r 1  4C rr rr       jmp loop
+000038r 1               
+000038r 1               lcd_wait:
+000038r 1  48             pha
+000039r 1  A9 00          lda #%00000000  ; Port B is input
+00003Br 1  8D 02 80       sta DDRB
+00003Er 1               lcdbusy:
+00003Er 1  A9 40          lda #RW
+000040r 1  8D 01 80       sta PORTA
+000043r 1  A9 C0          lda #(RW | E)
+000045r 1  8D 01 80       sta PORTA
+000048r 1  AD 00 80       lda PORTB
+00004Br 1  29 80          and #%10000000
+00004Dr 1  D0 EF          bne lcdbusy
+00004Fr 1               
+00004Fr 1  A9 40          lda #RW
+000051r 1  8D 01 80       sta PORTA
+000054r 1  A9 FF          lda #%11111111  ; Port B is output
+000056r 1  8D 02 80       sta DDRB
+000059r 1  68             pla
+00005Ar 1  60             rts
+00005Br 1               
+00005Br 1               lcd_instruction:
+00005Br 1  20 rr rr       jsr lcd_wait
+00005Er 1  8D 00 80       sta PORTB
+000061r 1  A9 00          lda #0         ; Clear RS/RW/E bits
+000063r 1  8D 01 80       sta PORTA
+000066r 1  A9 80          lda #E         ; Set E bit to send instruction
+000068r 1  8D 01 80       sta PORTA
+00006Br 1  A9 00          lda #0         ; Clear RS/RW/E bits
+00006Dr 1  8D 01 80       sta PORTA
+000070r 1  60             rts
+000071r 1               
+000071r 1               print_char:
+000071r 1  20 rr rr       jsr lcd_wait
+000074r 1  8D 00 80       sta PORTB
+000077r 1  A9 20          lda #RS         ; Set RS; Clear RW/E bits
+000079r 1  8D 01 80       sta PORTA
+00007Cr 1  A9 A0          lda #(RS | E)   ; Set E bit to send instruction
+00007Er 1  8D 01 80       sta PORTA
+000081r 1  A9 20          lda #RS         ; Clear E bits
+000083r 1  8D 01 80       sta PORTA
+000086r 1  60             rts
+000087r 1               
+000087r 1               .segment "VECTORS"
+000000r 1               
+000000r 1  00 00          .word $0000
+000002r 1  rr rr          .word reset
+000004r 1  00 00          .word $0000
+000004r 1               
