@@ -24,16 +24,29 @@ using namespace qindesign::network;
 #define ROM_START   0x8000
 #define ROM_CODE    0xA000
 #define ROM_END     0xFFFF
+                                  /*                            IO Registers                         */
                                   // | bit 7 | bit 6 | bit 5 | bit 4 | bit 3 | bit 2 | bit 1 | bit 0 |  USB Keyboard input can be read by software using either a polling or interrupt strategy
 #define KBD_DATA    0x9C00        // | DRDY  |                 ASCII KEY CODE                        |  Data Ready (Bit 7) -> [ Ascii Key Code (Bit 6-0) ] (Read from KBD_DATA to clear INT)
-#define KBD_CTRL    0x9C01        // |                         NA                            | INTEN |  (Bit 6-0 unused) -> Enable (1) / Disable (0) Keyboard Interrupts (Bit 0)
+#define KBD_CTRL    0x9C01        // |                       NA                      | ARINT | KBINT |  (Bit 7-2 unused) -> Enable (1) / Disable (0) Arrow Key Interrupts (Bit 1) -> Enable (1) / Disable (0) Keyboard Interrupts (Bit 0)
+#define KBD_STAT    0x9C02        // | KBINT | ARINT |       NA      |   UP  |  DOWN |  LEFT | RIGHT |  Interrupt Status (Bit 7-6) -> (Bit 5-4 unused) -> Arrow Keys Pressed (Bit 3-0)
+
+#define MOUSE_X     0x9C03        // |  DIR  |                    VELOCITY                           |  Direction + Right (0) - Left (1) -> Velocity from 0-127
+#define MOUSE_Y     0x9C04        // |  DIR  |                    VELOCITY                           |  Direction + Down (0) - Up (1) -> Velocity from 0-127
+#define MOUSE_W     0x9C05        // |  DIR  |                    VELOCITY                           |  Direction + Down (0) - Up (1) -> Velocity from 0-127
+#define MOUSE_BTN   0x9C06        // |                  NA                   |  MID  | RIGHT |  LEFT |  (Bit 7-3 unused) -> Middle, Right, Left Buttons Pressed (Bit 2-0)
 
 #define TIMER_PERIOD              1 // 1 uS
 #define FREQS                     (String[20])  {"1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz"}
 #define FREQ_DELAYS               (int[20])     {250000, 125000, 62500, 31250, 15625, 7812, 3906, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0}
 
-#define DEBOUNCE  5               // 5 milliseconds
+#define DEBOUNCE        5          // 5 milliseconds
 #define IO_BUFFER_SIZE  255
+
+#define DEBUG_NONE      0
+#define DEBUG_6502      1
+#define DEBUG_KEYBOARD  2
+#define DEBUG_MOUSE     3
+#define DEBUG_JOYSTICK  4
 
 byte RAM[RAM_END-RAM_START+1];
 byte IO[IO_END-IO_START+1];
@@ -51,7 +64,8 @@ void onTick();
 void onLow();
 void onHigh();
 void onCommand(char command);
-void onKey(int key);
+void onKeyPress(int key);
+void onKeyRelease(int key);
 
 void initPins();
 void initButtons();
@@ -87,12 +101,14 @@ void prevPage();
 void nextPage();
 
 String formatDateTime();
+String formatDebugMode();
+
 time_t syncTime();
 
 unsigned int freqIndex = 19;      // 500 kHz
 unsigned int freqCounter = 0;
 
-bool isDebugging = false;
+byte debugMode = DEBUG_NONE;
 bool isRunning = false;
 bool RAMEnabled = true;
 bool IOEnabled = true;
@@ -112,8 +128,10 @@ USBHost usb;
 USBHub hub1(usb);
 USBHIDParser hid1(usb);
 USBHIDParser hid2(usb);
+USBHIDParser hid3(usb);
 KeyboardController keyboard(usb);
 MouseController mouse(usb);
+JoystickController joystick(usb);
 
 //
 // MAIN
@@ -164,6 +182,58 @@ void loop() {
   }
 
   usb.Task();
+
+  if (mouse.available()) {
+    byte buttons = mouse.getButtons();
+    byte x = 0;
+    byte y = 0;
+    byte wheel = 0;
+
+    int8_t mouseX = mouse.getMouseX();
+    int8_t mouseY = mouse.getMouseY();
+    int8_t mouseWheel = mouse.getWheel();
+
+    x = mouseX < 0 ? (abs(mouseX) | 0b10000000) : mouseX; // If negative, set bit 7 (Left = -X)
+    y = mouseY < 0 ? (abs(mouseY) | 0b10000000) : mouseY; // If negative, set bit 7 (Up = -Y)
+    wheel = mouseWheel < 0 ? (abs(mouseWheel) | 0b10000000) : mouseWheel; // If negative, set bit 7 (Up = -W)
+
+    IO[MOUSE_X - IO_START] = x;
+    IO[MOUSE_Y - IO_START] = y;
+    IO[MOUSE_W - IO_START] = wheel;
+    IO[MOUSE_BTN - IO_START] = buttons;
+
+    if (debugMode == DEBUG_MOUSE) {
+      Serial.print("Mouse: Buttons = ");
+      Serial.print(buttons);
+      Serial.print(",  X = ");
+      Serial.print(mouseX);
+      Serial.print(",  Y = ");
+      Serial.print(mouseY);
+      Serial.print(",  Wheel = ");
+      Serial.print(mouseWheel);
+      Serial.println();
+    }
+
+    mouse.mouseDataClear();
+  }
+
+  if (joystick.available()) {
+    uint64_t axis_mask = joystick.axisMask();
+    uint32_t buttons = joystick.getButtons();
+
+    if (debugMode == DEBUG_JOYSTICK) {
+      Serial.printf("Joystick: Buttons = %x", buttons);
+
+      for (uint8_t i = 0; axis_mask != 0; i++, axis_mask >>= 1) {
+        if (axis_mask & 1) {
+          Serial.printf(" %d:%d", i, joystick.getAxis(i));
+        }
+      }
+      Serial.println();
+    }
+
+    joystick.joystickDataClear();
+  }
 }
 
 //
@@ -199,7 +269,7 @@ void onLow() {
 
   digitalWriteFast(PHI2, LOW);
 
-  if (isDebugging) {
+  if (debugMode == DEBUG_6502) {
     debug();
   }
 }
@@ -219,10 +289,28 @@ void onHigh() {
 
       switch(address) {
         case KBD_DATA: {
-           // Disable interrupt if keyboard interrupts are enabled
-          if ((IO[KBD_CTRL-IO_START] & 0x01) != 0) {
+          // Clear data ready bit
+          IO[KBD_DATA-IO_START] &= 0b01111111;
+
+          // Clear keyboard interrupt status bit
+          IO[KBD_STAT-IO_START] &= 0b01111111;
+
+          // Are there any more interrupts? If not, clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
+          if ((IO[KBD_STAT-IO_START] & 0b11000000) == 0) {
             digitalWriteFast(IRQB, HIGH);
           }
+
+          break;
+        }
+        case KBD_STAT: {
+          // Clear arrow key interrupt status bit
+          IO[KBD_STAT-IO_START] &= 0b10111111;
+
+          // Are there any more interrupts? If not, clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
+          if ((IO[KBD_STAT-IO_START] & 0b11000000) == 0) {
+            digitalWriteFast(IRQB, HIGH);
+          }
+
           break;
         }
       }
@@ -324,20 +412,110 @@ void onCommand(char command) {
   }
 }
 
-void onKey(int key) {
-  // If bit 7 is set (Non-ASCII) we should ignore the key press
-  if (key > 127) { return; }
+void onKeyPress(int key) {
+  if (key > 127) { 
+    // If bit 7 is set (non-ASCII key) we should set arrow keys
+    bool isArrowKey = false;
 
-  // Otherwise, we set the keyboard data register to key value and set data ready bit
-  IO[KBD_DATA-IO_START] = (key | 0x80);
+    switch (key) {
+      case 0xD7: { // RIGHT
+        IO[KBD_STAT - IO_START] |= 0b00000001;
+        isArrowKey = true;
+        break;
+      }
+      case 0xD8: { // LEFT
+        IO[KBD_STAT - IO_START] |= 0b00000010;
+        isArrowKey = true;
+        break;
+      }
+      case 0xD9: { // DOWN  
+        IO[KBD_STAT - IO_START] |= 0b00000100;
+        isArrowKey = true;
+        break;
+      }
+      case 0xDA: { // UP
+        IO[KBD_STAT - IO_START] |= 0b00001000;
+        isArrowKey = true;
+        break;
+      }
+    }
 
-  // And set interrupt if keyboard interrupts are enabled
-  if ((IO[KBD_CTRL-IO_START] & 0x01) != 0) {
-    digitalWriteFast(IRQB, LOW);
+    // And set interrupt if arrow key interrupts are enabled
+    if (isArrowKey && (IO[KBD_CTRL - IO_START] & 0x02) != 0) {
+      digitalWriteFast(IRQB, LOW);
+
+      // Set bit 6 of KBD_STAT register to indicate arrow key interrupt asserted
+      IO[KBD_STAT - IO_START] |= 0b01000000;
+    }
+  } else {
+    // Otherwise, we set the keyboard data register to key value and set data ready bit
+    IO[KBD_DATA - IO_START] = (key | 0x80);
+
+    // And set interrupt if keyboard interrupts are enabled
+    if ((IO[KBD_CTRL - IO_START] & 0x01) != 0) {
+      digitalWriteFast(IRQB, LOW);
+
+      // Set bit 7 of KBD_STAT register to indicate keyboard interrupt asserted
+      IO[KBD_STAT - IO_START] |= 0b10000000;
+    } 
   }
 
-  if (isDebugging) {
+  if (debugMode == DEBUG_KEYBOARD) {
     Serial.print("Key Pressed: ");
+    Serial.print((char)key);
+
+    char output[64];
+
+    sprintf(
+      output, 
+      " | %c%c%c%c%c%c%c%c | 0x%02X",
+      BYTE_TO_BINARY(key),
+      key
+    );
+
+    Serial.println(output);
+  }
+}
+
+void onKeyRelease(int key) {
+  if (key > 127) { 
+    // If bit 7 is set (non-ASCII key) we should clear arrow keys
+    bool isArrowKey = false;
+
+    switch (key) {
+      case KEYD_RIGHT: { // RIGHT
+        IO[KBD_STAT - IO_START] &= 0b11111110;
+        isArrowKey = true;
+        break;
+      }
+      case KEYD_LEFT: { // LEFT
+        IO[KBD_STAT - IO_START] &= 0b11111101;
+        isArrowKey = true;
+        break;
+      }
+      case KEYD_DOWN: { // DOWN  
+        IO[KBD_STAT - IO_START] &= 0b11111011;
+        isArrowKey = true;
+        break;
+      }
+      case KEYD_UP: { // UP
+        IO[KBD_STAT - IO_START] &= 0b11110111;
+        isArrowKey = true;
+        break;
+      }
+    }
+
+    // And set interrupt if arrow key interrupts are enabled
+    if (isArrowKey && (IO[KBD_CTRL - IO_START] & 0x02) != 0) {
+      digitalWriteFast(IRQB, LOW);
+
+      // Set bit 6 of KBD_STAT register to indicate arrow key interrupt asserted
+      IO[KBD_STAT - IO_START] |= 0b01000000;
+    }
+  }
+
+  if (debugMode == DEBUG_KEYBOARD) {
+    Serial.print("Key Released: ");
     Serial.print((char)key);
 
     char output[64];
@@ -383,7 +561,7 @@ void info() {
   Serial.print(romFile);
   Serial.println(")");
   Serial.print("Debug: ");
-  Serial.println(isDebugging ? "Enabled" : "Disabled");
+  Serial.println(formatDebugMode());
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
   Serial.print("IP address: ");
@@ -450,12 +628,12 @@ void reset() {
 
 void step() {
   onLow();
-  if (!isDebugging) {
+  if (debugMode == DEBUG_NONE) {
     Serial.print("Tick…  ");
   }
   delay(100);
   onHigh();
-  if (!isDebugging) {
+  if (debugMode == DEBUG_NONE) {
     Serial.println("Tock…");
   }
   delay(100);
@@ -534,10 +712,26 @@ void toggleRunStop() {
 }
 
 void toggleDebug() {
-  isDebugging = !isDebugging;
+  switch (debugMode) {
+    case DEBUG_NONE:
+      debugMode = DEBUG_6502;
+      break;
+    case DEBUG_6502:
+      debugMode = DEBUG_KEYBOARD;
+      break;
+    case DEBUG_KEYBOARD:
+      debugMode = DEBUG_MOUSE;
+      break;
+    case DEBUG_MOUSE:
+      debugMode = DEBUG_JOYSTICK;
+      break;
+    case DEBUG_JOYSTICK:
+      debugMode = DEBUG_NONE;
+      break;
+  }
 
   Serial.print("Debug: ");
-  Serial.println(isDebugging ? "Enabled" : "Disabled");
+  Serial.println(formatDebugMode());
 }
 
 void toggleRAM() {
@@ -677,6 +871,23 @@ String formatDateTime() {
   return time;
 }
 
+String formatDebugMode() {
+  switch (debugMode) {
+    case DEBUG_NONE:
+      return "Disabled";
+    case DEBUG_6502:
+      return "6502";
+    case DEBUG_KEYBOARD:
+      return "Keyboard";
+    case DEBUG_MOUSE:
+      return "Mouse";
+    case DEBUG_JOYSTICK:
+      return "Joystick";
+    default:
+      return "Unknown";
+  }
+}
+
 time_t syncTime() {
   return Teensy3Clock.get();
 }
@@ -800,7 +1011,8 @@ void initEthernet() {
 
 void initUSB() {
   usb.begin();
-  keyboard.attachPress(onKey);
+  keyboard.attachPress(onKeyPress);
+  keyboard.attachRelease(onKeyRelease);
 }
 
 //

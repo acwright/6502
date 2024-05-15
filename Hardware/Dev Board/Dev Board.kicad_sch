@@ -6,7 +6,7 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Dev Board")
-		(date "2024-04-23")
+		(date "2024-05-14")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
@@ -10787,7 +10787,7 @@
 			)
 		)
 	)
-	(global_label "INT_SW"
+	(global_label "CLK_SW"
 		(shape input)
 		(at 231.14 45.72 0)
 		(effects
@@ -12083,7 +12083,7 @@
 			)
 		)
 	)
-	(global_label "INT_SW"
+	(global_label "CLK_SW"
 		(shape output)
 		(at 256.54 146.05 0)
 		(effects
@@ -14920,7 +14920,7 @@
 		(at 198.12 168.91 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-0000605fe4a5")
@@ -14984,7 +14984,7 @@
 		(at 214.63 168.91 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-0000605fef09")
@@ -15048,7 +15048,7 @@
 		(at 231.14 168.91 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-0000605ff14c")
@@ -15112,7 +15112,7 @@
 		(at 247.65 168.91 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-0000605ff343")
@@ -16911,7 +16911,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "INT"
+		(property "Value" "Clock"
 			(at 257.7592 153.543 90)
 			(effects
 				(font
