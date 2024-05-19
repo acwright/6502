@@ -7,6 +7,7 @@
 #include <TimeLib.h>
 #include <EEPROM.h>
 #include <USBHost_t36.h>
+#include <AsyncWebServer_Teensy41.h>
 
 #if DEVBOARD
 #include "devboard.h"
@@ -85,18 +86,22 @@ using namespace qindesign::network;
 #define DEBOUNCE        5          // 5 milliseconds
 
 #define DEBUG_NONE      0
-#define DEBUG_6502      1
-#define DEBUG_KEYBOARD  2
-#define DEBUG_MOUSE     3
-#define DEBUG_JOYSTICK  4
+#define DEBUG_KEYBOARD  1
+#define DEBUG_MOUSE     2
+#define DEBUG_JOYSTICK  3
 
 #define IO_BANK_SIZE    0x3FF
 
+#define PAGE_SIZE       1024
+#define RAM_PAGES       32
+#define IO_PAGES        8
+#define ROM_PAGES       32
+
 const word IO_BANKS[8] { 0x8000, 0x8400, 0x8800, 0x8C00, 0x9000, 0x9400, 0x9800, 0x9C00 };
 
-byte RAM[RAM_END-RAM_START + 1];
-byte IO[IO_END-IO_START + 1];
-byte ROM[ROM_END-ROM_START + 1];
+byte RAM[RAM_END - RAM_START + 1];
+byte IO[IO_END - IO_START + 1];
+byte ROM[ROM_END - ROM_START + 1];
 
 Button intButton = Button();
 Button stepButton = Button();
@@ -117,6 +122,7 @@ void initROM();
 void initSD();
 void initEthernet();
 void initUSB();
+void initServer();
 
 void setAddrDirIn();
 void setDataDirIn();
@@ -138,10 +144,18 @@ void toggleRAM();
 void toggleIO();
 void toggleIOBank();
 void toggleROM();
+void readROMs();
 void listROMs();
 void loadROM(unsigned int index);
 void prevPage();
 void nextPage();
+
+void onServerRoot(AsyncWebServerRequest *request);
+void onServerStatus(AsyncWebServerRequest *request);
+void onServerRAM(AsyncWebServerRequest *request);
+void onServerIO(AsyncWebServerRequest *request);
+void onServerROM(AsyncWebServerRequest *request);
+void onServerNotFound(AsyncWebServerRequest *request);
 
 String formatDateTime();
 String formatDebugMode();
@@ -177,6 +191,8 @@ KeyboardController keyboard(usb);
 MouseController mouse(usb);
 JoystickController joystick(usb);
 
+AsyncWebServer    server(80);
+
 //
 // MAIN LOOPS
 //
@@ -196,11 +212,10 @@ void setup() {
 
   Serial.begin(9600);
 
-  delay(1500);
-
   initSD();
   initEthernet();
   initUSB();
+  initServer();
 
   info();
   reset();
@@ -279,6 +294,8 @@ void loop() {
 
     joystick.joystickDataClear();
   }
+
+  now(); // Sync the clock
 }
 
 //
@@ -345,11 +362,6 @@ void onLow() {
   }
 
   digitalWriteFast(PHI2, LOW);
-
-  // Debug only if in 6502 debug mode and freq is 64 Hz or lower so we don't clobber the serial port
-  if (debugMode == DEBUG_6502 && freqIndex < 7) {
-    debug();
-  }
 }
 
 void onHigh() {
@@ -689,19 +701,9 @@ void reset() {
 
 void step() {
   onLow();
-  if (debugMode == DEBUG_NONE) {
-    Serial.print("Tick…  ");
-  }
   delay(100);
-
-  if (debugMode == DEBUG_6502) {
-    debug();
-  }
-
+  debug();
   onHigh();
-  if (debugMode == DEBUG_NONE) {
-    Serial.println("Tock…");
-  }
   delay(100);
 }
 
@@ -780,9 +782,6 @@ void toggleRunStop() {
 void toggleDebug() {
   switch (debugMode) {
     case DEBUG_NONE:
-      debugMode = DEBUG_6502;
-      break;
-    case DEBUG_6502:
       debugMode = DEBUG_KEYBOARD;
       break;
     case DEBUG_KEYBOARD:
@@ -838,7 +837,7 @@ void toggleROM() {
   Serial.println(ROMEnabled ? "Enabled" : "Disabled");
 }
 
-void listROMs() {
+void readROMs() {
   if (!SD.exists("ROMS")) {
     SD.mkdir("ROMS");
   }
@@ -866,6 +865,10 @@ void listROMs() {
       break;
     }
   }
+}
+
+void listROMs() {
+  readROMs();
 
   for (unsigned int j = (romPage * 10); j < ((romPage * 10) + 10); j++) {
     Serial.print("(");
@@ -958,8 +961,6 @@ String formatDebugMode() {
   switch (debugMode) {
     case DEBUG_NONE:
       return "Disabled";
-    case DEBUG_6502:
-      return "6502";
     case DEBUG_KEYBOARD:
       return "Keyboard";
     case DEBUG_MOUSE:
@@ -991,7 +992,7 @@ time_t syncTime() {
 void initRAM() {
   unsigned int i;
   
-  for (i = 0; i < sizeof(RAM) ; i++) {
+  for (i = 0; i < (RAM_END - RAM_START + 1); i++) {
     RAM[i] = 0x00; 
   }
 }
@@ -999,7 +1000,7 @@ void initRAM() {
 void initIO() {
   unsigned int i;
   
-  for (i = 0; i < sizeof(IO) ; i++) {
+  for (i = 0; i < (IO_END - IO_START + 1); i++) {
     IO[i] = 0x00; 
   }
 }
@@ -1008,7 +1009,7 @@ void initROM() {
   unsigned int i;
 
   // Fill ROM with NOPs by default
-  for (i = 0; i < sizeof(ROM) ; i++) {
+  for (i = 0; i < (ROM_END - ROM_START + 1); i++) {
     ROM[i] = 0xEA;
   }
 }
@@ -1097,14 +1098,163 @@ void initSD() {
 
 void initEthernet() {
   Ethernet.begin();
+  Ethernet.waitForLocalIP(5000);
 
-  delay(1500);
+  MDNS.begin("6502debugger");
+  MDNS.addService("_http", "_tcp", 80);
 }
 
 void initUSB() {
   usb.begin();
   keyboard.attachPress(onKeyPress);
   keyboard.attachRelease(onKeyRelease);
+}
+
+void initServer() {
+  server.on("/", onServerRoot);
+  server.on("/status", onServerStatus);
+  server.on("/ram", onServerRAM);
+  server.on("/io", onServerIO);
+  server.on("/rom", onServerROM);
+  server.onNotFound(onServerNotFound);
+  server.begin();
+}
+
+//
+// WEB SERVER
+//
+
+void onServerRoot(AsyncWebServerRequest *request)
+{
+  request->send(200, "text/plain", "Hello from AsyncWebServer_Teensy41");
+}
+
+void onServerStatus(AsyncWebServerRequest *request)
+{
+  String response;
+  JsonDocument doc;
+
+  readROMs();
+
+  doc["frequency"]  = FREQS[freqIndex];
+  doc["ioBank"]     = "$" + String(IO_BANKS[IOBank], HEX);
+  doc["ioEnabled"]  = IOEnabled;
+  doc["ipAddress"]  = Ethernet.localIP();
+  doc["isRunning"]  = isRunning;
+  doc["ramEnabled"] = RAMEnabled;
+  doc["romEnabled"] = ROMEnabled;
+  doc["romFile"]    = romFile;
+
+  for (unsigned int i = 0; i < sizeof(ROMs) / sizeof(ROMs[0]); i++) {
+    if (ROMs[i] != "?") {
+      doc["romFiles"][i]   = ROMs[i];
+    }
+  }
+
+  doc["rtc"]        = now();
+  
+  serializeJson(doc, response);
+
+  request->send(200, "application/json", response);
+}
+
+/* Notes: We are paginating RAM/IO/ROM responses due to limitations in the AsyncWebServer_Teensy41 lib.           */
+/* There is a bug in the implementation of beginChunkedResponse() (improper formatting) and all other response    */
+/* types besides beginResponseStream() will corrupt or add garbage to the data. So we are limited to 1024 byte    */
+/* pages.                                                                                                         */
+
+void onServerRAM(AsyncWebServerRequest *request)
+{
+  size_t page = 0;
+  bool formatted = false;
+
+  if (request->hasParam("page")) {
+    page = size_t(request->getParam("page")->value().toInt());
+    page = min(size_t(RAM_PAGES - 1), page); // Clamp page index
+  }
+  if (request->hasParam("formatted")) {
+    formatted = true;
+  }
+
+  AsyncResponseStream *response = request->beginResponseStream(
+    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
+    PAGE_SIZE
+  );
+
+  for (size_t i = 0; i < PAGE_SIZE; i++) {
+    if (formatted) {
+      response->printf("%02X ", RAM[i + (page * PAGE_SIZE)]);
+    } else {
+      response->write(RAM[i + (page * PAGE_SIZE)]);
+    }
+  }
+  
+  request->send(response);
+}
+
+void onServerIO(AsyncWebServerRequest *request)
+{
+  size_t page = 0;
+  bool formatted = false;
+
+  if (request->hasParam("page")) {
+    page = size_t(request->getParam("page")->value().toInt());
+    page = min(size_t(IO_PAGES - 1), page); // Clamp page index
+  }
+  if (request->hasParam("formatted")) {
+    formatted = true;
+  }
+
+  AsyncResponseStream *response = request->beginResponseStream(
+    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
+    PAGE_SIZE
+  );
+
+  for (size_t i = 0; i < PAGE_SIZE; i++) {
+    if (formatted) {
+      response->printf("%02X ", IO[i + (page * PAGE_SIZE)]);
+    } else {
+      response->write(IO[i + (page * PAGE_SIZE)]);
+    }
+  }
+  
+  request->send(response);
+}
+
+void onServerROM(AsyncWebServerRequest *request)
+{
+  // Note: All 32 pages of RAM can be inspected but only top 24k is valid ROM area.
+
+  size_t page = 0;
+  bool formatted = false;
+
+  if (request->hasParam("page")) {
+    page = size_t(request->getParam("page")->value().toInt());
+    page = min(size_t(ROM_PAGES - 1), page); // Clamp page index
+  }
+  if (request->hasParam("formatted")) {
+    formatted = true;
+  }
+
+  AsyncResponseStream *response = request->beginResponseStream(
+    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
+    PAGE_SIZE
+  );
+
+  for (size_t i = 0; i < PAGE_SIZE; i++) {
+    if (formatted) {
+      response->printf("%02X ", ROM[i + (page * PAGE_SIZE)]);
+    } else {
+      response->write(ROM[i + (page * PAGE_SIZE)]);
+    }
+  }
+  
+  request->send(response);
+}
+
+void onServerNotFound(AsyncWebServerRequest *request)
+{
+  request->redirect("/");
 }
 
 //
