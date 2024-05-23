@@ -8,13 +8,13 @@ Embedded web application for 6502 Debugger supporting 6502 Dev Board and Retrosh
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Serve for Development
 
 ```sh
 npm run dev
 ```
 
-### Type-Check, Compile and Minify for Production
+### Minify for Production
 
 ```sh
 npm run build

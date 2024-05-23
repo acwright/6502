@@ -1,0 +1,14 @@
+{
+  "name": "debugger-web",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx five-server ./public",
+    "build": "npx html-minifier-terser --input-dir ./public --output-dir ./dist --case-sensitive --collapse-whitespace --collapse-inline-tag-whitespace --remove-comments --minify-css true --minify-js true"
+  },
+  "devDependencies": {
+    "five-server": "^0.3.3",
+    "html-minifier-terser": "^7.2.0"
+  }
+}

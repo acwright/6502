@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAGABoAwAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAaAMAAAAAAAAAAAAAAAAAAAAAAABQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFBQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACfn58AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////8AAAD///////8AAAD///////8AAAAAAAD///////////8AAAAAAAD///8AAAD///8AAAAAAAD///8AAAD///8AAAD///8AAAD///8AAAAAAAAAAAAAAAD///////////8AAAD///////8AAAD///8AAAD///8AAAD///////////8AAAAAAAD///8AAAAAAAAAAAD///8AAAAAAAD///8AAAD///8AAAAAAAAAAAD///8AAAAAAAD///////8AAAAAAAD///////8AAAAAAAD///////8AAAD///////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFBQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <title>6502 Debugger</title>
+    <style>
+      body { 
+        font-family: "Bebas Neue", Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+        font-weight: 400;
+        font-style: normal;
+      }
+    </style>
+  </head>
+  <body class="bg-slate-950 text-slate-50 p-8">
+    <div id="app" class="flex flex-col items-center">
+      <h1 class="text-5xl">6502 Debugger</h1>
+      <p class="text-lg">{{ message }}</p>
+      <p class="text-xs">&copy; 2024 A.C. Wright Design</p>
+    </div>
+
+    <script>
+      const { createApp, ref } = Vue
+
+      createApp({
+        setup() {
+          const message = ref('Hello, 6502!')
+
+          return {
+            message
+          }
+        }
+      }).mount('#app')
+    </script>
+  </body>
+</html>

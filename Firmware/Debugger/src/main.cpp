@@ -16,6 +16,8 @@
 #endif
 #include "utilities.h"
 
+#include "html.h"
+
 using namespace qindesign::network;
 
 /*      MEMORY MAP      */
@@ -108,7 +110,6 @@ Button stepButton = Button();
 Button runStopButton = Button();
 
 void onTick();
-void onLow();
 void onHigh();
 void onCommand(char command);
 void onKeyPress(int key);
@@ -133,11 +134,12 @@ void writeData(byte d);
 
 void reset();
 void info();
-void debug();
+void log();
 void step(); 
 void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
+void toggleClock();
 void toggleRunStop();
 void toggleDebug();
 void toggleRAM();
@@ -155,6 +157,7 @@ void onServerStatus(AsyncWebServerRequest *request);
 void onServerRAM(AsyncWebServerRequest *request);
 void onServerIO(AsyncWebServerRequest *request);
 void onServerROM(AsyncWebServerRequest *request);
+void onServerCommand(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
 
 String formatDateTime();
@@ -165,17 +168,18 @@ time_t syncTime();
 unsigned int freqIndex = 19;      // 500 kHz
 unsigned int freqCounter = 0;
 
-byte debugMode = DEBUG_NONE;
+unsigned int stepCounter = 0;
+
 bool isRunning = false;
+bool isStepping = false;
+bool isLogging = false;
+bool clockEnabled = true;
 bool RAMEnabled = true;
 bool IOEnabled = true;
 bool ROMEnabled = true;
 String romFile = "None";
 byte IOBank = 7;                  // By default, debugger IO bank is $9C00
-
-word address = 0;
-byte data = 0;
-byte readWrite = HIGH;
+byte debugMode = DEBUG_NONE;
 
 String ROMs[100];
 unsigned int romPage = 0;
@@ -222,6 +226,10 @@ void setup() {
 }
 
 void loop() {
+  if (digitalReadFast(PHI2)) {
+    onHigh();
+  }
+
   intButton.update();
   stepButton.update();
   runStopButton.update();
@@ -305,31 +313,63 @@ void loop() {
 void onTick()
 {
   if (freqCounter == 0) {
-    if (isRunning) {
-      digitalReadFast(PHI2) ? onLow() : onHigh();
-    } else if (!digitalReadFast(PHI2)) { 
-      digitalWriteFast(PHI2, HIGH);
+    if (isRunning && clockEnabled) {
+      digitalReadFast(PHI2) ? digitalWriteFast(PHI2, LOW) : digitalWriteFast(PHI2, HIGH);
     }
 
     freqCounter = FREQ_DELAYS[freqIndex];
   } else {
     freqCounter--;
   }
+
+  if (stepCounter == 0) {
+    if (isLogging) {
+      log();
+      isLogging = false;
+    }
+
+    if (isStepping && clockEnabled) {
+      if (digitalReadFast(PHI2)) {
+        digitalWriteFast(PHI2, LOW);
+      } else {
+        digitalWriteFast(PHI2, HIGH);
+
+        isStepping = false; // We are done stepping...
+        isLogging = true;   // Wait for next tick to log
+      }
+    }
+
+    stepCounter = FREQ_DELAYS[2]; // Use 4 Hz for step counter
+  } else {
+    stepCounter--;
+  }
 }
 
-void onLow() {
-  // Read data from bus just before high to low transition
-  data = readData();
+void onHigh() {
+  // Continously latch the read/write, data and address lines during HIGH phase
+  word address = readAddress();
+  byte data = readData();
+  byte readWrite = digitalReadFast(RWB);
 
-  // Always capture IO and RAM read / writes for debugging
-  if ((address >= IO_START) && (address <= IO_END)) { // IO
-    IO[address - IO_START] = data;
-  } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
-    RAM[address - RAM_START] = data;
-  }
-
-  // Handle IO post processing
   if (readWrite == HIGH) { // READING
+    // Check if in IO space first since it overlaps ROM space...
+    if ((address >= IO_START) && (address <= IO_END)) { // IO
+      // Only output data if address is in selected IOBank area and IO is enabled
+      if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) {
+        setDataDirOut();
+        writeData(IO[address - IO_START]);
+      }
+    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
+      setDataDirOut();
+      writeData(RAM[address - RAM_START]);
+    } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
+      setDataDirOut();
+      writeData(ROM[address - ROM_START]);
+    } else {
+      setDataDirIn();
+    }
+
+    // Handle IO post processing
     switch(address - IO_BANKS[IOBank]) {
       case KBD_DATA: {
         // Read from KBD_DATA clears data ready bit
@@ -359,33 +399,14 @@ void onLow() {
       default:
         break;
     }
-  }
+  } else { // WRITING
+    setDataDirIn();
 
-  digitalWriteFast(PHI2, LOW);
-}
-
-void onHigh() {
-  digitalWriteFast(PHI2, HIGH);
-  
-  setDataDirIn();
-
-  readWrite = digitalReadFast(RWB);
-  address = readAddress();
-
-  if (readWrite == HIGH) { // READING
-    // Check if in IO space first since it overlaps ROM space...
+    // Always store write to IO and RAM for debugging
     if ((address >= IO_START) && (address <= IO_END)) { // IO
-      // Only output data if address is in selected IOBank area and IO is enabled
-      if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) {
-        setDataDirOut();
-        writeData(IO[address - IO_START]);
-      }
-    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
-      setDataDirOut();
-      writeData(RAM[address - RAM_START]);
-    } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
-      setDataDirOut();
-      writeData(ROM[address - ROM_START]);
+      IO[address - IO_START] = data;
+    } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
+      RAM[address - RAM_START] = data;
     }
   }
 }
@@ -465,6 +486,14 @@ void onCommand(char command) {
     case 'f':
     case 'F':
       info();
+      break;
+    case 'g':
+    case 'G':
+      log();
+      break;
+    case 'c':
+    case 'C':
+      toggleClock();
       break;
     case '-':
       decreaseFrequency();
@@ -635,28 +664,36 @@ void info() {
   Serial.println(")");
   Serial.print("Debug: ");
   Serial.println(formatDebugMode());
-  Serial.print("Frequency: ");
+  Serial.print("Clock: ");
+  Serial.println(clockEnabled ? "Enabled" : "Disabled");
+  Serial.print("Clock Frequency: ");
   Serial.println(FREQS[freqIndex]);
   Serial.print("IP address: ");
   Serial.println(Ethernet.localIP());
   Serial.print("Date / Time: ");
   Serial.println(formatDateTime());
   Serial.println();
-  Serial.println("-----------------------------------------------------------");
-  Serial.println("| (R)un / Stop        | (S)tep           | Rese(T)        |");
-  Serial.println("-----------------------------------------------------------");
-  Serial.println("| Toggle R(A)M        | Toggle R(O)M     | (L)ist ROMs    |");
-  Serial.println("-----------------------------------------------------------");
-  Serial.println("| Toggle (I)O         | Change IO Ban(K) | Sna(P)shot     |");
-  Serial.println("-----------------------------------------------------------");
-  Serial.println("| (+/-) Clk Frequency | Toggle De(B)ug   | In(F)o         |");
-  Serial.println("-----------------------------------------------------------");
+  Serial.println("------------------------------------------------------------");
+  Serial.println("| (R)un / Stop         | (S)tep           | Rese(T)        |");
+  Serial.println("------------------------------------------------------------");
+  Serial.println("| Toggle R(A)M         | Toggle R(O)M     | (L)ist ROMs    |");
+  Serial.println("------------------------------------------------------------");
+  Serial.println("| Toggle (I)O          | Change IO Ban(K) | Sna(P)shot     |");
+  Serial.println("------------------------------------------------------------");
+  Serial.println("| Toggle (C)lock Mode  | (+/-) Clk Frequency               |");
+  Serial.println("------------------------------------------------------------");
+  Serial.println("| Lo(G) Data / Address | Toggle De(B)ug   | In(F)o         |");
+  Serial.println("------------------------------------------------------------");
   Serial.println();
 }
 
-void debug() {
+void log() {
   char output[64];
-  
+
+  word address = readAddress();
+  byte data = readData();
+  byte readWrite = digitalReadFast(RWB);
+
   sprintf(
     output, 
     "%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c  %c%c%c%c%c%c%c%c  %01X  0x%04X  0x%02X  %c", 
@@ -700,11 +737,11 @@ void reset() {
 }
 
 void step() {
-  onLow();
-  delay(100);
-  debug();
-  onHigh();
-  delay(100);
+  if (!isRunning && clockEnabled) {
+    isStepping = true;
+  } else {
+    Serial.println("Clock must be enabled and stopped before stepping!");
+  }
 }
 
 void snapshot() {
@@ -773,8 +810,20 @@ void increaseFrequency() {
   Serial.println(FREQS[freqIndex]);
 }
 
+void toggleClock() {
+  clockEnabled = !clockEnabled;
+  clockEnabled ? pinMode(PHI2, OUTPUT) : pinMode(PHI2, INPUT);
+
+  Serial.print("Clock: ");
+  Serial.print(clockEnabled ? "Enabled" : "Disabled");
+}
+
 void toggleRunStop() {
   isRunning = !isRunning;
+
+  if (!isRunning && digitalReadFast(PHI2) == LOW) { 
+    digitalWriteFast(PHI2, HIGH);
+  }
 
   Serial.println(isRunning ? "Running…" : "Stopped");
 }
@@ -1017,13 +1066,14 @@ void initROM() {
 #if DEVBOARD
 void initPins() {
   pinMode(RESB, OUTPUT);
-  pinMode(SYNC, INPUT);
-  pinMode(RWB, INPUT);
+  pinMode(IRQB, OUTPUT);
+  pinMode(NMIB, OUTPUT);
   pinMode(RDY, OUTPUT);
   pinMode(BE, OUTPUT);
   pinMode(PHI2, OUTPUT);
-  pinMode(NMIB, OUTPUT);
-  pinMode(IRQB, OUTPUT);
+  
+  pinMode(SYNC, INPUT);
+  pinMode(RWB, INPUT);
 
   pinMode(OE1, OUTPUT);
   pinMode(OE2, OUTPUT);
@@ -1047,7 +1097,7 @@ void initPins() {
   digitalWriteFast(RDY, HIGH);
   digitalWriteFast(BE, HIGH);
   digitalWriteFast(PHI2, HIGH);
-  
+
   digitalWriteFast(OE1, HIGH);
   digitalWriteFast(OE2, HIGH);
   digitalWriteFast(OE3, HIGH);
@@ -1055,12 +1105,13 @@ void initPins() {
 #elif RETROSHIELD
 void initPins() {
   pinMode(RESB, OUTPUT);
-  pinMode(RWB, INPUT);
+  pinMode(IRQB, OUTPUT);
+  pinMode(NMIB, OUTPUT);
   pinMode(RDY, OUTPUT);
   pinMode(SOB, OUTPUT);
   pinMode(PHI2, OUTPUT);
-  pinMode(NMIB, OUTPUT);
-  pinMode(IRQB, OUTPUT);
+
+  pinMode(RWB, INPUT);
 
   pinMode(INT_SWB, INPUT);
   pinMode(STEP_SWB, INPUT);
@@ -1100,7 +1151,7 @@ void initEthernet() {
   Ethernet.begin();
   Ethernet.waitForLocalIP(5000);
 
-  MDNS.begin("6502debugger");
+  MDNS.begin("6502-debugger");
   MDNS.addService("_http", "_tcp", 80);
 }
 
@@ -1116,6 +1167,7 @@ void initServer() {
   server.on("/ram", onServerRAM);
   server.on("/io", onServerIO);
   server.on("/rom", onServerROM);
+  server.on("/command", HTTP_POST, onServerCommand);
   server.onNotFound(onServerNotFound);
   server.begin();
 }
@@ -1124,26 +1176,57 @@ void initServer() {
 // WEB SERVER
 //
 
-void onServerRoot(AsyncWebServerRequest *request)
-{
-  request->send(200, "text/plain", "Hello from AsyncWebServer_Teensy41");
+void onServerRoot(AsyncWebServerRequest *request) {
+  request->send(
+    "text/html",
+    sizeof(HTML) / sizeof(char), 
+    [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t 
+  {
+    size_t length = min(maxLen, (sizeof(HTML) / sizeof(char)) - index);
+
+    memcpy(buffer, HTML + index, length);
+
+    return length;
+  });
 }
 
-void onServerStatus(AsyncWebServerRequest *request)
-{
+void onServerStatus(AsyncWebServerRequest *request) {
   String response;
   JsonDocument doc;
 
   readROMs();
 
-  doc["frequency"]  = FREQS[freqIndex];
-  doc["ioBank"]     = "$" + String(IO_BANKS[IOBank], HEX);
-  doc["ioEnabled"]  = IOEnabled;
-  doc["ipAddress"]  = Ethernet.localIP();
-  doc["isRunning"]  = isRunning;
-  doc["ramEnabled"] = RAMEnabled;
-  doc["romEnabled"] = ROMEnabled;
-  doc["romFile"]    = romFile;
+  word address = readAddress();
+  byte data = readData();
+  byte readWrite = digitalReadFast(RWB);
+
+  doc["clkFrequency"]       = FREQS[freqIndex];
+  doc["clkEnabled"]         = clockEnabled;
+  doc["ioBank"]             = IO_BANKS[IOBank];
+  doc["ioEnabled"]          = IOEnabled;
+  doc["ipAddress"]          = Ethernet.localIP();
+  doc["isRunning"]          = isRunning;
+  doc["pins"]["address"]    = address;
+  doc["pins"]["data"]       = data;
+  doc["pins"]["rwb"]        = readWrite;
+  doc["pins"]["phi2"]       = digitalReadFast(PHI2);
+  doc["pins"]["nmib"]       = digitalReadFast(NMIB);
+  doc["pins"]["irqb"]       = digitalReadFast(IRQB);
+  doc["pins"]["resb"]       = digitalReadFast(RESB);
+  doc["pins"]["rdy"]        = digitalReadFast(RDY);
+  
+  #if DEVBOARD
+    doc["pins"]["be"]       = digitalReadFast(BE);
+    doc["pins"]["sync"]     = digitalReadFast(SYNC);
+    doc["platform"]         = "Dev Board";
+  #else
+    doc["pins"]["sob"]      = digitalReadFast(SOB);
+    doc["platform"]         = "Retroshield";
+  #endif
+
+  doc["ramEnabled"]         = RAMEnabled;
+  doc["romEnabled"]         = ROMEnabled;
+  doc["romFile"]            = romFile;
 
   for (unsigned int i = 0; i < sizeof(ROMs) / sizeof(ROMs[0]); i++) {
     if (ROMs[i] != "?") {
@@ -1163,8 +1246,7 @@ void onServerStatus(AsyncWebServerRequest *request)
 /* types besides beginResponseStream() will corrupt or add garbage to the data. So we are limited to 1024 byte    */
 /* pages.                                                                                                         */
 
-void onServerRAM(AsyncWebServerRequest *request)
-{
+void onServerRAM(AsyncWebServerRequest *request) {
   size_t page = 0;
   bool formatted = false;
 
@@ -1192,8 +1274,7 @@ void onServerRAM(AsyncWebServerRequest *request)
   request->send(response);
 }
 
-void onServerIO(AsyncWebServerRequest *request)
-{
+void onServerIO(AsyncWebServerRequest *request) {
   size_t page = 0;
   bool formatted = false;
 
@@ -1221,8 +1302,7 @@ void onServerIO(AsyncWebServerRequest *request)
   request->send(response);
 }
 
-void onServerROM(AsyncWebServerRequest *request)
-{
+void onServerROM(AsyncWebServerRequest *request) {
   // Note: All 32 pages of RAM can be inspected but only top 24k is valid ROM area.
 
   size_t page = 0;
@@ -1252,8 +1332,11 @@ void onServerROM(AsyncWebServerRequest *request)
   request->send(response);
 }
 
-void onServerNotFound(AsyncWebServerRequest *request)
-{
+void onServerCommand(AsyncWebServerRequest *request) {
+  request->send(404);
+}
+
+void onServerNotFound(AsyncWebServerRequest *request) {
   request->redirect("/");
 }
 

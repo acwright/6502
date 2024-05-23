@@ -796,6 +796,883 @@
 				)
 			)
 		)
+		(symbol "74xx:74LS04"
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at 0 1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "74LS04"
+				(at 0 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Hex Inverter"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "TTL not inv"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "DIP*W7.62mm* SSOP?14* TSSOP?14*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "74LS04_1_0"
+				(polyline
+					(pts
+						(xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin input line
+					(at -7.62 0 0)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output inverted
+					(at 7.62 0 180)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS04_2_0"
+				(polyline
+					(pts
+						(xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin input line
+					(at -7.62 0 0)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output inverted
+					(at 7.62 0 180)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS04_3_0"
+				(polyline
+					(pts
+						(xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin input line
+					(at -7.62 0 0)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output inverted
+					(at 7.62 0 180)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS04_4_0"
+				(polyline
+					(pts
+						(xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin output inverted
+					(at 7.62 0 180)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 0 0)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS04_5_0"
+				(polyline
+					(pts
+						(xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin output inverted
+					(at 7.62 0 180)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 0 0)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS04_6_0"
+				(polyline
+					(pts
+						(xy -3.81 3.81) (xy -3.81 -3.81) (xy 3.81 0) (xy -3.81 3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin output inverted
+					(at 7.62 0 180)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -7.62 0 0)
+					(length 3.81)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS04_7_0"
+				(pin power_in line
+					(at 0 12.7 270)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -12.7 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS04_7_1"
+				(rectangle
+					(start -5.08 7.62)
+					(end 5.08 -7.62)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+		)
+		(symbol "74xx:74LS573"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at -7.62 16.51 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "74LS573"
+				(at -7.62 -16.51 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "74xx/74hc573.pdf"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "8-bit Latch 3-state outputs"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_locked" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "TTL DFF DFF8 LATCH 3State"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "DIP?20*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "74LS573_1_0"
+				(pin input inverted
+					(at -12.7 -12.7 0)
+					(length 5.08)
+					(name "OE"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 -20.32 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -10.16 0)
+					(length 5.08)
+					(name "Load"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 -5.08 180)
+					(length 5.08)
+					(name "Q7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 -2.54 180)
+					(length 5.08)
+					(name "Q6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 0 180)
+					(length 5.08)
+					(name "Q5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 2.54 180)
+					(length 5.08)
+					(name "Q4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 5.08 180)
+					(length 5.08)
+					(name "Q3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 7.62 180)
+					(length 5.08)
+					(name "Q2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "17"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 10.16 180)
+					(length 5.08)
+					(name "Q1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "18"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin tri_state line
+					(at 12.7 12.7 180)
+					(length 5.08)
+					(name "Q0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "19"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 12.7 0)
+					(length 5.08)
+					(name "D0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 0 20.32 270)
+					(length 5.08)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "20"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 10.16 0)
+					(length 5.08)
+					(name "D1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 7.62 0)
+					(length 5.08)
+					(name "D2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 5.08 0)
+					(length 5.08)
+					(name "D3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 2.54 0)
+					(length 5.08)
+					(name "D4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 0 0)
+					(length 5.08)
+					(name "D5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -2.54 0)
+					(length 5.08)
+					(name "D6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -12.7 -5.08 0)
+					(length 5.08)
+					(name "D7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "74LS573_1_1"
+				(rectangle
+					(start -7.62 15.24)
+					(end 7.62 -15.24)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+		)
 		(symbol "Device:LED"
 			(pin_numbers hide)
 			(pin_names
@@ -1316,28 +2193,16 @@
 		(uuid "136cec59-8db0-4f75-ad8c-519f639aa7b2")
 	)
 	(junction
-		(at 99.06 107.95)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "1aaf1341-3a68-421a-825a-270aed0eae4c")
-	)
-	(junction
-		(at 224.79 107.95)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "1f3e565a-81f5-4cf5-99c6-41fe757987e2")
-	)
-	(junction
 		(at 129.54 107.95)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "31aab498-2ed2-4f19-8cb2-1891777b0775")
 	)
 	(junction
-		(at 119.38 107.95)
+		(at 88.9 86.36)
 		(diameter 0)
 		(color 0 0 0 0)
-		(uuid "396a840a-3fda-4666-9ad6-d10b0c09d8fc")
+		(uuid "458bba64-4a52-4e52-8af3-ad75b911f292")
 	)
 	(junction
 		(at 26.67 66.04)
@@ -1364,34 +2229,16 @@
 		(uuid "6f240b07-1188-471d-ae81-a79a1a3e3993")
 	)
 	(junction
-		(at 109.22 107.95)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "731d7c2d-2130-4f61-9de0-5cde06bb2525")
-	)
-	(junction
 		(at 142.24 66.04)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "74bf810a-cf30-4410-81f1-acdbc8922fdd")
 	)
 	(junction
-		(at 88.9 107.95)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "75fe93c3-f92f-4d44-ab90-3f763d36e32d")
-	)
-	(junction
 		(at 139.7 107.95)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "793ac3e2-1d0a-4917-bc27-1f8fe32dd5d3")
-	)
-	(junction
-		(at 214.63 107.95)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "7ec89023-61a6-4c9e-9446-fa468bb543d7")
 	)
 	(junction
 		(at 234.95 66.04)
@@ -1404,6 +2251,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "8151e40b-3d30-42ed-b7ce-bfbca7d5397e")
+	)
+	(junction
+		(at 99.06 86.36)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "83183bd8-74b9-45bc-b66a-42ff214b50e9")
 	)
 	(junction
 		(at 71.12 66.04)
@@ -1460,6 +2313,12 @@
 		(uuid "e78f6a4c-ce49-4cbe-b014-b122dc4b9778")
 	)
 	(junction
+		(at 160.02 107.95)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "ef2ce672-d1a0-431f-a1fc-0723d8529699")
+	)
+	(junction
 		(at 106.68 66.04)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1470,16 +2329,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "fece617a-da9f-429d-bc18-1e17bea7351b")
-	)
-	(junction
-		(at 234.95 107.95)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ff2a8609-dd5c-41dd-89d6-97c543673955")
-	)
-	(no_connect
-		(at 34.29 179.07)
-		(uuid "33247025-58f5-468e-aed3-c045234b32cd")
 	)
 	(bus_entry
 		(at 20.32 135.89)
@@ -1579,6 +2428,15 @@
 			(type default)
 		)
 		(uuid "38743b52-f8bc-4272-9fb7-7bbe1acfd234")
+	)
+	(bus_entry
+		(at 20.32 176.53)
+		(size 2.54 2.54)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "397e8a21-cbd0-4d2e-b957-01b19ce2c87a")
 	)
 	(bus_entry
 		(at 20.32 153.67)
@@ -1846,16 +2704,6 @@
 	)
 	(wire
 		(pts
-			(xy 109.22 107.95) (xy 119.38 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "047b2cbd-6130-4890-8ef3-c3178de0d697")
-	)
-	(wire
-		(pts
 			(xy 160.02 63.5) (xy 160.02 66.04)
 		)
 		(stroke
@@ -1906,16 +2754,6 @@
 	)
 	(wire
 		(pts
-			(xy 245.11 96.52) (xy 245.11 97.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "07a5e917-1b23-4500-a473-14d61c0dcf87")
-	)
-	(wire
-		(pts
 			(xy 151.13 44.45) (xy 151.13 46.99)
 		)
 		(stroke
@@ -1963,26 +2801,6 @@
 			(type default)
 		)
 		(uuid "1062389a-422d-471b-a3be-2f922b7fe411")
-	)
-	(wire
-		(pts
-			(xy 99.06 107.95) (xy 109.22 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "10ec0bd5-e53a-4c5a-8d51-b8ceceab9870")
-	)
-	(wire
-		(pts
-			(xy 109.22 86.36) (xy 109.22 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "10fa91fc-968e-46e6-a502-e90d5dd4e6d9")
 	)
 	(wire
 		(pts
@@ -2126,16 +2944,6 @@
 	)
 	(wire
 		(pts
-			(xy 224.79 105.41) (xy 224.79 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "21adcacf-7bbd-407a-9306-6aec11a33fa1")
-	)
-	(wire
-		(pts
 			(xy 106.68 66.04) (xy 115.57 66.04)
 		)
 		(stroke
@@ -2163,6 +2971,16 @@
 			(type default)
 		)
 		(uuid "2456e36b-eaa3-439b-ada3-5925fdd51f6a")
+	)
+	(wire
+		(pts
+			(xy 88.9 86.36) (xy 88.9 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "276df57c-1520-49f5-a08f-c8e2c8014cff")
 	)
 	(wire
 		(pts
@@ -2274,16 +3092,6 @@
 		)
 		(uuid "31df85c6-864a-45ef-b36e-11a80b9c4c3a")
 	)
-	(wire
-		(pts
-			(xy 88.9 107.95) (xy 88.9 110.49)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "338444ae-705b-4203-86e7-6f5ce1419535")
-	)
 	(bus
 		(pts
 			(xy 78.74 130.81) (xy 78.74 133.35)
@@ -2293,6 +3101,16 @@
 			(type default)
 		)
 		(uuid "33855be5-7423-4717-8286-242a6ffc1f94")
+	)
+	(wire
+		(pts
+			(xy 109.22 88.9) (xy 109.22 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "33b50d6a-0743-46e3-bfd1-4f11ae235d1e")
 	)
 	(wire
 		(pts
@@ -2323,16 +3141,6 @@
 			(type default)
 		)
 		(uuid "3f33cde1-1201-4542-8766-79e2e3bbbce5")
-	)
-	(wire
-		(pts
-			(xy 245.11 105.41) (xy 245.11 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3f7258d3-5a68-4e08-a5ed-c51a93e81bbf")
 	)
 	(wire
 		(pts
@@ -2446,13 +3254,13 @@
 	)
 	(wire
 		(pts
-			(xy 234.95 107.95) (xy 245.11 107.95)
+			(xy 99.06 86.36) (xy 99.06 88.9)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "4997d2f4-140e-4afb-96f6-b14ab0c9759f")
+		(uuid "4a5fd81a-9069-4bfb-9d78-cbb7735b6060")
 	)
 	(wire
 		(pts
@@ -2476,16 +3284,6 @@
 	)
 	(wire
 		(pts
-			(xy 214.63 107.95) (xy 214.63 110.49)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4daf2fe3-7a81-49e1-bc40-74f927c0c0ca")
-	)
-	(wire
-		(pts
 			(xy 62.23 66.04) (xy 71.12 66.04)
 		)
 		(stroke
@@ -2493,36 +3291,6 @@
 			(type default)
 		)
 		(uuid "4e73af78-5dcb-4aed-b9d5-0da821555dda")
-	)
-	(wire
-		(pts
-			(xy 99.06 86.36) (xy 99.06 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "4ecbb6a3-e5b4-4156-bcc7-b4e4c2d18e43")
-	)
-	(wire
-		(pts
-			(xy 234.95 105.41) (xy 234.95 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "503350f4-f316-4d89-b099-a646d1762d41")
-	)
-	(wire
-		(pts
-			(xy 88.9 86.36) (xy 88.9 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "52a5aea1-1846-4325-9a01-2121c85bfb59")
 	)
 	(wire
 		(pts
@@ -2624,16 +3392,6 @@
 		)
 		(uuid "592bf5c7-d4b9-457e-b7be-8a1caafaa2e8")
 	)
-	(wire
-		(pts
-			(xy 234.95 96.52) (xy 234.95 97.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5986a547-0983-4202-aeda-e6110a738597")
-	)
 	(bus
 		(pts
 			(xy 20.32 133.35) (xy 20.32 135.89)
@@ -2654,16 +3412,6 @@
 		)
 		(uuid "5a503803-629b-4ff1-aec3-27f3121edb1d")
 	)
-	(wire
-		(pts
-			(xy 88.9 107.95) (xy 99.06 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5b3932d9-ceed-4143-be55-f5da83d32887")
-	)
 	(bus
 		(pts
 			(xy 78.74 153.67) (xy 78.74 156.21)
@@ -2673,6 +3421,16 @@
 			(type default)
 		)
 		(uuid "5b943cca-f3ce-4cdb-9bef-5c071a0e6add")
+	)
+	(wire
+		(pts
+			(xy 22.86 179.07) (xy 34.29 179.07)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5c11a414-bcb8-4252-bb20-71b106515ad9")
 	)
 	(wire
 		(pts
@@ -2713,6 +3471,26 @@
 			(type default)
 		)
 		(uuid "6253eed9-4bd5-4fdf-87b9-e43625ae3be4")
+	)
+	(wire
+		(pts
+			(xy 88.9 83.82) (xy 88.9 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "62b211d6-537d-4dcd-a1d5-b583ed72060e")
+	)
+	(wire
+		(pts
+			(xy 99.06 105.41) (xy 99.06 107.95)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "64584b0a-2946-4f08-ab80-11e8186012e6")
 	)
 	(wire
 		(pts
@@ -2803,6 +3581,16 @@
 			(type default)
 		)
 		(uuid "6a48c7cd-2c12-4e3b-99d0-d4e3f654512b")
+	)
+	(wire
+		(pts
+			(xy 99.06 86.36) (xy 109.22 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6a566d61-decd-4e51-8efb-63afc994775b")
 	)
 	(bus
 		(pts
@@ -3014,16 +3802,6 @@
 		)
 		(uuid "7dc21e4b-bacb-4d75-bb55-df87ad2956d6")
 	)
-	(wire
-		(pts
-			(xy 234.95 86.36) (xy 234.95 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7eca331a-b716-4b80-9673-f4bf704f79fc")
-	)
 	(bus
 		(pts
 			(xy 20.32 158.75) (xy 20.32 161.29)
@@ -3033,6 +3811,16 @@
 			(type default)
 		)
 		(uuid "7ef02dce-c5ff-42c5-91b2-925db3ca1348")
+	)
+	(bus
+		(pts
+			(xy 20.32 176.53) (xy 20.32 196.85)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7f136a55-c2fa-490b-8699-0518d9c8f511")
 	)
 	(wire
 		(pts
@@ -3126,16 +3914,6 @@
 	)
 	(wire
 		(pts
-			(xy 214.63 107.95) (xy 224.79 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "8b4c0c87-40d5-4ca4-b3b8-a51e42ef323e")
-	)
-	(wire
-		(pts
 			(xy 97.79 66.04) (xy 106.68 66.04)
 		)
 		(stroke
@@ -3193,16 +3971,6 @@
 			(type default)
 		)
 		(uuid "953ad7c9-ec0d-4477-831a-18ca1379be58")
-	)
-	(wire
-		(pts
-			(xy 99.06 105.41) (xy 99.06 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "965cc484-3351-430a-9ad9-ca1a3f6c433e")
 	)
 	(wire
 		(pts
@@ -3346,16 +4114,6 @@
 	)
 	(wire
 		(pts
-			(xy 224.79 86.36) (xy 224.79 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b1c84d4b-9911-4969-a7e9-ba1bfaac9305")
-	)
-	(wire
-		(pts
 			(xy 35.56 54.61) (xy 35.56 55.88)
 		)
 		(stroke
@@ -3474,6 +4232,16 @@
 		)
 		(uuid "be371a94-2085-4ebf-b6c1-fcd920a6c1d6")
 	)
+	(wire
+		(pts
+			(xy 88.9 86.36) (xy 99.06 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "beec7fd1-ba2b-45ae-b204-3c7b7291b31f")
+	)
 	(bus
 		(pts
 			(xy 20.32 138.43) (xy 20.32 140.97)
@@ -3496,16 +4264,6 @@
 	)
 	(wire
 		(pts
-			(xy 214.63 86.36) (xy 214.63 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c0a6d4f3-041e-4abf-bb67-1c2f018abb14")
-	)
-	(wire
-		(pts
 			(xy 80.01 54.61) (xy 80.01 55.88)
 		)
 		(stroke
@@ -3513,16 +4271,6 @@
 			(type default)
 		)
 		(uuid "c13f3057-641f-4be8-9665-08e6236ac9fb")
-	)
-	(wire
-		(pts
-			(xy 224.79 107.95) (xy 234.95 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "c15d0d31-a32f-4b40-b04f-259361faf028")
 	)
 	(wire
 		(pts
@@ -3686,6 +4434,16 @@
 	)
 	(wire
 		(pts
+			(xy 160.02 107.95) (xy 160.02 110.49)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "df88a066-96d2-44f1-99bb-e7c5d48c59f6")
+	)
+	(wire
+		(pts
 			(xy 149.86 105.41) (xy 149.86 107.95)
 		)
 		(stroke
@@ -3746,16 +4504,6 @@
 	)
 	(wire
 		(pts
-			(xy 224.79 96.52) (xy 224.79 97.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e69a8879-8a25-42f2-a7e0-cdec3b0bf225")
-	)
-	(wire
-		(pts
 			(xy 124.46 63.5) (xy 124.46 66.04)
 		)
 		(stroke
@@ -3773,16 +4521,6 @@
 			(type default)
 		)
 		(uuid "e92a4dc3-dc2c-4bd4-a3d6-0f8ae2f9a4c0")
-	)
-	(wire
-		(pts
-			(xy 214.63 96.52) (xy 214.63 97.79)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e92d55e4-7dfe-4e00-ad39-52c7d7d76143")
 	)
 	(wire
 		(pts
@@ -3813,16 +4551,6 @@
 			(type default)
 		)
 		(uuid "eb9bd1aa-c34a-4be3-ba02-b2bfad765a6f")
-	)
-	(wire
-		(pts
-			(xy 245.11 86.36) (xy 245.11 88.9)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ebe7d739-d74b-4d28-87b0-132ec89fa521")
 	)
 	(bus
 		(pts
@@ -3956,7 +4684,7 @@
 	)
 	(bus
 		(pts
-			(xy 20.32 173.99) (xy 20.32 196.85)
+			(xy 20.32 173.99) (xy 20.32 176.53)
 		)
 		(stroke
 			(width 0)
@@ -4006,16 +4734,6 @@
 	)
 	(wire
 		(pts
-			(xy 214.63 105.41) (xy 214.63 107.95)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ff564d2e-b110-434d-92b2-c5b6f27e63f8")
-	)
-	(wire
-		(pts
 			(xy 34.29 168.91) (xy 22.86 168.91)
 		)
 		(stroke
@@ -4023,6 +4741,16 @@
 			(type default)
 		)
 		(uuid "ffa1305f-cd9f-4f10-b33d-af15d20eaebd")
+	)
+	(text "These are wrong!"
+		(exclude_from_sim no)
+		(at 124.206 78.994 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+		(uuid "72649ce1-7269-4cb1-b966-4f98c4f06509")
 	)
 	(label "EXP0"
 		(at 74.93 135.89 180)
@@ -4089,6 +4817,17 @@
 			(justify right bottom)
 		)
 		(uuid "0d6f3b57-3dd3-4a7b-a693-3bf24212de12")
+	)
+	(label "VCC"
+		(at 24.13 179.07 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "101871f6-ae05-49fe-89cb-5cf841aaea79")
 	)
 	(label "GND"
 		(at 24.13 130.81 0)
@@ -4499,22 +5238,22 @@
 	)
 	(global_label "IRQB"
 		(shape input)
-		(at 99.06 86.36 90)
+		(at 99.06 107.95 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
 		(uuid "178b13da-fc51-482f-8e6e-fc7ea1c20f8e")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 99.06 79.5537 90)
+			(at 99.06 114.7563 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
@@ -4563,31 +5302,31 @@
 			)
 		)
 	)
-	(global_label "EXP1"
+	(global_label "NMIB"
 		(shape input)
-		(at 234.95 86.36 90)
+		(at 109.22 107.95 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
-		(uuid "2b91e9b6-825b-4191-b0a8-349c5eb495d7")
+		(uuid "35424767-bdfd-4fce-89f6-cde10012320f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 234.95 79.191 90)
+			(at 109.22 114.9377 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
 	)
-	(global_label "NMIB"
+	(global_label "VCC"
 		(shape input)
-		(at 109.22 86.36 90)
+		(at 88.9 83.82 90)
 		(fields_autoplaced yes)
 		(effects
 			(font
@@ -4595,9 +5334,9 @@
 			)
 			(justify left)
 		)
-		(uuid "35424767-bdfd-4fce-89f6-cde10012320f")
+		(uuid "3a819d45-eedc-423f-9946-64c2bc6782d3")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 109.22 79.3723 90)
+			(at 88.9 77.8604 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4741,22 +5480,22 @@
 	)
 	(global_label "RESB"
 		(shape input)
-		(at 88.9 86.36 90)
+		(at 88.9 107.95 270)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
 		(uuid "6b8a4dcf-43e8-469a-b3cb-b4e5393cd10b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 88.9 79.1305 90)
+			(at 88.9 115.1795 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
@@ -4774,28 +5513,6 @@
 		(uuid "6c6f0fca-1c00-4f7f-8282-11460459265b")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 184.15 39.6395 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "EXP0"
-		(shape input)
-		(at 245.11 86.36 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "8d48d282-0c0b-4c96-8959-db5d9f84114e")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 245.11 79.191 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4937,28 +5654,6 @@
 			)
 		)
 	)
-	(global_label "EXP2"
-		(shape input)
-		(at 224.79 86.36 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "a76e8bbf-9533-46d5-b7d4-a50356db065d")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 224.79 79.191 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "D2"
 		(shape input)
 		(at 224.79 44.45 90)
@@ -5038,28 +5733,6 @@
 		(uuid "b2ccd4af-6a43-4964-984d-d62cef985de8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 133.35 39.8209 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "EXP3"
-		(shape input)
-		(at 214.63 86.36 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "b40f44ce-b3bb-4ed3-b5fa-1b79ba746248")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 214.63 79.191 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -5405,6 +6078,110 @@
 		)
 	)
 	(symbol
+		(lib_id "74xx:74LS04")
+		(at 110.49 143.51 0)
+		(unit 4)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0266b93c-0354-420f-ba8b-f584c372ea76")
+		(property "Reference" "U2"
+			(at 110.49 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74LS04"
+			(at 110.49 137.16 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 110.49 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+			(at 110.49 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Hex Inverter"
+			(at 110.49 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "8486ae99-142f-4b7a-b785-f28589ab0905")
+		)
+		(pin "8"
+			(uuid "17a071a3-dcb9-4d97-ad90-3944f3a6e625")
+		)
+		(pin "9"
+			(uuid "7aa62916-243e-43d4-b81a-edc7934ef2b3")
+		)
+		(pin "10"
+			(uuid "c76f479c-36db-43c6-96b4-78742245ebb4")
+		)
+		(pin "11"
+			(uuid "4b427368-c066-4294-821f-e822c7c4dfa6")
+		)
+		(pin "12"
+			(uuid "4d7a3621-7604-4809-9a44-c764275d407c")
+		)
+		(pin "13"
+			(uuid "091dcf77-73f1-4ab9-b2f1-2ef3dfab2eba")
+		)
+		(pin "14"
+			(uuid "c958c8a3-e82b-4964-ae54-53c45e0a88c9")
+		)
+		(pin "7"
+			(uuid "c38cb667-783b-47d4-b1d8-967d61d6117f")
+		)
+		(pin "3"
+			(uuid "2bc4c30b-be2a-4f10-a049-cb5e4558e83f")
+		)
+		(pin "2"
+			(uuid "b5517305-72f2-4359-bcf1-61f3519e375c")
+		)
+		(pin "1"
+			(uuid "2b2f3244-b330-4d3e-9c2a-a19c5013d5c2")
+		)
+		(pin "5"
+			(uuid "fdf21d32-6867-4b1e-b88e-e247f8033114")
+		)
+		(pin "6"
+			(uuid "762c2c92-8569-4eae-8d83-bf2bf642db5a")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "U2")
+					(unit 4)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 204.47 59.69 180)
 		(unit 1)
@@ -5477,84 +6254,6 @@
 			(project "Blinkenlights Card"
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "R20")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:LED")
-		(at 214.63 92.71 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "144ea711-a318-4764-b421-246474295b70")
-		(property "Reference" "D33"
-			(at 217.6272 91.7194 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "EXP3"
-			(at 217.6272 94.0308 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0805_2012Metric"
-			(at 214.63 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 214.63 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Light emitting diode"
-			(at 214.63 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C2296"
-			(at 214.63 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "ae2b8269-bf3b-4723-a945-3eb3e4f921da")
-		)
-		(pin "2"
-			(uuid "68403f7a-ecf7-4883-8e4e-4c5163f26b5b")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "D33")
 					(unit 1)
 				)
 			)
@@ -6575,6 +7274,110 @@
 		)
 	)
 	(symbol
+		(lib_id "74xx:74LS04")
+		(at 160.02 151.13 0)
+		(unit 3)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2e22a48d-9637-4ab3-a785-585820cf91f9")
+		(property "Reference" "U2"
+			(at 160.02 142.24 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74LS04"
+			(at 160.02 144.78 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 160.02 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+			(at 160.02 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Hex Inverter"
+			(at 160.02 151.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "8486ae99-142f-4b7a-b785-f28589ab0905")
+		)
+		(pin "8"
+			(uuid "17a071a3-dcb9-4d97-ad90-3944f3a6e625")
+		)
+		(pin "9"
+			(uuid "7aa62916-243e-43d4-b81a-edc7934ef2b3")
+		)
+		(pin "10"
+			(uuid "c76f479c-36db-43c6-96b4-78742245ebb4")
+		)
+		(pin "11"
+			(uuid "4b427368-c066-4294-821f-e822c7c4dfa6")
+		)
+		(pin "12"
+			(uuid "4d7a3621-7604-4809-9a44-c764275d407c")
+		)
+		(pin "13"
+			(uuid "091dcf77-73f1-4ab9-b2f1-2ef3dfab2eba")
+		)
+		(pin "14"
+			(uuid "c958c8a3-e82b-4964-ae54-53c45e0a88c9")
+		)
+		(pin "7"
+			(uuid "c38cb667-783b-47d4-b1d8-967d61d6117f")
+		)
+		(pin "3"
+			(uuid "2bc4c30b-be2a-4f10-a049-cb5e4558e83f")
+		)
+		(pin "2"
+			(uuid "b5517305-72f2-4359-bcf1-61f3519e375c")
+		)
+		(pin "1"
+			(uuid "2b2f3244-b330-4d3e-9c2a-a19c5013d5c2")
+		)
+		(pin "5"
+			(uuid "fdf21d32-6867-4b1e-b88e-e247f8033114")
+		)
+		(pin "6"
+			(uuid "762c2c92-8569-4eae-8d83-bf2bf642db5a")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "U2")
+					(unit 3)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:LED")
 		(at 53.34 50.8 90)
 		(unit 1)
@@ -6809,6 +7612,110 @@
 		)
 	)
 	(symbol
+		(lib_id "74xx:74LS04")
+		(at 143.51 146.05 0)
+		(unit 2)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3b136b21-6fa5-436a-9a83-5264f44bec4c")
+		(property "Reference" "U2"
+			(at 143.51 137.16 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74LS04"
+			(at 143.51 139.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 143.51 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+			(at 143.51 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Hex Inverter"
+			(at 143.51 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "8486ae99-142f-4b7a-b785-f28589ab0905")
+		)
+		(pin "8"
+			(uuid "17a071a3-dcb9-4d97-ad90-3944f3a6e625")
+		)
+		(pin "9"
+			(uuid "7aa62916-243e-43d4-b81a-edc7934ef2b3")
+		)
+		(pin "10"
+			(uuid "c76f479c-36db-43c6-96b4-78742245ebb4")
+		)
+		(pin "11"
+			(uuid "4b427368-c066-4294-821f-e822c7c4dfa6")
+		)
+		(pin "12"
+			(uuid "4d7a3621-7604-4809-9a44-c764275d407c")
+		)
+		(pin "13"
+			(uuid "091dcf77-73f1-4ab9-b2f1-2ef3dfab2eba")
+		)
+		(pin "14"
+			(uuid "c958c8a3-e82b-4964-ae54-53c45e0a88c9")
+		)
+		(pin "7"
+			(uuid "c38cb667-783b-47d4-b1d8-967d61d6117f")
+		)
+		(pin "3"
+			(uuid "2bc4c30b-be2a-4f10-a049-cb5e4558e83f")
+		)
+		(pin "2"
+			(uuid "b5517305-72f2-4359-bcf1-61f3519e375c")
+		)
+		(pin "1"
+			(uuid "2b2f3244-b330-4d3e-9c2a-a19c5013d5c2")
+		)
+		(pin "5"
+			(uuid "fdf21d32-6867-4b1e-b88e-e247f8033114")
+		)
+		(pin "6"
+			(uuid "762c2c92-8569-4eae-8d83-bf2bf642db5a")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "U2")
+					(unit 2)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 115.57 59.69 180)
 		(unit 1)
@@ -6882,6 +7789,110 @@
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "R11")
 					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "74xx:74LS04")
+		(at 125.73 162.56 0)
+		(unit 6)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "41554b5d-ada9-462e-be58-7698444abbd3")
+		(property "Reference" "U2"
+			(at 125.73 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74LS04"
+			(at 125.73 156.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 125.73 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+			(at 125.73 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Hex Inverter"
+			(at 125.73 162.56 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "8486ae99-142f-4b7a-b785-f28589ab0905")
+		)
+		(pin "8"
+			(uuid "17a071a3-dcb9-4d97-ad90-3944f3a6e625")
+		)
+		(pin "9"
+			(uuid "7aa62916-243e-43d4-b81a-edc7934ef2b3")
+		)
+		(pin "10"
+			(uuid "c76f479c-36db-43c6-96b4-78742245ebb4")
+		)
+		(pin "11"
+			(uuid "4b427368-c066-4294-821f-e822c7c4dfa6")
+		)
+		(pin "12"
+			(uuid "4d7a3621-7604-4809-9a44-c764275d407c")
+		)
+		(pin "13"
+			(uuid "091dcf77-73f1-4ab9-b2f1-2ef3dfab2eba")
+		)
+		(pin "14"
+			(uuid "c958c8a3-e82b-4964-ae54-53c45e0a88c9")
+		)
+		(pin "7"
+			(uuid "c38cb667-783b-47d4-b1d8-967d61d6117f")
+		)
+		(pin "3"
+			(uuid "2bc4c30b-be2a-4f10-a049-cb5e4558e83f")
+		)
+		(pin "2"
+			(uuid "b5517305-72f2-4359-bcf1-61f3519e375c")
+		)
+		(pin "1"
+			(uuid "2b2f3244-b330-4d3e-9c2a-a19c5013d5c2")
+		)
+		(pin "5"
+			(uuid "fdf21d32-6867-4b1e-b88e-e247f8033114")
+		)
+		(pin "6"
+			(uuid "762c2c92-8569-4eae-8d83-bf2bf642db5a")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "U2")
+					(unit 6)
 				)
 			)
 		)
@@ -7511,6 +8522,110 @@
 		)
 	)
 	(symbol
+		(lib_id "74xx:74LS04")
+		(at 116.84 154.94 0)
+		(unit 5)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "5cd1b475-2d87-4181-b6ac-03d118308ebd")
+		(property "Reference" "U2"
+			(at 116.84 146.05 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "74LS04"
+			(at 116.84 148.59 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 116.84 154.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+			(at 116.84 154.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Hex Inverter"
+			(at 116.84 154.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "8486ae99-142f-4b7a-b785-f28589ab0905")
+		)
+		(pin "8"
+			(uuid "17a071a3-dcb9-4d97-ad90-3944f3a6e625")
+		)
+		(pin "9"
+			(uuid "7aa62916-243e-43d4-b81a-edc7934ef2b3")
+		)
+		(pin "10"
+			(uuid "c76f479c-36db-43c6-96b4-78742245ebb4")
+		)
+		(pin "11"
+			(uuid "4b427368-c066-4294-821f-e822c7c4dfa6")
+		)
+		(pin "12"
+			(uuid "4d7a3621-7604-4809-9a44-c764275d407c")
+		)
+		(pin "13"
+			(uuid "091dcf77-73f1-4ab9-b2f1-2ef3dfab2eba")
+		)
+		(pin "14"
+			(uuid "c958c8a3-e82b-4964-ae54-53c45e0a88c9")
+		)
+		(pin "7"
+			(uuid "c38cb667-783b-47d4-b1d8-967d61d6117f")
+		)
+		(pin "3"
+			(uuid "2bc4c30b-be2a-4f10-a049-cb5e4558e83f")
+		)
+		(pin "2"
+			(uuid "b5517305-72f2-4359-bcf1-61f3519e375c")
+		)
+		(pin "1"
+			(uuid "2b2f3244-b330-4d3e-9c2a-a19c5013d5c2")
+		)
+		(pin "5"
+			(uuid "fdf21d32-6867-4b1e-b88e-e247f8033114")
+		)
+		(pin "6"
+			(uuid "762c2c92-8569-4eae-8d83-bf2bf642db5a")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "U2")
+					(unit 5)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 88.9 101.6 180)
 		(unit 1)
@@ -7584,6 +8699,112 @@
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "R25")
 					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "74xx:74LS04")
+		(at 173.99 134.62 0)
+		(unit 7)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "601488c4-f344-45ba-8c6b-f82864660e99")
+		(property "Reference" "U2"
+			(at 180.34 133.3499 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "74LS04"
+			(at 180.34 135.8899 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 173.99 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+			(at 173.99 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Hex Inverter"
+			(at 173.99 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "4"
+			(uuid "8486ae99-142f-4b7a-b785-f28589ab0905")
+		)
+		(pin "8"
+			(uuid "17a071a3-dcb9-4d97-ad90-3944f3a6e625")
+		)
+		(pin "9"
+			(uuid "7aa62916-243e-43d4-b81a-edc7934ef2b3")
+		)
+		(pin "10"
+			(uuid "c76f479c-36db-43c6-96b4-78742245ebb4")
+		)
+		(pin "11"
+			(uuid "4b427368-c066-4294-821f-e822c7c4dfa6")
+		)
+		(pin "12"
+			(uuid "4d7a3621-7604-4809-9a44-c764275d407c")
+		)
+		(pin "13"
+			(uuid "091dcf77-73f1-4ab9-b2f1-2ef3dfab2eba")
+		)
+		(pin "14"
+			(uuid "c958c8a3-e82b-4964-ae54-53c45e0a88c9")
+		)
+		(pin "7"
+			(uuid "c38cb667-783b-47d4-b1d8-967d61d6117f")
+		)
+		(pin "3"
+			(uuid "2bc4c30b-be2a-4f10-a049-cb5e4558e83f")
+		)
+		(pin "2"
+			(uuid "b5517305-72f2-4359-bcf1-61f3519e375c")
+		)
+		(pin "1"
+			(uuid "2b2f3244-b330-4d3e-9c2a-a19c5013d5c2")
+		)
+		(pin "5"
+			(uuid "fdf21d32-6867-4b1e-b88e-e247f8033114")
+		)
+		(pin "6"
+			(uuid "762c2c92-8569-4eae-8d83-bf2bf642db5a")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "U2")
+					(unit 7)
 				)
 			)
 		)
@@ -7824,84 +9045,6 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 214.63 101.6 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "66a872a8-52ca-48c3-a08d-30f67a35d0a8")
-		(property "Reference" "R33"
-			(at 216.408 100.4316 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "330"
-			(at 216.408 102.743 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 216.408 101.6 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 214.63 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 214.63 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17630"
-			(at 214.63 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "209b200c-3e42-4d20-83d0-74980a0f58d4")
-		)
-		(pin "2"
-			(uuid "834c581e-e794-4809-a28f-c1d504587a36")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "R33")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
 		(at 44.45 59.69 180)
 		(unit 1)
 		(exclude_from_sim no)
@@ -8051,73 +9194,6 @@
 			(project "Blinkenlights Card"
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "R9")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 214.63 110.49 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "6e256803-c2e7-428a-9dbc-0469ff0148e8")
-		(property "Reference" "#PWR04"
-			(at 214.63 116.84 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 214.63 115.57 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" ""
-			(at 214.63 110.49 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 214.63 110.49 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 214.63 110.49 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "ab349bd9-1003-4b63-85e6-933cf5e186e7")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "#PWR04")
 					(unit 1)
 				)
 			)
@@ -8670,6 +9746,73 @@
 		)
 	)
 	(symbol
+		(lib_id "power:GND")
+		(at 160.02 110.49 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8c468606-b49a-446e-8770-225c4d371700")
+		(property "Reference" "#PWR05"
+			(at 160.02 116.84 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 160.02 115.57 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Footprint" ""
+			(at 160.02 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 160.02 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 160.02 110.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e4a1f435-acdc-4751-932d-05b4cfbc83cb")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "#PWR05")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:LED")
 		(at 71.12 50.8 90)
 		(unit 1)
@@ -8971,162 +10114,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:R")
-		(at 245.11 101.6 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "9cf8817e-2aa7-4dea-9b4a-3384ebdce2c7")
-		(property "Reference" "R36"
-			(at 246.888 100.4316 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "330"
-			(at 246.888 102.743 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 246.888 101.6 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 245.11 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 245.11 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17630"
-			(at 245.11 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "62cd05a1-8ad9-482a-a538-198c6adc5cfe")
-		)
-		(pin "2"
-			(uuid "f3d3dfaf-aec8-4b5d-9a73-5ea0b5040406")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "R36")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:LED")
-		(at 234.95 92.71 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "a09a349d-f2ef-4d60-b9f9-37d7da986413")
-		(property "Reference" "D35"
-			(at 237.9472 91.7194 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "EXP1"
-			(at 237.9472 94.0308 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0805_2012Metric"
-			(at 234.95 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 234.95 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Light emitting diode"
-			(at 234.95 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C2296"
-			(at 234.95 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "cf8191c0-61d2-49f5-a4da-93e0f1a95a9a")
-		)
-		(pin "2"
-			(uuid "7020ad1e-7b40-4aec-b87f-5d31c7223397")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "D35")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:LED")
 		(at 160.02 92.71 90)
 		(unit 1)
@@ -9199,84 +10186,6 @@
 			(project "Blinkenlights Card"
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "D32")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 224.79 101.6 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "a7db5b00-73ad-4bbf-a50a-c48d3e9eafa7")
-		(property "Reference" "R34"
-			(at 226.568 100.4316 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "330"
-			(at 226.568 102.743 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 226.568 101.6 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 224.79 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 224.79 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17630"
-			(at 224.79 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "afe043ba-49f6-4fb8-8da3-ce581a33b811")
-		)
-		(pin "2"
-			(uuid "b3701660-0c8f-4c96-9dc4-dd300e251ec4")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "R34")
 					(unit 1)
 				)
 			)
@@ -9506,35 +10415,33 @@
 		)
 	)
 	(symbol
-		(lib_id "power:GND")
-		(at 88.9 110.49 0)
+		(lib_id "74xx:74LS04")
+		(at 137.16 137.16 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(fields_autoplaced yes)
-		(uuid "b5f273d1-3bbb-4aed-b7bc-424f4839614a")
-		(property "Reference" "#PWR03"
-			(at 88.9 116.84 0)
+		(uuid "bad58a9b-3ec8-4dd6-9cff-2ef8f63eabeb")
+		(property "Reference" "U2"
+			(at 137.16 128.27 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
-		(property "Value" "GND"
-			(at 88.9 115.57 0)
+		(property "Value" "74LS04"
+			(at 137.16 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Footprint" ""
-			(at 88.9 110.49 0)
+			(at 137.16 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9542,8 +10449,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" ""
-			(at 88.9 110.49 0)
+		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS04"
+			(at 137.16 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9551,22 +10458,61 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 88.9 110.49 0)
+		(property "Description" "Hex Inverter"
+			(at 137.16 137.16 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(hide yes)
 			)
+		)
+		(pin "4"
+			(uuid "8486ae99-142f-4b7a-b785-f28589ab0905")
+		)
+		(pin "8"
+			(uuid "17a071a3-dcb9-4d97-ad90-3944f3a6e625")
+		)
+		(pin "9"
+			(uuid "7aa62916-243e-43d4-b81a-edc7934ef2b3")
+		)
+		(pin "10"
+			(uuid "c76f479c-36db-43c6-96b4-78742245ebb4")
+		)
+		(pin "11"
+			(uuid "4b427368-c066-4294-821f-e822c7c4dfa6")
+		)
+		(pin "12"
+			(uuid "4d7a3621-7604-4809-9a44-c764275d407c")
+		)
+		(pin "13"
+			(uuid "091dcf77-73f1-4ab9-b2f1-2ef3dfab2eba")
+		)
+		(pin "14"
+			(uuid "c958c8a3-e82b-4964-ae54-53c45e0a88c9")
+		)
+		(pin "7"
+			(uuid "c38cb667-783b-47d4-b1d8-967d61d6117f")
+		)
+		(pin "3"
+			(uuid "2bc4c30b-be2a-4f10-a049-cb5e4558e83f")
+		)
+		(pin "2"
+			(uuid "b5517305-72f2-4359-bcf1-61f3519e375c")
 		)
 		(pin "1"
-			(uuid "63d5da19-8d23-44c1-a5ea-236a5f29200b")
+			(uuid "2b2f3244-b330-4d3e-9c2a-a19c5013d5c2")
+		)
+		(pin "5"
+			(uuid "fdf21d32-6867-4b1e-b88e-e247f8033114")
+		)
+		(pin "6"
+			(uuid "762c2c92-8569-4eae-8d83-bf2bf642db5a")
 		)
 		(instances
 			(project "Blinkenlights Card"
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "#PWR03")
+					(reference "U2")
 					(unit 1)
 				)
 			)
@@ -10186,84 +11132,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:LED")
-		(at 245.11 92.71 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "d40abdce-4b95-4e31-a5f5-8a9da2a76a36")
-		(property "Reference" "D36"
-			(at 248.1072 91.7194 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "EXP0"
-			(at 248.1072 94.0308 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0805_2012Metric"
-			(at 245.11 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 245.11 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Light emitting diode"
-			(at 245.11 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C2296"
-			(at 245.11 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "c38b5e17-cd76-445d-932d-d469d000d553")
-		)
-		(pin "2"
-			(uuid "c10e4751-bd37-48fd-a16e-9bfdec029b88")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "D36")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "Device:R")
 		(at 160.02 101.6 180)
 		(unit 1)
@@ -10492,84 +11360,6 @@
 			(project "Blinkenlights Card"
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "D28")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 234.95 101.6 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "e2f8b875-363a-4ff5-900c-78022ab51b6d")
-		(property "Reference" "R35"
-			(at 236.728 100.4316 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "330"
-			(at 236.728 102.743 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 236.728 101.6 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 234.95 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Resistor"
-			(at 234.95 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C17630"
-			(at 234.95 101.6 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "3cbd50c0-c8a6-4d0f-af78-1d2c098d1062")
-		)
-		(pin "2"
-			(uuid "f955534f-d40f-4789-a0a5-e65d6a7c85dd")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "R35")
 					(unit 1)
 				)
 			)
@@ -10810,6 +11600,130 @@
 		)
 	)
 	(symbol
+		(lib_id "74xx:74LS573")
+		(at 200.66 113.03 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f172e519-b409-4ada-8876-df11f2a05817")
+		(property "Reference" "U1"
+			(at 202.8541 92.71 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "74LS573"
+			(at 202.8541 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 200.66 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "74xx/74hc573.pdf"
+			(at 200.66 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "8-bit Latch 3-state outputs"
+			(at 200.66 113.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "243ffb21-0d5f-4bb2-92f1-bf0248647411")
+		)
+		(pin "16"
+			(uuid "34f7fbb7-1f79-4b84-b730-e52ccf901b69")
+		)
+		(pin "15"
+			(uuid "0ea7493b-3347-4014-b585-2b3f34a4c407")
+		)
+		(pin "11"
+			(uuid "eb6ad4ae-63d8-44f1-b12c-eb5b47e0efdb")
+		)
+		(pin "12"
+			(uuid "91a0aef5-b98d-42c7-919b-10cca2ea0d30")
+		)
+		(pin "18"
+			(uuid "74a09445-9bc1-4c05-8c10-91a78d4580f9")
+		)
+		(pin "13"
+			(uuid "930af027-b8e5-482d-a2c9-bdfa0679a8ab")
+		)
+		(pin "19"
+			(uuid "a2616dd0-d2f4-48ed-a19e-13471e91c6f7")
+		)
+		(pin "4"
+			(uuid "49c6b2ba-f49b-4113-acd6-339ec1bacb82")
+		)
+		(pin "7"
+			(uuid "f987ed80-0678-4821-bbdc-a62e4cb4c09b")
+		)
+		(pin "3"
+			(uuid "720f911a-4203-4df5-9358-82663d8c30b3")
+		)
+		(pin "2"
+			(uuid "ada4921e-d845-4ef2-867c-37f6a4b3b323")
+		)
+		(pin "14"
+			(uuid "b731f1c4-f257-4fe0-9c45-27071ce7dc48")
+		)
+		(pin "6"
+			(uuid "80b8afe3-4901-44db-96f5-64d788d5bd31")
+		)
+		(pin "17"
+			(uuid "921270da-8086-462e-abed-856c91ab746d")
+		)
+		(pin "5"
+			(uuid "2a79c209-eea6-417a-bdca-a09afaa71b15")
+		)
+		(pin "10"
+			(uuid "a4ba4658-2d55-4a1f-8068-588fbb05ea24")
+		)
+		(pin "20"
+			(uuid "ba64bb35-7cf5-44d3-9665-c2291a6e462f")
+		)
+		(pin "8"
+			(uuid "f69d627c-07e0-42a5-b5a3-e8385eab40f4")
+		)
+		(pin "9"
+			(uuid "d49fecdd-0571-4fa1-aba2-398e79549bf1")
+		)
+		(instances
+			(project "Blinkenlights Card"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "U1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:LED")
 		(at 194.31 50.8 90)
 		(unit 1)
@@ -11038,84 +11952,6 @@
 			(project "Blinkenlights Card"
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "D5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:LED")
-		(at 224.79 92.71 90)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f968b683-c73f-45ab-9d5c-54f3e49978a7")
-		(property "Reference" "D34"
-			(at 227.7872 91.7194 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "EXP2"
-			(at 227.7872 94.0308 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "LED_SMD:LED_0805_2012Metric"
-			(at 224.79 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 224.79 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Light emitting diode"
-			(at 224.79 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C2296"
-			(at 224.79 92.71 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "8d259dd8-9e3b-4bca-8cf4-e2d0e6887a4c")
-		)
-		(pin "2"
-			(uuid "028bf348-40a8-49d3-87c0-ffd2bff48afe")
-		)
-		(instances
-			(project "Blinkenlights Card"
-				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
-					(reference "D34")
 					(unit 1)
 				)
 			)
