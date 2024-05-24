@@ -1,6 +1,6 @@
 # Debugger Web
 
-Embedded web application for 6502 Debugger supporting 6502 Dev Board and Retroshield
+Embedded web page for 6502 Debugger supporting 6502 Dev Board and Retroshield
 
 ## Project Setup
 

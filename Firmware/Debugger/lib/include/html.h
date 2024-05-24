@@ -1,34 +1,15 @@
+#ifndef _HTML_H
+#define _HTML_H
+
+PROGMEM const char HTML[] = R"=====(
 <!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="icon" href="data:image/x-icon;base64,AAABAAEAEBAAAAEAGABoAwAAFgAAACgAAAAQAAAAIAAAAAEAGAAAAAAAaAMAAAAAAAAAAAAAAAAAAAAAAABQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFBQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACfn58AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD///////////8AAAD///////8AAAD///////8AAAAAAAD///////////8AAAAAAAD///8AAAD///8AAAAAAAD///8AAAD///8AAAD///8AAAD///8AAAAAAAAAAAAAAAD///////////8AAAD///////8AAAD///8AAAD///8AAAD///////////8AAAAAAAD///8AAAAAAAAAAAD///8AAAAAAAD///8AAAD///8AAAAAAAAAAAD///8AAAAAAAD///////8AAAAAAAD///////8AAAAAAAD///////8AAAD///////////8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFBQUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFCfn5+fn59QUFAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA">
     <title>6502 Debugger</title>
-    <style>
-      body { 
-        display: flex;
-        flex-direction: column;
-        font-family: monospace;
-        background-color: black;
-        color: white;
-      }
-      a {
-        color: white;
-      }
-      header {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        white-space: pre;
-      }
-      main {
-        display: flex;
-        flex-direction: row;
-        justify-content: center;
-        gap: 8px;
-      }
-    </style>
+    <style>body{display:flex;flex-direction:column;font-family:monospace;background-color:#000;color:#fff}a{color:#fff}header{display:flex;flex-direction:row;justify-content:center;white-space:pre}main{display:flex;flex-direction:row;justify-content:center;gap:8px}</style>
   </head>
   <body class="bg-slate-950 text-slate-50 p-8">
     <header>
@@ -52,3 +33,6 @@
     </main>
   </body>
 </html>
+)=====";
+
+#endif

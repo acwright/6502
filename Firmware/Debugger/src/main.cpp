@@ -99,6 +99,8 @@ using namespace qindesign::network;
 #define IO_PAGES        8
 #define ROM_PAGES       32
 
+#define VERSION         "1.0.0"
+
 const word IO_BANKS[8] { 0x8000, 0x8400, 0x8800, 0x8C00, 0x9000, 0x9400, 0x9800, 0x9C00 };
 
 byte RAM[RAM_END - RAM_START + 1];
@@ -111,6 +113,7 @@ Button runStopButton = Button();
 
 void onTick();
 void onHigh();
+void onLow();
 void onCommand(char command);
 void onKeyPress(int key);
 void onKeyRelease(int key);
@@ -139,7 +142,6 @@ void step();
 void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
-void toggleClock();
 void toggleRunStop();
 void toggleDebug();
 void toggleRAM();
@@ -154,10 +156,8 @@ void nextPage();
 
 void onServerRoot(AsyncWebServerRequest *request);
 void onServerStatus(AsyncWebServerRequest *request);
-void onServerRAM(AsyncWebServerRequest *request);
-void onServerIO(AsyncWebServerRequest *request);
-void onServerROM(AsyncWebServerRequest *request);
-void onServerCommand(AsyncWebServerRequest *request);
+void onServerMemory(AsyncWebServerRequest *request);
+void onServerControl(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
 
 String formatDateTime();
@@ -173,13 +173,16 @@ unsigned int stepCounter = 0;
 bool isRunning = false;
 bool isStepping = false;
 bool isLogging = false;
-bool clockEnabled = true;
 bool RAMEnabled = true;
 bool IOEnabled = true;
 bool ROMEnabled = true;
 String romFile = "None";
 byte IOBank = 7;                  // By default, debugger IO bank is $9C00
 byte debugMode = DEBUG_NONE;
+
+word address = 0;
+byte data = 0;
+byte readWrite = HIGH;
 
 String ROMs[100];
 unsigned int romPage = 0;
@@ -226,10 +229,6 @@ void setup() {
 }
 
 void loop() {
-  if (digitalReadFast(PHI2)) {
-    onHigh();
-  }
-
   intButton.update();
   stepButton.update();
   runStopButton.update();
@@ -313,8 +312,8 @@ void loop() {
 void onTick()
 {
   if (freqCounter == 0) {
-    if (isRunning && clockEnabled) {
-      digitalReadFast(PHI2) ? digitalWriteFast(PHI2, LOW) : digitalWriteFast(PHI2, HIGH);
+    if (isRunning) {
+      digitalReadFast(PHI2) ? onLow() : onHigh();
     }
 
     freqCounter = FREQ_DELAYS[freqIndex];
@@ -328,14 +327,14 @@ void onTick()
       isLogging = false;
     }
 
-    if (isStepping && clockEnabled) {
+    if (isStepping) {
       if (digitalReadFast(PHI2)) {
-        digitalWriteFast(PHI2, LOW);
-      } else {
-        digitalWriteFast(PHI2, HIGH);
+        onLow();
 
         isStepping = false; // We are done stepping...
-        isLogging = true;   // Wait for next tick to log
+        isLogging = true;   // Log on next tick
+      } else {
+        onHigh();
       }
     }
 
@@ -345,31 +344,19 @@ void onTick()
   }
 }
 
-void onHigh() {
-  // Continously latch the read/write, data and address lines during HIGH phase
-  word address = readAddress();
-  byte data = readData();
-  byte readWrite = digitalReadFast(RWB);
+void onLow() {
+  // Read data from bus just before high to low transition
+  data = readData();
 
+  // Always capture IO and RAM read / writes for debugging
+  if ((address >= IO_START) && (address <= IO_END)) { // IO
+    IO[address - IO_START] = data;
+  } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
+    RAM[address - RAM_START] = data;
+  }
+
+  // Handle IO post processing
   if (readWrite == HIGH) { // READING
-    // Check if in IO space first since it overlaps ROM space...
-    if ((address >= IO_START) && (address <= IO_END)) { // IO
-      // Only output data if address is in selected IOBank area and IO is enabled
-      if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) {
-        setDataDirOut();
-        writeData(IO[address - IO_START]);
-      }
-    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
-      setDataDirOut();
-      writeData(RAM[address - RAM_START]);
-    } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
-      setDataDirOut();
-      writeData(ROM[address - ROM_START]);
-    } else {
-      setDataDirIn();
-    }
-
-    // Handle IO post processing
     switch(address - IO_BANKS[IOBank]) {
       case KBD_DATA: {
         // Read from KBD_DATA clears data ready bit
@@ -399,15 +386,38 @@ void onHigh() {
       default:
         break;
     }
+  }
+
+  digitalWriteFast(PHI2, LOW);
+}
+
+void onHigh() {
+  digitalWriteFast(PHI2, HIGH);
+
+  readWrite = digitalReadFast(RWB);
+  address = readAddress();
+
+  if (readWrite == HIGH) { // READING
+    // Check if in IO space first since it overlaps ROM space...
+    if ((address >= IO_START) && (address <= IO_END)) { // IO
+      // Only output data if address is in selected IOBank area and IO is enabled
+      if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) {
+        setDataDirOut();
+        writeData(IO[address - IO_START]);
+      } else {
+        setDataDirIn();
+      }
+    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
+      setDataDirOut();
+      writeData(RAM[address - RAM_START]);
+    } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
+      setDataDirOut();
+      writeData(ROM[address - ROM_START]);
+    } else {
+      setDataDirIn();
+    }
   } else { // WRITING
     setDataDirIn();
-
-    // Always store write to IO and RAM for debugging
-    if ((address >= IO_START) && (address <= IO_END)) { // IO
-      IO[address - IO_START] = data;
-    } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
-      RAM[address - RAM_START] = data;
-    }
   }
 }
 
@@ -490,10 +500,6 @@ void onCommand(char command) {
     case 'g':
     case 'G':
       log();
-      break;
-    case 'c':
-    case 'C':
-      toggleClock();
       break;
     case '-':
       decreaseFrequency();
@@ -664,9 +670,7 @@ void info() {
   Serial.println(")");
   Serial.print("Debug: ");
   Serial.println(formatDebugMode());
-  Serial.print("Clock: ");
-  Serial.println(clockEnabled ? "Enabled" : "Disabled");
-  Serial.print("Clock Frequency: ");
+  Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
   Serial.print("IP address: ");
   Serial.println(Ethernet.localIP());
@@ -676,23 +680,17 @@ void info() {
   Serial.println("------------------------------------------------------------");
   Serial.println("| (R)un / Stop         | (S)tep           | Rese(T)        |");
   Serial.println("------------------------------------------------------------");
-  Serial.println("| Toggle R(A)M         | Toggle R(O)M     | (L)ist ROMs    |");
+  Serial.println("| Toggle R(A)M         | Toggle (I)O      | Toggle R(O)M   |");
   Serial.println("------------------------------------------------------------");
-  Serial.println("| Toggle (I)O          | Change IO Ban(K) | Sna(P)shot     |");
+  Serial.println("| (L)ist ROMs          | Change IO Ban(K) | Sna(P)shot     |");
   Serial.println("------------------------------------------------------------");
-  Serial.println("| Toggle (C)lock Mode  | (+/-) Clk Frequency               |");
-  Serial.println("------------------------------------------------------------");
-  Serial.println("| Lo(G) Data / Address | Toggle De(B)ug   | In(F)o         |");
+  Serial.println("| (+/-) Clk Frequency  | Toggle De(B)ug   | In(F)o / Lo(G) |");
   Serial.println("------------------------------------------------------------");
   Serial.println();
 }
 
 void log() {
   char output[64];
-
-  word address = readAddress();
-  byte data = readData();
-  byte readWrite = digitalReadFast(RWB);
 
   sprintf(
     output, 
@@ -706,19 +704,19 @@ void log() {
     readWrite ? 'R' : 'W'
   );
 
-  Serial.println(output); 
+  Serial.println(output);
 }
 
 void reset() {
   bool isCurrentlyRunning = isRunning;
 
   if (isCurrentlyRunning) {
-    isRunning = false;
+    toggleRunStop();
   }
 
+  Serial.print("Resetting... ");
+
   digitalWriteFast(RESB, LOW);
-  digitalWriteFast(PHI2, LOW);
-  delay(100);
   digitalWriteFast(PHI2, HIGH);
   delay(100);
   digitalWriteFast(PHI2, LOW);
@@ -728,19 +726,23 @@ void reset() {
   digitalWriteFast(PHI2, LOW);
   delay(100);
   digitalWriteFast(PHI2, HIGH);
+  delay(100);
+  digitalWriteFast(PHI2, LOW);
   delay(100);
   digitalWriteFast(RESB, HIGH);
 
+  Serial.println("Done");
+
   if (isCurrentlyRunning) {
-    isRunning = true;
+    toggleRunStop();
   }
 }
 
 void step() {
-  if (!isRunning && clockEnabled) {
+  if (!isRunning) {
     isStepping = true;
   } else {
-    Serial.println("Clock must be enabled and stopped before stepping!");
+    Serial.println("Clock must be stopped before stepping!");
   }
 }
 
@@ -810,19 +812,11 @@ void increaseFrequency() {
   Serial.println(FREQS[freqIndex]);
 }
 
-void toggleClock() {
-  clockEnabled = !clockEnabled;
-  clockEnabled ? pinMode(PHI2, OUTPUT) : pinMode(PHI2, INPUT);
-
-  Serial.print("Clock: ");
-  Serial.print(clockEnabled ? "Enabled" : "Disabled");
-}
-
 void toggleRunStop() {
   isRunning = !isRunning;
 
-  if (!isRunning && digitalReadFast(PHI2) == LOW) { 
-    digitalWriteFast(PHI2, HIGH);
+  if (!isRunning && digitalReadFast(PHI2) == HIGH) { 
+    onLow();
   }
 
   Serial.println(isRunning ? "Running…" : "Stopped");
@@ -1096,7 +1090,7 @@ void initPins() {
   digitalWriteFast(NMIB, HIGH);
   digitalWriteFast(RDY, HIGH);
   digitalWriteFast(BE, HIGH);
-  digitalWriteFast(PHI2, HIGH);
+  digitalWriteFast(PHI2, LOW);
 
   digitalWriteFast(OE1, HIGH);
   digitalWriteFast(OE2, HIGH);
@@ -1125,7 +1119,7 @@ void initPins() {
   digitalWriteFast(NMIB, HIGH);
   digitalWriteFast(RDY, HIGH);
   digitalWriteFast(SOB, HIGH);
-  digitalWriteFast(PHI2, HIGH);
+  digitalWriteFast(PHI2, LOW);
 }
 #endif
 
@@ -1164,10 +1158,8 @@ void initUSB() {
 void initServer() {
   server.on("/", onServerRoot);
   server.on("/status", onServerStatus);
-  server.on("/ram", onServerRAM);
-  server.on("/io", onServerIO);
-  server.on("/rom", onServerROM);
-  server.on("/command", HTTP_POST, onServerCommand);
+  server.on("/memory", onServerMemory);
+  server.on("/control", onServerControl);
   server.onNotFound(onServerNotFound);
   server.begin();
 }
@@ -1196,12 +1188,7 @@ void onServerStatus(AsyncWebServerRequest *request) {
 
   readROMs();
 
-  word address = readAddress();
-  byte data = readData();
-  byte readWrite = digitalReadFast(RWB);
-
-  doc["clkFrequency"]       = FREQS[freqIndex];
-  doc["clkEnabled"]         = clockEnabled;
+  doc["frequency"]          = FREQS[freqIndex];
   doc["ioBank"]             = IO_BANKS[IOBank];
   doc["ioEnabled"]          = IOEnabled;
   doc["ipAddress"]          = Ethernet.localIP();
@@ -1227,6 +1214,8 @@ void onServerStatus(AsyncWebServerRequest *request) {
   doc["ramEnabled"]         = RAMEnabled;
   doc["romEnabled"]         = ROMEnabled;
   doc["romFile"]            = romFile;
+  doc["romPage"]            = romPage;
+  doc["version"]            = VERSION;
 
   for (unsigned int i = 0; i < sizeof(ROMs) / sizeof(ROMs[0]); i++) {
     if (ROMs[i] != "?") {
@@ -1245,14 +1234,38 @@ void onServerStatus(AsyncWebServerRequest *request) {
 /* There is a bug in the implementation of beginChunkedResponse() (improper formatting) and all other response    */
 /* types besides beginResponseStream() will corrupt or add garbage to the data. So we are limited to 1024 byte    */
 /* pages.                                                                                                         */
+/* All 32 pages of ROM can be inspected but only top 24k is valid ROM space.                                      */
 
-void onServerRAM(AsyncWebServerRequest *request) {
-  size_t page = 0;
+void onServerMemory(AsyncWebServerRequest *request) {
+  String block;
+  size_t page;
   bool formatted = false;
 
+  size_t maxPages;
+
+  if (request->hasParam("block")) {
+    block = request->getParam("page")->value();
+
+    if (block == "ram") {
+      maxPages = RAM_PAGES;
+    } else if (block == "io") {
+      maxPages = IO_PAGES;
+    } else if (block == "rom") {
+      maxPages = ROM_PAGES;
+    } else {
+      request->send(400);
+      return;
+    }
+  } else {
+    request->send(400);
+    return;
+  }
   if (request->hasParam("page")) {
     page = size_t(request->getParam("page")->value().toInt());
-    page = min(size_t(RAM_PAGES - 1), page); // Clamp page index
+    page = min(size_t(maxPages - 1), page); // Clamp page index
+  } else {
+    request->send(400);
+    return;
   }
   if (request->hasParam("formatted")) {
     formatted = true;
@@ -1265,79 +1278,81 @@ void onServerRAM(AsyncWebServerRequest *request) {
 
   for (size_t i = 0; i < PAGE_SIZE; i++) {
     if (formatted) {
-      response->printf("%02X ", RAM[i + (page * PAGE_SIZE)]);
+      if (block == "ram") {
+        response->printf("%02X ", RAM[i + (page * PAGE_SIZE)]);
+      } else if (block == "io") {
+        response->printf("%02X ", IO[i + (page * PAGE_SIZE)]);
+      } else if (block == "rom") {
+        response->printf("%02X ", ROM[i + (page * PAGE_SIZE)]);
+      }
     } else {
-      response->write(RAM[i + (page * PAGE_SIZE)]);
+      if (block == "ram") {
+        response->write(RAM[i + (page * PAGE_SIZE)]);
+      } else if (block == "io") {
+        response->write(IO[i + (page * PAGE_SIZE)]);
+      } else if (block == "rom") {
+        response->write(ROM[i + (page * PAGE_SIZE)]);
+      }
     }
   }
   
   request->send(response);
 }
 
-void onServerIO(AsyncWebServerRequest *request) {
-  size_t page = 0;
-  bool formatted = false;
+void onServerControl(AsyncWebServerRequest *request) {
+  String command;
 
-  if (request->hasParam("page")) {
-    page = size_t(request->getParam("page")->value().toInt());
-    page = min(size_t(IO_PAGES - 1), page); // Clamp page index
-  }
-  if (request->hasParam("formatted")) {
-    formatted = true;
+  if (request->hasParam("command")) {
+    command = request->getParam("command")->value();
+  } else {
+    request->send(400);
+    return;
   }
 
-  AsyncResponseStream *response = request->beginResponseStream(
-    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
-    PAGE_SIZE
-  );
-
-  for (size_t i = 0; i < PAGE_SIZE; i++) {
-    if (formatted) {
-      response->printf("%02X ", IO[i + (page * PAGE_SIZE)]);
-    } else {
-      response->write(IO[i + (page * PAGE_SIZE)]);
-    }
+  if (command == "r" || command == "R") {
+    toggleRunStop();
+  } else if (command == "s" || command == "S") {
+    step();
+  } else if (command == "t" || command == "T") {
+    reset();
+  } else if (command == "a" || command == "A") {
+    toggleRAM();
+  } else if (command == "i" || command == "I") {
+    toggleIO();
+  } else if (command == "o" || command == "O") {
+    toggleROM();
+  } else if (command == "l" || command == "L") {
+    listROMs();
+  } else if (command == "k" || command == "K") {
+    toggleIOBank();
+  } else if (command == "p" || command == "P") {
+    snapshot();
+  } else if (command == "+") {
+    increaseFrequency();
+  } else if (command == "-") {
+    decreaseFrequency();
+  } else if (command == "b" || command == "B") {
+    toggleDebug();
+  } else if (command == "f" || command == "F") {
+    info();
+  } else if (command == "g" || command == "G") {
+    log();
+  } else if (command == "[") {
+    prevPage();
+  } else if (command == "]") {
+    nextPage();
+  } else if (request->getParam("command")->value().toInt() >= 0 && request->getParam("command")->value().toInt() < 10) {
+    loadROM(request->getParam("command")->value().toInt());
+  } else {
+    request->send(400);
+    return;
   }
-  
-  request->send(response);
-}
 
-void onServerROM(AsyncWebServerRequest *request) {
-  // Note: All 32 pages of RAM can be inspected but only top 24k is valid ROM area.
-
-  size_t page = 0;
-  bool formatted = false;
-
-  if (request->hasParam("page")) {
-    page = size_t(request->getParam("page")->value().toInt());
-    page = min(size_t(ROM_PAGES - 1), page); // Clamp page index
-  }
-  if (request->hasParam("formatted")) {
-    formatted = true;
-  }
-
-  AsyncResponseStream *response = request->beginResponseStream(
-    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
-    PAGE_SIZE
-  );
-
-  for (size_t i = 0; i < PAGE_SIZE; i++) {
-    if (formatted) {
-      response->printf("%02X ", ROM[i + (page * PAGE_SIZE)]);
-    } else {
-      response->write(ROM[i + (page * PAGE_SIZE)]);
-    }
-  }
-  
-  request->send(response);
-}
-
-void onServerCommand(AsyncWebServerRequest *request) {
-  request->send(404);
+  request->send(200);
 }
 
 void onServerNotFound(AsyncWebServerRequest *request) {
-  request->redirect("/");
+  request->send(404);
 }
 
 //
