@@ -69,15 +69,28 @@ using namespace qindesign::network;
 #define MOUSE_W     6       // |  DIR  |                    VELOCITY                           |  Mouse Wheel:      Direction + Down (0) - Up (1) -> Velocity from 0-127
 #define MOUSE_BTN   7       // |                  NA                   |  MID  | RIGHT |  LEFT |  Mouse Buttons:    (Bit 7-3 unused) -> Middle, Right, Left Buttons Pressed (Bit 2-0)
 
-#define JOY_DIR     8       // |  SEL  | START |       NA      |   UP  |  DOWN |  LEFT | RIGHT |  Joystick Dir:     Select / Start (Bit 7-6) -> (Bit 5-4 unused) -> D-Pad or Analog (Left) (Bit 3-0)
-#define JOY_BTN     9       // |   L   |   R   | LTRIG | RTRIG |   X   |   Y   |   A   |   B   |  Joystick Btn:     Left -> Right -> Left Trigger -> Right Trigger -> X -> Y -> A -> B
+#define JOY_BTNL    8       // |   Y   |   X   |   B   |   A   | LFUNC | RFUNC |       NA      |  Joystick Btn L:           Y -> X -> B -> A -> L Function (View) -> R Function (Menu) -> (Bit 1-0 unused)
+#define JOY_BTNH    9       // | RABTN | LABTN |  RBTN |  LBTN | RIGHT |  LEFT |  DOWN |   UP  |  Joystick Btn H:           Right Analog Btn -> Left Analog Btn -> Right Btn -> Left Btn -> D-Right -> D-Left -> D-Down -> D-Up
+#define JOY_LAXL   10       // |                   LEFT ANALOG X (LOW BYTE)                    |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (Low Byte)
+#define JOY_LAXH   11       // |                   LEFT ANALOG X (HIGH BYTE)                   |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (High Byte)
+#define JOY_LAYL   12       // |                   LEFT ANALOG Y (LOW BYTE)                    |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (Low Byte)
+#define JOY_LAYH   13       // |                   LEFT ANALOG Y (HIGH BYTE)                   |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (High Byte)
+#define JOY_RAXL   14       // |                  RIGHT ANALOG X (LOW BYTE)                    |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (Low Byte)
+#define JOY_RAXH   15       // |                  RIGHT ANALOG X (HIGH BYTE)                   |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (High Byte)
+#define JOY_RAYL   16       // |                  RIGHT ANALOG Y (LOW BYTE)                    |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (Low Byte)
+#define JOY_RAYH   17       // |                  RIGHT ANALOG Y (HIGH BYTE)                   |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (High Byte)
+#define JOY_LTRL   18       // |                   LEFT TRIGGER (LOW BYTE)                     |  Joystick Left Trigger:    +0 to +1024 (Low Byte)
+#define JOY_LTRH   19       // |                       NA                      |    LTRIG(H)   |  Joystick Left Trigger:    +0 to +1024 (High Byte) (Bit 7-2 unused)
+#define JOY_RTRL   20       // |                  RIGHT TRIGGER (LOW BYTE)                     |  Joystick Right Trigger:   +0 to +1024 (Low Byte)
+#define JOY_RTRH   21       // |                       NA                      |    RTRIG(H)   |  Joystick Right Trigger:   +0 to +1024 (High Byte) (Bit 7-2 unused)
+                            /*                                                                    Notes:                    XBOX 360 and XBOX One controllers supported for now... */
 
-#define RTC_SEC     16      // |                            SECONDS                            |  Real Time Clock:  Second (0-59)
-#define RTC_MIN     17      // |                            MINUTES                            |  Real Time Clock:  Minute (0-59)
-#define RTC_HR      18      // |                             HOURS                             |  Real Time Clock:  Hour (0-23)
-#define RTC_DAY     19      // |                              DAY                              |  Real Time Clock:  Day (1-31)
-#define RTC_MON     20      // |                             MONTH                             |  Real Time Clock:  Month (1-12)
-#define RTC_YR      21      // |                             YEAR                              |  Real Time Clock:  Year (0-99) (Offset from 1970)
+#define RTC_SEC    32       // |                            SECONDS                            |  Real Time Clock:  Second (0-59)
+#define RTC_MIN    33       // |                            MINUTES                            |  Real Time Clock:  Minute (0-59)
+#define RTC_HR     34       // |                             HOURS                             |  Real Time Clock:  Hour (0-23)
+#define RTC_DAY    35       // |                              DAY                              |  Real Time Clock:  Day (1-31)
+#define RTC_MON    36       // |                             MONTH                             |  Real Time Clock:  Month (1-12)
+#define RTC_YR     37       // |                             YEAR                              |  Real Time Clock:  Year (0-99) (Offset from 1970)
                             /*                                                                    Notes:            Real Time Clock IO registers are read-only. Teensy Loader automatically initializes the RTC to your PC's time while uploading. */
                             /*                                                                                      If a coin cell is connected to VBAT, the RTC will continue keeping time while power is turned off. See: https://www.pjrc.com/store/teensy41.html */
 
@@ -98,6 +111,7 @@ using namespace qindesign::network;
 #define RAM_PAGES       32
 #define IO_PAGES        8
 #define ROM_PAGES       32
+#define ROM_MAX         256
 
 #define VERSION         "1.0.0"
 
@@ -184,7 +198,7 @@ word address = 0;
 byte data = 0;
 byte readWrite = HIGH;
 
-String ROMs[100];
+String ROMs[ROM_MAX];
 unsigned int romPage = 0;
 
 EthernetClient ethClient;
@@ -287,6 +301,55 @@ void loop() {
   if (joystick.available()) {
     uint64_t axis_mask = joystick.axisMask();
     uint32_t buttons = joystick.getButtons();
+
+    if (joystick.joystickType() == JoystickController::XBOX360 || 
+        joystick.joystickType() == JoystickController::XBOXONE) 
+    {
+      byte joyBtnL = 0;
+      byte joyBtnH = 0;
+      
+      // #define JOY_BTNL    8       // |   Y   |   X   |   B   |   A   | LFUNC | RFUNC |       NA      |  Joystick Btn L:           Y -> X -> B -> A -> L Function (View) -> R Function (Menu) -> (Bit 1-0 unused)
+      // #define JOY_BTNH    9       // | RABTN | LABTN |  RBTN |  LBTN | RIGHT |  LEFT |  DOWN |   UP  |  Joystick Btn H:           Right Analog Btn -> Left Analog Btn -> Right Btn -> Left Btn -> D-Right -> D-Left -> D-Down -> D-Up
+      // #define JOY_LAXL   10       // |                   LEFT ANALOG X (LOW BYTE)                    |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (Low Byte)
+      // #define JOY_LAXH   11       // |                   LEFT ANALOG X (HIGH BYTE)                   |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (High Byte)
+      // #define JOY_LAYL   12       // |                   LEFT ANALOG Y (LOW BYTE)                    |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (Low Byte)
+      // #define JOY_LAYH   13       // |                   LEFT ANALOG Y (HIGH BYTE)                   |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (High Byte)
+      // #define JOY_RAXL   14       // |                  RIGHT ANALOG X (LOW BYTE)                    |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (Low Byte)
+      // #define JOY_RAXH   15       // |                  RIGHT ANALOG X (HIGH BYTE)                   |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (High Byte)
+      // #define JOY_RAYL   16       // |                  RIGHT ANALOG Y (LOW BYTE)                    |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (Low Byte)
+      // #define JOY_RAYH   17       // |                  RIGHT ANALOG Y (HIGH BYTE)                   |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (High Byte)
+      // #define JOY_LTRL   18       // |                   LEFT TRIGGER (LOW BYTE)                     |  Joystick Left Trigger:    +0 to +1024 (Low Byte)
+      // #define JOY_LTRH   19       // |                       NA                      |    LTRIG(H)   |  Joystick Left Trigger:    +0 to +1024 (High Byte) (Bit 7-2 unused)
+      // #define JOY_RTRL   20       // |                  RIGHT TRIGGER (LOW BYTE)                     |  Joystick Right Trigger:   +0 to +1024 (Low Byte)
+      // #define JOY_RTRH   21       // |                       NA                      |    RTRIG(H)   |  Joystick Right Trigger:   +0 to +1024 (High Byte) (Bit 7-2 unused)
+      //                             /*                                                                    Notes:                    XBOX 360 and XBOX One controllers supported for now... */
+      // XBOX Button Values
+      // LFUNC (View): 0x8 0000 1000
+      // RFUNC (Menu): 0x4 0000 0100
+      // A: 0x10 0001 0000
+      // B: 0x20 0010 0000
+      // X: 0x40 0100 0000
+      // Y: 0x80 1000 0000
+      // UP: 0x100 0000 0001 0000 0000
+      // DOWN: 0x200 0000 0010 0000 0000
+      // LEFT: 0x400 0000 0100 0000 0000
+      // RIGHT: 0x800 0000 1000 0000 0000
+      // LBTN: 0x1000 0001 0000 0000 0000
+      // RBTN: 0x2000 0010 0000 0000 0000
+      // LABTN: 0x4000 0100 0000 0000 0000
+      // RABTN: 0x8000 1000 0000 0000 0000
+
+      // XBOX Analog Values
+      // Left Analog X: 0:-32768(left) +32768(right) 
+      // Left Analog Y: 1:-32768(down) +32768(up)
+      // Right Analog X: 2:-32768(left) +32768(right) 
+      // LTRIG: 3:0-1023
+      // RTRIG: 4:0-1023
+      // Right Analog Y: 5:-32768(down) +32768(up)
+
+      IO[(IO_BANKS[IOBank] + JOY_BTNL) - IO_START] = joyBtnL;
+      IO[(IO_BANKS[IOBank] + JOY_BTNH) - IO_START] = joyBtnH;
+    }
 
     if (debugMode == DEBUG_JOYSTICK) {
       Serial.printf("Joystick: Buttons = %x", buttons);
@@ -446,12 +509,6 @@ void onCommand(char command) {
       break;
     case '7':
       loadROM(7);
-      break;
-    case '8':
-      loadROM(8);
-      break;
-    case '9':
-      loadROM(9);
       break;
     case 'r':
     case 'R':
@@ -885,7 +942,7 @@ void readROMs() {
     SD.mkdir("ROMS");
   }
 
-  for (unsigned int i = 0; i < 100; i++) {
+  for (unsigned int i = 0; i < ROM_MAX; i++) {
     ROMs[i] = "?";
   }
 
@@ -911,11 +968,9 @@ void readROMs() {
 }
 
 void listROMs() {
-  readROMs();
-
-  for (unsigned int j = (romPage * 10); j < ((romPage * 10) + 10); j++) {
+  for (unsigned int j = (romPage * 8); j < ((romPage * 8) + 8); j++) {
     Serial.print("(");
-    Serial.print(j - (romPage * 10));
+    Serial.print(j - (romPage * 8));
     Serial.print(")");
     Serial.print(" - ");
     Serial.println(ROMs[j]);
@@ -923,14 +978,14 @@ void listROMs() {
 
   Serial.println();
   Serial.print("Page: ");
-  Serial.print(romPage + 1);
+  Serial.print(romPage);
   Serial.println(" | ([) Prev Page | Next Page (]) |");
   Serial.println();
 }
 
 void loadROM(unsigned int index) {
   String directory = "ROMS/";
-  String filename = ROMs[(romPage * 10) + index];
+  String filename = ROMs[(romPage * 8) + index];
 
   if (!filename.length()) { 
     Serial.println("Invalid ROM! (L)ist ROMs before loading.");
@@ -964,14 +1019,14 @@ void prevPage() {
   if (romPage > 0)  {
     romPage--;
   } else {
-    romPage = 9;
+    romPage = 31;
   }
 
   listROMs();
 }
 
 void nextPage() {
-  if (romPage < 9) {
+  if (romPage < 31) {
     romPage++;
   } else {
     romPage = 0;
@@ -1139,6 +1194,8 @@ void initButtons() {
 
 void initSD() {
   SD.begin(BUILTIN_SDCARD);
+
+  readROMs();
 }
 
 void initEthernet() {
@@ -1341,7 +1398,7 @@ void onServerControl(AsyncWebServerRequest *request) {
     prevPage();
   } else if (command == "]") {
     nextPage();
-  } else if (request->getParam("command")->value().toInt() >= 0 && request->getParam("command")->value().toInt() < 10) {
+  } else if (request->getParam("command")->value().toInt() >= 0 && request->getParam("command")->value().toInt() < 8) {
     loadROM(request->getParam("command")->value().toInt());
   } else {
     request->send(400);
