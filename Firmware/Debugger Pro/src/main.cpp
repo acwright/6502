@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <TimerOne.h>
 #include <Bounce2.h>
 #include <SD.h>
@@ -7,7 +6,6 @@
 #include <TimeLib.h>
 #include <EEPROM.h>
 #include <USBHost_t36.h>
-#include <AsyncWebServer_Teensy41.h>
 
 #if DEVBOARD
 #include "devboard.h"
@@ -15,8 +13,6 @@
 #include "retroshield.h"
 #endif
 #include "utilities.h"
-
-#include "html.h"
 
 using namespace qindesign::network;
 
@@ -140,7 +136,6 @@ void initROM();
 void initSD();
 void initEthernet();
 void initUSB();
-void initServer();
 
 void setAddrDirIn();
 void setDataDirIn();
@@ -167,12 +162,6 @@ void listROMs();
 void loadROM(unsigned int index);
 void prevPage();
 void nextPage();
-
-void onServerRoot(AsyncWebServerRequest *request);
-void onServerStatus(AsyncWebServerRequest *request);
-void onServerMemory(AsyncWebServerRequest *request);
-void onServerControl(AsyncWebServerRequest *request);
-void onServerNotFound(AsyncWebServerRequest *request);
 
 String formatDateTime();
 String formatDebugMode();
@@ -212,8 +201,6 @@ KeyboardController keyboard(usb);
 MouseController mouse(usb);
 JoystickController joystick(usb);
 
-AsyncWebServer    server(80);
-
 //
 // MAIN LOOPS
 //
@@ -236,7 +223,6 @@ void setup() {
   initSD();
   initEthernet();
   initUSB();
-  initServer();
 
   info();
   reset();
@@ -305,17 +291,35 @@ void loop() {
     if (joystick.joystickType() == JoystickController::XBOX360 || 
         joystick.joystickType() == JoystickController::XBOXONE) 
     {
+      byte joyBtnL = 0;
+      byte joyBtnH = 0;
+      
+      // #define JOY_BTNL    8       // |   Y   |   X   |   B   |   A   | LFUNC | RFUNC |       NA      |  Joystick Btn L:           Y -> X -> B -> A -> L Function (View) -> R Function (Menu) -> (Bit 1-0 unused)
+      // #define JOY_BTNH    9       // | RABTN | LABTN |  RBTN |  LBTN | RIGHT |  LEFT |  DOWN |   UP  |  Joystick Btn H:           Right Analog Btn -> Left Analog Btn -> Right Btn -> Left Btn -> D-Right -> D-Left -> D-Down -> D-Up
+      // #define JOY_LAXL   10       // |                   LEFT ANALOG X (LOW BYTE)                    |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (Low Byte)
+      // #define JOY_LAXH   11       // |                   LEFT ANALOG X (HIGH BYTE)                   |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (High Byte)
+      // #define JOY_LAYL   12       // |                   LEFT ANALOG Y (LOW BYTE)                    |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (Low Byte)
+      // #define JOY_LAYH   13       // |                   LEFT ANALOG Y (HIGH BYTE)                   |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (High Byte)
+      // #define JOY_RAXL   14       // |                  RIGHT ANALOG X (LOW BYTE)                    |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (Low Byte)
+      // #define JOY_RAXH   15       // |                  RIGHT ANALOG X (HIGH BYTE)                   |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (High Byte)
+      // #define JOY_RAYL   16       // |                  RIGHT ANALOG Y (LOW BYTE)                    |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (Low Byte)
+      // #define JOY_RAYH   17       // |                  RIGHT ANALOG Y (HIGH BYTE)                   |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (High Byte)
+      // #define JOY_LTRL   18       // |                   LEFT TRIGGER (LOW BYTE)                     |  Joystick Left Trigger:    +0 to +1024 (Low Byte)
+      // #define JOY_LTRH   19       // |                       NA                      |    LTRIG(H)   |  Joystick Left Trigger:    +0 to +1024 (High Byte) (Bit 7-2 unused)
+      // #define JOY_RTRL   20       // |                  RIGHT TRIGGER (LOW BYTE)                     |  Joystick Right Trigger:   +0 to +1024 (Low Byte)
+      // #define JOY_RTRH   21       // |                       NA                      |    RTRIG(H)   |  Joystick Right Trigger:   +0 to +1024 (High Byte) (Bit 7-2 unused)
+      //                             /*                                                                    Notes:                    XBOX 360 and XBOX One controllers supported for now... */
       // XBOX Button Values
-      // LFUNC (View): 0x8 1000
-      // RFUNC (Menu): 0x4 0100
+      // LFUNC (View): 0x8 0000 1000
+      // RFUNC (Menu): 0x4 0000 0100
       // A: 0x10 0001 0000
       // B: 0x20 0010 0000
       // X: 0x40 0100 0000
       // Y: 0x80 1000 0000
-      // UP: 0x100 0001 0000 0000
-      // DOWN: 0x200 0010 0000 0000
-      // LEFT: 0x400 0100 0000 0000
-      // RIGHT: 0x800 1000 0000 0000
+      // UP: 0x100 0000 0001 0000 0000
+      // DOWN: 0x200 0000 0010 0000 0000
+      // LEFT: 0x400 0000 0100 0000 0000
+      // RIGHT: 0x800 0000 1000 0000 0000
       // LBTN: 0x1000 0001 0000 0000 0000
       // RBTN: 0x2000 0010 0000 0000 0000
       // LABTN: 0x4000 0100 0000 0000 0000
@@ -329,20 +333,8 @@ void loop() {
       // RTRIG: 4:0-1023
       // Right Analog Y: 5:-32768(down) +32768(up)
 
-      IO[(IO_BANKS[IOBank] + JOY_BTNL) - IO_START] = buttons & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_BTNH) - IO_START] = (buttons >> 8) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_LAXL) - IO_START] = joystick.getAxis(0) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_LAXH) - IO_START] = (joystick.getAxis(0) >> 8) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_LAYL) - IO_START] = joystick.getAxis(1) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_LAYH) - IO_START] = (joystick.getAxis(1) >> 8) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_RAXL) - IO_START] = joystick.getAxis(2) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_RAXH) - IO_START] = (joystick.getAxis(2) >> 8) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_RAYL) - IO_START] = joystick.getAxis(5) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_RAYH) - IO_START] = (joystick.getAxis(5) >> 8) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_LTRL) - IO_START] = joystick.getAxis(3) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_LTRH) - IO_START] = (joystick.getAxis(3) >> 8) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_RTRL) - IO_START] = joystick.getAxis(4) & 0xFF;
-      IO[(IO_BANKS[IOBank] + JOY_RTRH) - IO_START] = (joystick.getAxis(4) >> 8) & 0xFF;
+      IO[(IO_BANKS[IOBank] + JOY_BTNL) - IO_START] = joyBtnL;
+      IO[(IO_BANKS[IOBank] + JOY_BTNH) - IO_START] = joyBtnH;
     }
 
     if (debugMode == DEBUG_JOYSTICK) {
@@ -613,7 +605,7 @@ void onKeyPress(int key) {
 
       // Set bit 7 of KBD_STAT register to indicate keyboard interrupt asserted
       IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b10000000;
-    } 
+    }
   }
 
   if (debugMode == DEBUG_KEYBOARD) {
@@ -701,13 +693,7 @@ void info() {
   Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88ee 88eee8 88ee8 88ee8 88ee8 88ee 88   8  ");
   Serial.println();
   Serial.print("6502 Debugger | Version: ");
-  Serial.print(VERSION);
-  Serial.print(" | Platform: ");
-  #if DEVBOARD
-  Serial.println("Dev Board");
-  #elif RETROSHIELD
-  Serial.println("Retroshield");
-  #endif
+  Serial.println(VERSION);
   Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
@@ -1112,8 +1098,8 @@ void initROM() {
   }
 }
 
+#if DEVBOARD
 void initPins() {
-  #if DEVBOARD
   pinMode(RESB, OUTPUT);
   pinMode(IRQB, OUTPUT);
   pinMode(NMIB, OUTPUT);
@@ -1150,7 +1136,9 @@ void initPins() {
   digitalWriteFast(OE1, HIGH);
   digitalWriteFast(OE2, HIGH);
   digitalWriteFast(OE3, HIGH);
-  #elif RETROSHIELD
+}
+#elif RETROSHIELD
+void initPins() {
   pinMode(RESB, OUTPUT);
   pinMode(IRQB, OUTPUT);
   pinMode(NMIB, OUTPUT);
@@ -1173,8 +1161,8 @@ void initPins() {
   digitalWriteFast(RDY, HIGH);
   digitalWriteFast(SOB, HIGH);
   digitalWriteFast(PHI2, LOW);
-  #endif
 }
+#endif
 
 void initButtons() {
   intButton.attach(INT_SWB, INPUT_PULLUP);
@@ -1200,7 +1188,7 @@ void initEthernet() {
   Ethernet.begin();
   Ethernet.waitForLocalIP(5000);
 
-  MDNS.begin("6502");
+  MDNS.begin("6502-debugger");
   MDNS.addService("_http", "_tcp", 80);
 }
 
@@ -1208,206 +1196,6 @@ void initUSB() {
   usb.begin();
   keyboard.attachPress(onKeyPress);
   keyboard.attachRelease(onKeyRelease);
-}
-
-void initServer() {
-  server.on("/", onServerRoot);
-  server.on("/status", onServerStatus);
-  server.on("/memory", onServerMemory);
-  server.on("/control", onServerControl);
-  server.onNotFound(onServerNotFound);
-  server.begin();
-}
-
-//
-// WEB SERVER
-//
-
-void onServerRoot(AsyncWebServerRequest *request) {
-  request->send(
-    "text/html",
-    sizeof(HTML) / sizeof(char), 
-    [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t 
-  {
-    size_t length = min(maxLen, (sizeof(HTML) / sizeof(char)) - index);
-
-    memcpy(buffer, HTML + index, length);
-
-    return length;
-  });
-}
-
-void onServerStatus(AsyncWebServerRequest *request) {
-  String response;
-  JsonDocument doc;
-
-  readROMs();
-
-  doc["frequency"]          = FREQS[freqIndex];
-  doc["ioBank"]             = IO_BANKS[IOBank];
-  doc["ioEnabled"]          = IOEnabled;
-  doc["ipAddress"]          = Ethernet.localIP();
-  doc["isRunning"]          = isRunning;
-  doc["pins"]["address"]    = address;
-  doc["pins"]["data"]       = data;
-  doc["pins"]["rwb"]        = readWrite;
-  doc["pins"]["phi2"]       = digitalReadFast(PHI2);
-  doc["pins"]["nmib"]       = digitalReadFast(NMIB);
-  doc["pins"]["irqb"]       = digitalReadFast(IRQB);
-  doc["pins"]["resb"]       = digitalReadFast(RESB);
-  doc["pins"]["rdy"]        = digitalReadFast(RDY);
-  
-  #if DEVBOARD
-    doc["pins"]["be"]       = digitalReadFast(BE);
-    doc["pins"]["sync"]     = digitalReadFast(SYNC);
-    doc["platform"]         = "Dev Board";
-  #else
-    doc["pins"]["sob"]      = digitalReadFast(SOB);
-    doc["platform"]         = "Retroshield";
-  #endif
-
-  doc["ramEnabled"]         = RAMEnabled;
-  doc["romEnabled"]         = ROMEnabled;
-  doc["romFile"]            = romFile;
-  doc["romPage"]            = romPage;
-  doc["version"]            = VERSION;
-
-  for (unsigned int i = 0; i < sizeof(ROMs) / sizeof(ROMs[0]); i++) {
-    if (ROMs[i] != "?") {
-      doc["romFiles"][i]   = ROMs[i];
-    }
-  }
-
-  doc["rtc"]        = now();
-  
-  serializeJson(doc, response);
-
-  request->send(200, "application/json", response);
-}
-
-/* Notes: We are paginating RAM/IO/ROM responses due to limitations in the AsyncWebServer_Teensy41 lib.           */
-/* There is a bug in the implementation of beginChunkedResponse() (improper formatting) and all other response    */
-/* types besides beginResponseStream() will corrupt or add garbage to the data. So we are limited to 1024 byte    */
-/* pages.                                                                                                         */
-/* All 32 pages of ROM can be inspected but only top 24k is valid ROM space.                                      */
-
-void onServerMemory(AsyncWebServerRequest *request) {
-  String block;
-  size_t page;
-  bool formatted = false;
-
-  size_t maxPages;
-
-  if (request->hasParam("block")) {
-    block = request->getParam("page")->value();
-
-    if (block == "ram") {
-      maxPages = RAM_PAGES;
-    } else if (block == "io") {
-      maxPages = IO_PAGES;
-    } else if (block == "rom") {
-      maxPages = ROM_PAGES;
-    } else {
-      request->send(400);
-      return;
-    }
-  } else {
-    request->send(400);
-    return;
-  }
-  if (request->hasParam("page")) {
-    page = size_t(request->getParam("page")->value().toInt());
-    page = min(size_t(maxPages - 1), page); // Clamp page index
-  } else {
-    request->send(400);
-    return;
-  }
-  if (request->hasParam("formatted")) {
-    formatted = true;
-  }
-
-  AsyncResponseStream *response = request->beginResponseStream(
-    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
-    PAGE_SIZE
-  );
-
-  for (size_t i = 0; i < PAGE_SIZE; i++) {
-    if (formatted) {
-      if (block == "ram") {
-        response->printf("%02X ", RAM[i + (page * PAGE_SIZE)]);
-      } else if (block == "io") {
-        response->printf("%02X ", IO[i + (page * PAGE_SIZE)]);
-      } else if (block == "rom") {
-        response->printf("%02X ", ROM[i + (page * PAGE_SIZE)]);
-      }
-    } else {
-      if (block == "ram") {
-        response->write(RAM[i + (page * PAGE_SIZE)]);
-      } else if (block == "io") {
-        response->write(IO[i + (page * PAGE_SIZE)]);
-      } else if (block == "rom") {
-        response->write(ROM[i + (page * PAGE_SIZE)]);
-      }
-    }
-  }
-  
-  request->send(response);
-}
-
-void onServerControl(AsyncWebServerRequest *request) {
-  String command;
-
-  if (request->hasParam("command")) {
-    command = request->getParam("command")->value();
-  } else {
-    request->send(400);
-    return;
-  }
-
-  if (command == "r" || command == "R") {
-    toggleRunStop();
-  } else if (command == "s" || command == "S") {
-    step();
-  } else if (command == "t" || command == "T") {
-    reset();
-  } else if (command == "a" || command == "A") {
-    toggleRAM();
-  } else if (command == "i" || command == "I") {
-    toggleIO();
-  } else if (command == "o" || command == "O") {
-    toggleROM();
-  } else if (command == "l" || command == "L") {
-    listROMs();
-  } else if (command == "k" || command == "K") {
-    toggleIOBank();
-  } else if (command == "p" || command == "P") {
-    snapshot();
-  } else if (command == "+") {
-    increaseFrequency();
-  } else if (command == "-") {
-    decreaseFrequency();
-  } else if (command == "b" || command == "B") {
-    toggleDebug();
-  } else if (command == "f" || command == "F") {
-    info();
-  } else if (command == "g" || command == "G") {
-    log();
-  } else if (command == "[") {
-    prevPage();
-  } else if (command == "]") {
-    nextPage();
-  } else if (request->getParam("command")->value().toInt() >= 0 && request->getParam("command")->value().toInt() < 8) {
-    loadROM(request->getParam("command")->value().toInt());
-  } else {
-    request->send(400);
-    return;
-  }
-
-  request->send(200);
-}
-
-void onServerNotFound(AsyncWebServerRequest *request) {
-  request->send(404);
 }
 
 //

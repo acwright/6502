@@ -11,4 +11,7 @@
   ((byte) & 0x02 ? '1' : '0'), \
   ((byte) & 0x01 ? '1' : '0')
 
+#define FREQ_TO_PERIOD(freq)      (unsigned long) ((1.0 / freq) * 1000000) // In microseconds
+#define PERIOD_TO_FREQ(period)    (double) (1.0 / (period / 1000000)) // In Hz
+
 #endif
