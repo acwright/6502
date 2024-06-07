@@ -6,7 +6,7 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Serial Card")
-		(date "2024-05-14")
+		(date "2024-06-05")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
@@ -1810,27 +1810,26 @@
 				)
 			)
 		)
-		(symbol "74xx:74LS138"
-			(pin_names
-				(offset 1.016)
-			)
+		(symbol "74xx:74HC138"
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "U"
-				(at -7.62 11.43 0)
+				(at -7.62 13.97 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
+					(justify left bottom)
 				)
 			)
-			(property "Value" "74LS138"
-				(at -7.62 -13.97 0)
+			(property "Value" "74HC138"
+				(at 2.54 -11.43 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
+					(justify left top)
 				)
 			)
 			(property "Footprint" ""
@@ -1842,7 +1841,7 @@
 					(hide yes)
 				)
 			)
-			(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS138"
+			(property "Datasheet" "http://www.ti.com/lit/ds/symlink/cd74hc238.pdf"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1851,7 +1850,7 @@
 					(hide yes)
 				)
 			)
-			(property "Description" "Decoder 3 to 8 active low outputs"
+			(property "Description" "3-to-8 line decoder/multiplexer inverting, DIP-16/SOIC-16/SSOP-16"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1860,15 +1859,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "TTL DECOD DECOD8"
+			(property "ki_keywords" "demux"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1877,7 +1868,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "DIP?16*"
+			(property "ki_fp_filters" "DIP*W7.62mm* SOIC*3.9x9.9mm*P1.27mm* SSOP*5.3x6.2mm*P0.65mm*"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1886,10 +1877,23 @@
 					(hide yes)
 				)
 			)
-			(symbol "74LS138_1_0"
+			(symbol "74HC138_0_1"
+				(rectangle
+					(start -7.62 12.7)
+					(end 7.62 -10.16)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+			)
+			(symbol "74HC138_1_1"
 				(pin input line
-					(at -12.7 7.62 0)
-					(length 5.08)
+					(at -10.16 10.16 0)
+					(length 2.54)
 					(name "A0"
 						(effects
 							(font
@@ -1905,10 +1909,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 -5.08 180)
-					(length 5.08)
-					(name "O5"
+				(pin output line
+					(at 10.16 -2.54 180)
+					(length 2.54)
+					(name "~{Y5}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1923,10 +1927,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 -2.54 180)
-					(length 5.08)
-					(name "O4"
+				(pin output line
+					(at 10.16 0 180)
+					(length 2.54)
+					(name "~{Y4}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1941,10 +1945,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 0 180)
-					(length 5.08)
-					(name "O3"
+				(pin output line
+					(at 10.16 2.54 180)
+					(length 2.54)
+					(name "~{Y3}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1959,10 +1963,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 2.54 180)
-					(length 5.08)
-					(name "O2"
+				(pin output line
+					(at 10.16 5.08 180)
+					(length 2.54)
+					(name "~{Y2}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1977,10 +1981,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 5.08 180)
-					(length 5.08)
-					(name "O1"
+				(pin output line
+					(at 10.16 7.62 180)
+					(length 2.54)
+					(name "~{Y1}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1995,10 +1999,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 7.62 180)
-					(length 5.08)
-					(name "O0"
+				(pin output line
+					(at 10.16 10.16 180)
+					(length 2.54)
+					(name "~{Y0}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2015,7 +2019,7 @@
 				)
 				(pin power_in line
 					(at 0 15.24 270)
-					(length 5.08)
+					(length 2.54)
 					(name "VCC"
 						(effects
 							(font
@@ -2032,8 +2036,8 @@
 					)
 				)
 				(pin input line
-					(at -12.7 5.08 0)
-					(length 5.08)
+					(at -10.16 7.62 0)
+					(length 2.54)
 					(name "A1"
 						(effects
 							(font
@@ -2050,8 +2054,8 @@
 					)
 				)
 				(pin input line
-					(at -12.7 2.54 0)
-					(length 5.08)
+					(at -10.16 5.08 0)
+					(length 2.54)
 					(name "A2"
 						(effects
 							(font
@@ -2067,10 +2071,10 @@
 						)
 					)
 				)
-				(pin input input_low
-					(at -12.7 -10.16 0)
-					(length 5.08)
-					(name "E1"
+				(pin input line
+					(at -10.16 -2.54 0)
+					(length 2.54)
+					(name "~{E0}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2085,10 +2089,10 @@
 						)
 					)
 				)
-				(pin input input_low
-					(at -12.7 -7.62 0)
-					(length 5.08)
-					(name "E2"
+				(pin input line
+					(at -10.16 -5.08 0)
+					(length 2.54)
+					(name "~{E1}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2104,9 +2108,9 @@
 					)
 				)
 				(pin input line
-					(at -12.7 -5.08 0)
-					(length 5.08)
-					(name "E3"
+					(at -10.16 -7.62 0)
+					(length 2.54)
+					(name "E2"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2121,10 +2125,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 -10.16 180)
-					(length 5.08)
-					(name "O7"
+				(pin output line
+					(at 10.16 -7.62 180)
+					(length 2.54)
+					(name "~{Y7}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2140,8 +2144,8 @@
 					)
 				)
 				(pin power_in line
-					(at 0 -17.78 90)
-					(length 5.08)
+					(at 0 -12.7 90)
+					(length 2.54)
 					(name "GND"
 						(effects
 							(font
@@ -2157,10 +2161,10 @@
 						)
 					)
 				)
-				(pin output output_low
-					(at 12.7 -7.62 180)
-					(length 5.08)
-					(name "O6"
+				(pin output line
+					(at 10.16 -5.08 180)
+					(length 2.54)
+					(name "~{Y6}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2173,19 +2177,6 @@
 								(size 1.27 1.27)
 							)
 						)
-					)
-				)
-			)
-			(symbol "74LS138_1_1"
-				(rectangle
-					(start -7.62 10.16)
-					(end 7.62 -12.7)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
 					)
 				)
 			)
@@ -4750,16 +4741,6 @@
 	)
 	(wire
 		(pts
-			(xy 217.17 146.05) (xy 228.6 146.05)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "092ab0c4-4dc5-43f2-aef3-2e89a7e0a46f")
-	)
-	(wire
-		(pts
 			(xy 43.18 106.68) (xy 59.69 106.68)
 		)
 		(stroke
@@ -4767,16 +4748,6 @@
 			(type default)
 		)
 		(uuid "0cf3b1ae-b443-48e1-b685-8cac50859b30")
-	)
-	(wire
-		(pts
-			(xy 189.23 140.97) (xy 191.77 140.97)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0db03518-205b-497b-a333-1c1405c08a71")
 	)
 	(wire
 		(pts
@@ -4797,6 +4768,26 @@
 			(type default)
 		)
 		(uuid "139bdcab-4441-4434-b8af-302c7b8ed9bc")
+	)
+	(wire
+		(pts
+			(xy 214.63 130.81) (xy 228.6 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "13ea9abb-ea13-4960-8cc5-89e23b54dca4")
+	)
+	(wire
+		(pts
+			(xy 214.63 140.97) (xy 228.6 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "162a13e4-6d69-4db6-b675-dea964f86d9f")
 	)
 	(wire
 		(pts
@@ -4870,7 +4861,7 @@
 	)
 	(wire
 		(pts
-			(xy 204.47 153.67) (xy 204.47 154.94)
+			(xy 204.47 151.13) (xy 204.47 154.94)
 		)
 		(stroke
 			(width 0)
@@ -4940,7 +4931,7 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 133.35) (xy 189.23 133.35)
+			(xy 189.23 133.35) (xy 194.31 133.35)
 		)
 		(stroke
 			(width 0)
@@ -5020,16 +5011,6 @@
 	)
 	(wire
 		(pts
-			(xy 217.17 128.27) (xy 228.6 128.27)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "3a969169-9529-495f-a013-91fd4870e165")
-	)
-	(wire
-		(pts
 			(xy 78.74 133.35) (xy 78.74 135.89)
 		)
 		(stroke
@@ -5060,7 +5041,7 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 130.81) (xy 189.23 130.81)
+			(xy 189.23 130.81) (xy 194.31 130.81)
 		)
 		(stroke
 			(width 0)
@@ -5117,6 +5098,26 @@
 			(type default)
 		)
 		(uuid "44a0adca-8dbe-4f21-a14a-bac5fb860e01")
+	)
+	(wire
+		(pts
+			(xy 214.63 133.35) (xy 228.6 133.35)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "469ccb03-d9bf-4f31-98dc-f3296631230a")
+	)
+	(wire
+		(pts
+			(xy 214.63 128.27) (xy 228.6 128.27)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4888f607-6074-44a4-886e-0e2b777fa3eb")
 	)
 	(wire
 		(pts
@@ -5210,13 +5211,13 @@
 	)
 	(wire
 		(pts
-			(xy 217.17 135.89) (xy 228.6 135.89)
+			(xy 214.63 135.89) (xy 228.6 135.89)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5951ca61-ba19-4f15-824f-2f6b5c49d389")
+		(uuid "5c4d727a-3483-4ece-a95c-6d621d459023")
 	)
 	(wire
 		(pts
@@ -5250,7 +5251,7 @@
 	)
 	(wire
 		(pts
-			(xy 204.47 120.65) (xy 204.47 116.84)
+			(xy 204.47 123.19) (xy 204.47 116.84)
 		)
 		(stroke
 			(width 0)
@@ -5330,16 +5331,6 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 146.05) (xy 189.23 146.05)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "75d8fd79-dff0-43d8-93db-d8712b7b1ee0")
-	)
-	(wire
-		(pts
 			(xy 241.3 133.35) (xy 243.84 133.35)
 		)
 		(stroke
@@ -5390,6 +5381,16 @@
 	)
 	(wire
 		(pts
+			(xy 189.23 146.05) (xy 194.31 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "82f1d1ce-130d-4d31-bddb-d4605a38b604")
+	)
+	(wire
+		(pts
 			(xy 243.84 143.51) (xy 241.3 143.51)
 		)
 		(stroke
@@ -5420,6 +5421,16 @@
 	)
 	(wire
 		(pts
+			(xy 189.23 140.97) (xy 194.31 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "883812cc-540d-492f-a525-6ee28502fbe0")
+	)
+	(wire
+		(pts
 			(xy 27.94 111.76) (xy 27.94 118.11)
 		)
 		(stroke
@@ -5447,16 +5458,6 @@
 			(type default)
 		)
 		(uuid "9249784e-cac2-439c-8260-3264132e38d4")
-	)
-	(wire
-		(pts
-			(xy 217.17 130.81) (xy 228.6 130.81)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "93f882b4-3b00-4053-bea1-6f373e3708b4")
 	)
 	(wire
 		(pts
@@ -5537,6 +5538,16 @@
 			(type default)
 		)
 		(uuid "9c972ffe-029e-4aa2-bb0a-80c02002ca21")
+	)
+	(wire
+		(pts
+			(xy 214.63 146.05) (xy 228.6 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9d41d9f3-868f-47b8-9abc-0c25aa463379")
 	)
 	(wire
 		(pts
@@ -5630,7 +5641,7 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 143.51) (xy 189.23 143.51)
+			(xy 189.23 143.51) (xy 194.31 143.51)
 		)
 		(stroke
 			(width 0)
@@ -5647,16 +5658,6 @@
 			(type default)
 		)
 		(uuid "b340b941-43c3-4637-a415-b237c46b28a7")
-	)
-	(wire
-		(pts
-			(xy 217.17 138.43) (xy 228.6 138.43)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "b381f0de-336c-4daa-bd89-5b100a32d1c9")
 	)
 	(wire
 		(pts
@@ -5740,16 +5741,6 @@
 	)
 	(wire
 		(pts
-			(xy 217.17 133.35) (xy 228.6 133.35)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "bbcb15a6-425b-40e2-87cb-cc3787002508")
-	)
-	(wire
-		(pts
 			(xy 41.91 158.75) (xy 45.72 158.75)
 		)
 		(stroke
@@ -5800,6 +5791,16 @@
 	)
 	(wire
 		(pts
+			(xy 214.63 143.51) (xy 228.6 143.51)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c89f2311-abbd-4973-a8f9-73bf651edaca")
+	)
+	(wire
+		(pts
 			(xy 41.91 156.21) (xy 45.72 156.21)
 		)
 		(stroke
@@ -5827,6 +5828,16 @@
 			(type default)
 		)
 		(uuid "d23efb8e-b696-4afa-bb68-ba614dcea92d")
+	)
+	(wire
+		(pts
+			(xy 214.63 138.43) (xy 228.6 138.43)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d9642353-c67b-4778-b473-4903e2f86f30")
 	)
 	(wire
 		(pts
@@ -5887,16 +5898,6 @@
 			(type default)
 		)
 		(uuid "e3b85083-5c83-4bb7-aace-1596bee12dfd")
-	)
-	(wire
-		(pts
-			(xy 217.17 143.51) (xy 228.6 143.51)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e56e8119-c45f-40a7-8f4e-71d670f36849")
 	)
 	(wire
 		(pts
@@ -6000,7 +6001,7 @@
 	)
 	(wire
 		(pts
-			(xy 191.77 128.27) (xy 189.23 128.27)
+			(xy 189.23 128.27) (xy 194.31 128.27)
 		)
 		(stroke
 			(width 0)
@@ -6057,16 +6058,6 @@
 			(type default)
 		)
 		(uuid "f7e65b27-a406-447f-abe6-2d8059a4cb09")
-	)
-	(wire
-		(pts
-			(xy 217.17 140.97) (xy 228.6 140.97)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f92d757a-8c17-45f4-8c15-1a4cd246547c")
 	)
 	(wire
 		(pts
@@ -6758,7 +6749,7 @@
 	)
 	(global_label "A13"
 		(shape input)
-		(at 189.23 146.05 180)
+		(at 189.23 140.97 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6767,7 +6758,7 @@
 		)
 		(uuid "9a5c6ea5-daf5-428b-b293-2a5b9fb5a236")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 189.23 146.05 0)
+			(at 189.23 140.97 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7178,7 +7169,7 @@
 	)
 	(global_label "A15"
 		(shape input)
-		(at 189.23 140.97 180)
+		(at 189.23 146.05 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7187,7 +7178,7 @@
 		)
 		(uuid "d29bbfd0-3835-4e5b-9a54-02834135d6a8")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 189.23 140.97 0)
+			(at 189.23 146.05 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7518,8 +7509,8 @@
 		)
 	)
 	(symbol
-		(lib_id "74xx:74LS138")
-		(at 204.47 135.89 0)
+		(lib_id "74xx:74HC138")
+		(at 204.47 138.43 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -7527,23 +7518,25 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00006062c5a6")
 		(property "Reference" "U2"
-			(at 207.01 120.65 0)
+			(at 196.85 124.46 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left bottom)
 			)
 		)
-		(property "Value" "74LS138"
-			(at 209.55 123.19 0)
+		(property "Value" "74HC138"
+			(at 206.756 122.936 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
+				(justify left top)
 			)
 		)
 		(property "Footprint" "Package_SO:SOIC-16_3.9x9.9mm_P1.27mm"
-			(at 204.47 135.89 0)
+			(at 204.47 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7551,8 +7544,8 @@
 				(hide yes)
 			)
 		)
-		(property "Datasheet" "http://www.ti.com/lit/gpn/sn74LS138"
-			(at 204.47 135.89 0)
+		(property "Datasheet" "http://www.ti.com/lit/ds/symlink/cd74hc238.pdf"
+			(at 204.47 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7560,8 +7553,8 @@
 				(hide yes)
 			)
 		)
-		(property "Description" ""
-			(at 204.47 135.89 0)
+		(property "Description" "3-to-8 line decoder/multiplexer inverting, DIP-16/SOIC-16/SSOP-16"
+			(at 204.47 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7570,7 +7563,7 @@
 			)
 		)
 		(property "LCSC" "C5602"
-			(at 204.47 135.89 0)
+			(at 204.47 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7750,7 +7743,7 @@
 		(at 234.95 66.04 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00006070b7be")
