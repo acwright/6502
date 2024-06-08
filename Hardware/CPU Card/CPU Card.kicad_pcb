@@ -9,7 +9,7 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 CPU Card")
-		(date "2024-03-19")
+		(date "2024-06-08")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
@@ -2055,7 +2055,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "A.C. Wright Logo:A.C. Wright Logo 5mm"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2356,7 +2356,7 @@
 				)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "6502 Logos:6502 CPU Card Logo 5mm"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5613,17 +5613,6 @@
 			)
 		)
 	)
-	(gr_text "Jumper J2 for original 6502"
-		(at 183.8011 89.4136 0)
-		(layer "F.SilkS")
-		(uuid "8e2215e5-ad3d-4909-b39a-2d7367a03ac3")
-		(effects
-			(font
-				(size 0.7 0.7)
-				(thickness 0.1)
-			)
-		)
-	)
 	(gr_text "EXP3 | PHI1O"
 		(at 187.2011 113.7136 0)
 		(layer "F.SilkS")
@@ -5632,6 +5621,18 @@
 			(font
 				(size 0.5 0.5)
 				(thickness 0.1)
+			)
+			(justify left)
+		)
+	)
+	(gr_text "6502"
+		(at 178.3011 90.1136 0)
+		(layer "F.SilkS")
+		(uuid "cb2874c8-1e6d-4be9-85aa-68be6648362c")
+		(effects
+			(font
+				(size 0.5 0.5)
+				(thickness 0.125)
 			)
 			(justify left)
 		)
