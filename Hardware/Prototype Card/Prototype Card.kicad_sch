@@ -6,20 +6,20 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Prototype Card")
-		(date "2024-06-05")
+		(date "2024-06-12")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
 	(lib_symbols
-		(symbol "6502 Parts:6502CARDEDGE"
+		(symbol "6502 Parts:6502 Card Edge"
 			(pin_names
 				(offset 1.016)
 			)
 			(exclude_from_sim no)
-			(in_bom yes)
+			(in_bom no)
 			(on_board yes)
 			(property "Reference" "J"
-				(at -1.27 28.194 0)
+				(at -10.16 28.448 0)
 				(effects
 					(font
 						(size 1.4986 1.4986)
@@ -27,15 +27,15 @@
 					(justify left bottom)
 				)
 			)
-			(property "Value" "6502CARDEDGE"
-				(at 0 26.67 0)
+			(property "Value" "6502 Card Edge"
+				(at -5.588 26.924 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "6502 Parts:6502 Card Edge"
 				(at 0 0 0)
 				(effects
 					(font
@@ -62,7 +62,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "6502CARDEDGE_1_0"
+			(symbol "6502 Card Edge_1_0"
 				(rectangle
 					(start -10.16 25.4)
 					(end 10.16 -27.94)
@@ -615,8 +615,8 @@
 					)
 				)
 				(pin power_in line
-					(at -15.24 22.86 0)
-					(length 5.08) hide
+					(at 15.24 -25.4 180)
+					(length 5.08)
 					(name "GND"
 						(effects
 							(font
@@ -777,8 +777,8 @@
 					)
 				)
 				(pin power_in line
-					(at -15.24 -25.4 0)
-					(length 5.08) hide
+					(at 15.24 22.86 180)
+					(length 5.08)
 					(name "VCC"
 						(effects
 							(font
@@ -796,7 +796,7 @@
 				)
 			)
 		)
-		(symbol "6502 Parts:BREADBOARDMINI"
+		(symbol "6502 Parts:Breadboard Mini"
 			(pin_names
 				(offset 1.016)
 			)
@@ -812,7 +812,7 @@
 					(justify left bottom)
 				)
 			)
-			(property "Value" "BREADBOARDMINI"
+			(property "Value" "Breadboard Mini"
 				(at -5.08 -5.334 0)
 				(effects
 					(font
@@ -821,7 +821,7 @@
 					(justify left top)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "6502 Parts:Breadboard Mini"
 				(at 0 0 0)
 				(effects
 					(font
@@ -848,15 +848,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_locked" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "BREADBOARDMINI_1_0"
+			(symbol "Breadboard Mini_1_0"
 				(polyline
 					(pts
 						(xy -5.08 -5.08) (xy 5.08 -5.08)
@@ -3627,6 +3619,15 @@
 		(uuid "9227580c-3b73-4b2c-92ef-91b29a62f9d0")
 	)
 	(bus_entry
+		(at 90.17 88.9)
+		(size -2.54 2.54)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "951379b4-d57c-4cb5-b7b4-58d0a2d378ec")
+	)
+	(bus_entry
 		(at 31.75 83.82)
 		(size 2.54 2.54)
 		(stroke
@@ -3670,6 +3671,15 @@
 			(type default)
 		)
 		(uuid "a747a544-03c7-4410-b206-a5d14338d9bc")
+	)
+	(bus_entry
+		(at 90.17 40.64)
+		(size -2.54 2.54)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a749ef63-7975-4b62-a2b7-56e379d3756e")
 	)
 	(bus_entry
 		(at 135.89 68.58)
@@ -4004,6 +4014,16 @@
 			(type default)
 		)
 		(uuid "09571e5b-0959-4f7f-8b35-478ec1ca42ea")
+	)
+	(wire
+		(pts
+			(xy 76.2 91.44) (xy 87.63 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0c4c7ad2-bbed-4d76-aac6-bc88358206d9")
 	)
 	(wire
 		(pts
@@ -5617,6 +5637,16 @@
 	)
 	(wire
 		(pts
+			(xy 76.2 43.18) (xy 87.63 43.18)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e2efbbdc-4658-484c-aaf1-6e936e83a9e1")
+	)
+	(wire
+		(pts
 			(xy 119.38 50.8) (xy 133.35 50.8)
 		)
 		(stroke
@@ -5996,6 +6026,17 @@
 		(uuid "26646696-ad87-4b42-8c6b-c10bd74481cc")
 	)
 	(label "GND"
+		(at 82.55 91.44 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "2d20d734-233f-42fc-a22d-d673e576e03c")
+	)
+	(label "GND"
 		(at 35.56 43.18 0)
 		(fields_autoplaced yes)
 		(effects
@@ -6082,6 +6123,17 @@
 			(justify right bottom)
 		)
 		(uuid "4b3be21c-a133-4ee0-9a7d-e6c7668a06f6")
+	)
+	(label "VCC"
+		(at 82.55 43.18 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "4d59abe4-27e8-4b4d-a728-079277fb8983")
 	)
 	(label "A9"
 		(at 132.08 66.04 180)
@@ -6972,11 +7024,11 @@
 		)
 	)
 	(symbol
-		(lib_id "6502 Parts:BREADBOARDMINI")
+		(lib_id "6502 Parts:Breadboard Mini")
 		(at 137.16 187.96 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00003bc00ccd")
@@ -6989,7 +7041,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "BREADBOARDMINI"
+		(property "Value" "Breadboard Mini"
 			(at 132.08 193.294 0)
 			(effects
 				(font
@@ -6998,7 +7050,7 @@
 				(justify left top)
 			)
 		)
-		(property "Footprint" "6502 Parts:BREADBOARD-MINI"
+		(property "Footprint" "6502 Parts:Breadboard Mini"
 			(at 137.16 187.96 0)
 			(effects
 				(font
@@ -7044,7 +7096,7 @@
 		)
 	)
 	(symbol
-		(lib_id "6502 Parts:6502CARDEDGE")
+		(lib_id "6502 Parts:6502 Card Edge")
 		(at 60.96 66.04 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -7053,22 +7105,23 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000060623f64")
 		(property "Reference" "J1"
-			(at 60.96 36.2712 0)
+			(at 50.546 37.338 0)
 			(effects
 				(font
 					(size 1.4986 1.4986)
 				)
+				(justify left bottom)
 			)
 		)
-		(property "Value" "6502CARDEDGE"
-			(at 60.96 38.7604 0)
+		(property "Value" "6502 Card Edge"
+			(at 58.42 38.862 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Footprint" "6502 Parts:6502CARDEDGE"
+		(property "Footprint" "6502 Parts:6502 Card Edge"
 			(at 60.96 66.04 0)
 			(effects
 				(font
@@ -7416,7 +7469,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00006062c5a6")
 		(property "Reference" "U1"
-			(at 179.07 55.88 0)
+			(at 188.976 52.832 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7841,11 +7894,11 @@
 		)
 	)
 	(symbol
-		(lib_id "6502 Parts:BREADBOARDMINI")
+		(lib_id "6502 Parts:Breadboard Mini")
 		(at 110.49 187.96 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00006925386a")
@@ -7858,7 +7911,7 @@
 				(justify left bottom)
 			)
 		)
-		(property "Value" "BREADBOARDMINI"
+		(property "Value" "Breadboard Mini"
 			(at 105.41 193.294 0)
 			(effects
 				(font
@@ -7867,7 +7920,7 @@
 				(justify left top)
 			)
 		)
-		(property "Footprint" "6502 Parts:BREADBOARD-MINI"
+		(property "Footprint" "6502 Parts:Breadboard Mini"
 			(at 110.49 187.96 0)
 			(effects
 				(font

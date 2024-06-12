@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <ArduinoJson.h>
 #include <TimerOne.h>
 #include <TimeLib.h>
 #include <Bounce2.h>

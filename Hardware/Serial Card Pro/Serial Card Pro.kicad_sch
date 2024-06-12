@@ -6,20 +6,20 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Serial Card Pro")
-		(date "2024-06-05")
+		(date "2024-06-12")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
 	(lib_symbols
-		(symbol "6502 Parts:6502CARDEDGE"
+		(symbol "6502 Parts:6502 Card Edge"
 			(pin_names
 				(offset 1.016)
 			)
 			(exclude_from_sim no)
-			(in_bom yes)
+			(in_bom no)
 			(on_board yes)
 			(property "Reference" "J"
-				(at -1.27 28.194 0)
+				(at -10.16 28.448 0)
 				(effects
 					(font
 						(size 1.4986 1.4986)
@@ -27,15 +27,15 @@
 					(justify left bottom)
 				)
 			)
-			(property "Value" "6502CARDEDGE"
-				(at 0 26.67 0)
+			(property "Value" "6502 Card Edge"
+				(at -5.588 26.924 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "6502 Parts:6502 Card Edge"
 				(at 0 0 0)
 				(effects
 					(font
@@ -62,7 +62,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "6502CARDEDGE_1_0"
+			(symbol "6502 Card Edge_1_0"
 				(rectangle
 					(start -10.16 25.4)
 					(end 10.16 -27.94)
@@ -615,8 +615,8 @@
 					)
 				)
 				(pin power_in line
-					(at -15.24 22.86 0)
-					(length 5.08) hide
+					(at 15.24 -25.4 180)
+					(length 5.08)
 					(name "GND"
 						(effects
 							(font
@@ -777,8 +777,8 @@
 					)
 				)
 				(pin power_in line
-					(at -15.24 -25.4 0)
-					(length 5.08) hide
+					(at 15.24 22.86 180)
+					(length 5.08)
 					(name "VCC"
 						(effects
 							(font
@@ -1388,7 +1388,7 @@
 					)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "6502 Parts:DB9 Male"
 				(at 0 0 0)
 				(effects
 					(font
@@ -4937,6 +4937,16 @@
 	)
 	(wire
 		(pts
+			(xy 72.39 77.47) (xy 76.2 77.47)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "14f090cb-4d7c-49bb-abdb-deaa13472c18")
+	)
+	(wire
+		(pts
 			(xy 73.66 162.56) (xy 78.74 162.56)
 		)
 		(stroke
@@ -6387,6 +6397,16 @@
 	)
 	(wire
 		(pts
+			(xy 72.39 29.21) (xy 76.2 29.21)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "efddc3c2-aa46-43d5-9d1d-3cfb5edb1f51")
+	)
+	(wire
+		(pts
 			(xy 198.12 137.16) (xy 203.2 137.16)
 		)
 		(stroke
@@ -7703,6 +7723,26 @@
 			)
 		)
 	)
+	(global_label "VCC"
+		(shape output)
+		(at 76.2 29.21 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "ab1eb5ee-7192-495e-bacc-0ea117596714")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 76.2 29.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "A12"
 		(shape output)
 		(at 76.2 44.45 0)
@@ -8043,6 +8083,26 @@
 			)
 		)
 	)
+	(global_label "GND"
+		(shape output)
+		(at 76.2 77.47 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left)
+		)
+		(uuid "d52d9137-6f3f-4c53-9cd2-8df490995b6e")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 76.2 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "DTROUT"
 		(shape output)
 		(at 78.74 160.02 0)
@@ -8164,7 +8224,7 @@
 		)
 	)
 	(symbol
-		(lib_id "6502 Parts:6502CARDEDGE")
+		(lib_id "6502 Parts:6502 Card Edge")
 		(at 57.15 52.07 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -8173,22 +8233,23 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000060623f64")
 		(property "Reference" "J1"
-			(at 57.15 22.3012 0)
+			(at 46.736 23.368 0)
 			(effects
 				(font
 					(size 1.4986 1.4986)
 				)
+				(justify left bottom)
 			)
 		)
-		(property "Value" "6502CARDEDGE"
-			(at 57.15 24.7904 0)
+		(property "Value" "6502 Card Edge"
+			(at 54.61 24.892 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Footprint" "6502 Parts:6502CARDEDGE"
+		(property "Footprint" "6502 Parts:6502 Card Edge"
 			(at 57.15 52.07 0)
 			(effects
 				(font
@@ -8354,7 +8415,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00006062c5a6")
 		(property "Reference" "U3"
-			(at 205.74 133.35 0)
+			(at 215.646 130.81 0)
 			(effects
 				(font
 					(size 1.27 1.27)

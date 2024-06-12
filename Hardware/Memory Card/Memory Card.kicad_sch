@@ -6,20 +6,20 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Memory Card")
-		(date "2024-03-19")
+		(date "2024-06-12")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
 	(lib_symbols
-		(symbol "6502 Parts:6502CARDEDGE"
+		(symbol "6502 Parts:6502 Card Edge"
 			(pin_names
 				(offset 1.016)
 			)
 			(exclude_from_sim no)
-			(in_bom yes)
+			(in_bom no)
 			(on_board yes)
 			(property "Reference" "J"
-				(at -1.27 28.194 0)
+				(at -10.16 28.448 0)
 				(effects
 					(font
 						(size 1.4986 1.4986)
@@ -27,15 +27,15 @@
 					(justify left bottom)
 				)
 			)
-			(property "Value" "6502CARDEDGE"
-				(at 0 26.67 0)
+			(property "Value" "6502 Card Edge"
+				(at -5.588 26.924 0)
 				(effects
 					(font
 						(size 1.27 1.27)
 					)
 				)
 			)
-			(property "Footprint" ""
+			(property "Footprint" "6502 Parts:6502 Card Edge"
 				(at 0 0 0)
 				(effects
 					(font
@@ -62,7 +62,7 @@
 					(hide yes)
 				)
 			)
-			(symbol "6502CARDEDGE_1_0"
+			(symbol "6502 Card Edge_1_0"
 				(rectangle
 					(start -10.16 25.4)
 					(end 10.16 -27.94)
@@ -615,8 +615,8 @@
 					)
 				)
 				(pin power_in line
-					(at -15.24 22.86 0)
-					(length 5.08) hide
+					(at 15.24 -25.4 180)
+					(length 5.08)
 					(name "GND"
 						(effects
 							(font
@@ -777,8 +777,8 @@
 					)
 				)
 				(pin power_in line
-					(at -15.24 -25.4 0)
-					(length 5.08) hide
+					(at 15.24 22.86 180)
+					(length 5.08)
 					(name "VCC"
 						(effects
 							(font
@@ -804,7 +804,7 @@
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "U"
-				(at 11.43 6.35 0)
+				(at 4.572 6.35 0)
 				(effects
 					(font
 						(size 1.4986 1.4986)
@@ -813,7 +813,7 @@
 				)
 			)
 			(property "Value" "AS6C62256"
-				(at 6.35 3.81 0)
+				(at 4.826 4.064 0)
 				(effects
 					(font
 						(size 1.4986 1.4986)
@@ -1376,7 +1376,7 @@
 			(in_bom yes)
 			(on_board yes)
 			(property "Reference" "U"
-				(at 24.13 7.62 0)
+				(at 4.826 6.858 0)
 				(effects
 					(font
 						(size 1.4986 1.4986)
@@ -1385,7 +1385,7 @@
 				)
 			)
 			(property "Value" "AT28C256"
-				(at 24.13 5.08 0)
+				(at 4.826 4.318 0)
 				(effects
 					(font
 						(size 1.4986 1.4986)
@@ -4271,6 +4271,15 @@
 		(uuid "073826d5-d893-4c2f-9a86-3ca2045e347c")
 	)
 	(bus_entry
+		(at 78.74 100.33)
+		(size 2.54 -2.54)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "073da57f-91ca-421e-b868-97609961dc18")
+	)
+	(bus_entry
 		(at 81.28 74.93)
 		(size 2.54 2.54)
 		(stroke
@@ -4296,6 +4305,15 @@
 			(type default)
 		)
 		(uuid "1af2b21f-7975-4e48-80f2-874fe9fc454c")
+	)
+	(bus_entry
+		(at 78.74 52.07)
+		(size 2.54 -2.54)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1b6f1298-177a-4560-b566-535544f42ef3")
 	)
 	(bus_entry
 		(at 134.62 85.09)
@@ -5143,6 +5161,16 @@
 		)
 		(uuid "10e514c9-222a-4f82-a526-328c9290117a")
 	)
+	(bus
+		(pts
+			(xy 81.28 97.79) (xy 81.28 110.49)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "10fdb0f0-3044-4404-87e4-bc5e08e03b0e")
+	)
 	(wire
 		(pts
 			(xy 111.76 97.79) (xy 123.19 97.79)
@@ -5983,6 +6011,16 @@
 		)
 		(uuid "55ff1ea3-4da6-46a7-adfc-261063887cc0")
 	)
+	(wire
+		(pts
+			(xy 67.31 52.07) (xy 78.74 52.07)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "578f9c08-07d2-4e03-879d-cc1b38296794")
+	)
 	(bus
 		(pts
 			(xy 81.28 52.07) (xy 81.28 54.61)
@@ -6385,7 +6423,7 @@
 	)
 	(bus
 		(pts
-			(xy 81.28 95.25) (xy 81.28 110.49)
+			(xy 81.28 95.25) (xy 81.28 97.79)
 		)
 		(stroke
 			(width 0)
@@ -7383,6 +7421,16 @@
 		)
 		(uuid "d9fd5b75-723b-4054-9478-2f6446788803")
 	)
+	(wire
+		(pts
+			(xy 67.31 100.33) (xy 78.74 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "dae78b73-900a-4e70-956f-8c2cb3f71c37")
+	)
 	(bus
 		(pts
 			(xy 134.62 80.01) (xy 134.62 82.55)
@@ -7803,6 +7851,16 @@
 		)
 		(uuid "fd6db969-7a6a-44a2-8904-7e0eeb7ee62c")
 	)
+	(bus
+		(pts
+			(xy 81.28 49.53) (xy 81.28 52.07)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fde9d66c-aec5-4938-bd77-a2e33b904372")
+	)
 	(wire
 		(pts
 			(xy 121.92 57.15) (xy 121.92 29.21)
@@ -8066,6 +8124,17 @@
 		)
 		(uuid "414765fc-89da-472c-afa5-4994a4013d77")
 	)
+	(label "VCC"
+		(at 73.66 52.07 0)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "4193780a-82da-43ea-ad44-7662a2483671")
+	)
 	(label "A14"
 		(at 77.47 62.23 180)
 		(fields_autoplaced yes)
@@ -8274,6 +8343,17 @@
 			(justify right bottom)
 		)
 		(uuid "79815a7d-2eb4-488c-96cf-6a1fea4964c8")
+	)
+	(label "GND"
+		(at 77.47 100.33 180)
+		(fields_autoplaced yes)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "79b9922e-f2f3-419f-86c0-38bfed1f9ec7")
 	)
 	(label "D1"
 		(at 26.67 95.25 0)
@@ -9136,7 +9216,7 @@
 		)
 	)
 	(symbol
-		(lib_id "6502 Parts:6502CARDEDGE")
+		(lib_id "6502 Parts:6502 Card Edge")
 		(at 52.07 74.93 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -9145,22 +9225,23 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000060621dae")
 		(property "Reference" "J1"
-			(at 52.07 45.72 0)
+			(at 41.656 46.482 0)
 			(effects
 				(font
 					(size 1.4986 1.4986)
 				)
+				(justify left bottom)
 			)
 		)
-		(property "Value" "6502CARDEDGE"
-			(at 52.07 48.26 0)
+		(property "Value" "6502 Card Edge"
+			(at 49.53 48.006 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 			)
 		)
-		(property "Footprint" "6502 Parts:6502CARDEDGE"
+		(property "Footprint" "6502 Parts:6502 Card Edge"
 			(at 52.07 74.93 0)
 			(effects
 				(font
@@ -9326,7 +9407,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-000060623898")
 		(property "Reference" "U3"
-			(at 107.95 47.3456 0)
+			(at 101.6 47.498 0)
 			(effects
 				(font
 					(size 1.4986 1.4986)
@@ -9334,7 +9415,7 @@
 			)
 		)
 		(property "Value" "AS6C62256"
-			(at 107.95 50.0126 0)
+			(at 106.68 50.038 0)
 			(effects
 				(font
 					(size 1.4986 1.4986)
@@ -9471,7 +9552,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-0000606279c8")
 		(property "Reference" "U4"
-			(at 160.02 47.3456 0)
+			(at 152.146 47.752 0)
 			(effects
 				(font
 					(size 1.4986 1.4986)
@@ -9479,7 +9560,7 @@
 			)
 		)
 		(property "Value" "AT28C256"
-			(at 160.02 50.0126 0)
+			(at 156.464 50.292 0)
 			(effects
 				(font
 					(size 1.4986 1.4986)
