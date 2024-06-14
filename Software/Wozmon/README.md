@@ -1,7 +1,7 @@
-6522 Transmit WDC
-=================
+Wozmon
+======
 
-6551 Transmit Example (WDC Version)
+Wozmon for the 6502 project
 
 Install:
 

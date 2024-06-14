@@ -1,7 +1,7 @@
-Hello World
-===========
+Keyboard Polling
+================
 
-Ben Eater hello world example for the 6502 project
+Keyboard polling example
 
 Install:
 

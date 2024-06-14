@@ -1,7 +1,7 @@
 Hello World
 ===========
 
-Ben Eater hello world example for the 6502 project
+Ben Eater hello world example for the 6502 project (Serial console version)
 
 Install:
 

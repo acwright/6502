@@ -1,5 +1,5 @@
-Hello World
-===========
+Hello World LCD
+===============
 
 Ben Eater hello world example for the 6502 project
 

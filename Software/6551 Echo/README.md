@@ -1,7 +1,7 @@
-6522 LED
-========
+6551 Echo
+=========
 
-Ben Eater 6522 LED example (Video 2) for the 6502 project
+6551 Echo example
 
 Install:
 
