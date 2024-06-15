@@ -4,3 +4,6 @@ make:
 
 view:
 	hexdump -C ./build/Keyboard\ Polling.bin
+
+eeprom:
+	minipro -p AT28C256	-w ./build/Keyboard\ Polling.bin

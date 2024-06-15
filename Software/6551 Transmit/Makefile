@@ -4,3 +4,6 @@ make:
 
 view:
 	hexdump -C ./build/6551\ Transmit.bin
+
+eeprom:
+	minipro -p AT28C256	-w ./build/6551\ Transmit.bin

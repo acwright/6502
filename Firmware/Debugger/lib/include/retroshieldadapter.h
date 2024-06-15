@@ -1,10 +1,10 @@
-#ifndef _RETROSHIELD_H
-#define _RETROSHIELD_H
+#ifndef _RETROSHIELDADAPTER_H
+#define _RETROSHIELDADAPTER_H
 
 #define RESB      24  // RESET
 #define RWB       16  // READ/WRITE
 #define RDY       17  // RDY
-#define SOB       13  // SOB
+#define SYNC      13  // SYNC
 #define PHI2      39  // PHI2
 #define NMIB      29  // NMI
 #define IRQB      30  // IRQ

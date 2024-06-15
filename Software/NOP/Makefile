@@ -4,3 +4,6 @@ make:
 
 view:
 	hexdump -C ./build/NOP.bin
+
+eeprom:
+	minipro -p AT28C256	-w ./build/NOP.bin

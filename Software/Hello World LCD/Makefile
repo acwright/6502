@@ -4,3 +4,6 @@ make:
 
 view:
 	hexdump -C ./build/Hello\ World\ LCD.bin
+
+eeprom:
+	minipro -p AT28C256	-w ./build/Hello\ World\ LCD.bin

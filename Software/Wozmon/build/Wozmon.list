@@ -196,6 +196,8 @@ Current file: ./src/Wozmon.asm
 0000F8r 1  68             PLA                    ; Restore A.
 0000F9r 1  60             RTS                    ; Return.
 0000FAr 1               
+0000FAr 1               ; This non-delay ECHO routine for 6551 is 2 bytes too long...
+0000FAr 1               ;
 0000FAr 1               ; ECHO:
 0000FAr 1               ;   PHA
 0000FAr 1               ;   STA     ACIA_DATA      ; Output character.
@@ -205,9 +207,14 @@ Current file: ./src/Wozmon.asm
 0000FAr 1               ;   BEQ     TXWAIT         ; Loop if tx buffer not empty
 0000FAr 1               ;   PLA                    ; Restore A.
 0000FAr 1               ;   RTS                    ; Return.
+0000FAr 1               ;
+0000FAr 1               ; We can change lines 23-25 to:
+0000FAr 1               ;   LDY     #$8B           ; No parity, no echo, no interrupts.
+0000FAr 1               ;  STY     ACIA_CMD
+0000FAr 1               ;  ; LDA     #$1B           ; Begin with escape. REMOVE THIS
+0000FAr 1               ; But this turns on parity for R6551 IC...
 0000FAr 1               
 0000FAr 1               .segment "VECTORS"
-000000r 1               
 000000r 1               
 000000r 1  00 0F          .word   $0F00          ; NMI vector
 000002r 1  rr rr          .word   RESET          ; RESET vector

@@ -43,55 +43,59 @@ Current file: ./src/Hello World LCD.asm
 00002Cr 1  4C rr rr       jmp print
 00002Fr 1               
 00002Fr 1               loop:
-00002Fr 1  4C rr rr       jmp clear
-000032r 1               
-000032r 1  48 65 6C 6C  message: .asciiz "Hello, World!"
-000036r 1  6F 2C 20 57  
-00003Ar 1  6F 72 6C 64  
-000040r 1               
-000040r 1               lcd_wait:
-000040r 1  48             pha
-000041r 1  A9 00          lda #%00000000  ; Port B is input
-000043r 1  8D 02 80       sta DDRB
-000046r 1               lcdbusy:
-000046r 1  A9 40          lda #RW
-000048r 1  8D 01 80       sta PORTA
-00004Br 1  A9 C0          lda #(RW | E)
+00002Fr 1  A9 FF          lda #$FF           ; Initialize delay loop.
+000031r 1               delay:
+000031r 1  3A             dec                ; Decrement A.
+000032r 1  D0 FD          bne delay
+000034r 1  4C rr rr       jmp clear
+000037r 1               
+000037r 1  48 65 6C 6C  message: .asciiz "Hello, World!"
+00003Br 1  6F 2C 20 57  
+00003Fr 1  6F 72 6C 64  
+000045r 1               
+000045r 1               lcd_wait:
+000045r 1  48             pha
+000046r 1  A9 00          lda #%00000000  ; Port B is input
+000048r 1  8D 02 80       sta DDRB
+00004Br 1               lcdbusy:
+00004Br 1  A9 40          lda #RW
 00004Dr 1  8D 01 80       sta PORTA
-000050r 1  AD 00 80       lda PORTB
-000053r 1  29 80          and #%10000000
-000055r 1  D0 EF          bne lcdbusy
-000057r 1               
-000057r 1  A9 40          lda #RW
-000059r 1  8D 01 80       sta PORTA
-00005Cr 1  A9 FF          lda #%11111111  ; Port B is output
-00005Er 1  8D 02 80       sta DDRB
-000061r 1  68             pla
-000062r 1  60             rts
-000063r 1               
-000063r 1               lcd_instruction:
-000063r 1  20 rr rr       jsr lcd_wait
-000066r 1  8D 00 80       sta PORTB
-000069r 1  A9 00          lda #0         ; Clear RS/RW/E bits
-00006Br 1  8D 01 80       sta PORTA
-00006Er 1  A9 80          lda #E         ; Set E bit to send instruction
+000050r 1  A9 C0          lda #(RW | E)
+000052r 1  8D 01 80       sta PORTA
+000055r 1  AD 00 80       lda PORTB
+000058r 1  29 80          and #%10000000
+00005Ar 1  D0 EF          bne lcdbusy
+00005Cr 1               
+00005Cr 1  A9 40          lda #RW
+00005Er 1  8D 01 80       sta PORTA
+000061r 1  A9 FF          lda #%11111111  ; Port B is output
+000063r 1  8D 02 80       sta DDRB
+000066r 1  68             pla
+000067r 1  60             rts
+000068r 1               
+000068r 1               lcd_instruction:
+000068r 1  20 rr rr       jsr lcd_wait
+00006Br 1  8D 00 80       sta PORTB
+00006Er 1  A9 00          lda #0         ; Clear RS/RW/E bits
 000070r 1  8D 01 80       sta PORTA
-000073r 1  A9 00          lda #0         ; Clear RS/RW/E bits
+000073r 1  A9 80          lda #E         ; Set E bit to send instruction
 000075r 1  8D 01 80       sta PORTA
-000078r 1  60             rts
-000079r 1               
-000079r 1               print_char:
-000079r 1  20 rr rr       jsr lcd_wait
-00007Cr 1  8D 00 80       sta PORTB
-00007Fr 1  A9 20          lda #RS         ; Set RS; Clear RW/E bits
-000081r 1  8D 01 80       sta PORTA
-000084r 1  A9 A0          lda #(RS | E)   ; Set E bit to send instruction
+000078r 1  A9 00          lda #0         ; Clear RS/RW/E bits
+00007Ar 1  8D 01 80       sta PORTA
+00007Dr 1  60             rts
+00007Er 1               
+00007Er 1               print_char:
+00007Er 1  20 rr rr       jsr lcd_wait
+000081r 1  8D 00 80       sta PORTB
+000084r 1  A9 20          lda #RS         ; Set RS; Clear RW/E bits
 000086r 1  8D 01 80       sta PORTA
-000089r 1  A9 20          lda #RS         ; Clear E bits
+000089r 1  A9 A0          lda #(RS | E)   ; Set E bit to send instruction
 00008Br 1  8D 01 80       sta PORTA
-00008Er 1  60             rts
-00008Fr 1               
-00008Fr 1               .segment "VECTORS"
+00008Er 1  A9 20          lda #RS         ; Clear E bits
+000090r 1  8D 01 80       sta PORTA
+000093r 1  60             rts
+000094r 1               
+000094r 1               .segment "VECTORS"
 000000r 1               
 000000r 1  00 00          .word $0000
 000002r 1  rr rr          .word reset

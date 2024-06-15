@@ -10,6 +10,8 @@
 #include "devboard.h"
 #elif RETROSHIELD
 #include "retroshield.h"
+#elif RETROSHIELDADAPTER
+#include "retroshieldadapter.h"
 #endif
 #include "utilities.h"
 
@@ -249,27 +251,6 @@ void setup() {
 }
 
 void loop() {
-  // Handle clock edge
-  if (isEdge) {
-    if (!digitalReadFast(PHI2)) {
-      digitalWriteFast(PHI2, HIGH);
-      onCycleBegin();
-    } else {
-      onCycleEnd();
-      digitalWriteFast(PHI2, LOW);
-    }
-    isEdge = false;
-  }
-
-  // Handle step logging
-  if (isLogging) {
-    log();
-    isLogging = false;
-  }
-
-  // Sync the clock
-  now();
-
   // Update buttons
   intButton.update();
   stepButton.update();
@@ -359,6 +340,9 @@ void loop() {
     }
   }
   #endif
+
+  // Sync the clock
+  now();
 }
 
 //
@@ -369,9 +353,15 @@ void onTick()
 {
   // This is called in the timer interrupt so extra care should be taken!
 
-  if (freqCounter == 0) {
+  if (freqCounter <= 0) {
     if (isRunning) {
-      isEdge = true;
+      if (!digitalReadFast(PHI2)) {
+        digitalWriteFast(PHI2, HIGH);
+        onCycleBegin();
+      } else {
+        onCycleEnd();
+        digitalWriteFast(PHI2, LOW);
+      }
     }
 
     freqCounter = FREQ_DELAYS[freqIndex];
@@ -379,13 +369,23 @@ void onTick()
     freqCounter--;
   }
 
-  if (stepCounter == 0) {
+  if (stepCounter <= 0) {
     if (isStepping) {
-      isEdge = true;
-      if (digitalReadFast(PHI2)) {
+      if (!digitalReadFast(PHI2)) {
+        digitalWriteFast(PHI2, HIGH);
+        onCycleBegin();
+      } else {
+        onCycleEnd();
+        digitalWriteFast(PHI2, LOW);
         isStepping = false; // We are done stepping...
         isLogging = true;   // Log on next tick
       }
+    }
+
+    // Handle step logging
+    if (isLogging) {
+      log();
+      isLogging = false;
     }
 
     stepCounter = FREQ_DELAYS[2]; // Use 4 Hz for step counter
@@ -404,6 +404,8 @@ void onCycleBegin() {
   be = digitalReadFast(BE);
   #elif RETROSHIELD
   sob = digitalReadFast(SOB);
+  #elif RETROSHIELDADAPTER
+  sync = digitalReadFast(SYNC);
   #endif
 
   if (readWrite == HIGH) { // READING
@@ -863,6 +865,8 @@ void info() {
   Serial.println("Dev Board");
   #elif RETROSHIELD
   Serial.println("Retroshield");
+  #elif RETROSHIELDADAPTER
+  Serial.println("Retroshield Adapter");
   #endif
   Serial.println();
   Serial.println("---------------------------------");
@@ -884,7 +888,7 @@ void info() {
   Serial.print("Debug: ");
   Serial.println(formatDebugMode());
   Serial.print("Keyboard Capture: ");
-  Serial.print(keyboardCaptureEnabled ? "Enabled" : "Disabled");
+  Serial.println(keyboardCaptureEnabled ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
   Serial.print("Date / Time: ");
@@ -1176,7 +1180,7 @@ void loadROM(unsigned int index) {
       i++;
     }
 
-    romFile = ROMs[index];
+    romFile = ROMs[(romPage * 8) + index];
 
     Serial.print("Loaded ROM: ");
     Serial.println(romFile);
@@ -1346,6 +1350,30 @@ void initPins() {
   digitalWriteFast(NMIB, HIGH);
   digitalWriteFast(RDY, HIGH);
   digitalWriteFast(SOB, HIGH);
+  digitalWriteFast(PHI2, LOW);
+  #elif RETROSHIELDADAPTER
+  pinMode(RESB, OUTPUT);
+  pinMode(IRQB, OUTPUT);
+  pinMode(NMIB, OUTPUT);
+  pinMode(RDY, OUTPUT);
+  pinMode(PHI2, OUTPUT);
+
+  pinMode(SYNC, INPUT);
+  pinMode(RWB, INPUT);
+
+  pinMode(INT_SWB, INPUT);
+  pinMode(STEP_SWB, INPUT);
+  pinMode(RS_SWB, INPUT);
+
+  pinMode(GPIO0, INPUT);
+
+  setAddrDirIn();
+  setDataDirIn();
+
+  digitalWriteFast(RESB, HIGH);
+  digitalWriteFast(IRQB, HIGH);
+  digitalWriteFast(NMIB, HIGH);
+  digitalWriteFast(RDY, HIGH);
   digitalWriteFast(PHI2, LOW);
   #endif
 }

@@ -40,13 +40,13 @@
 #define OE2       22  // OUTPUT ENABLE 2
 #define OE3       23  // OUTPUT ENABLE 3
 
-#define INT_SWB   21  // INTERVAL SWITCH
-#define STEP_SWB  20  // STEP SWITCH
-#define RS_SWB    19  // RUN/STOP SWITCH
-
 #define GPIO0     14  // GPIO 0
 #define GPIO1     15  // GPIO 1
 #define GPIO2     16  // GPIO 2
 #define GPIO3     17  // GPIO 3
+
+#define INT_SWB   21  // INTERVAL SWITCH
+#define STEP_SWB  20  // STEP SWITCH
+#define RS_SWB    19  // RUN/STOP SWITCH
 
 #endif

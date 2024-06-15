@@ -39,6 +39,10 @@ print:
   jmp print
 
 loop:
+  lda #$FF           ; Initialize delay loop.
+delay:        
+  dec                ; Decrement A.
+  bne delay
   jmp clear
 
 message: .asciiz "Hello, World!"
