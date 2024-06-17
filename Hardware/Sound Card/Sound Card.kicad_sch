@@ -6,7 +6,7 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Sound Card")
-		(date "2024-06-12")
+		(date "2024-06-16")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
@@ -2248,6 +2248,182 @@
 				)
 			)
 		)
+		(symbol "6502 Parts:PJRAN1X1U02X"
+			(pin_names
+				(offset 1.016) hide)
+			(exclude_from_sim no)
+			(in_bom no)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0.254 3.048 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "PJRAN1X1U02X"
+				(at 2.921 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" "6502 Parts:SWITCHCRAFT_PJRAN1X1U02X"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "https://www.switchcraft.com/assets/1/24/pjran1x1u__x_series_cd.pdf?4664"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "RCA Connector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Digikey" "https://www.digikey.com/en/products/detail/switchcraft-inc/PJRAN1X1U02X/1832412"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "BNC SMA SMB SMC LEMO coaxial connector CINCH RCA MCX MMCX U.FL UMRF"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "*BNC* *SMA* *SMB* *SMC* *Cinch* *LEMO* *UMRF* *MCX* *U.FL*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "PJRAN1X1U02X_0_1"
+				(arc
+					(start -1.778 -0.508)
+					(mid 0.2311 -1.8066)
+					(end 1.778 0)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.54 0) (xy -0.508 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -2.54) (xy 0 -1.778)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 0)
+					(radius 0.508)
+					(stroke
+						(width 0.2032)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(arc
+					(start 1.778 0)
+					(mid 0.2099 1.8101)
+					(end -1.778 0.508)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "PJRAN1X1U02X_1_1"
+				(pin passive line
+					(at 0 -5.08 90)
+					(length 2.54)
+					(name "Ext"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "In"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+		)
 		(symbol "74xx:74HC138"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -2712,188 +2888,6 @@
 						)
 					)
 					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-		)
-		(symbol "Connector_Audio:AudioJack3"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "J"
-				(at 0 8.89 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "AudioJack3"
-				(at 0 6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "~"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Audio Jack, 3 Poles (Stereo / TRS)"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "audio jack receptacle stereo headphones phones TRS connector"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "Jack*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "AudioJack3_0_1"
-				(rectangle
-					(start -5.08 -5.08)
-					(end -6.35 -2.54)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -2.54) (xy 0.635 -3.175) (xy 1.27 -2.54) (xy 2.54 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.905 -2.54) (xy -1.27 -3.175) (xy -0.635 -2.54) (xy -0.635 0) (xy 2.54 0)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.54 2.54) (xy -2.54 2.54) (xy -2.54 -2.54) (xy -3.175 -3.175) (xy -3.81 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(rectangle
-					(start 2.54 3.81)
-					(end -5.08 -5.08)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "AudioJack3_1_1"
-				(pin passive line
-					(at 5.08 0 180)
-					(length 2.54)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "R"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 2.54 180)
-					(length 2.54)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "S"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 -2.54 180)
-					(length 2.54)
-					(name "~"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "T"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -4993,12 +4987,6 @@
 		(uuid "0c5758e4-9738-46c5-b7c1-f862b02077e6")
 	)
 	(junction
-		(at 227.33 106.68)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "0da2fab9-413e-4506-9334-4b34b8a085e4")
-	)
-	(junction
 		(at 180.34 151.13)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5029,6 +5017,12 @@
 		(uuid "60da43d7-e085-4427-9bd2-e58bba74907e")
 	)
 	(junction
+		(at 158.75 99.06)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6a4b903e-3fef-49a4-9f97-dfabcfe61094")
+	)
+	(junction
 		(at 180.34 153.67)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5045,12 +5039,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "93f03ed1-58cd-40b4-9ee3-ea48e1d8926c")
-	)
-	(junction
-		(at 227.33 111.76)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "ab09427c-82a7-410a-9d7c-28a6bc688907")
 	)
 	(junction
 		(at 180.34 158.75)
@@ -5350,6 +5338,16 @@
 	)
 	(wire
 		(pts
+			(xy 146.05 99.06) (xy 146.05 97.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11c35f31-e604-4655-8d4a-b3fb46b5134a")
+	)
+	(wire
+		(pts
 			(xy 125.73 146.05) (xy 130.81 146.05)
 		)
 		(stroke
@@ -5430,13 +5428,23 @@
 	)
 	(wire
 		(pts
-			(xy 223.52 106.68) (xy 227.33 106.68)
+			(xy 223.52 106.68) (xy 231.14 106.68)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "1fbe9017-6bf4-4b6c-abeb-7f431a328a61")
+	)
+	(wire
+		(pts
+			(xy 238.76 114.3) (xy 238.76 111.76)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "202aa61d-4daf-48dd-8f40-88c77f6a35ee")
 	)
 	(wire
 		(pts
@@ -5790,23 +5798,13 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 128.27) (xy 227.33 128.27)
+			(xy 227.33 128.27) (xy 234.95 128.27)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
 		(uuid "4fee90c5-3e98-467e-9de2-73d1cef7dd2f")
-	)
-	(wire
-		(pts
-			(xy 227.33 106.68) (xy 231.14 106.68)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "54933bfa-084d-4f9e-8081-10382d2b799b")
 	)
 	(wire
 		(pts
@@ -5937,16 +5935,6 @@
 			(type default)
 		)
 		(uuid "5cc6bad8-e18d-456a-a20e-e2ce84519024")
-	)
-	(wire
-		(pts
-			(xy 234.95 124.46) (xy 231.14 124.46)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "5d042383-7487-4a4f-a9d5-3f89221e76c5")
 	)
 	(wire
 		(pts
@@ -6120,7 +6108,7 @@
 	)
 	(wire
 		(pts
-			(xy 234.95 121.92) (xy 231.14 121.92)
+			(xy 234.95 125.73) (xy 231.14 125.73)
 		)
 		(stroke
 			(width 0)
@@ -6197,6 +6185,16 @@
 			(type default)
 		)
 		(uuid "749a989e-fdd0-4f0d-a001-2c0f39341146")
+	)
+	(wire
+		(pts
+			(xy 158.75 99.06) (xy 158.75 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "781d3b5e-9f4e-4557-bf9b-f6cf3c53682f")
 	)
 	(wire
 		(pts
@@ -6280,23 +6278,13 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 124.46) (xy 231.14 128.27)
+			(xy 158.75 92.71) (xy 158.75 99.06)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "84b99672-6798-4e55-a114-bd4b828cadb6")
-	)
-	(wire
-		(pts
-			(xy 158.75 92.71) (xy 158.75 93.98)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "85b2801c-1578-4dc7-89b5-24af16d6988d")
+		(uuid "83fc6899-4785-4e5a-9206-42f257af4184")
 	)
 	(wire
 		(pts
@@ -6417,6 +6405,16 @@
 			(type default)
 		)
 		(uuid "925dea09-99cb-435f-837d-cbb5c8abc3ef")
+	)
+	(wire
+		(pts
+			(xy 146.05 99.06) (xy 158.75 99.06)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "945ff08a-955f-41b4-a251-00b6a33c9564")
 	)
 	(wire
 		(pts
@@ -6710,7 +6708,7 @@
 	)
 	(wire
 		(pts
-			(xy 231.14 121.92) (xy 231.14 106.68)
+			(xy 231.14 125.73) (xy 231.14 106.68)
 		)
 		(stroke
 			(width 0)
@@ -6720,13 +6718,13 @@
 	)
 	(wire
 		(pts
-			(xy 233.68 111.76) (xy 227.33 111.76)
+			(xy 146.05 90.17) (xy 146.05 88.9)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "c42bd73c-eec9-44d4-971a-e2d56f8a7a1e")
+		(uuid "c47781b1-ff2d-4764-8638-a2b3e3bff230")
 	)
 	(wire
 		(pts
@@ -6880,7 +6878,7 @@
 	)
 	(wire
 		(pts
-			(xy 233.68 109.22) (xy 227.33 109.22)
+			(xy 227.33 114.3) (xy 238.76 114.3)
 		)
 		(stroke
 			(width 0)
@@ -7000,17 +6998,7 @@
 	)
 	(wire
 		(pts
-			(xy 227.33 111.76) (xy 227.33 128.27)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "f131d8da-353b-492f-98f5-41d4810518e0")
-	)
-	(wire
-		(pts
-			(xy 227.33 109.22) (xy 227.33 111.76)
+			(xy 227.33 114.3) (xy 227.33 128.27)
 		)
 		(stroke
 			(width 0)
@@ -9277,7 +9265,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "01d6bd56-4188-4c17-80df-0830a8b385cb")
-		(property "Reference" "#PWR08"
+		(property "Reference" "#PWR02"
 			(at 128.27 99.06 0)
 			(effects
 				(font
@@ -9327,7 +9315,7 @@
 		(instances
 			(project "Sound Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "#PWR08")
+					(reference "#PWR02")
 					(unit 1)
 				)
 			)
@@ -9335,15 +9323,15 @@
 	)
 	(symbol
 		(lib_id "Connector:TestPoint")
-		(at 227.33 106.68 0)
+		(at 231.14 106.68 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "0717b1d2-e4a9-4ec5-91d3-43e16c00e65d")
-		(property "Reference" "TP2"
-			(at 226.314 98.806 0)
+		(property "Reference" "TP3"
+			(at 230.124 98.806 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9352,7 +9340,7 @@
 			)
 		)
 		(property "Value" "Audio Out"
-			(at 226.314 100.8381 0)
+			(at 230.124 100.8381 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9361,7 +9349,7 @@
 			)
 		)
 		(property "Footprint" "TestPoint:TestPoint_Pad_1.5x1.5mm"
-			(at 232.41 106.68 0)
+			(at 236.22 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9370,7 +9358,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 232.41 106.68 0)
+			(at 236.22 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9379,7 +9367,7 @@
 			)
 		)
 		(property "Description" "test point"
-			(at 227.33 106.68 0)
+			(at 231.14 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9393,7 +9381,87 @@
 		(instances
 			(project ""
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "TP2")
+					(reference "TP3")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "6502 Parts:PJRAN1X1U02X")
+		(at 238.76 106.68 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "0dbd2f06-a304-467e-b2a0-5f7d6ea2a7fb")
+		(property "Reference" "J4"
+			(at 241.3 105.7031 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Audio Out"
+			(at 241.3 108.2431 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "6502 Parts:SWITCHCRAFT_PJRAN1X1U02X"
+			(at 238.76 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "https://www.switchcraft.com/assets/1/24/pjran1x1u__x_series_cd.pdf?4664"
+			(at 238.76 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "RCA Connector"
+			(at 238.76 106.68 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Digikey" "https://www.digikey.com/en/products/detail/switchcraft-inc/PJRAN1X1U02X/1832412"
+			(at 242.57 109.5131 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "5235f0f7-5447-4e18-9925-2e840c49af0a")
+		)
+		(pin "2"
+			(uuid "c9d56f4a-444d-47ac-970f-ac9c8e0a79f0")
+		)
+		(instances
+			(project ""
+				(path "/154a5133-b84f-49cb-b657-9c810539146c"
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -9474,7 +9542,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1207f7fd-7527-41b0-87d6-ec1e9d7cc521")
-		(property "Reference" "TP1"
+		(property "Reference" "TP2"
 			(at 189.484 77.724 0)
 			(effects
 				(font
@@ -9483,7 +9551,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Audio Raw"
+		(property "Value" "Mixer"
 			(at 189.484 79.756 0)
 			(effects
 				(font
@@ -9525,7 +9593,7 @@
 		(instances
 			(project ""
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "TP1")
+					(reference "TP2")
 					(unit 1)
 				)
 			)
@@ -9540,7 +9608,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1cb857ec-0986-4731-8614-f88d1ba637e3")
-		(property "Reference" "J3"
+		(property "Reference" "J2"
 			(at 171.45 140.335 0)
 			(effects
 				(font
@@ -9635,7 +9703,83 @@
 		(instances
 			(project "Pi Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J3")
+					(reference "J2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 146.05 93.98 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "29a10afa-b532-4713-a6a9-7faa6932a4e3")
+		(property "Reference" "C3"
+			(at 152.4508 93.98 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100nF"
+			(at 150.1394 93.98 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 147.0152 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 146.05 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 146.05 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C49678"
+			(at 146.05 93.98 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "75e0d0f0-2627-4425-be31-ef84a6f8f70f")
+		)
+		(pin "2"
+			(uuid "447f1ff4-06e0-4c6a-9a76-5ee05913497a")
+		)
+		(instances
+			(project "Sound Card"
+				(path "/154a5133-b84f-49cb-b657-9c810539146c"
+					(reference "C3")
 					(unit 1)
 				)
 			)
@@ -9651,7 +9795,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "2a18de18-35ed-4d91-b173-70bac955424b")
-		(property "Reference" "U4"
+		(property "Reference" "U2"
 			(at 143.1641 135.89 0)
 			(effects
 				(font
@@ -9756,7 +9900,7 @@
 		(instances
 			(project "Pi Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "U4")
+					(reference "U2")
 					(unit 1)
 				)
 			)
@@ -9916,7 +10060,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "3b426940-aa84-429b-a6f9-dd5a732906a4")
-		(property "Reference" "#PWR010"
+		(property "Reference" "#PWR05"
 			(at 209.55 135.89 0)
 			(effects
 				(font
@@ -9966,7 +10110,7 @@
 		(instances
 			(project "Sound Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "#PWR010")
+					(reference "#PWR05")
 					(unit 1)
 				)
 			)
@@ -9981,7 +10125,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "57c90a2c-f75b-439e-9042-9ea472b03bbd")
-		(property "Reference" "C9"
+		(property "Reference" "C5"
 			(at 219.71 100.2792 90)
 			(effects
 				(font
@@ -10042,7 +10186,7 @@
 		(instances
 			(project "Sound Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "C9")
+					(reference "C5")
 					(unit 1)
 				)
 			)
@@ -10133,7 +10277,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "669f4df4-9114-4b7a-bc4e-3d9dbfda0ec1")
-		(property "Reference" "TP3"
+		(property "Reference" "TP1"
 			(at 178.308 126.238 90)
 			(effects
 				(font
@@ -10182,7 +10326,7 @@
 		(instances
 			(project ""
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "TP3")
+					(reference "TP1")
 					(unit 1)
 				)
 			)
@@ -10198,7 +10342,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "79b50317-5f45-4b23-82ab-34e1c8da747a")
-		(property "Reference" "J4"
+		(property "Reference" "J3"
 			(at 222.25 44.45 0)
 			(effects
 				(font
@@ -10280,7 +10424,7 @@
 		(instances
 			(project "Sound Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J4")
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -10545,7 +10689,7 @@
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_01x02")
-		(at 240.03 121.92 0)
+		(at 240.03 125.73 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -10553,8 +10697,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "897eaebb-50cd-41f7-a9f5-05b54779315d")
-		(property "Reference" "J1"
-			(at 242.57 121.9199 0)
+		(property "Reference" "J5"
+			(at 242.57 125.7299 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10563,7 +10707,7 @@
 			)
 		)
 		(property "Value" "Audio Out"
-			(at 242.57 124.4599 0)
+			(at 242.57 128.2699 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10572,7 +10716,7 @@
 			)
 		)
 		(property "Footprint" "Connector_JST:JST_XH_B2B-XH-A_1x02_P2.50mm_Vertical"
-			(at 240.03 121.92 0)
+			(at 240.03 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10581,7 +10725,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 240.03 121.92 0)
+			(at 240.03 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10590,7 +10734,7 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
-			(at 240.03 121.92 0)
+			(at 240.03 125.73 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -10607,7 +10751,7 @@
 		(instances
 			(project ""
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J1")
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -10622,7 +10766,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "93b983e6-3858-4038-b325-0d5388edf864")
-		(property "Reference" "J2"
+		(property "Reference" "J1"
 			(at 54.102 122.428 0)
 			(effects
 				(font
@@ -10789,7 +10933,7 @@
 		(instances
 			(project "Pi Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J2")
+					(reference "J1")
 					(unit 1)
 				)
 			)
@@ -10941,7 +11085,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a20dd98c-f2c2-4c80-b86f-6e5cb961a560")
-		(property "Reference" "#PWR07"
+		(property "Reference" "#PWR03"
 			(at 140.97 179.07 0)
 			(effects
 				(font
@@ -10991,7 +11135,7 @@
 		(instances
 			(project "Pi Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "#PWR07")
+					(reference "#PWR03")
 					(unit 1)
 				)
 			)
@@ -11079,7 +11223,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "a781368b-cecf-4a17-937d-13c960567d89")
-		(property "Reference" "C7"
+		(property "Reference" "C2"
 			(at 116.8908 152.4 90)
 			(effects
 				(font
@@ -11140,7 +11284,7 @@
 		(instances
 			(project "Pi Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "C7")
+					(reference "C2")
 					(unit 1)
 				)
 			)
@@ -11216,7 +11360,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 158.75 93.98 0)
+		(at 158.75 100.33 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -11224,8 +11368,8 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "afa574fa-3a90-423b-bdc9-3d0da33670ad")
-		(property "Reference" "#PWR09"
-			(at 158.75 100.33 0)
+		(property "Reference" "#PWR04"
+			(at 158.75 106.68 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11234,7 +11378,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 158.75 99.06 0)
+			(at 158.75 105.41 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11242,7 +11386,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 158.75 93.98 0)
+			(at 158.75 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11251,7 +11395,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 158.75 93.98 0)
+			(at 158.75 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11260,7 +11404,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 158.75 93.98 0)
+			(at 158.75 100.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11274,80 +11418,7 @@
 		(instances
 			(project "Sound Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "#PWR09")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Connector_Audio:AudioJack3")
-		(at 238.76 109.22 180)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "db8eef0b-6d5e-49e4-8047-032e2d2a2d8a")
-		(property "Reference" "J5"
-			(at 246.38 107.3149 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Value" "3.5mm TRS"
-			(at 246.38 109.8549 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify right)
-			)
-		)
-		(property "Footprint" "Connector_Audio:Jack_3.5mm_CUI_SJ1-3523N_Horizontal"
-			(at 238.76 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 238.76 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Audio Jack, 3 Poles (Stereo / TRS)"
-			(at 238.76 109.22 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "T"
-			(uuid "fdd3fb1f-1ccb-4f7b-8cf5-704bf4082ce1")
-		)
-		(pin "S"
-			(uuid "75fc6076-07fb-4b99-87dc-64f8ccb02bc1")
-		)
-		(pin "R"
-			(uuid "5cf90f22-4e05-4f21-956f-d0a8a69846e8")
-		)
-		(instances
-			(project ""
-				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J5")
+					(reference "#PWR04")
 					(unit 1)
 				)
 			)
@@ -11362,7 +11433,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f099dc77-0a00-42c8-9fff-da780adc8c78")
-		(property "Reference" "C8"
+		(property "Reference" "C4"
 			(at 215.9508 118.11 90)
 			(effects
 				(font
@@ -11423,7 +11494,7 @@
 		(instances
 			(project "Sound Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "C8")
+					(reference "C4")
 					(unit 1)
 				)
 			)
@@ -11438,7 +11509,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "f9d579c7-09fb-4ba9-995b-4fc235743192")
-		(property "Reference" "U5"
+		(property "Reference" "U3"
 			(at 163.83 42.926 0)
 			(effects
 				(font
@@ -11660,7 +11731,7 @@
 		(instances
 			(project ""
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "U5")
+					(reference "U3")
 					(unit 1)
 				)
 			)
