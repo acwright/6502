@@ -4,7 +4,6 @@
 #include <Bounce2.h>
 #include <SD.h>
 #include <EEPROM.h>
-#include <USBHost_t36.h>
 
 #include "pins.h"
 #include "utilities.h"
@@ -46,60 +45,11 @@
 #define ROM_CODE    0xA000
 #define ROM_END     0xFFFF
 
-                            /*                            IO REGISTERS                        */
-                            // | bit 7 | bit 6 | bit 5 | bit 4 | bit 3 | bit 2 | bit 1 | bit 0 |  
-#define KBD_DATA    0       // | DRDY  |                 ASCII KEY CODE                        |  Keyboard Data:    Data Ready (Bit 7) -> [ Ascii Key Code (Bit 6-0) ] (Read from KBD_DATA to clear keyboard INT)
-#define KBD_CTRL    1       // |                       NA                      | ARINT | KBINT |  Keyboard Control: (Bit 7-2 unused) -> Enable (1) / Disable (0) Arrow Key Interrupts (Bit 1) -> Enable (1) / Disable (0) Keyboard Interrupts (Bit 0)
-#define KBD_STAT    2       // | KBINT | ARINT |       NA      |   UP  |  DOWN |  LEFT | RIGHT |  Keyboard Status:  Interrupt Status (Bit 7-6) -> (Bit 5-4 unused) -> Arrow Keys Pressed (Bit 3-0) (Read from KBD_STAT to clear arrow key INT)
-                            /*                                                                    Notes:            USB Keyboard input can be read by 6502 using either a polling or interrupt strategy */
-
-#define DSP_DATA    3       // |                           ASCII CODE                          |  Display Data:     [ Extended Ascii Code (Bit 7-0) ]
-#define DSP_CTRL    4       // |                               NA                              |  Display Control:  Unused for now...
-                            /*                                                                    Notes:            Outputs character to serial terminal. */
-
-#define MOUSE_X     5       // |  DIR  |                    VELOCITY                           |  Mouse X:          Direction + Right (0) - Left (1) -> Velocity from 0-127
-#define MOUSE_Y     6       // |  DIR  |                    VELOCITY                           |  Mouse Y:          Direction + Down (0) - Up (1) -> Velocity from 0-127
-#define MOUSE_W     7       // |  DIR  |                    VELOCITY                           |  Mouse Wheel:      Direction + Down (0) - Up (1) -> Velocity from 0-127
-#define MOUSE_BTN   8       // |                  NA                   |  MID  | RIGHT |  LEFT |  Mouse Buttons:    (Bit 7-3 unused) -> Middle, Right, Left Buttons Pressed (Bit 2-0)
-
-#define JOY_BTNL    9       // |   Y   |   X   |   B   |   A   | LFUNC | RFUNC |       NA      |  Joystick Btn L:           Y -> X -> B -> A -> L Function (View) -> R Function (Menu) -> (Bit 1-0 unused)
-#define JOY_BTNH   10       // | RABTN | LABTN |  RBTN |  LBTN | RIGHT |  LEFT |  DOWN |   UP  |  Joystick Btn H:           Right Analog Btn -> Left Analog Btn -> Right Btn -> Left Btn -> D-Right -> D-Left -> D-Down -> D-Up
-#define JOY_LAXL   11       // |                   LEFT ANALOG X (LOW BYTE)                    |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (Low Byte)
-#define JOY_LAXH   12       // |                   LEFT ANALOG X (HIGH BYTE)                   |  Joystick Left Analog X:   -32768(Left) to +32768(Right) (High Byte)
-#define JOY_LAYL   13       // |                   LEFT ANALOG Y (LOW BYTE)                    |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (Low Byte)
-#define JOY_LAYH   14       // |                   LEFT ANALOG Y (HIGH BYTE)                   |  Joystick Left Analog Y:   -32768(Down) to +32768(Up) (High Byte)
-#define JOY_RAXL   15       // |                  RIGHT ANALOG X (LOW BYTE)                    |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (Low Byte)
-#define JOY_RAXH   16       // |                  RIGHT ANALOG X (HIGH BYTE)                   |  Joystick Right Analog X:  -32768(Left) to +32768(Right) (High Byte)
-#define JOY_RAYL   17       // |                  RIGHT ANALOG Y (LOW BYTE)                    |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (Low Byte)
-#define JOY_RAYH   18       // |                  RIGHT ANALOG Y (HIGH BYTE)                   |  Joystick Right Analog Y:  -32768(Down) to +32768(Up) (High Byte)
-#define JOY_LTRL   19       // |                   LEFT TRIGGER (LOW BYTE)                     |  Joystick Left Trigger:    +0 to +1024 (Low Byte)
-#define JOY_LTRH   20       // |                       NA                      |    LTRIG(H)   |  Joystick Left Trigger:    +0 to +1024 (High Byte) (Bit 7-2 unused)
-#define JOY_RTRL   21       // |                  RIGHT TRIGGER (LOW BYTE)                     |  Joystick Right Trigger:   +0 to +1024 (Low Byte)
-#define JOY_RTRH   22       // |                       NA                      |    RTRIG(H)   |  Joystick Right Trigger:   +0 to +1024 (High Byte) (Bit 7-2 unused)
-                            /*                                                                    Notes:                    XBOX 360 and XBOX One controllers supported for now... */
-
-#define RTC_SEC    32       // |                            SECONDS                            |  Real Time Clock:  Second (0-59)
-#define RTC_MIN    33       // |                            MINUTES                            |  Real Time Clock:  Minute (0-59)
-#define RTC_HR     34       // |                             HOURS                             |  Real Time Clock:  Hour (0-23)
-#define RTC_DAY    35       // |                              DAY                              |  Real Time Clock:  Day (1-31)
-#define RTC_MON    36       // |                             MONTH                             |  Real Time Clock:  Month (1-12)
-#define RTC_YR     37       // |                             YEAR                              |  Real Time Clock:  Year (0-99) (Offset from 1970)
-                            /*                                                                    Notes:            Real Time Clock IO registers are read-only. Teensy Loader automatically initializes the RTC to your PC's time while uploading. */
-                            /*                                                                                      If a coin cell is connected to VBAT, the RTC will continue keeping time while power is turned off. See: https://www.pjrc.com/store/teensy41.html */
-
-#define GPIO_DATA  40       // |  INT3 |  INT2 |  INT1 |  INT0 | GPIO3 | GPIO2 | GPIO1 | GPIO0 |  GPIO Data:    Interrupt Status (Bit 7-4) -> GPIO Data (Bit 3-0) (Read from GPIO_DATA to clear INTs)
-#define GPIO_CTRL  41       // | INEN3 | INEN2 | INEN1 | INEN0 | GDIR3 | GDIR2 | GDIR1 | GDIR0 |  GPIO Control: Interrupt Enable (Bit 7-4) -> GPIO Direction (Bit 3-0) (LOW = IN | HIGH = OUT)
-
 #define TIMER_PERIOD              1 // 1 uS
 #define FREQS                     (String[20])  { "1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz" }
 #define FREQ_DELAYS               (int[20])     { 250000, 125000, 62500, 31250, 15625, 7812, 3906, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0 }
 
 #define DEBOUNCE        5          // 5 milliseconds
-
-#define DEBUG_NONE      0
-#define DEBUG_KEYBOARD  1
-#define DEBUG_MOUSE     2
-#define DEBUG_JOYSTICK  3
 
 #define IO_BANK_SIZE    0x3FF
 
@@ -125,11 +75,6 @@ void onTick();
 void onCycleBegin();
 void onCycleEnd();
 void onCommand(char command);
-void onKey(char key);
-void onKeyPress(int key);
-void onKeyRelease(int key);
-void onMouseAvailable();
-void onJoystickAvailable();
 
 void initPins();
 void initButtons();
@@ -137,7 +82,6 @@ void initRAM();
 void initIO();
 void initROM();
 void initSD();
-void initUSB();
 
 void setAddrDirIn();
 void setDataDirIn();
@@ -154,8 +98,7 @@ void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
 void toggleRunStop();
-void toggleDebug();
-void toggleKeyboardCapture();
+void toggleOutput();
 void toggleRAM();
 void toggleIO();
 void toggleIOBank();
@@ -165,9 +108,6 @@ void listROMs();
 void loadROM(unsigned int index);
 void prevPage();
 void nextPage();
-
-String formatDateTime();
-String formatDebugMode();
 
 time_t syncTime();
 
@@ -179,14 +119,12 @@ volatile bool isRunning = false;
 volatile bool isStepping = false;
 volatile bool isLogging = false;
 
-bool RAMEnabled = true;
-bool IOEnabled = true;
-bool ROMEnabled = true;
+bool OutputEnabled = false;
+bool RAMEnabled = false;
+bool IOEnabled = false;
+bool ROMEnabled = false;
 String romFile = "None";
 byte IOBank = 7;                  // By default, debugger IO bank is $9C00
-
-byte debugMode = DEBUG_NONE;
-bool keyboardCaptureEnabled = false;
 
 word address = 0;
 byte data = 0;
@@ -201,15 +139,6 @@ bool nmib = HIGH;
 String ROMs[ROM_MAX];
 unsigned int romPage = 0;
 
-USBHost usb;
-USBHub hub1(usb);
-USBHIDParser hid1(usb);
-USBHIDParser hid2(usb);
-USBHIDParser hid3(usb);
-KeyboardController keyboard(usb);
-MouseController mouse(usb);
-JoystickController joystick(usb);
-
 //
 // MAIN LOOPS
 //
@@ -220,26 +149,23 @@ void setup() {
   initRAM();
   initIO();
   initROM();
+  initSD();
 
   setSyncProvider(syncTime);
   setSyncInterval(1);
 
-  Timer1.initialize(TIMER_PERIOD);
-  Timer1.attachInterrupt(onTick);
-
-  initSD();
-  initUSB();
-
   Serial.begin(9600);
   
-  // Wait up to 1 sec for serial to connect
-  int timeout = 1000;
+  // Wait up to 2 sec for serial to connect
+  int timeout = 2000;
   while (!Serial && timeout--) {
     delay(1);
   }
 
   info();
-  reset();
+
+  Timer1.initialize(TIMER_PERIOD);
+  Timer1.attachInterrupt(onTick);
 }
 
 void loop() {
@@ -258,84 +184,11 @@ void loop() {
     toggleRunStop();
   }
 
+  // Check for key press
   if (Serial.available()) 
   {
-    byte key = Serial.read();
-
-    if (keyboardCaptureEnabled && key != 0x1B) {
-      onKey(key);
-    } else {
-      onCommand(key);
-    }
+    onCommand(Serial.read());
   }
-
-  // Update USB
-  usb.Task();
-
-  if (mouse.available()) {
-    onMouseAvailable();
-  }
-
-  if (joystick.available()) {
-    onJoystickAvailable();
-  }
-
-  // Update GPIO
-  if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000001) != 1) { // GPIO0 is set to INPUT
-    if (digitalReadFast(GPIO0)) {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] |= 1;
-
-      // Set interrupt if enabled
-      if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00010000) >> 4) {
-        pinMode(IRQB, OUTPUT);
-        digitalWriteFast(IRQB, LOW);
-      }
-    } else {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] &= ~1;
-    }
-  }
-  if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) != 1) { // GPIO1 is set to INPUT
-    if (digitalReadFast(GPIO1)) {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] |= (1 << 1);
-
-      // Set interrupt if enabled
-      if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00100000) >> 5) {
-        pinMode(IRQB, OUTPUT);
-        digitalWriteFast(IRQB, LOW);
-      }
-    } else {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] &= ~(1 << 1);
-    }
-  }
-  if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000100) != 1) { // GPIO2 is set to INPUT
-    if (digitalReadFast(GPIO2)) {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] |= (1 << 2);
-
-      // Set interrupt if enabled
-      if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b01000000) >> 6) {
-        pinMode(IRQB, OUTPUT);
-        digitalWriteFast(IRQB, LOW);
-      }
-    } else {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] &= ~(1 << 2);
-    }
-  }
-  if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00001000) != 1) { // GPIO3 is set to INPUT
-    if (digitalReadFast(GPIO3)) {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] |= (1 << 3);
-
-      // Set interrupt if enabled
-      if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b10000000) >> 7) {
-        pinMode(IRQB, OUTPUT);
-        digitalWriteFast(IRQB, LOW);
-      }
-    } else {
-      IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] &= ~(1 << 3);
-    }
-  }
-
-  // Sync the clock
-  now();
 }
 
 //
@@ -397,53 +250,10 @@ FASTRUN void onCycleBegin() {
 
   if (readWrite == HIGH) { // READING
     // Check if in IO space first since it overlaps ROM space...
+    // Only output data if address is in selected IOBank area and IO is enabled
     if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) { // IO
-      // Only output data if address is in selected IOBank area and IO is enabled
       setDataDirOut();
       writeData(IO[address - IO_START]);
-
-      // Handle IO post processing
-      switch(address - IO_BANKS[IOBank]) {
-        case KBD_DATA: {
-          // Read from KBD_DATA clears data ready bit
-          IO[(IO_BANKS[IOBank] + KBD_DATA) - IO_START] &= 0b01111111;
-
-          // Read from KBD_DATA clears keyboard interrupt status bit
-          IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] &= 0b01111111;
-
-          // Are there any more interrupts? If not, clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
-          if ((IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] & 0b11000000) == 0) {
-            digitalWriteFast(IRQB, HIGH);
-            pinMode(IRQB, INPUT);
-          }
-
-          break;
-        }
-        case KBD_STAT: {
-          // Read from KBD_STAT clears arrow key interrupt status bit
-          IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] &= 0b10111111;
-
-          // Are there any more interrupts? If not, clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
-          if ((IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] & 0b11000000) == 0) {
-            digitalWriteFast(IRQB, HIGH);
-            pinMode(IRQB, INPUT);
-          }
-
-          break;
-        }
-        case GPIO_DATA: {
-          // Read from GPIO_DATA clears interrupt status bits
-          IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] &= 0b00001111;
-
-          // Clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
-          digitalWriteFast(IRQB, HIGH);
-          pinMode(IRQB, INPUT);
-
-          break;
-        }
-        default:
-          break;
-      }
     } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       setDataDirOut();
       writeData(RAM[address - RAM_START]);
@@ -469,33 +279,6 @@ FASTRUN void onCycleEnd() {
       IO[address - IO_START] = data;
     } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
       RAM[address - RAM_START] = data;
-    }
-
-    // Handle IO post processing
-    switch(address - IO_BANKS[IOBank]) {
-      case DSP_DATA: {
-        Serial.write(data);
-      }
-      case GPIO_DATA: {
-        if (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000001) {
-          digitalWriteFast(GPIO0, IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] & 0b00000001);
-        }
-        if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) >> 1) {
-          digitalWriteFast(GPIO1, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) >> 1);
-        }
-        if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000100) >> 2) {
-          digitalWriteFast(GPIO2, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000100) >> 2);
-        }
-        if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00001000) >> 3) {
-          digitalWriteFast(GPIO3, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00001000) >> 3);
-        }
-      }
-      case GPIO_CTRL: {
-        pinMode(GPIO0, IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000001);
-        pinMode(GPIO1, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) >> 1);
-        pinMode(GPIO2, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000100) >> 2);
-        pinMode(GPIO3, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00001000) >> 3);
-      }
     }
   }
 }
@@ -542,6 +325,10 @@ void onCommand(char command) {
     case 'P':
       snapshot();
       break;
+    case 'u':
+    case 'U':
+      toggleOutput();
+      break;
     case 'a':
     case 'A':
       toggleRAM();
@@ -561,10 +348,6 @@ void onCommand(char command) {
     case 'l':
     case 'L':
       listROMs();
-      break;
-    case 'b':
-    case 'B':
-      toggleDebug();
       break;
     case 'f':
     case 'F':
@@ -587,241 +370,7 @@ void onCommand(char command) {
     case ']':
       nextPage();
       break;
-    case 0x1B:
-      toggleKeyboardCapture();
-      break;
   }
-}
-
-void onKey(char key) {
-  // Set the keyboard data register to key value and set data ready bit
-  IO[(IO_BANKS[IOBank] + KBD_DATA) - IO_START] = (key | 0x80);
-
-  // And set interrupt if keyboard interrupts are enabled
-  if ((IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x01) != 0) {
-    pinMode(IRQB, OUTPUT);
-    digitalWriteFast(IRQB, LOW);
-
-    // Set bit 7 of KBD_STAT register to indicate keyboard interrupt asserted
-    IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b10000000;
-  } 
-}
-
-void onKeyPress(int key) {
-  if (key > 127) { 
-    // If bit 7 is set (non-ASCII key) we should set arrow keys
-    bool isArrowKey = false;
-
-    switch (key) {
-      case 0xD7: { // RIGHT
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b00000001;
-        isArrowKey = true;
-        break;
-      }
-      case 0xD8: { // LEFT
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b00000010;
-        isArrowKey = true;
-        break;
-      }
-      case 0xD9: { // DOWN  
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b00000100;
-        isArrowKey = true;
-        break;
-      }
-      case 0xDA: { // UP
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b00001000;
-        isArrowKey = true;
-        break;
-      }
-    }
-
-    // And set interrupt if arrow key interrupts are enabled
-    if (isArrowKey && (IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x02) != 0) {
-      pinMode(IRQB, OUTPUT);
-      digitalWriteFast(IRQB, LOW);
-
-      // Set bit 6 of KBD_STAT register to indicate arrow key interrupt asserted
-      IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b01000000;
-    }
-  } else {
-    // Otherwise, we set the keyboard data register to key value and set data ready bit
-    IO[(IO_BANKS[IOBank] + KBD_DATA) - IO_START] = (key | 0x80);
-
-    // And set interrupt if keyboard interrupts are enabled
-    if ((IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x01) != 0) {
-      pinMode(IRQB, OUTPUT);
-      digitalWriteFast(IRQB, LOW);
-
-      // Set bit 7 of KBD_STAT register to indicate keyboard interrupt asserted
-      IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b10000000;
-    } 
-  }
-
-  if (debugMode == DEBUG_KEYBOARD) {
-    Serial.print("Key Pressed: ");
-    Serial.print((char)key);
-
-    char output[64];
-
-    sprintf(
-      output, 
-      " | %c%c%c%c%c%c%c%c | 0x%02X",
-      BYTE_TO_BINARY(key),
-      key
-    );
-
-    Serial.println(output);
-  }
-}
-
-void onKeyRelease(int key) {
-  if (key > 127) { 
-    // If bit 7 is set (non-ASCII key) we should clear arrow keys
-    bool isArrowKey = false;
-
-    switch (key) {
-      case KEYD_RIGHT: { // RIGHT
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] &= 0b11111110;
-        isArrowKey = true;
-        break;
-      }
-      case KEYD_LEFT: { // LEFT
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] &= 0b11111101;
-        isArrowKey = true;
-        break;
-      }
-      case KEYD_DOWN: { // DOWN  
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] &= 0b11111011;
-        isArrowKey = true;
-        break;
-      }
-      case KEYD_UP: { // UP
-        IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] &= 0b11110111;
-        isArrowKey = true;
-        break;
-      }
-    }
-
-    // And set interrupt if arrow key interrupts are enabled
-    if (isArrowKey && (IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x02) != 0) {
-      pinMode(IRQB, OUTPUT);
-      digitalWriteFast(IRQB, LOW);
-
-      // Set bit 6 of KBD_STAT register to indicate arrow key interrupt asserted
-      IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] |= 0b01000000;
-    }
-  }
-
-  if (debugMode == DEBUG_KEYBOARD) {
-    Serial.print("Key Released: ");
-    Serial.print((char)key);
-
-    char output[64];
-
-    sprintf(
-      output, 
-      " | %c%c%c%c%c%c%c%c | 0x%02X",
-      BYTE_TO_BINARY(key),
-      key
-    );
-
-    Serial.println(output);
-  }
-}
-
-void onMouseAvailable() {
-  byte buttons = mouse.getButtons();
-  byte x = 0;
-  byte y = 0;
-  byte wheel = 0;
-
-  int8_t mouseX = mouse.getMouseX();
-  int8_t mouseY = mouse.getMouseY();
-  int8_t mouseWheel = mouse.getWheel();
-
-  x = mouseX < 0 ? (abs(mouseX) | 0b10000000) : mouseX;                 // If negative, set bit 7 (Left = -X)
-  y = mouseY < 0 ? (abs(mouseY) | 0b10000000) : mouseY;                 // If negative, set bit 7 (Up = -Y)
-  wheel = mouseWheel < 0 ? (abs(mouseWheel) | 0b10000000) : mouseWheel; // If negative, set bit 7 (Up = -W)
-
-  IO[(IO_BANKS[IOBank] + MOUSE_X) - IO_START] = x;
-  IO[(IO_BANKS[IOBank] + MOUSE_Y) - IO_START] = y;
-  IO[(IO_BANKS[IOBank] + MOUSE_W) - IO_START] = wheel;
-  IO[(IO_BANKS[IOBank] + MOUSE_BTN) - IO_START] = buttons;
-
-  if (debugMode == DEBUG_MOUSE) {
-    Serial.print("Mouse: Buttons = ");
-    Serial.print(buttons);
-    Serial.print(",  X = ");
-    Serial.print(mouseX);
-    Serial.print(",  Y = ");
-    Serial.print(mouseY);
-    Serial.print(",  Wheel = ");
-    Serial.print(mouseWheel);
-    Serial.println();
-  }
-
-  mouse.mouseDataClear();
-}
-
-void onJoystickAvailable() {
-  uint64_t axis_mask = joystick.axisMask();
-  uint32_t buttons = joystick.getButtons();
-
-  if (joystick.joystickType() == JoystickController::XBOX360 || 
-      joystick.joystickType() == JoystickController::XBOXONE) 
-  {
-    // XBOX Button Values
-    // LFUNC (View): 0x8 1000
-    // RFUNC (Menu): 0x4 0100
-    // A: 0x10 0001 0000
-    // B: 0x20 0010 0000
-    // X: 0x40 0100 0000
-    // Y: 0x80 1000 0000
-    // UP: 0x100 0001 0000 0000
-    // DOWN: 0x200 0010 0000 0000
-    // LEFT: 0x400 0100 0000 0000
-    // RIGHT: 0x800 1000 0000 0000
-    // LBTN: 0x1000 0001 0000 0000 0000
-    // RBTN: 0x2000 0010 0000 0000 0000
-    // LABTN: 0x4000 0100 0000 0000 0000
-    // RABTN: 0x8000 1000 0000 0000 0000
-
-    // XBOX Analog Values
-    // Left Analog X: 0:-32768(left) +32768(right) 
-    // Left Analog Y: 1:-32768(down) +32768(up)
-    // Right Analog X: 2:-32768(left) +32768(right) 
-    // LTRIG: 3:0-1023
-    // RTRIG: 4:0-1023
-    // Right Analog Y: 5:-32768(down) +32768(up)
-
-    IO[(IO_BANKS[IOBank] + JOY_BTNL) - IO_START] = buttons & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_BTNH) - IO_START] = (buttons >> 8) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_LAXL) - IO_START] = joystick.getAxis(0) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_LAXH) - IO_START] = (joystick.getAxis(0) >> 8) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_LAYL) - IO_START] = joystick.getAxis(1) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_LAYH) - IO_START] = (joystick.getAxis(1) >> 8) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_RAXL) - IO_START] = joystick.getAxis(2) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_RAXH) - IO_START] = (joystick.getAxis(2) >> 8) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_RAYL) - IO_START] = joystick.getAxis(5) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_RAYH) - IO_START] = (joystick.getAxis(5) >> 8) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_LTRL) - IO_START] = joystick.getAxis(3) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_LTRH) - IO_START] = (joystick.getAxis(3) >> 8) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_RTRL) - IO_START] = joystick.getAxis(4) & 0xFF;
-    IO[(IO_BANKS[IOBank] + JOY_RTRH) - IO_START] = (joystick.getAxis(4) >> 8) & 0xFF;
-  }
-
-  if (debugMode == DEBUG_JOYSTICK) {
-    Serial.printf("Joystick: Buttons = %x", buttons);
-
-    for (uint8_t i = 0; axis_mask != 0; i++, axis_mask >>= 1) {
-      if (axis_mask & 1) {
-        Serial.printf(" %d:%d", i, joystick.getAxis(i));
-      }
-    }
-    Serial.println();
-  }
-
-  joystick.joystickDataClear();
 }
 
 //
@@ -844,6 +393,8 @@ void info() {
   Serial.println("| Created by A.C. Wright © 2024 |");
   Serial.println("---------------------------------");
   Serial.println();
+  Serial.print("OUTPUT: ");
+  Serial.println(OutputEnabled ? "Enabled" : "Disabled");
   Serial.print("RAM: ");
   Serial.println(RAMEnabled ? "Enabled" : "Disabled");
   Serial.print("IO: ");
@@ -856,16 +407,8 @@ void info() {
   Serial.print(" (");
   Serial.print(romFile);
   Serial.println(")");
-  Serial.print("Debug: ");
-  Serial.println(formatDebugMode());
-  Serial.print("Keyboard Capture: ");
-  Serial.println(keyboardCaptureEnabled ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
-  Serial.print("Date / Time: ");
-  Serial.println(formatDateTime());
-  Serial.println();
-  Serial.println("Hit (ESC) to begin / end keyboard capture mode...");
   Serial.println();
   Serial.println("------------------------------------------------------------");
   Serial.println("| (R)un / Stop         | (S)tep           | Rese(T)        |");
@@ -874,7 +417,7 @@ void info() {
   Serial.println("------------------------------------------------------------");
   Serial.println("| (L)ist ROMs          | Change IO Ban(K) | Sna(P)shot     |");
   Serial.println("------------------------------------------------------------");
-  Serial.println("| (+/-) Clk Frequency  | Toggle De(B)ug   | In(F)o / Lo(G) |");
+  Serial.println("| (+/-) Clk Frequency  | Toggle Outp(U)ts | In(F)o / Lo(G) |");
   Serial.println("------------------------------------------------------------");
   Serial.println();
 }
@@ -1009,31 +552,21 @@ void toggleRunStop() {
   Serial.println(isRunning ? "Running…" : "Stopped");
 }
 
-void toggleDebug() {
-  switch (debugMode) {
-    case DEBUG_NONE:
-      debugMode = DEBUG_KEYBOARD;
-      break;
-    case DEBUG_KEYBOARD:
-      debugMode = DEBUG_MOUSE;
-      break;
-    case DEBUG_MOUSE:
-      debugMode = DEBUG_JOYSTICK;
-      break;
-    case DEBUG_JOYSTICK:
-      debugMode = DEBUG_NONE;
-      break;
+void toggleOutput() {
+  OutputEnabled = !OutputEnabled;
+
+  if (OutputEnabled) {
+    digitalWriteFast(OE1, HIGH);
+    digitalWriteFast(OE2, HIGH);
+    digitalWriteFast(OE3, HIGH);
+  } else {
+    digitalWriteFast(OE1, LOW);
+    digitalWriteFast(OE2, LOW);
+    digitalWriteFast(OE3, LOW);
   }
 
-  Serial.print("Debug: ");
-  Serial.println(formatDebugMode());
-}
-
-void toggleKeyboardCapture() {
-  keyboardCaptureEnabled = !keyboardCaptureEnabled;
-
-  Serial.print("Keyboard Capture: ");
-  Serial.println(keyboardCaptureEnabled ? "Enabled" : "Disabled");
+  Serial.print("OUTPUT: ");
+  Serial.println(OutputEnabled ? "Enabled" : "Disabled");
 }
 
 void toggleRAM() {
@@ -1172,52 +705,8 @@ void nextPage() {
   listROMs();
 }
 
-String formatDateTime() {
-  String time;
-
-  time.append(month());
-  time.append("/");
-  time.append(day());
-  time.append("/");
-  time.append(year());
-  time.append(" ");
-  time.append(hour());
-  time.append(":");
-  time.append(minute() < 10 ? "0": "");
-  time.append(minute());
-  time.append(":");
-  time.append(second() < 10 ? "0": "");
-  time.append(second());
-
-  return time;
-}
-
-String formatDebugMode() {
-  switch (debugMode) {
-    case DEBUG_NONE:
-      return "Disabled";
-    case DEBUG_KEYBOARD:
-      return "Keyboard";
-    case DEBUG_MOUSE:
-      return "Mouse";
-    case DEBUG_JOYSTICK:
-      return "Joystick";
-    default:
-      return "Unknown";
-  }
-}
-
 time_t syncTime() {
-  time_t now = Teensy3Clock.get();
-
-  IO[(IO_BANKS[IOBank] + RTC_SEC) - IO_START] = byte(second(now));
-  IO[(IO_BANKS[IOBank] + RTC_MIN) - IO_START] = byte(minute(now));
-  IO[(IO_BANKS[IOBank] + RTC_HR) - IO_START]  = byte(hour(now));
-  IO[(IO_BANKS[IOBank] + RTC_DAY) - IO_START] = byte(day(now));
-  IO[(IO_BANKS[IOBank] + RTC_MON) - IO_START] = byte(month(now));
-  IO[(IO_BANKS[IOBank] + RTC_YR) - IO_START]  = byte(year(now) - 1970); // Offset from 1970 (0-99)
-
-  return now;
+  return Teensy3Clock.get();
 }
 
 //
@@ -1277,9 +766,9 @@ void initPins() {
 
   digitalWriteFast(PHI2, LOW);
 
-  digitalWriteFast(OE1, HIGH);
-  digitalWriteFast(OE2, HIGH);
-  digitalWriteFast(OE3, HIGH);
+  digitalWriteFast(OE1, LOW);
+  digitalWriteFast(OE2, LOW);
+  digitalWriteFast(OE3, LOW);
 }
 
 void initButtons() {
@@ -1300,12 +789,6 @@ void initSD() {
   SD.begin(BUILTIN_SDCARD);
 
   readROMs();
-}
-
-void initUSB() {
-  usb.begin();
-  keyboard.attachPress(onKeyPress);
-  keyboard.attachRelease(onKeyRelease);
 }
 
 //
