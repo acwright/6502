@@ -8287,6 +8287,276 @@
 			)
 		)
 	)
+	(symbol "NES Controller Port"
+		(pin_names
+			(offset 5.08)
+		)
+		(exclude_from_sim no)
+		(in_bom no)
+		(on_board yes)
+		(property "Reference" "J"
+			(at 0 10.16 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "NES Controller Port"
+			(at 0 12.7 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "6502 Parts:NES Controller Port"
+			(at 0.508 -11.43 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at -1.27 -6.35 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 7.62 -7.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(symbol "NES Controller Port_0_1"
+			(circle
+				(center -7.62 -6.35)
+				(radius 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center -7.62 -2.54)
+				(radius 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center -7.62 1.27)
+				(radius 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 7.62 -6.35)
+				(radius 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 7.62 -2.54)
+				(radius 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 7.62 1.27)
+				(radius 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 7.62 5.08)
+				(radius 1.27)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+		)
+		(symbol "NES Controller Port_1_1"
+			(polyline
+				(pts
+					(xy -10.16 -8.89) (xy 10.16 -8.89) (xy 10.16 7.62) (xy -6.35 7.62) (xy -10.16 3.81) (xy -10.16 -8.89)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(pin passive line
+				(at 15.24 5.08 180)
+				(length 5.08)
+				(name "GND"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 15.24 1.27 180)
+				(length 5.08)
+				(name "Clock"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin input line
+				(at 15.24 -2.54 180)
+				(length 5.08)
+				(name "Latch"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "3"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin output line
+				(at 15.24 -6.35 180)
+				(length 5.08)
+				(name "Data"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at -15.24 -2.54 0)
+				(length 5.08)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "5"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin no_connect line
+				(at -15.24 -6.35 0)
+				(length 5.08)
+				(name "NC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "6"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin passive line
+				(at -15.24 1.27 0)
+				(length 5.08)
+				(name "VCC"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number "7"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
+	)
 	(symbol "PJRAN1X1U02X"
 		(pin_names
 			(offset 1.016) hide)
@@ -11053,12 +11323,12 @@
 			)
 		)
 	)
-	(symbol "SNES Controller Socket"
+	(symbol "SNES Controller Port"
 		(pin_names
 			(offset 5.08)
 		)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(property "Reference" "J"
 			(at 0 17.78 0)
@@ -11068,7 +11338,7 @@
 				)
 			)
 		)
-		(property "Value" "SNES Controller Socket"
+		(property "Value" "SNES Controller Port"
 			(at 0 20.32 0)
 			(effects
 				(font
@@ -11076,7 +11346,7 @@
 				)
 			)
 		)
-		(property "Footprint" "6502 Parts:SNES Controller Socket"
+		(property "Footprint" "6502 Parts:SNES Controller Port"
 			(at -0.254 -16.51 0)
 			(effects
 				(font
@@ -11103,19 +11373,7 @@
 				(hide yes)
 			)
 		)
-		(symbol "SNES Controller Socket_0_1"
-			(arc
-				(start -2.54 -11.469)
-				(mid 0 -13.9703)
-				(end 2.54 -11.469)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
+		(symbol "SNES Controller Port_0_1"
 			(circle
 				(center 0 -11.43)
 				(radius 1.27)
@@ -11152,18 +11410,6 @@
 			(polyline
 				(pts
 					(xy -2.54 -1.27) (xy 2.54 -1.27)
-				)
-				(stroke
-					(width 0)
-					(type default)
-				)
-				(fill
-					(type none)
-				)
-			)
-			(polyline
-				(pts
-					(xy 2.54 -11.43) (xy 2.54 15.24) (xy -2.54 15.24) (xy -2.54 -11.43)
 				)
 				(stroke
 					(width 0)
@@ -11218,7 +11464,31 @@
 				)
 			)
 		)
-		(symbol "SNES Controller Socket_1_1"
+		(symbol "SNES Controller Port_1_1"
+			(arc
+				(start -2.54 -11.469)
+				(mid 0 -13.9703)
+				(end 2.54 -11.469)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
+			(polyline
+				(pts
+					(xy 2.54 -11.43) (xy 2.54 15.24) (xy -2.54 15.24) (xy -2.54 -11.43)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type background)
+				)
+			)
 			(pin passive line
 				(at -6.35 12.7 0)
 				(length 5.08)

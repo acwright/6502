@@ -6,13 +6,7 @@
 #include <EEPROM.h>
 #include <USBHost_t36.h>
 
-#if DEVBOARD
-#include "devboard.h"
-#elif RETROSHIELD
-#include "retroshield.h"
-#elif RETROSHIELDADAPTER
-#include "retroshieldadapter.h"
-#endif
+#include "pins.h"
 #include "utilities.h"
 
 /*      MEMORY MAP      */
@@ -95,7 +89,6 @@
 
 #define GPIO_DATA  40       // |  INT3 |  INT2 |  INT1 |  INT0 | GPIO3 | GPIO2 | GPIO1 | GPIO0 |  GPIO Data:    Interrupt Status (Bit 7-4) -> GPIO Data (Bit 3-0) (Read from GPIO_DATA to clear INTs)
 #define GPIO_CTRL  41       // | INEN3 | INEN2 | INEN1 | INEN0 | GDIR3 | GDIR2 | GDIR1 | GDIR0 |  GPIO Control: Interrupt Enable (Bit 7-4) -> GPIO Direction (Bit 3-0) (LOW = IN | HIGH = OUT)
-                            /*                                                                    Notes:        GPIO 3-0 available on Dev Board. GPIO 0 ONLY available on Retroshield. */
 
 #define TIMER_PERIOD              1 // 1 uS
 #define FREQS                     (String[20])  { "1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz" }
@@ -197,11 +190,10 @@ bool keyboardCaptureEnabled = false;
 
 word address = 0;
 byte data = 0;
-bool readWrite = LOW;
+bool readWrite = HIGH;
 bool be = HIGH;
 bool rdy = HIGH;
 bool sync = LOW;
-bool sob = HIGH;
 bool resb = HIGH;
 bool irqb = HIGH;
 bool nmib = HIGH;
@@ -295,20 +287,20 @@ void loop() {
 
       // Set interrupt if enabled
       if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00010000) >> 4) {
+        pinMode(IRQB, OUTPUT);
         digitalWriteFast(IRQB, LOW);
       }
     } else {
       IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] &= ~1;
     }
   }
-
-  #ifdef DEVBOARD
   if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) != 1) { // GPIO1 is set to INPUT
     if (digitalReadFast(GPIO1)) {
       IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] |= (1 << 1);
 
       // Set interrupt if enabled
       if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00100000) >> 5) {
+        pinMode(IRQB, OUTPUT);
         digitalWriteFast(IRQB, LOW);
       }
     } else {
@@ -321,6 +313,7 @@ void loop() {
 
       // Set interrupt if enabled
       if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b01000000) >> 6) {
+        pinMode(IRQB, OUTPUT);
         digitalWriteFast(IRQB, LOW);
       }
     } else {
@@ -333,13 +326,13 @@ void loop() {
 
       // Set interrupt if enabled
       if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b10000000) >> 7) {
+        pinMode(IRQB, OUTPUT);
         digitalWriteFast(IRQB, LOW);
       }
     } else {
       IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] &= ~(1 << 3);
     }
   }
-  #endif
 
   // Sync the clock
   now();
@@ -349,7 +342,7 @@ void loop() {
 // EVENTS
 //
 
-void onTick()
+FASTRUN void onTick()
 {
   // This is called in the timer interrupt so extra care should be taken!
 
@@ -361,6 +354,7 @@ void onTick()
       } else {
         onCycleEnd();
         digitalWriteFast(PHI2, LOW);
+        setDataDirIn();
       }
     }
 
@@ -394,30 +388,19 @@ void onTick()
   }
 }
 
-void onCycleBegin() {
+FASTRUN void onCycleBegin() {
   // Read the address and r/w at the beginning of cycle (low to high transition)
   address = readAddress();
   readWrite = digitalReadFast(RWB);
-
-  #ifdef DEVBOARD
   sync = digitalReadFast(SYNC);
   be = digitalReadFast(BE);
-  #elif RETROSHIELD
-  sob = digitalReadFast(SOB);
-  #elif RETROSHIELDADAPTER
-  sync = digitalReadFast(SYNC);
-  #endif
 
   if (readWrite == HIGH) { // READING
     // Check if in IO space first since it overlaps ROM space...
-    if ((address >= IO_START) && (address <= IO_END)) { // IO
+    if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) { // IO
       // Only output data if address is in selected IOBank area and IO is enabled
-      if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) {
-        setDataDirOut();
-        writeData(IO[address - IO_START]);
-      } else {
-        setDataDirIn();
-      }
+      setDataDirOut();
+      writeData(IO[address - IO_START]);
 
       // Handle IO post processing
       switch(address - IO_BANKS[IOBank]) {
@@ -431,6 +414,7 @@ void onCycleBegin() {
           // Are there any more interrupts? If not, clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
           if ((IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] & 0b11000000) == 0) {
             digitalWriteFast(IRQB, HIGH);
+            pinMode(IRQB, INPUT);
           }
 
           break;
@@ -442,6 +426,7 @@ void onCycleBegin() {
           // Are there any more interrupts? If not, clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
           if ((IO[(IO_BANKS[IOBank] + KBD_STAT) - IO_START] & 0b11000000) == 0) {
             digitalWriteFast(IRQB, HIGH);
+            pinMode(IRQB, INPUT);
           }
 
           break;
@@ -452,6 +437,7 @@ void onCycleBegin() {
 
           // Clear interrupt line (TODO: We should also check for other IO asserting interrupt...)
           digitalWriteFast(IRQB, HIGH);
+          pinMode(IRQB, INPUT);
 
           break;
         }
@@ -464,15 +450,11 @@ void onCycleBegin() {
     } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
       setDataDirOut();
       writeData(ROM[address - ROM_START]);
-    } else {
-      setDataDirIn();
     }
-  } else { // WRITING
-    setDataDirIn();
   }
 }
 
-void onCycleEnd() {
+FASTRUN void onCycleEnd() {
   // Read data at end of cycle (just before high to low transition)
   data = readData();
 
@@ -482,14 +464,13 @@ void onCycleEnd() {
   irqb = digitalReadFast(IRQB);
   rdy = digitalReadFast(RDY);
 
-  // Always capture IO and RAM read / writes for debugging
-  if ((address >= IO_START) && (address <= IO_END)) { // IO
-    IO[address - IO_START] = data;
-  } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
-    RAM[address - RAM_START] = data;
-  }
-
   if (readWrite == LOW) { // WRITING
+    if ((address >= IO_START) && (address <= IO_END)) { // IO
+      IO[address - IO_START] = data;
+    } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
+      RAM[address - RAM_START] = data;
+    }
+
     // Handle IO post processing
     switch(address - IO_BANKS[IOBank]) {
       case DSP_DATA: {
@@ -499,8 +480,6 @@ void onCycleEnd() {
         if (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000001) {
           digitalWriteFast(GPIO0, IO[(IO_BANKS[IOBank] + GPIO_DATA) - IO_START] & 0b00000001);
         }
-
-        #ifdef DEVBOARD
         if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) >> 1) {
           digitalWriteFast(GPIO1, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) >> 1);
         }
@@ -510,16 +489,12 @@ void onCycleEnd() {
         if ((IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00001000) >> 3) {
           digitalWriteFast(GPIO3, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00001000) >> 3);
         }
-        #endif
       }
       case GPIO_CTRL: {
         pinMode(GPIO0, IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000001);
-
-        #ifdef DEVBOARD
         pinMode(GPIO1, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000010) >> 1);
         pinMode(GPIO2, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00000100) >> 2);
         pinMode(GPIO3, (IO[(IO_BANKS[IOBank] + GPIO_CTRL) - IO_START] & 0b00001000) >> 3);
-        #endif
       }
     }
   }
@@ -624,6 +599,7 @@ void onKey(char key) {
 
   // And set interrupt if keyboard interrupts are enabled
   if ((IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x01) != 0) {
+    pinMode(IRQB, OUTPUT);
     digitalWriteFast(IRQB, LOW);
 
     // Set bit 7 of KBD_STAT register to indicate keyboard interrupt asserted
@@ -661,6 +637,7 @@ void onKeyPress(int key) {
 
     // And set interrupt if arrow key interrupts are enabled
     if (isArrowKey && (IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x02) != 0) {
+      pinMode(IRQB, OUTPUT);
       digitalWriteFast(IRQB, LOW);
 
       // Set bit 6 of KBD_STAT register to indicate arrow key interrupt asserted
@@ -672,6 +649,7 @@ void onKeyPress(int key) {
 
     // And set interrupt if keyboard interrupts are enabled
     if ((IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x01) != 0) {
+      pinMode(IRQB, OUTPUT);
       digitalWriteFast(IRQB, LOW);
 
       // Set bit 7 of KBD_STAT register to indicate keyboard interrupt asserted
@@ -726,6 +704,7 @@ void onKeyRelease(int key) {
 
     // And set interrupt if arrow key interrupts are enabled
     if (isArrowKey && (IO[(IO_BANKS[IOBank] + KBD_CTRL) - IO_START] & 0x02) != 0) {
+      pinMode(IRQB, OUTPUT);
       digitalWriteFast(IRQB, LOW);
 
       // Set bit 6 of KBD_STAT register to indicate arrow key interrupt asserted
@@ -851,23 +830,15 @@ void onJoystickAvailable() {
 
 void info() {
   Serial.println();
-  Serial.println("eeee  eeeee eeeeee eeee   eeeeee                                            ");                        
-  Serial.println("8  8  8     8    8    8   8    8 eeee eeeee  e   e eeeee eeeee eeee eeeee   ");
-  Serial.println("8     8eeee 8    8    8   8e   8 8    8   8  8   8 8   8 8   8 8    8   8   ");
-  Serial.println("8eeee     8 8    8 eee8   88   8 8eee 8eee8e 8e  8 8e    8e    8eee 8eee8e  ");
-  Serial.println("8   8     8 8    8 8      88   8 88   88   8 88  8 88 e8 88 e8 88   88   8  ");
-  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88ee 88eee8 88ee8 88ee8 88ee8 88ee 88   8  ");
+  Serial.println("eeee  eeeee eeeeee eeee   8eeee8 8eeee 88   8   8eeee8   8eee88 8eeee8 8eee8  8eeee8 ");                        
+  Serial.println("8  8  8     8    8    8   8    8 8     88   8   8    8   8    8 8    8 8   8  8    8 ");
+  Serial.println("8     8eeee 8    8    8   8e   8 8eeee 88  e8   8eeee8ee 8    8 8eeee8 8eee8e 8e   8 ");
+  Serial.println("8eeee     8 8    8 eee8   88   8 88     8  8    88     8 8    8 88   8 88   8 88   8 ");
+  Serial.println("8   8     8 8    8 8      88   8 88     8  8    88     8 8    8 88   8 88   8 88   8 ");
+  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88eee  8ee8    88eeeee8 8eeee8 88   8 88   8 88eee8 ");
   Serial.println();
-  Serial.print("6502 Debugger | Version: ");
+  Serial.print("6502 Dev Board | Version: ");
   Serial.print(VERSION);
-  Serial.print(" | Platform: ");
-  #if DEVBOARD
-  Serial.println("Dev Board");
-  #elif RETROSHIELD
-  Serial.println("Retroshield");
-  #elif RETROSHIELDADAPTER
-  Serial.println("Retroshield Adapter");
-  #endif
   Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
@@ -913,7 +884,7 @@ void log() {
 
   sprintf(
     output, 
-    "| %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c | %c%c%c%c%c%c%c%c | 0x%04X | 0x%02X | %c | RDY: %01X | BE: %01X | RESB: %01X | NMIB: %01X | IRQB: %01X | SOB: %01X | SYNC: %01X |", 
+    "| %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c | %c%c%c%c%c%c%c%c | 0x%04X | 0x%02X | %c | RDY: %01X | BE: %01X | RESB: %01X | NMIB: %01X | IRQB: %01X | SYNC: %01X |", 
     BYTE_TO_BINARY((address >> 8) & 0xFF),
     BYTE_TO_BINARY(address & 0xFF), 
     BYTE_TO_BINARY(data),
@@ -925,7 +896,6 @@ void log() {
     resb,
     nmib,
     irqb,
-    sob,
     sync
   );
 
@@ -941,6 +911,7 @@ void reset() {
 
   Serial.print("Resetting... ");
 
+  pinMode(RESB, OUTPUT);
   digitalWriteFast(RESB, LOW);
   digitalWriteFast(PHI2, HIGH);
   delay(100);
@@ -955,6 +926,7 @@ void reset() {
   digitalWriteFast(PHI2, LOW);
   delay(100);
   digitalWriteFast(RESB, HIGH);
+  pinMode(RESB, INPUT);
 
   Serial.println("Done");
 
@@ -984,30 +956,19 @@ void snapshot() {
   }
 
   time_t time = now();
-  String RAMpath = "Snapshots/";
+  String path = "Snapshots/";
   String IOpath = "Snapshots/";
 
-  RAMpath.append(time);
-  RAMpath.append(" - RAM.bin");
-  IOpath.append(time);
-  IOpath.append(" - IO.bin");
+  path.append(time);
+  path.append(".bin");
 
-  File ramSnapshot = SD.open(RAMpath.c_str(), FILE_WRITE);
+  File snapshot = SD.open(path.c_str(), FILE_WRITE);
 
-  if (ramSnapshot) {
+  if (snapshot) {
     for(unsigned int i = 0; i < (RAM_END - RAM_START); i++) {
-      ramSnapshot.write(RAM[i]);
+      snapshot.write(RAM[i]);
     }
-    ramSnapshot.close();
-  }
-
-  File ioSnapshot = SD.open(IOpath.c_str(), FILE_WRITE);
-
-  if (ioSnapshot) {
-    for(unsigned int i = 0; i < (IO_END - IO_START); i++) {
-      ioSnapshot.write(IO[i]);
-    }
-    ioSnapshot.close();
+    snapshot.close();
   }
 
   Serial.print("Success! (");
@@ -1289,16 +1250,14 @@ void initROM() {
 }
 
 void initPins() {
-  #if DEVBOARD
-  pinMode(RESB, OUTPUT);
-  pinMode(IRQB, OUTPUT);
-  pinMode(NMIB, OUTPUT);
-  pinMode(RDY, OUTPUT);
-  pinMode(BE, OUTPUT);
-  pinMode(PHI2, OUTPUT);
-  
+  pinMode(RESB, INPUT);
+  pinMode(IRQB, INPUT);
+  pinMode(NMIB, INPUT);
+  pinMode(RDY, INPUT);
+  pinMode(BE, INPUT);
   pinMode(SYNC, INPUT);
   pinMode(RWB, INPUT);
+  pinMode(PHI2, OUTPUT);
 
   pinMode(OE1, OUTPUT);
   pinMode(OE2, OUTPUT);
@@ -1316,66 +1275,11 @@ void initPins() {
   setAddrDirIn();
   setDataDirIn();
 
-  digitalWriteFast(RESB, HIGH);
-  digitalWriteFast(IRQB, HIGH);
-  digitalWriteFast(NMIB, HIGH);
-  digitalWriteFast(RDY, HIGH);
-  digitalWriteFast(BE, HIGH);
   digitalWriteFast(PHI2, LOW);
 
   digitalWriteFast(OE1, HIGH);
   digitalWriteFast(OE2, HIGH);
   digitalWriteFast(OE3, HIGH);
-  #elif RETROSHIELD
-  pinMode(RESB, OUTPUT);
-  pinMode(IRQB, OUTPUT);
-  pinMode(NMIB, OUTPUT);
-  pinMode(RDY, OUTPUT);
-  pinMode(SOB, OUTPUT);
-  pinMode(PHI2, OUTPUT);
-
-  pinMode(RWB, INPUT);
-
-  pinMode(INT_SWB, INPUT);
-  pinMode(STEP_SWB, INPUT);
-  pinMode(RS_SWB, INPUT);
-
-  pinMode(GPIO0, INPUT);
-
-  setAddrDirIn();
-  setDataDirIn();
-
-  digitalWriteFast(RESB, HIGH);
-  digitalWriteFast(IRQB, HIGH);
-  digitalWriteFast(NMIB, HIGH);
-  digitalWriteFast(RDY, HIGH);
-  digitalWriteFast(SOB, HIGH);
-  digitalWriteFast(PHI2, LOW);
-  #elif RETROSHIELDADAPTER
-  pinMode(RESB, OUTPUT);
-  pinMode(IRQB, OUTPUT);
-  pinMode(NMIB, OUTPUT);
-  pinMode(RDY, OUTPUT);
-  pinMode(PHI2, OUTPUT);
-
-  pinMode(SYNC, INPUT);
-  pinMode(RWB, INPUT);
-
-  pinMode(INT_SWB, INPUT);
-  pinMode(STEP_SWB, INPUT);
-  pinMode(RS_SWB, INPUT);
-
-  pinMode(GPIO0, INPUT);
-
-  setAddrDirIn();
-  setDataDirIn();
-
-  digitalWriteFast(RESB, HIGH);
-  digitalWriteFast(IRQB, HIGH);
-  digitalWriteFast(NMIB, HIGH);
-  digitalWriteFast(RDY, HIGH);
-  digitalWriteFast(PHI2, LOW);
-  #endif
 }
 
 void initButtons() {
