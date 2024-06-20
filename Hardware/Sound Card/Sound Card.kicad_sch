@@ -6,7 +6,7 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 Sound Card")
-		(date "2024-06-16")
+		(date "2024-06-19")
 		(rev "1.0")
 		(company "A.C. Wright Design")
 	)
@@ -4987,6 +4987,12 @@
 		(uuid "0c5758e4-9738-46c5-b7c1-f862b02077e6")
 	)
 	(junction
+		(at 139.7 73.66)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "0d414c7e-9e36-4d70-be3d-899741406ad2")
+	)
+	(junction
 		(at 180.34 151.13)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5228,7 +5234,7 @@
 	)
 	(wire
 		(pts
-			(xy 135.89 73.66) (xy 160.02 73.66)
+			(xy 135.89 73.66) (xy 139.7 73.66)
 		)
 		(stroke
 			(width 0)
@@ -5695,6 +5701,16 @@
 			(type default)
 		)
 		(uuid "45af164e-d9ff-4122-ac4d-bae224f5d0af")
+	)
+	(wire
+		(pts
+			(xy 139.7 73.66) (xy 160.02 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4681c72f-33f7-4f6e-8442-b58908a3054a")
 	)
 	(wire
 		(pts
@@ -6668,6 +6684,16 @@
 	)
 	(wire
 		(pts
+			(xy 139.7 52.07) (xy 139.7 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bdd03dd8-7bbc-41f1-a322-fdacb1963135")
+	)
+	(wire
+		(pts
 			(xy 78.74 36.83) (xy 81.28 36.83)
 		)
 		(stroke
@@ -6935,6 +6961,16 @@
 			(type default)
 		)
 		(uuid "eccae710-038c-427f-9449-e4ad74410c72")
+	)
+	(wire
+		(pts
+			(xy 137.16 49.53) (xy 139.7 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ed4e63e6-bf5a-4e1b-b5da-01bcb566d428")
 	)
 	(wire
 		(pts
@@ -7510,6 +7546,26 @@
 		(uuid "29762814-725e-4433-b27b-431db407efcb")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 125.73 156.21 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
+	(global_label "PHI2"
+		(shape input)
+		(at 137.16 49.53 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "2b987b62-975e-4325-9d42-ad4435b182a5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 137.16 49.53 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -9397,7 +9453,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "0dbd2f06-a304-467e-b2a0-5f7d6ea2a7fb")
-		(property "Reference" "J4"
+		(property "Reference" "J5"
 			(at 241.3 105.7031 0)
 			(effects
 				(font
@@ -9461,7 +9517,7 @@
 		(instances
 			(project ""
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J4")
+					(reference "J5")
 					(unit 1)
 				)
 			)
@@ -9608,7 +9664,7 @@
 		(on_board yes)
 		(dnp no)
 		(uuid "1cb857ec-0986-4731-8614-f88d1ba637e3")
-		(property "Reference" "J2"
+		(property "Reference" "J3"
 			(at 171.45 140.335 0)
 			(effects
 				(font
@@ -9703,7 +9759,7 @@
 		(instances
 			(project "Pi Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J2")
+					(reference "J3")
 					(unit 1)
 				)
 			)
@@ -10333,6 +10389,75 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 144.78 49.53 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "71469ac3-e622-4abe-b9fc-7a96cee8059b")
+		(property "Reference" "J2"
+			(at 146.558 43.942 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "PHI2"
+			(at 146.558 46.228 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 144.78 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 144.78 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 144.78 49.53 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "f98d7ea6-5825-49ce-8915-b8ce195e1254")
+		)
+		(pin "1"
+			(uuid "90df8c3b-e414-431f-a513-c82584e31c04")
+		)
+		(instances
+			(project "Sound Card"
+				(path "/154a5133-b84f-49cb-b657-9c810539146c"
+					(reference "J2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Connector_Generic:Conn_02x06_Odd_Even")
 		(at 220.98 46.99 0)
 		(unit 1)
@@ -10342,7 +10467,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "79b50317-5f45-4b23-82ab-34e1c8da747a")
-		(property "Reference" "J3"
+		(property "Reference" "J4"
 			(at 222.25 35.56 0)
 			(effects
 				(font
@@ -10424,7 +10549,7 @@
 		(instances
 			(project "Sound Card"
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J3")
+					(reference "J4")
 					(unit 1)
 				)
 			)
@@ -10697,7 +10822,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "897eaebb-50cd-41f7-a9f5-05b54779315d")
-		(property "Reference" "J5"
+		(property "Reference" "J6"
 			(at 242.57 125.7299 0)
 			(effects
 				(font
@@ -10751,7 +10876,7 @@
 		(instances
 			(project ""
 				(path "/154a5133-b84f-49cb-b657-9c810539146c"
-					(reference "J5")
+					(reference "J6")
 					(unit 1)
 				)
 			)
