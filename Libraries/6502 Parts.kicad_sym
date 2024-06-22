@@ -5829,10 +5829,10 @@
 					)
 				)
 			)
-			(pin no_connect line
+			(pin output line
 				(at 19.05 -22.86 180)
 				(length 5.08)
-				(name "NC"
+				(name "~{IOCS16}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -5902,7 +5902,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at 19.1511 17.5917 180)
+				(at 19.05 17.78 180)
 				(length 5.08)
 				(name "D12"
 					(effects
@@ -5920,7 +5920,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at 19.215 15.0361 180)
+				(at 19.05 15.24 180)
 				(length 5.08)
 				(name "D13"
 					(effects
@@ -5994,7 +5994,7 @@
 			(pin input line
 				(at -20.32 2.54 0)
 				(length 5.08)
-				(name "~{CE2}"
+				(name "~{CS1}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6027,10 +6027,10 @@
 					)
 				)
 			)
-			(pin no_connect line
+			(pin input line
 				(at 19.05 -33.02 180)
 				(length 5.08)
-				(name "NC"
+				(name "~{IORD}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6045,10 +6045,10 @@
 					)
 				)
 			)
-			(pin no_connect line
+			(pin input line
 				(at 19.05 -35.56 180)
 				(length 5.08)
-				(name "NC"
+				(name "~{IOWR}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6084,7 +6084,7 @@
 			(pin output line
 				(at 19.05 -7.62 180)
 				(length 5.08)
-				(name "RDY"
+				(name "INTRQ"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6174,7 +6174,7 @@
 			(pin input line
 				(at -20.32 33.02 0)
 				(length 5.08)
-				(name "RESET"
+				(name "~{RESET}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6192,7 +6192,7 @@
 			(pin output line
 				(at 19.05 -5.08 180)
 				(length 5.08)
-				(name "~{WAIT}"
+				(name "IORDY"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6208,7 +6208,7 @@
 				)
 			)
 			(pin no_connect line
-				(at 19.05 -30.48 180)
+				(at 19.05 33.02 180)
 				(length 5.08)
 				(name "NC"
 					(effects
@@ -6243,10 +6243,10 @@
 					)
 				)
 			)
-			(pin no_connect line
+			(pin bidirectional line
 				(at 19.05 -27.94 180)
 				(length 5.08)
-				(name "NC"
+				(name "~{DASP}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6261,10 +6261,10 @@
 					)
 				)
 			)
-			(pin no_connect line
+			(pin bidirectional line
 				(at 19.05 -25.4 180)
 				(length 5.08)
-				(name "NC"
+				(name "~{PDIAG}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6390,7 +6390,7 @@
 			(pin input line
 				(at -20.32 5.08 0)
 				(length 5.08)
-				(name "~{CE1}"
+				(name "~{CS0}"
 					(effects
 						(font
 							(size 1.27 1.27)
@@ -6426,7 +6426,7 @@
 			(pin input line
 				(at -20.32 -2.54 0)
 				(length 5.08)
-				(name "~{OE}"
+				(name "~{ATA_SEL}"
 					(effects
 						(font
 							(size 1.27 1.27)
