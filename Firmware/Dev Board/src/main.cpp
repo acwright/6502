@@ -1,98 +1,35 @@
 #include <Arduino.h>
-#include <TimerOne.h>
+#include <TeensyTimerTool.h>
 #include <TimeLib.h>
 #include <Bounce2.h>
 #include <SD.h>
 #include <EEPROM.h>
 
 #include "pins.h"
+#include "macros.h"
 #include "utilities.h"
+#include "constants.h"
 
-/*      MEMORY MAP      */
-/* -------------------- */
-/* |                  | */
-/* |        ROM       | */
-/* |    $A000-$FFFF   | */
-/* |                  | */
-/* -------------------- */
-/* |    IO 7 ($9C00)  | */
-/* -------------------- */
-/* |    IO 6 ($9800)  | */
-/* -------------------- */
-/* |    IO 5 ($9400)  | */
-/* -------------------- */
-/* |    IO 4 ($9000)  | */
-/* -------------------- */
-/* |    IO 3 ($8C00)  | */
-/* -------------------- */
-/* |    IO 2 ($8800)  | */
-/* -------------------- */
-/* |    IO 1 ($8400)  | */
-/* -------------------- */
-/* |    IO 0 ($8000)  | */
-/* -------------------- */
-/* |                  | */
-/* |        RAM       | */
-/* |    $0000-$7FFF   | */
-/* |                  | */
-/* -------------------- */
-
-#define RAM_START   0x0000
-#define RAM_END     0x7FFF
-#define IO_START    0x8000
-#define IO_END      0x9FFF
-#define ROM_START   0x8000
-#define ROM_CODE    0xA000
-#define ROM_END     0xFFFF
-
-#define TIMER_PERIOD              1 // 1 uS
-#define FREQS                     (String[20])  { "1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz" }
-#define FREQ_DELAYS               (int[20])     { 250000, 125000, 62500, 31250, 15625, 7812, 3906, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0 }
-
-#define DEBOUNCE        5          // 5 milliseconds
-
-#define IO_BANK_SIZE    0x3FF
-
-#define PAGE_SIZE       1024
-#define RAM_PAGES       32
-#define IO_PAGES        8
-#define ROM_PAGES       32
-#define ROM_MAX         256
-
-#define VERSION         "1.0.0"
-
-const word IO_BANKS[8] { 0x8000, 0x8400, 0x8800, 0x8C00, 0x9000, 0x9400, 0x9800, 0x9C00 };
+#include "Monitor/Monitor.h"
+#include "RTC/RTC.h"
 
 byte RAM[RAM_END - RAM_START + 1];
-byte IO[IO_END - IO_START + 1];
 byte ROM[ROM_END - ROM_START + 1];
 
-Button intButton = Button();
-Button stepButton = Button();
-Button runStopButton = Button();
+Button intButton      = Button();
+Button stepButton     = Button();
+Button runStopButton  = Button();
+
+Monitor monitor       = Monitor();
+RTC rtc               = RTC();
 
 void onTick();
-void onCycleBegin();
-void onCycleEnd();
+void onClock();
 void onCommand(char command);
 
-void initPins();
-void initButtons();
-void initRAM();
-void initIO();
-void initROM();
-void initSD();
-
-void setAddrDirIn();
-void setDataDirIn();
-void setDataDirOut();
-word readAddress();
-byte readData();
-void writeData(byte d);
-
-void reset();
 void info();
 void log();
+void reset();
 void step(); 
 void snapshot();
 void decreaseFrequency();
@@ -103,41 +40,46 @@ void toggleRAM();
 void toggleIO();
 void toggleIOBank();
 void toggleROM();
-void readROMs();
+bool readROMs();
 void listROMs();
 void loadROM(unsigned int index);
 void prevPage();
 void nextPage();
 
-time_t syncTime();
+byte readIO(word address);
+void writeIO(word address, byte data);
 
-unsigned int freqIndex = 19;      // 500 kHz
-volatile unsigned int freqCounter = 0;
-volatile unsigned int stepCounter = 0;
-volatile bool isEdge = false;
-volatile bool isRunning = false;
-volatile bool isStepping = false;
-volatile bool isLogging = false;
+void initPins();
+void initButtons();
+void initSD();
+void initRAM();
+void initROM();
 
-bool OutputEnabled = false;
-bool RAMEnabled = false;
-bool IOEnabled = false;
-bool ROMEnabled = false;
+unsigned int freqIndex = 20;      // 1 MHz
+bool isRunning = false;
+bool isStepping = false;
+
+bool OutputEnabled = true;
+bool RAMEnabled = true;
+bool IOEnabled = true;
+bool ROMEnabled = true;
 String romFile = "None";
 byte IOBank = 7;                  // By default, debugger IO bank is $9C00
 
-word address = 0;
-byte data = 0;
-bool readWrite = HIGH;
-bool be = HIGH;
-bool rdy = HIGH;
-bool sync = LOW;
-bool resb = HIGH;
-bool irqb = HIGH;
-bool nmib = HIGH;
+volatile word address = 0;
+volatile byte data = 0;
+volatile bool readWrite = HIGH;
+volatile bool be = HIGH;
+volatile bool rdy = HIGH;
+volatile bool sync = LOW;
+volatile bool resb = HIGH;
+volatile bool irqb = HIGH;
+volatile bool nmib = HIGH;
 
 String ROMs[ROM_MAX];
 unsigned int romPage = 0;
+
+TeensyTimerTool::PeriodicTimer timer(TeensyTimerTool::TCK);
 
 //
 // MAIN LOOPS
@@ -146,13 +88,13 @@ unsigned int romPage = 0;
 void setup() {
   initPins();
   initButtons();
-  initRAM();
-  initIO();
-  initROM();
   initSD();
+  
+  initRAM();
+  initROM();
 
-  setSyncProvider(syncTime);
-  setSyncInterval(1);
+  monitor.begin();
+  rtc.begin();
 
   Serial.begin(9600);
   
@@ -163,9 +105,9 @@ void setup() {
   }
 
   info();
+  reset();
 
-  Timer1.initialize(TIMER_PERIOD);
-  Timer1.attachInterrupt(onTick);
+  timer.begin(onTick, FREQ_PERIODS[freqIndex]);
 }
 
 void loop() {
@@ -189,59 +131,41 @@ void loop() {
   {
     onCommand(Serial.read());
   }
+
+  if (!isRunning || digitalReadFast(PHI2) == LOW) {
+    // Do secondary processing during clock LOW...
+    monitor.update();
+    rtc.update();
+  }
 }
 
 //
 // EVENTS
 //
 
-FASTRUN void onTick()
-{
+FASTRUN void onTick() {
   // This is called in the timer interrupt so extra care should be taken!
+  
+  if (!isRunning) { return; }
 
-  if (freqCounter <= 0) {
-    if (isRunning) {
-      if (!digitalReadFast(PHI2)) {
-        digitalWriteFast(PHI2, HIGH);
-        onCycleBegin();
-      } else {
-        onCycleEnd();
-        digitalWriteFast(PHI2, LOW);
-        setDataDirIn();
-      }
-    }
-
-    freqCounter = FREQ_DELAYS[freqIndex];
+  if (!digitalReadFast(PHI2)) {
+    digitalWriteFast(PHI2, HIGH);
+    onClock();
   } else {
-    freqCounter--;
-  }
+    digitalWriteFast(PHI2, LOW);
 
-  if (stepCounter <= 0) {
-    if (isStepping) {
-      if (!digitalReadFast(PHI2)) {
-        digitalWriteFast(PHI2, HIGH);
-        onCycleBegin();
-      } else {
-        onCycleEnd();
-        digitalWriteFast(PHI2, LOW);
-        isStepping = false; // We are done stepping...
-        isLogging = true;   // Log on next tick
-      }
-    }
+    // Delay for data hold time
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
 
-    // Handle step logging
-    if (isLogging) {
-      log();
-      isLogging = false;
-    }
-
-    stepCounter = FREQ_DELAYS[2]; // Use 4 Hz for step counter
-  } else {
-    stepCounter--;
+    setDataDirIn();
   }
 }
 
-FASTRUN void onCycleBegin() {
+FASTRUN void onClock() {
   // Read the address and r/w at the beginning of cycle (low to high transition)
   address = readAddress();
   readWrite = digitalReadFast(RWB);
@@ -249,37 +173,50 @@ FASTRUN void onCycleBegin() {
   be = digitalReadFast(BE);
 
   if (readWrite == HIGH) { // READING
-    // Check if in IO space first since it overlaps ROM space...
-    // Only output data if address is in selected IOBank area and IO is enabled
     if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) { // IO
+      data = readIO(address);
       setDataDirOut();
-      writeData(IO[address - IO_START]);
-    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
-      setDataDirOut();
-      writeData(RAM[address - RAM_START]);
+      writeData(data);
     } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
+      data = ROM[address - ROM_START];
       setDataDirOut();
-      writeData(ROM[address - ROM_START]);
+      writeData(data);
+    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
+      data = RAM[address - RAM_START];
+      setDataDirOut();
+      writeData(data);
     }
-  }
-}
+  } else { // WRITING
+    // Read data after delay for processor setup time
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
 
-FASTRUN void onCycleEnd() {
-  // Read data at end of cycle (just before high to low transition)
-  data = readData();
+    data = readData();
 
-  // Read the control pins
-  resb = digitalReadFast(RESB);
-  nmib = digitalReadFast(NMIB);
-  irqb = digitalReadFast(IRQB);
-  rdy = digitalReadFast(RDY);
-
-  if (readWrite == LOW) { // WRITING
-    if ((address >= IO_START) && (address <= IO_END)) { // IO
-      IO[address - IO_START] = data;
-    } else if ((address >= RAM_START) && (address <= RAM_END)) { // RAM
+    if ((address >= IO_START) && (address <= IO_END) && IOEnabled) { // IO
+      writeIO(address, data);
+    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       RAM[address - RAM_START] = data;
     }
+
+    // Read the control pins
+    resb = digitalReadFast(RESB);
+    nmib = digitalReadFast(NMIB);
+    irqb = digitalReadFast(IRQB);
+    rdy = digitalReadFast(RDY);
   }
 }
 
@@ -409,16 +346,18 @@ void info() {
   Serial.println(")");
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
+  Serial.print("Date / Time: ");
+  Serial.println(rtc.formattedDateTime());
   Serial.println();
-  Serial.println("------------------------------------------------------------");
-  Serial.println("| (R)un / Stop         | (S)tep           | Rese(T)        |");
-  Serial.println("------------------------------------------------------------");
-  Serial.println("| Toggle R(A)M         | Toggle (I)O      | Toggle R(O)M   |");
-  Serial.println("------------------------------------------------------------");
-  Serial.println("| (L)ist ROMs          | Change IO Ban(K) | Sna(P)shot     |");
-  Serial.println("------------------------------------------------------------");
-  Serial.println("| (+/-) Clk Frequency  | Toggle Outp(U)ts | In(F)o / Lo(G) |");
-  Serial.println("------------------------------------------------------------");
+  Serial.println("-------------------------------------------------------------");
+  Serial.println("| (R)un / Stop         | (S)tep           | Rese(T)         |");
+  Serial.println("-------------------------------------------------------------");
+  Serial.println("| Toggle R(A)M         | Toggle (I)O      | Toggle R(O)M    |");
+  Serial.println("-------------------------------------------------------------");
+  Serial.println("| (L)ist ROMs          | Change IO Ban(K) | Toggle Outp(U)t |");
+  Serial.println("-------------------------------------------------------------");
+  Serial.println("| (+/-) Clk Frequency  | Sna(P)shot       | In(F)o / Lo(G)  |");
+  Serial.println("-------------------------------------------------------------");
   Serial.println();
 }
 
@@ -454,22 +393,10 @@ void reset() {
 
   Serial.print("Resetting... ");
 
-  pinMode(RESB, OUTPUT);
   digitalWriteFast(RESB, LOW);
-  digitalWriteFast(PHI2, HIGH);
-  delay(100);
-  digitalWriteFast(PHI2, LOW);
-  delay(100);
-  digitalWriteFast(PHI2, HIGH);
-  delay(100);
-  digitalWriteFast(PHI2, LOW);
-  delay(100);
-  digitalWriteFast(PHI2, HIGH);
-  delay(100);
-  digitalWriteFast(PHI2, LOW);
   delay(100);
   digitalWriteFast(RESB, HIGH);
-  pinMode(RESB, INPUT);
+  delay(100);
 
   Serial.println("Done");
 
@@ -479,8 +406,16 @@ void reset() {
 }
 
 void step() {
+  if (isStepping) { return; }
+
   if (!isRunning) {
     isStepping = true;
+    digitalWriteFast(PHI2, LOW);
+    delay(100);
+    digitalWriteFast(PHI2, HIGH);
+    onClock();
+    log();
+    isStepping = false;
   } else {
     Serial.println("Clock must be stopped before stepping!");
   }
@@ -523,15 +458,17 @@ void decreaseFrequency() {
   if (freqIndex > 0) {
     freqIndex--;
   } else {
-    freqIndex = 19;
+    freqIndex = 20;
   }
 
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
+
+  timer.setPeriod(FREQ_PERIODS[freqIndex]);
 }
 
 void increaseFrequency() {
-  if (freqIndex < 19) {
+  if (freqIndex < 20) {
     freqIndex++;
   } else {
     freqIndex = 0;
@@ -539,14 +476,16 @@ void increaseFrequency() {
 
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
+
+  timer.setPeriod(FREQ_PERIODS[freqIndex]);
 }
 
 void toggleRunStop() {
   isRunning = !isRunning;
 
-  if (!isRunning && digitalReadFast(PHI2)) { 
-    onCycleEnd();
-    digitalWriteFast(PHI2, LOW);
+  if (!isRunning && digitalReadFast(PHI2) == LOW) {
+    digitalWriteFast(PHI2, HIGH);
+    onClock();
   }
 
   Serial.println(isRunning ? "Running…" : "Stopped");
@@ -607,7 +546,12 @@ void toggleROM() {
   Serial.println(ROMEnabled ? "Enabled" : "Disabled");
 }
 
-void readROMs() {
+bool readROMs() {
+  if (!SD.mediaPresent()) { 
+    Serial.println("SD card not detected!");
+    return false;
+  }
+
   if (!SD.exists("ROMS")) {
     SD.mkdir("ROMS");
   }
@@ -635,9 +579,15 @@ void readROMs() {
       break;
     }
   }
+
+  return true;
 }
 
 void listROMs() {
+  if (!readROMs()) { return; }
+
+  Serial.println();
+
   for (unsigned int j = (romPage * 8); j < ((romPage * 8) + 8); j++) {
     Serial.print("(");
     Serial.print(j - (romPage * 8));
@@ -705,41 +655,34 @@ void nextPage() {
   listROMs();
 }
 
-time_t syncTime() {
-  return Teensy3Clock.get();
+//
+// IO
+//
+
+byte readIO(word address) {
+  if ((address - IO_BANKS[IOBank]) >= MON_START && (address - IO_BANKS[IOBank]) <= MON_END) {
+    return monitor.read(address - IO_BANKS[IOBank]);
+  } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
+    return rtc.read(address - IO_BANKS[IOBank]);
+  }
+
+  return 0;
+}
+
+void writeIO(word address, byte data) {
+  if ((address - IO_BANKS[IOBank]) >= MON_START && (address - IO_BANKS[IOBank]) <= MON_END) {
+    monitor.write(address - IO_BANKS[IOBank], data);
+  } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
+    rtc.write(address - IO_BANKS[IOBank], data);
+  }
 }
 
 //
 // INITIALIZATION
 //
 
-void initRAM() {
-  unsigned int i;
-  
-  for (i = 0; i < (RAM_END - RAM_START + 1); i++) {
-    RAM[i] = 0x00; 
-  }
-}
-
-void initIO() {
-  unsigned int i;
-  
-  for (i = 0; i < (IO_END - IO_START + 1); i++) {
-    IO[i] = 0x00; 
-  }
-}
-
-void initROM() {
-  unsigned int i;
-
-  // Fill ROM with NOPs by default
-  for (i = 0; i < (ROM_END - ROM_START + 1); i++) {
-    ROM[i] = 0xEA;
-  }
-}
-
 void initPins() {
-  pinMode(RESB, INPUT);
+  pinMode(RESB, OUTPUT);
   pinMode(IRQB, INPUT);
   pinMode(NMIB, INPUT);
   pinMode(RDY, INPUT);
@@ -763,12 +706,13 @@ void initPins() {
 
   setAddrDirIn();
   setDataDirIn();
+  
+  digitalWriteFast(RESB, HIGH);
+  digitalWriteFast(PHI2, HIGH);
 
-  digitalWriteFast(PHI2, LOW);
-
-  digitalWriteFast(OE1, LOW);
-  digitalWriteFast(OE2, LOW);
-  digitalWriteFast(OE3, LOW);
+  digitalWriteFast(OE1, HIGH);
+  digitalWriteFast(OE2, HIGH);
+  digitalWriteFast(OE3, HIGH);
 }
 
 void initButtons() {
@@ -787,129 +731,16 @@ void initButtons() {
 
 void initSD() {
   SD.begin(BUILTIN_SDCARD);
-
-  readROMs();
 }
 
-//
-// UTILITIES
-//
-
-void setAddrDirIn() {
-  pinMode(A0, INPUT);
-  pinMode(A1, INPUT);
-  pinMode(A2, INPUT);
-  pinMode(A3, INPUT);
-  pinMode(A4, INPUT);
-  pinMode(A5, INPUT);
-  pinMode(A6, INPUT);
-  pinMode(A7, INPUT);
-  pinMode(A8, INPUT);
-  pinMode(A9, INPUT);
-  pinMode(A10, INPUT);
-  pinMode(A11, INPUT);
-  pinMode(A12, INPUT);
-  pinMode(A13, INPUT);
-  pinMode(A14, INPUT);
-  pinMode(A15, INPUT);
+void initRAM() {
+  for (word a = 0x0000; a < (RAM_END - RAM_START + 1); a++) {
+    RAM[a] = 0x00; 
+  }
 }
 
-void setDataDirIn() {
-  pinMode(D0, INPUT);
-  pinMode(D1, INPUT);
-  pinMode(D2, INPUT);
-  pinMode(D3, INPUT);
-  pinMode(D4, INPUT);
-  pinMode(D5, INPUT);
-  pinMode(D6, INPUT);
-  pinMode(D7, INPUT);
-}
-
-void setDataDirOut() {
-  pinMode(D0, OUTPUT);
-  pinMode(D1, OUTPUT);
-  pinMode(D2, OUTPUT);
-  pinMode(D3, OUTPUT);
-  pinMode(D4, OUTPUT);
-  pinMode(D5, OUTPUT);
-  pinMode(D6, OUTPUT);
-  pinMode(D7, OUTPUT);
-}
-
-word readAddress() {
-  word a = 0;
-
-  a = a | digitalReadFast(A15);
-  a = a << 1;
-  a = a | digitalReadFast(A14);
-  a = a << 1;
-  a = a | digitalReadFast(A13);
-  a = a << 1;
-  a = a | digitalReadFast(A12);
-  a = a << 1;
-  a = a | digitalReadFast(A11);
-  a = a << 1;
-  a = a | digitalReadFast(A10);
-  a = a << 1;
-  a = a | digitalReadFast(A9);
-  a = a << 1;
-  a = a | digitalReadFast(A8);
-  a = a << 1;
-  a = a | digitalReadFast(A7);
-  a = a << 1;
-  a = a | digitalReadFast(A6);
-  a = a << 1;
-  a = a | digitalReadFast(A5);
-  a = a << 1;
-  a = a | digitalReadFast(A4);
-  a = a << 1;
-  a = a | digitalReadFast(A3);
-  a = a << 1;
-  a = a | digitalReadFast(A2);
-  a = a << 1;
-  a = a | digitalReadFast(A1);
-  a = a << 1;
-  a = a | digitalReadFast(A0);
-  
-  return a;
-}
-
-byte readData() {
-  byte d = 0;
-
-  d = d | digitalReadFast(D7);
-  d = d << 1;
-  d = d | digitalReadFast(D6);
-  d = d << 1;
-  d = d | digitalReadFast(D5);
-  d = d << 1;
-  d = d | digitalReadFast(D4);
-  d = d << 1;
-  d = d | digitalReadFast(D3);
-  d = d << 1;
-  d = d | digitalReadFast(D2);
-  d = d << 1;
-  d = d | digitalReadFast(D1);
-  d = d << 1;
-  d = d | digitalReadFast(D0);
-
-  return d;
-}
-
-void writeData(byte d) {
-  digitalWriteFast(D0, d & 1);
-  d = d >> 1;
-  digitalWriteFast(D1, d & 1);
-  d = d >> 1;
-  digitalWriteFast(D2, d & 1);
-  d = d >> 1;
-  digitalWriteFast(D3, d & 1);
-  d = d >> 1;
-  digitalWriteFast(D4, d & 1);
-  d = d >> 1;
-  digitalWriteFast(D5, d & 1);
-  d = d >> 1;
-  digitalWriteFast(D6, d & 1);
-  d = d >> 1;
-  digitalWriteFast(D7, d & 1);
+void initROM() {
+  for (word a = 0x0000; a < (ROM_END - ROM_START + 1); a++) {
+    ROM[a] = 0xEA; // Fill the ROM with 0xEA's by default
+  }
 }
