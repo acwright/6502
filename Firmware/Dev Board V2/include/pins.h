@@ -1,5 +1,5 @@
-#ifndef _DEVBOARD_H
-#define _DEVBOARD_H
+#ifndef _PINS_H
+#define _PINS_H
 
 #define RESB      28  // RESET            3.18 -> 8.18
 #define SYNC      30  // SYNC             3.23 -> 8.23
