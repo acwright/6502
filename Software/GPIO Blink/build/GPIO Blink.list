@@ -1,0 +1,26 @@
+ca65 V2.18 - N/A
+Main file   : ./src/GPIO Blink.asm
+Current file: ./src/GPIO Blink.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               PORTB   = $9400
+000000r 1               DDRB    = $9402
+000000r 1               
+000000r 1               reset:
+000000r 1  A9 FF          lda #%11111111         ; Set all pins on port B to output
+000002r 1  8D 02 94       sta DDRB
+000005r 1               loop:
+000005r 1  A9 55          lda #$55
+000007r 1  8D 00 94       sta PORTB
+00000Ar 1  A9 AA          lda #$AA
+00000Cr 1  8D 00 94       sta PORTB
+00000Fr 1  4C rr rr       jmp loop
+000012r 1               
+000012r 1               .segment "VECTORS"
+000000r 1               
+000000r 1  00 00          .word $0000
+000002r 1  rr rr          .word reset
+000004r 1  00 00          .word $0000
+000004r 1               

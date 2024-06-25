@@ -1,7 +1,7 @@
-NOP
-===
+LCD Hello World
+===============
 
-NOP filled ROM.
+Displays "Hello, World!" on the LCD Card.
 
 Install:
 

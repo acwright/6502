@@ -1,7 +1,7 @@
-NOP
-===
+SCWDC Wozmon
+============
 
-NOP filled ROM.
+Wozmon for the Serial Card (WDC 65C51).
 
 Install:
 

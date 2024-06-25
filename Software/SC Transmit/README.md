@@ -1,7 +1,7 @@
-NOP
-===
+SC Transmit
+===========
 
-NOP filled ROM.
+Transmits "Hello from 6502!" using Serial Card.
 
 Install:
 

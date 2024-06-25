@@ -1,7 +1,7 @@
-NOP
-===
+SC Wozmon
+=========
 
-NOP filled ROM.
+Wozmon for the Serial Card.
 
 Install:
 

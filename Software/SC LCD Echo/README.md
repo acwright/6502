@@ -1,7 +1,7 @@
-NOP
-===
+SC LCD Echo
+===========
 
-NOP filled ROM.
+Echo Serial Card received data to LCD Card.
 
 Install:
 

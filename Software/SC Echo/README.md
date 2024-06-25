@@ -1,7 +1,7 @@
-NOP
-===
+SC Echo
+=======
 
-NOP filled ROM.
+Serial Card echo example.
 
 Install:
 

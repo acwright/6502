@@ -1,7 +1,7 @@
-NOP
-===
+SCWDC Echo
+==========
 
-NOP filled ROM.
+Serial Card echo example (WDC 65C51).
 
 Install:
 

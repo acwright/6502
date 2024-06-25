@@ -1,7 +1,7 @@
-NOP
-===
+GPIO Blink
+==========
 
-NOP filled ROM.
+Blink LED's on GPIO Helper using GPIO Card Port B
 
 Install:
 

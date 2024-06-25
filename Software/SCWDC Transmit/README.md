@@ -1,7 +1,7 @@
-NOP
-===
+SCWDC Transmit
+==============
 
-NOP filled ROM.
+Transmits "Hello from 6502!" using Serial Card (WDC 65C51).
 
 Install:
 

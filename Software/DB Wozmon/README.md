@@ -1,7 +1,7 @@
-NOP
-===
+DB Wozmon
+=========
 
-NOP filled ROM.
+Wozmon for the Dev Board using USB keyboard input and terminal output.
 
 Install:
 
