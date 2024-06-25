@@ -52,6 +52,4 @@
 #define ROM_PAGES       32
 #define ROM_MAX         256
 
-#define VERSION         "1.0.0"
-
 #endif

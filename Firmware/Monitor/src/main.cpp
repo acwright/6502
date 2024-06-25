@@ -5,13 +5,23 @@
 #include <SD.h>
 #include <EEPROM.h>
 
-#include "pins.h"
+#if DEVBOARD
+#include "devboard.h"
+#elif RETROSHIELD
+#include "retroshield.h"
+#elif RETROSHIELD_ADAPTER
+#include "retroshieldadapter.h"
+#endif
+
 #include "macros.h"
 #include "utilities.h"
 #include "constants.h"
 
-#include "Monitor/Monitor.h"
-#include "RTC/RTC.h"
+#include "terminal.h"
+#include "mouse.h"
+#include "joystick.h"
+#include "rtc.h"
+#include "keyboard.h"
 
 byte RAM[RAM_END - RAM_START + 1];
 byte ROM[ROM_END - ROM_START + 1];
@@ -20,8 +30,11 @@ Button intButton      = Button();
 Button stepButton     = Button();
 Button runStopButton  = Button();
 
-Monitor monitor       = Monitor();
-RTC rtc               = RTC();
+USBHost             usb;
+USBHub              hub1(usb);
+USBHIDParser        hid1(usb);
+USBHIDParser        hid2(usb);
+USBHIDParser        hid3(usb);
 
 void onTick();
 void onClock();
@@ -35,7 +48,9 @@ void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
 void toggleRunStop();
+#if DEVBOARD
 void toggleOutput();
+#endif
 void toggleRAM();
 void toggleIO();
 void toggleIOBank();
@@ -93,9 +108,14 @@ void setup() {
   initRAM();
   initROM();
 
-  monitor.begin();
-  rtc.begin();
+  usb.begin();
 
+  Terminal::begin();
+  Mouse::begin();
+  Joystick::begin();
+  RTC::begin();
+  Keyboard::begin();
+  
   Serial.begin(9600);
   
   // Wait up to 2 sec for serial to connect
@@ -106,6 +126,9 @@ void setup() {
 
   info();
   reset();
+
+  setAddrDirIn();
+  setDataDirIn();
 
   timer.begin(onTick, FREQ_PERIODS[freqIndex]);
 }
@@ -132,10 +155,16 @@ void loop() {
     onCommand(Serial.read());
   }
 
+  // Update USB
+  usb.Task();
+  
   if (!isRunning || digitalReadFast(PHI2) == LOW) {
     // Do secondary processing during clock LOW...
-    monitor.update();
-    rtc.update();
+    Terminal::update();
+    Mouse::update();
+    Joystick::update();
+    RTC::update();
+    Keyboard::update();
   }
 }
 
@@ -155,11 +184,7 @@ FASTRUN void onTick() {
     digitalWriteFast(PHI2, LOW);
 
     // Delay for data hold time
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    delayNanoseconds(20);
 
     setDataDirIn();
   }
@@ -167,10 +192,14 @@ FASTRUN void onTick() {
 
 FASTRUN void onClock() {
   // Read the address and r/w at the beginning of cycle (low to high transition)
-  address = readAddress();
-  readWrite = digitalReadFast(RWB);
-  sync = digitalReadFast(SYNC);
-  be = digitalReadFast(BE);
+  address     = readAddress();
+  readWrite   = digitalReadFast(RWB);
+  #if DEVBOARD
+  sync        = digitalReadFast(SYNC);
+  be          = digitalReadFast(BE);
+  #elif RETROSHIELD_ADAPTER
+  sync        = digitalReadFast(SYNC);
+  #endif
 
   if (readWrite == HIGH) { // READING
     if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) { // IO
@@ -187,22 +216,8 @@ FASTRUN void onClock() {
       writeData(data);
     }
   } else { // WRITING
-    // Read data after delay for processor setup time
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
-    asm volatile ("NOP\nNOP\nNOP\nNOP\nNOP");
+    // Delay for write data setup time
+    delayNanoseconds(150);
 
     data = readData();
 
@@ -213,10 +228,10 @@ FASTRUN void onClock() {
     }
 
     // Read the control pins
-    resb = digitalReadFast(RESB);
-    nmib = digitalReadFast(NMIB);
-    irqb = digitalReadFast(IRQB);
-    rdy = digitalReadFast(RDY);
+    resb  = digitalReadFast(RESB);
+    nmib  = digitalReadFast(NMIB);
+    irqb  = digitalReadFast(IRQB);
+    rdy   = digitalReadFast(RDY);
   }
 }
 
@@ -262,10 +277,12 @@ void onCommand(char command) {
     case 'P':
       snapshot();
       break;
+    #if DEVBOARD
     case 'u':
     case 'U':
       toggleOutput();
       break;
+    #endif
     case 'a':
     case 'A':
       toggleRAM();
@@ -316,15 +333,17 @@ void onCommand(char command) {
 
 void info() {
   Serial.println();
-  Serial.println("eeee  eeeee eeeeee eeee   8eeee8 8eeee 88   8   8eeee8   8eee88 8eeee8 8eee8  8eeee8 ");                        
-  Serial.println("8  8  8     8    8    8   8    8 8     88   8   8    8   8    8 8    8 8   8  8    8 ");
-  Serial.println("8     8eeee 8    8    8   8e   8 8eeee 88  e8   8eeee8ee 8    8 8eeee8 8eee8e 8e   8 ");
-  Serial.println("8eeee     8 8    8 eee8   88   8 88     8  8    88     8 8    8 88   8 88   8 88   8 ");
-  Serial.println("8   8     8 8    8 8      88   8 88     8  8    88     8 8    8 88   8 88   8 88   8 ");
-  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88eee  8ee8    88eeeee8 8eeee8 88   8 88   8 88eee8 ");
+  Serial.println("eeee  eeeee eeeeee eeee   eeeeeee eeeeee eeeee e eeeee eeeeee eeeee   ");                        
+  Serial.println("8  8  8     8    8    8   8  8  8 8    8 8   8 8   8   8    8 8   8   ");
+  Serial.println("8     8eeee 8    8    8   8e 8  8 8    8 8e  8 8e  8e  8    8 8eee8e  ");
+  Serial.println("8eeee     8 8    8 eee8   88 8  8 8    8 88  8 88  88  8    8 88   8  ");
+  Serial.println("8   8     8 8    8 8      88 8  8 8    8 88  8 88  88  8    8 88   8  ");
+  Serial.println("8eee8 eeee8 8eeee8 8eee   88 8  8 8eeee8 88  8 88  88  8eeee8 88   8  ");
   Serial.println();
-  Serial.print("6502 Dev Board | Version: ");
+  Serial.print("6502 Monitor | Version: ");
+  #ifdef VERSION
   Serial.print(VERSION);
+  #endif
   Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
@@ -347,14 +366,18 @@ void info() {
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
   Serial.print("Date / Time: ");
-  Serial.println(rtc.formattedDateTime());
+  Serial.println(RTC::formattedDateTime());
   Serial.println();
   Serial.println("-------------------------------------------------------------");
   Serial.println("| (R)un / Stop         | (S)tep           | Rese(T)         |");
   Serial.println("-------------------------------------------------------------");
   Serial.println("| Toggle R(A)M         | Toggle (I)O      | Toggle R(O)M    |");
   Serial.println("-------------------------------------------------------------");
+  #if DEVBOARD
   Serial.println("| (L)ist ROMs          | Change IO Ban(K) | Toggle Outp(U)t |");
+  #else
+  Serial.println("| (L)ist ROMs          | Change IO Ban(K) |                 |");
+  #endif
   Serial.println("-------------------------------------------------------------");
   Serial.println("| (+/-) Clk Frequency  | Sna(P)shot       | In(F)o / Lo(G)  |");
   Serial.println("-------------------------------------------------------------");
@@ -491,6 +514,7 @@ void toggleRunStop() {
   Serial.println(isRunning ? "Running…" : "Stopped");
 }
 
+#if DEVBOARD
 void toggleOutput() {
   OutputEnabled = !OutputEnabled;
 
@@ -507,6 +531,7 @@ void toggleOutput() {
   Serial.print("OUTPUT: ");
   Serial.println(OutputEnabled ? "Enabled" : "Disabled");
 }
+#endif
 
 void toggleRAM() {
   RAMEnabled = !RAMEnabled;
@@ -660,60 +685,38 @@ void nextPage() {
 //
 
 byte readIO(word address) {
-  if ((address - IO_BANKS[IOBank]) >= MON_START && (address - IO_BANKS[IOBank]) <= MON_END) {
-    return monitor.read(address - IO_BANKS[IOBank]);
+  if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
+    return Terminal::read(address - IO_BANKS[IOBank]);
+  } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
+    return Mouse::read(address - IO_BANKS[IOBank]);
+  } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
+    return Joystick::read(address - IO_BANKS[IOBank]);
   } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
-    return rtc.read(address - IO_BANKS[IOBank]);
+    return RTC::read(address - IO_BANKS[IOBank]);
+  } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
+    return Keyboard::read(address - IO_BANKS[IOBank]);
   }
 
   return 0;
 }
 
 void writeIO(word address, byte data) {
-  if ((address - IO_BANKS[IOBank]) >= MON_START && (address - IO_BANKS[IOBank]) <= MON_END) {
-    monitor.write(address - IO_BANKS[IOBank], data);
+  if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
+    Terminal::write(address - IO_BANKS[IOBank], data);
+  } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
+    Mouse::write(address - IO_BANKS[IOBank], data);
+  } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
+    Joystick::write(address - IO_BANKS[IOBank], data);
   } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
-    rtc.write(address - IO_BANKS[IOBank], data);
+    RTC::write(address - IO_BANKS[IOBank], data);
+  } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
+    Keyboard::write(address - IO_BANKS[IOBank], data);
   }
 }
 
 //
 // INITIALIZATION
 //
-
-void initPins() {
-  pinMode(RESB, OUTPUT);
-  pinMode(IRQB, INPUT);
-  pinMode(NMIB, INPUT);
-  pinMode(RDY, INPUT);
-  pinMode(BE, INPUT);
-  pinMode(SYNC, INPUT);
-  pinMode(RWB, INPUT);
-  pinMode(PHI2, OUTPUT);
-
-  pinMode(OE1, OUTPUT);
-  pinMode(OE2, OUTPUT);
-  pinMode(OE3, OUTPUT);
-
-  pinMode(INT_SWB, INPUT);
-  pinMode(STEP_SWB, INPUT);
-  pinMode(RS_SWB, INPUT);
-
-  pinMode(GPIO0, INPUT);
-  pinMode(GPIO1, INPUT);
-  pinMode(GPIO2, INPUT);
-  pinMode(GPIO3, INPUT);
-
-  setAddrDirIn();
-  setDataDirIn();
-  
-  digitalWriteFast(RESB, HIGH);
-  digitalWriteFast(PHI2, HIGH);
-
-  digitalWriteFast(OE1, HIGH);
-  digitalWriteFast(OE2, HIGH);
-  digitalWriteFast(OE3, HIGH);
-}
 
 void initButtons() {
   intButton.attach(INT_SWB, INPUT_PULLUP);

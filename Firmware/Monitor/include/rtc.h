@@ -21,21 +21,14 @@
 #define RTC_START  RTC_SEC  + 0x32  // Defaults to $9C32
 #define RTC_END    RTC_YR   + 0x32  // Defaults to $9C37
 
-class RTC {
-
-public:
-
-  RTC();
+namespace RTC {
 
   void begin();
   void update();
   byte read(byte reg);
   void write(byte reg, byte data);
-
   String formattedDateTime();
-
-private:
-  static time_t syncTime();
+  time_t syncTime();
 
 };
 

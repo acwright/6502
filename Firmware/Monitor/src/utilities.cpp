@@ -1,5 +1,12 @@
 #include "utilities.h"
-#include "pins.h"
+
+#if DEVBOARD
+#include "devboard.h"
+#elif RETROSHIELD
+#include "retroshield.h"
+#elif RETROSHIELD_ADAPTER
+#include "retroshieldadapter.h"
+#endif
 
 void setAddrDirIn() {
   pinMode(A0, INPUT);

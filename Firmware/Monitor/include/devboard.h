@@ -1,5 +1,7 @@
-#ifndef _PINS_H
-#define _PINS_H
+#ifndef _DEVBOARD_H
+#define _DEVBOARD_H
+
+#include <Arduino.h>
 
 #define RESB      28  // RESET            3.18 -> 8.18
 #define SYNC      30  // SYNC             3.23 -> 8.23
@@ -48,5 +50,7 @@
 #define INT_SWB   21  // INTERVAL SWITCH  1.27 -> 6.27
 #define STEP_SWB  20  // STEP SWITCH      1.26 -> 6.26
 #define RS_SWB    19  // RUN/STOP SWITCH  1.16 -> 6.16
+
+void initPins();
 
 #endif
