@@ -48,143 +48,149 @@ Current file: ./src/DB Wozmon.asm
 00001Fr 1  F0 FB          BEQ     NEXTCHAR       ; Loop until ready.
 000021r 1  99 00 02       STA     IN,Y           ; Add to text buffer.
 000024r 1  20 rr rr       JSR     ECHO           ; Display character.
-000027r 1  C9 0D          CMP     #$0D           ; CR?
-000029r 1  D0 D7          BNE     NOTCR          ; No.
-00002Br 1               
-00002Br 1  A0 FF          LDY     #$FF           ; Reset text index.
-00002Dr 1  A9 00          LDA     #$00           ; For XAM mode.
-00002Fr 1  AA             TAX                    ; X=0.
-000030r 1               SETBLOCK:
-000030r 1  0A             ASL
-000031r 1               SETSTOR:
-000031r 1  0A             ASL                    ; Leaves $7B if setting STOR mode.
-000032r 1  85 2B          STA     MODE           ; $00 = XAM, $74 = STOR, $B8 = BLOK XAM.
-000034r 1               BLSKIP:
-000034r 1  C8             INY                    ; Advance text index.
-000035r 1               NEXTITEM:
-000035r 1  B9 00 02       LDA     IN,Y           ; Get character.
-000038r 1  C9 0D          CMP     #$0D           ; CR?
-00003Ar 1  F0 D6          BEQ     GETLINE        ; Yes, done this line.
-00003Cr 1  C9 2E          CMP     #$2E           ; "."?
-00003Er 1  90 F4          BCC     BLSKIP         ; Skip delimiter.
-000040r 1  F0 EE          BEQ     SETBLOCK       ; Set BLOCK XAM mode.
-000042r 1  C9 3A          CMP     #$3A           ; ":"?
-000044r 1  F0 EB          BEQ     SETSTOR        ; Yes, set STOR mode.
-000046r 1  C9 52          CMP     #$52           ; "R"?
-000048r 1  F0 3B          BEQ     RUN            ; Yes, run user program.
-00004Ar 1  86 28          STX     L              ; $00 -> L.
-00004Cr 1  86 29          STX     H              ;    and H.
-00004Er 1  84 2A          STY     YSAV           ; Save Y for comparison
-000050r 1               
-000050r 1               NEXTHEX:
-000050r 1  B9 00 02       LDA     IN,Y           ; Get character for hex test.
-000053r 1  49 30          EOR     #$30           ; Map digits to $0-9.
-000055r 1  C9 0A          CMP     #$0A           ; Digit?
-000057r 1  90 06          BCC     DIG            ; Yes.
-000059r 1  69 88          ADC     #$88           ; Map letter "A"-"F" to $FA-FF.
-00005Br 1  C9 FA          CMP     #$FA           ; Hex letter?
-00005Dr 1  90 11          BCC     NOTHEX         ; No, character not hex.
-00005Fr 1               DIG:
-00005Fr 1  0A             ASL
-000060r 1  0A             ASL                    ; Hex digit to MSD of A.
-000061r 1  0A             ASL
-000062r 1  0A             ASL
-000063r 1               
-000063r 1  A2 04          LDX     #$04           ; Shift count.
-000065r 1               HEXSHIFT:
-000065r 1  0A             ASL                    ; Hex digit left, MSB to carry.
-000066r 1  26 28          ROL     L              ; Rotate into LSD.
-000068r 1  26 29          ROL     H              ; Rotate into MSD's.
-00006Ar 1  CA             DEX                    ; Done 4 shifts?
-00006Br 1  D0 F8          BNE     HEXSHIFT       ; No, loop.
-00006Dr 1  C8             INY                    ; Advance text index.
-00006Er 1  D0 E0          BNE     NEXTHEX        ; Always taken. Check next character for hex.
-000070r 1               
-000070r 1               NOTHEX:
-000070r 1  C4 2A          CPY     YSAV           ; Check if L, H empty (no hex digits).
-000072r 1  F0 99          BEQ     ESCAPE         ; Yes, generate ESC sequence.
-000074r 1               
-000074r 1  24 2B          BIT     MODE           ; Test MODE byte.
-000076r 1  50 10          BVC     NOTSTOR        ; B6=0 is STOR, 1 is XAM and BLOCK XAM.
-000078r 1               
-000078r 1  A5 28          LDA     L              ; LSD's of hex data.
-00007Ar 1  81 26          STA     (STL,X)        ; Store current 'store index'.
-00007Cr 1  E6 26          INC     STL            ; Increment store index.
-00007Er 1  D0 B5          BNE     NEXTITEM       ; Get next item (no carry).
-000080r 1  E6 27          INC     STH            ; Add carry to 'store index' high order.
-000082r 1               TONEXTITEM:
-000082r 1  4C rr rr       JMP     NEXTITEM       ; Get next command item.
-000085r 1               
-000085r 1               RUN:
-000085r 1  6C 24 00       JMP     (XAML)         ; Run at current XAM index.
-000088r 1               
-000088r 1               NOTSTOR:
-000088r 1  30 2B          BMI     XAMNEXT        ; B7 = 0 for XAM, 1 for BLOCK XAM.
-00008Ar 1               
-00008Ar 1  A2 02          LDX     #$02           ; Byte count.
-00008Cr 1               SETADR:
-00008Cr 1  B5 27          LDA     L-1,X          ; Copy hex data to
-00008Er 1  95 25          STA     STL-1,X        ;  'store index'.
-000090r 1  95 23          STA     XAML-1,X       ; And to 'XAM index'.
-000092r 1  CA             DEX                    ; Next of 2 bytes.
-000093r 1  D0 F7          BNE     SETADR         ; Loop unless X = 0.
+000027r 1  C9 0A          CMP     #$0A           ; LF?
+000029r 1  F0 07          BEQ     CR             ; Yes.
+00002Br 1  C9 0D          CMP     #$0D           ; CR?
+00002Dr 1  F0 03          BEQ     CR             ; Yes.
+00002Fr 1  4C rr rr       JMP     NOTCR          ; No.
+000032r 1               
+000032r 1               CR:
+000032r 1  A0 FF          LDY     #$FF           ; Reset text index.
+000034r 1  A9 00          LDA     #$00           ; For XAM mode.
+000036r 1  AA             TAX                    ; X=0.
+000037r 1               SETBLOCK:
+000037r 1  0A             ASL
+000038r 1               SETSTOR:
+000038r 1  0A             ASL                    ; Leaves $7B if setting STOR mode.
+000039r 1  85 2B          STA     MODE           ; $00 = XAM, $74 = STOR, $B8 = BLOK XAM.
+00003Br 1               BLSKIP:
+00003Br 1  C8             INY                    ; Advance text index.
+00003Cr 1               NEXTITEM:
+00003Cr 1  B9 00 02       LDA     IN,Y           ; Get character.
+00003Fr 1  C9 0D          CMP     #$0D           ; CR?
+000041r 1  F0 CF          BEQ     GETLINE        ; Yes, done this line.
+000043r 1  C9 0A          CMP     #$0A           ; LF?
+000045r 1  F0 CB          BEQ     GETLINE        ; Yes, done this line.
+000047r 1  C9 2E          CMP     #$2E           ; "."?
+000049r 1  90 F0          BCC     BLSKIP         ; Skip delimiter.
+00004Br 1  F0 EA          BEQ     SETBLOCK       ; Set BLOCK XAM mode.
+00004Dr 1  C9 3A          CMP     #$3A           ; ":"?
+00004Fr 1  F0 E7          BEQ     SETSTOR        ; Yes, set STOR mode.
+000051r 1  C9 52          CMP     #$52           ; "R"?
+000053r 1  F0 3B          BEQ     RUN            ; Yes, run user program.
+000055r 1  86 28          STX     L              ; $00 -> L.
+000057r 1  86 29          STX     H              ;    and H.
+000059r 1  84 2A          STY     YSAV           ; Save Y for comparison
+00005Br 1               
+00005Br 1               NEXTHEX:
+00005Br 1  B9 00 02       LDA     IN,Y           ; Get character for hex test.
+00005Er 1  49 30          EOR     #$30           ; Map digits to $0-9.
+000060r 1  C9 0A          CMP     #$0A           ; Digit?
+000062r 1  90 06          BCC     DIG            ; Yes.
+000064r 1  69 88          ADC     #$88           ; Map letter "A"-"F" to $FA-FF.
+000066r 1  C9 FA          CMP     #$FA           ; Hex letter?
+000068r 1  90 11          BCC     NOTHEX         ; No, character not hex.
+00006Ar 1               DIG:
+00006Ar 1  0A             ASL
+00006Br 1  0A             ASL                    ; Hex digit to MSD of A.
+00006Cr 1  0A             ASL
+00006Dr 1  0A             ASL
+00006Er 1               
+00006Er 1  A2 04          LDX     #$04           ; Shift count.
+000070r 1               HEXSHIFT:
+000070r 1  0A             ASL                    ; Hex digit left, MSB to carry.
+000071r 1  26 28          ROL     L              ; Rotate into LSD.
+000073r 1  26 29          ROL     H              ; Rotate into MSD's.
+000075r 1  CA             DEX                    ; Done 4 shifts?
+000076r 1  D0 F8          BNE     HEXSHIFT       ; No, loop.
+000078r 1  C8             INY                    ; Advance text index.
+000079r 1  D0 E0          BNE     NEXTHEX        ; Always taken. Check next character for hex.
+00007Br 1               
+00007Br 1               NOTHEX:
+00007Br 1  C4 2A          CPY     YSAV           ; Check if L, H empty (no hex digits).
+00007Dr 1  F0 8E          BEQ     ESCAPE         ; Yes, generate ESC sequence.
+00007Fr 1               
+00007Fr 1  24 2B          BIT     MODE           ; Test MODE byte.
+000081r 1  50 10          BVC     NOTSTOR        ; B6=0 is STOR, 1 is XAM and BLOCK XAM.
+000083r 1               
+000083r 1  A5 28          LDA     L              ; LSD's of hex data.
+000085r 1  81 26          STA     (STL,X)        ; Store current 'store index'.
+000087r 1  E6 26          INC     STL            ; Increment store index.
+000089r 1  D0 B1          BNE     NEXTITEM       ; Get next item (no carry).
+00008Br 1  E6 27          INC     STH            ; Add carry to 'store index' high order.
+00008Dr 1               TONEXTITEM:
+00008Dr 1  4C rr rr       JMP     NEXTITEM       ; Get next command item.
+000090r 1               
+000090r 1               RUN:
+000090r 1  6C 24 00       JMP     (XAML)         ; Run at current XAM index.
+000093r 1               
+000093r 1               NOTSTOR:
+000093r 1  30 2B          BMI     XAMNEXT        ; B7 = 0 for XAM, 1 for BLOCK XAM.
 000095r 1               
-000095r 1               NXTPRNT:
-000095r 1  D0 14          BNE     PRDATA         ; NE means no address to print.
-000097r 1  A9 0D          LDA     #$0D           ; CR.
-000099r 1  20 rr rr       JSR     ECHO           ; Output it.
-00009Cr 1  A5 25          LDA     XAMH           ; 'Examine index' high-order byte.
-00009Er 1  20 rr rr       JSR     PRBYTE         ; Output it in hex format.
-0000A1r 1  A5 24          LDA     XAML           ; Low-order 'examine index' byte.
-0000A3r 1  20 rr rr       JSR     PRBYTE         ; Output it in hex format.
-0000A6r 1  A9 3A          LDA     #$3A           ; ":".
-0000A8r 1  20 rr rr       JSR     ECHO           ; Output it.
-0000ABr 1               
-0000ABr 1               PRDATA:
-0000ABr 1  A9 20          LDA     #$20           ; Blank.
-0000ADr 1  20 rr rr       JSR     ECHO           ; Output it.
-0000B0r 1  A1 24          LDA     (XAML,X)       ; Get data byte at 'examine index'.
-0000B2r 1  20 rr rr       JSR     PRBYTE         ; Output it in hex format.
-0000B5r 1               XAMNEXT:
-0000B5r 1  86 2B          STX     MODE           ; 0 -> MODE (XAM mode).
-0000B7r 1  A5 24          LDA     XAML
-0000B9r 1  C5 28          CMP     L              ; Compare 'examine index' to hex data.
-0000BBr 1  A5 25          LDA     XAMH
-0000BDr 1  E5 29          SBC     H
-0000BFr 1  B0 C1          BCS     TONEXTITEM     ; Not less, so no more data to output.
-0000C1r 1               
-0000C1r 1  E6 24          INC     XAML
-0000C3r 1  D0 02          BNE     MOD8CHK        ; Increment 'examine index'.
-0000C5r 1  E6 25          INC     XAMH
-0000C7r 1               
-0000C7r 1               MOD8CHK:
-0000C7r 1  A5 24          LDA     XAML           ; Check low-order 'examine index' byte
-0000C9r 1  29 07          AND     #$07           ; For MOD 8 = 0
-0000CBr 1  10 C8          BPL     NXTPRNT        ; Always taken.
-0000CDr 1               
-0000CDr 1               PRBYTE:
-0000CDr 1  48             PHA                    ; Save A for LSD.
-0000CEr 1  4A             LSR
-0000CFr 1  4A             LSR
-0000D0r 1  4A             LSR                    ; MSD to LSD position.
-0000D1r 1  4A             LSR
-0000D2r 1  20 rr rr       JSR     PRHEX          ; Output hex digit.
-0000D5r 1  68             PLA                    ; Restore A.
-0000D6r 1               
-0000D6r 1               PRHEX:
-0000D6r 1  29 0F          AND     #$0F           ; Mask LSD for hex print.
-0000D8r 1  09 30          ORA     #$30           ; Add "0".
-0000DAr 1  C9 3A          CMP     #$3A           ; Digit?
-0000DCr 1  90 02          BCC     ECHO           ; Yes, output it.
-0000DEr 1  69 06          ADC     #$06           ; Add offset for letter.
-0000E0r 1               
-0000E0r 1               ECHO:
-0000E0r 1  48             PHA
-0000E1r 1  8D 00 9C       STA     TERM_DATA      ; Output character.
-0000E4r 1  68             PLA                    ; Restore A.
-0000E5r 1  60             RTS                    ; Return.
-0000E6r 1               
-0000E6r 1               .segment "VECTORS"
+000095r 1  A2 02          LDX     #$02           ; Byte count.
+000097r 1               SETADR:
+000097r 1  B5 27          LDA     L-1,X          ; Copy hex data to
+000099r 1  95 25          STA     STL-1,X        ;  'store index'.
+00009Br 1  95 23          STA     XAML-1,X       ; And to 'XAM index'.
+00009Dr 1  CA             DEX                    ; Next of 2 bytes.
+00009Er 1  D0 F7          BNE     SETADR         ; Loop unless X = 0.
+0000A0r 1               
+0000A0r 1               NXTPRNT:
+0000A0r 1  D0 14          BNE     PRDATA         ; NE means no address to print.
+0000A2r 1  A9 0D          LDA     #$0D           ; CR.
+0000A4r 1  20 rr rr       JSR     ECHO           ; Output it.
+0000A7r 1  A5 25          LDA     XAMH           ; 'Examine index' high-order byte.
+0000A9r 1  20 rr rr       JSR     PRBYTE         ; Output it in hex format.
+0000ACr 1  A5 24          LDA     XAML           ; Low-order 'examine index' byte.
+0000AEr 1  20 rr rr       JSR     PRBYTE         ; Output it in hex format.
+0000B1r 1  A9 3A          LDA     #$3A           ; ":".
+0000B3r 1  20 rr rr       JSR     ECHO           ; Output it.
+0000B6r 1               
+0000B6r 1               PRDATA:
+0000B6r 1  A9 20          LDA     #$20           ; Blank.
+0000B8r 1  20 rr rr       JSR     ECHO           ; Output it.
+0000BBr 1  A1 24          LDA     (XAML,X)       ; Get data byte at 'examine index'.
+0000BDr 1  20 rr rr       JSR     PRBYTE         ; Output it in hex format.
+0000C0r 1               XAMNEXT:
+0000C0r 1  86 2B          STX     MODE           ; 0 -> MODE (XAM mode).
+0000C2r 1  A5 24          LDA     XAML
+0000C4r 1  C5 28          CMP     L              ; Compare 'examine index' to hex data.
+0000C6r 1  A5 25          LDA     XAMH
+0000C8r 1  E5 29          SBC     H
+0000CAr 1  B0 C1          BCS     TONEXTITEM     ; Not less, so no more data to output.
+0000CCr 1               
+0000CCr 1  E6 24          INC     XAML
+0000CEr 1  D0 02          BNE     MOD8CHK        ; Increment 'examine index'.
+0000D0r 1  E6 25          INC     XAMH
+0000D2r 1               
+0000D2r 1               MOD8CHK:
+0000D2r 1  A5 24          LDA     XAML           ; Check low-order 'examine index' byte
+0000D4r 1  29 07          AND     #$07           ; For MOD 8 = 0
+0000D6r 1  10 C8          BPL     NXTPRNT        ; Always taken.
+0000D8r 1               
+0000D8r 1               PRBYTE:
+0000D8r 1  48             PHA                    ; Save A for LSD.
+0000D9r 1  4A             LSR
+0000DAr 1  4A             LSR
+0000DBr 1  4A             LSR                    ; MSD to LSD position.
+0000DCr 1  4A             LSR
+0000DDr 1  20 rr rr       JSR     PRHEX          ; Output hex digit.
+0000E0r 1  68             PLA                    ; Restore A.
+0000E1r 1               
+0000E1r 1               PRHEX:
+0000E1r 1  29 0F          AND     #$0F           ; Mask LSD for hex print.
+0000E3r 1  09 30          ORA     #$30           ; Add "0".
+0000E5r 1  C9 3A          CMP     #$3A           ; Digit?
+0000E7r 1  90 02          BCC     ECHO           ; Yes, output it.
+0000E9r 1  69 06          ADC     #$06           ; Add offset for letter.
+0000EBr 1               
+0000EBr 1               ECHO:
+0000EBr 1  48             PHA
+0000ECr 1  8D 00 9C       STA     TERM_DATA      ; Output character.
+0000EFr 1  68             PLA                    ; Restore A.
+0000F0r 1  60             RTS                    ; Return.
+0000F1r 1               
+0000F1r 1               .segment "VECTORS"
 000000r 1               
 000000r 1  00 0F          .word   $0F00          ; NMI vector
 000002r 1  rr rr          .word   RESET          ; RESET vector

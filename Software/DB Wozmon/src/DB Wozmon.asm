@@ -44,9 +44,13 @@ NEXTCHAR:
   BEQ     NEXTCHAR       ; Loop until ready.
   STA     IN,Y           ; Add to text buffer.
   JSR     ECHO           ; Display character.
+  CMP     #$0A           ; LF?
+  BEQ     CR             ; Yes.
   CMP     #$0D           ; CR?
-  BNE     NOTCR          ; No.
+  BEQ     CR             ; Yes.
+  JMP     NOTCR          ; No.
 
+CR:
   LDY     #$FF           ; Reset text index.
   LDA     #$00           ; For XAM mode.
   TAX                    ; X=0.
@@ -60,6 +64,8 @@ BLSKIP:
 NEXTITEM:
   LDA     IN,Y           ; Get character.
   CMP     #$0D           ; CR?
+  BEQ     GETLINE        ; Yes, done this line.
+  CMP     #$0A           ; LF?
   BEQ     GETLINE        ; Yes, done this line.
   CMP     #$2E           ; "."?
   BCC     BLSKIP         ; Skip delimiter.
