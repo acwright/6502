@@ -11,8 +11,8 @@
 /* Notes:                                                                                                                                               */
 /* - Outputs character to Serial terminal.                                                                                                              */
 
-#define TERM_START  TERM_DATA  + 0x00           // Defaults to $9C00
-#define TERM_END    TERM_START + TERM_DATA      // Defaults to $9C00
+#define TERM_START  (TERM_DATA  + 0x00)           // Defaults to $9C00
+#define TERM_END    (TERM_START + TERM_DATA)      // Defaults to $9C00
 
 namespace Terminal {
 

@@ -14,8 +14,8 @@ extern USBHost usb;
 #define MOUSE_W     2      /* |  DIR  |                    VELOCITY                           |  Mouse Wheel:      Direction + Down (0) - Up (1) -> Velocity from 0-127               */
 #define MOUSE_BTN   3      /* |                  NA                   |  MID  | RIGHT |  LEFT |  Mouse Buttons:    (Bit 7-3 unused) -> Middle, Right, Left Buttons Pressed (Bit 2-0)  */
 
-#define MOUSE_START  MOUSE_X    + 0x02  // Defaults to $9C02
-#define MOUSE_END    MOUSE_BTN  + 0x02  // Defaults to $9C05
+#define MOUSE_START  (MOUSE_X    + 0x02)  // Defaults to $9C02
+#define MOUSE_END    (MOUSE_BTN  + 0x02)  // Defaults to $9C05
 
 namespace Mouse {
 

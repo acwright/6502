@@ -47,14 +47,14 @@ lcd_wait:
   pha
   lda #%00000000  ; Port B is input
   sta DDRB
-lcdbusy:
+lcd_busy:
   lda #RW
   sta PORTA
   lda #(RW | E)
   sta PORTA
   lda PORTB
   and #%10000000
-  bne lcdbusy
+  bne lcd_busy
 
   lda #RW
   sta PORTA

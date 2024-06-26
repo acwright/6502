@@ -16,8 +16,8 @@ extern USBHost usb;
 /* - Keyboard data is stored in a 256 byte circular buffer                                                                                              */
 /* - Keyboard data register can be read repeatably until NULL (0x0) encountered at which time the buffer is empty                                       */
 
-#define KBD_START  KBD_DATA  + 0x100            // Defaults to $9D00
-#define KBD_END    KBD_DATA  + 0x100            // Defaults to $9D00
+#define KBD_START  (KBD_DATA  + 0x100)            // Defaults to $9D00
+#define KBD_END    (KBD_DATA  + 0x100)            // Defaults to $9D00
 
 namespace Keyboard {
 

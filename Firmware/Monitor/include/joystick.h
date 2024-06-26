@@ -27,8 +27,8 @@ extern USBHost usb;
 /* Notes:                                                                                                                                                                                                                       */
 /* - XBOX 360 and XBOX One controllers supported for now...                                                                                                                                                                     */
 
-#define JOY_START  JOY_BTNL  + 0x16  // Defaults to $9C16
-#define JOY_END    JOY_RTRH  + 0x16  // Defaults to $9C23
+#define JOY_START  (JOY_BTNL  + 0x16)  // Defaults to $9C16
+#define JOY_END    (JOY_RTRH  + 0x16)  // Defaults to $9C23
 
 namespace Joystick {
 

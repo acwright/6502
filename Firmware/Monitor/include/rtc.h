@@ -18,8 +18,8 @@
 /* - Real Time Clock IO registers are read-only. Teensy Loader automatically initializes the RTC to your PC's time while uploading firmware.            */
 /* - If a coin cell is connected to VBAT, the RTC will continue keeping time while power is turned off. See: https://www.pjrc.com/store/teensy41.html   */
 
-#define RTC_START  RTC_SEC  + 0x32  // Defaults to $9C32
-#define RTC_END    RTC_YR   + 0x32  // Defaults to $9C37
+#define RTC_START  (RTC_SEC  + 0x32)  // Defaults to $9C32
+#define RTC_END    (RTC_YR   + 0x32)  // Defaults to $9C37
 
 namespace RTC {
 

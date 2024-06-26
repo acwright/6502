@@ -21,7 +21,7 @@ namespace Joystick {
 
   void begin() { /* Do nothing... */ }
 
-  void update() { 
+  void update() {
     if (controller.available()) {
       uint32_t buttons    = controller.getButtons();
 

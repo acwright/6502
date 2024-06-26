@@ -157,15 +157,12 @@ void loop() {
 
   // Update USB
   usb.Task();
-  
-  if (!isRunning || digitalReadFast(PHI2) == LOW) {
-    // Do secondary processing during clock LOW...
-    Terminal::update();
-    Mouse::update();
-    Joystick::update();
-    RTC::update();
-    Keyboard::update();
-  }
+
+  Terminal::update();
+  Mouse::update();
+  Joystick::update();
+  RTC::update();
+  Keyboard::update();
 }
 
 //
@@ -686,15 +683,15 @@ void nextPage() {
 
 byte readIO(word address) {
   if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
-    return Terminal::read(address - IO_BANKS[IOBank]);
+    return Terminal::read(address - IO_BANKS[IOBank] - TERM_START);
   } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
-    return Mouse::read(address - IO_BANKS[IOBank]);
+    return Mouse::read(address - IO_BANKS[IOBank] - MOUSE_START);
   } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
-    return Joystick::read(address - IO_BANKS[IOBank]);
+    return Joystick::read(address - IO_BANKS[IOBank] - JOY_START);
   } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
-    return RTC::read(address - IO_BANKS[IOBank]);
+    return RTC::read(address - IO_BANKS[IOBank] - RTC_START);
   } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
-    return Keyboard::read(address - IO_BANKS[IOBank]);
+    return Keyboard::read(address - IO_BANKS[IOBank] - KBD_START);
   }
 
   return 0;
@@ -702,15 +699,15 @@ byte readIO(word address) {
 
 void writeIO(word address, byte data) {
   if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
-    Terminal::write(address - IO_BANKS[IOBank], data);
+    Terminal::write(address - IO_BANKS[IOBank] - TERM_START, data);
   } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
-    Mouse::write(address - IO_BANKS[IOBank], data);
+    Mouse::write(address - IO_BANKS[IOBank] - MOUSE_START, data);
   } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
-    Joystick::write(address - IO_BANKS[IOBank], data);
+    Joystick::write(address - IO_BANKS[IOBank] - JOY_START, data);
   } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
-    RTC::write(address - IO_BANKS[IOBank], data);
+    RTC::write(address - IO_BANKS[IOBank] - RTC_START, data);
   } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
-    Keyboard::write(address - IO_BANKS[IOBank], data);
+    Keyboard::write(address - IO_BANKS[IOBank] - KBD_START, data);
   }
 }
 

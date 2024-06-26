@@ -23,19 +23,19 @@ namespace Mouse {
       mouseBtns = controller.getButtons();
     
       controller.mouseDataClear();
-    }
 
-    #ifdef MOUSE_DEBUG
-      // Serial.print("Mouse: Buttons = ");
-      // Serial.print(mouseBtns);
-      // Serial.print(",  X = ");
-      // Serial.print(mouseX);
-      // Serial.print(",  Y = ");
-      // Serial.print(mouseY);
-      // Serial.print(",  Wheel = ");
-      // Serial.print(mouseW);
-      // Serial.println();
-    #endif
+      #ifdef MOUSE_DEBUG
+      Serial.print("Mouse: Buttons = ");
+      Serial.print(mouseBtns);
+      Serial.print(",  X = ");
+      Serial.print(mouseX);
+      Serial.print(",  Y = ");
+      Serial.print(mouseY);
+      Serial.print(",  Wheel = ");
+      Serial.print(mouseW);
+      Serial.println();
+      #endif
+    }
   }
 
   byte read(byte reg) {

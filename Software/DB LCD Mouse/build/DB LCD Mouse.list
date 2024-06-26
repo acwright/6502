@@ -1,0 +1,272 @@
+ca65 V2.18 - N/A
+Main file   : ./src/DB LCD Mouse.asm
+Current file: ./src/DB LCD Mouse.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               PORTB   = $8000
+000000r 1               PORTA   = $8001
+000000r 1               DDRB    = $8002
+000000r 1               DDRA    = $8003
+000000r 1               
+000000r 1               MOUSE_X     = $9C02
+000000r 1               MOUSE_Y     = $9C03
+000000r 1               MOUSE_W     = $9C04
+000000r 1               MOUSE_BTN   = $9C05
+000000r 1               
+000000r 1               E       = %10000000
+000000r 1               RW      = %01000000
+000000r 1               RS      = %00100000
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1  A9 FF          lda #%11111111                ; Set all pins on port B to output
+000005r 1  8D 02 80       sta DDRB
+000008r 1  A9 E0          lda #%11100000                ; Set top 3 pins on port A to output
+00000Ar 1  8D 03 80       sta DDRA
+00000Dr 1               
+00000Dr 1  A9 38          lda #%00111000                ; Set 8-bit mode; 2-line display; 5x8 font
+00000Fr 1  20 rr rr       jsr lcd_instruction
+000012r 1  A9 0C          lda #%00001100                ; Display on; cursor off; blink off
+000014r 1  20 rr rr       jsr lcd_instruction
+000017r 1  A9 06          lda #%00000110                ; Increment and shift cursor; don't shift display
+000019r 1  20 rr rr       jsr lcd_instruction
+00001Cr 1               
+00001Cr 1               clear:
+00001Cr 1  A9 01          lda #$00000001                ; Clear display
+00001Er 1  20 rr rr       jsr lcd_instruction
+000021r 1               
+000021r 1  A2 00          ldx #0
+000023r 1               line_1:                         ; Print the line 1 template
+000023r 1  BD rr rr       lda line_1_template,x
+000026r 1  F0 07          beq line_2_start
+000028r 1  20 rr rr       jsr lcd_write
+00002Br 1  E8             inx
+00002Cr 1  4C rr rr       jmp line_1
+00002Fr 1               
+00002Fr 1               line_2_start:
+00002Fr 1  A9 C0          lda #($80 | $40)              ; Move to DDRAM address $40 (line 2)
+000031r 1  20 rr rr       jsr lcd_instruction
+000034r 1               
+000034r 1  A2 00          ldx #0
+000036r 1               line_2:                         ; Print the line 2 template
+000036r 1  BD rr rr       lda line_2_template,x
+000039r 1  F0 07          beq load_mouse
+00003Br 1  20 rr rr       jsr lcd_write
+00003Er 1  E8             inx
+00003Fr 1  4C rr rr       jmp line_2
+000042r 1               
+000042r 1               load_mouse:
+000042r 1  A9 48          lda #%01001000                 ; Set CGRAM address 1
+000044r 1  20 rr rr       jsr lcd_instruction
+000047r 1               
+000047r 1  AD rr rr       lda mouse
+00004Ar 1  20 rr rr       jsr lcd_write
+00004Dr 1  AD rr rr       lda mouse+1
+000050r 1  20 rr rr       jsr lcd_write
+000053r 1  AD rr rr       lda mouse+2
+000056r 1  20 rr rr       jsr lcd_write
+000059r 1  AD rr rr       lda mouse+3
+00005Cr 1  20 rr rr       jsr lcd_write
+00005Fr 1  AD rr rr       lda mouse+4
+000062r 1  20 rr rr       jsr lcd_write
+000065r 1  AD rr rr       lda mouse+5
+000068r 1  20 rr rr       jsr lcd_write
+00006Br 1  AD rr rr       lda mouse+6
+00006Er 1  20 rr rr       jsr lcd_write
+000071r 1  AD rr rr       lda mouse+7
+000074r 1  20 rr rr       jsr lcd_write
+000077r 1  AD rr rr       lda mouse+8
+00007Ar 1  20 rr rr       jsr lcd_write
+00007Dr 1  AD rr rr       lda mouse+9
+000080r 1  20 rr rr       jsr lcd_write
+000083r 1  AD rr rr       lda mouse+10
+000086r 1  20 rr rr       jsr lcd_write
+000089r 1  AD rr rr       lda mouse+11
+00008Cr 1  20 rr rr       jsr lcd_write
+00008Fr 1  AD rr rr       lda mouse+12
+000092r 1  20 rr rr       jsr lcd_write
+000095r 1  AD rr rr       lda mouse+13
+000098r 1  20 rr rr       jsr lcd_write
+00009Br 1  AD rr rr       lda mouse+14
+00009Er 1  20 rr rr       jsr lcd_write
+0000A1r 1  AD rr rr       lda mouse+15
+0000A4r 1  20 rr rr       jsr lcd_write
+0000A7r 1  AD rr rr       lda mouse+16
+0000AAr 1  20 rr rr       jsr lcd_write
+0000ADr 1  AD rr rr       lda mouse+17
+0000B0r 1  20 rr rr       jsr lcd_write
+0000B3r 1  AD rr rr       lda mouse+18
+0000B6r 1  20 rr rr       jsr lcd_write
+0000B9r 1  AD rr rr       lda mouse+19
+0000BCr 1  20 rr rr       jsr lcd_write
+0000BFr 1  AD rr rr       lda mouse+20
+0000C2r 1  20 rr rr       jsr lcd_write
+0000C5r 1  AD rr rr       lda mouse+21
+0000C8r 1  20 rr rr       jsr lcd_write
+0000CBr 1  AD rr rr       lda mouse+22
+0000CEr 1  20 rr rr       jsr lcd_write
+0000D1r 1  AD rr rr       lda mouse+23
+0000D4r 1  20 rr rr       jsr lcd_write
+0000D7r 1  AD rr rr       lda mouse+24
+0000DAr 1  20 rr rr       jsr lcd_write
+0000DDr 1  AD rr rr       lda mouse+25
+0000E0r 1  20 rr rr       jsr lcd_write
+0000E3r 1  AD rr rr       lda mouse+26
+0000E6r 1  20 rr rr       jsr lcd_write
+0000E9r 1  AD rr rr       lda mouse+27
+0000ECr 1  20 rr rr       jsr lcd_write
+0000EFr 1  AD rr rr       lda mouse+28
+0000F2r 1  20 rr rr       jsr lcd_write
+0000F5r 1  AD rr rr       lda mouse+29
+0000F8r 1  20 rr rr       jsr lcd_write
+0000FBr 1  AD rr rr       lda mouse+30
+0000FEr 1  20 rr rr       jsr lcd_write
+000101r 1  AD rr rr       lda mouse+31
+000104r 1  20 rr rr       jsr lcd_write
+000107r 1               
+000107r 1               draw_mouse:
+000107r 1  A9 87          lda #($80 | $07)              ; Move to DDRAM address $07 (line 1, pos 7)
+000109r 1  20 rr rr       jsr lcd_instruction
+00010Cr 1  A9 01          lda #1
+00010Er 1  20 rr rr       jsr lcd_write
+000111r 1  A9 88          lda #($80 | $08)              ; Move to DDRAM address $08 (line 1, pos 8)
+000113r 1  20 rr rr       jsr lcd_instruction
+000116r 1  A9 02          lda #2
+000118r 1  20 rr rr       jsr lcd_write
+00011Br 1  A9 C7          lda #($80 | $47)              ; Move to DDRAM address $47 (line 2, pos 7)
+00011Dr 1  20 rr rr       jsr lcd_instruction
+000120r 1  A9 03          lda #3
+000122r 1  20 rr rr       jsr lcd_write
+000125r 1  A9 C8          lda #($80 | $48)              ; Move to DDRAM address $48 (line 2, pos 8)
+000127r 1  20 rr rr       jsr lcd_instruction
+00012Ar 1  A9 04          lda #4
+00012Cr 1  20 rr rr       jsr lcd_write
+00012Fr 1               
+00012Fr 1               loop:
+00012Fr 1  A9 83          lda #($80 | $03)              ; Move to DDRAM address $03 (line 1, pos 3)
+000131r 1  20 rr rr       jsr lcd_instruction
+000134r 1  AD 02 9C       lda MOUSE_X
+000137r 1  20 rr rr       jsr lcd_write
+00013Ar 1  A9 8D          lda #($80 | $0D)              ; Move to DDRAM address $0D (line 1, pos 14)
+00013Cr 1  20 rr rr       jsr lcd_instruction
+00013Fr 1  AD 03 9C       lda MOUSE_Y
+000142r 1  20 rr rr       jsr lcd_write
+000145r 1  A9 C3          lda #($80 | $43)              ; Move to DDRAM address $43 (line 2, pos 3)
+000147r 1  20 rr rr       jsr lcd_instruction
+00014Ar 1  AD 04 9C       lda MOUSE_W
+00014Dr 1  20 rr rr       jsr lcd_write
+000150r 1  A9 CD          lda #($80 | $4D)              ; Move to DDRAM address $4D (line 2, pos 14)
+000152r 1  20 rr rr       jsr lcd_instruction
+000155r 1  20 rr rr       jsr button_test_left
+000158r 1  20 rr rr       jsr button_test_right
+00015Br 1  20 rr rr       jsr button_test_middle
+00015Er 1  4C rr rr       jmp loop
+000161r 1               
+000161r 1               button_test_left:
+000161r 1  AD 05 9C       lda MOUSE_BTN
+000164r 1  29 01          and #%00000001
+000166r 1  D0 08          bne button_test_left_pressed
+000168r 1  A9 2D          lda #$2D                      ; Dash
+00016Ar 1  20 rr rr       jsr lcd_write
+00016Dr 1  4C rr rr       jmp button_test_left_end
+000170r 1               button_test_left_pressed:
+000170r 1  A9 4C          lda #$4C                      ; L
+000172r 1  20 rr rr       jsr lcd_write
+000175r 1               button_test_left_end:
+000175r 1  60             rts
+000176r 1               
+000176r 1               button_test_right:
+000176r 1  AD 05 9C       lda MOUSE_BTN
+000179r 1  29 02          and #%00000010
+00017Br 1  D0 08          bne button_test_right_pressed
+00017Dr 1  A9 2D          lda #$2D                      ; Dash
+00017Fr 1  20 rr rr       jsr lcd_write
+000182r 1  4C rr rr       jmp button_test_right_end
+000185r 1               button_test_right_pressed:
+000185r 1  A9 52          lda #$52                      ; R
+000187r 1  20 rr rr       jsr lcd_write
+00018Ar 1               button_test_right_end:
+00018Ar 1  60             rts
+00018Br 1               
+00018Br 1               button_test_middle:
+00018Br 1  AD 05 9C       lda MOUSE_BTN
+00018Er 1  29 04          and #%00000100
+000190r 1  D0 08          bne button_test_middle_pressed
+000192r 1  A9 2D          lda #$2D                      ; Dash
+000194r 1  20 rr rr       jsr lcd_write
+000197r 1  4C rr rr       jmp button_test_middle_end
+00019Ar 1               button_test_middle_pressed:
+00019Ar 1  A9 4D          lda #$4D                      ; M
+00019Cr 1  20 rr rr       jsr lcd_write
+00019Fr 1               button_test_middle_end:
+00019Fr 1  60             rts
+0001A0r 1               
+0001A0r 1               lcd_wait:
+0001A0r 1  48             pha
+0001A1r 1  A9 00          lda #%00000000                ; Port B is input
+0001A3r 1  8D 02 80       sta DDRB
+0001A6r 1               lcd_busy:
+0001A6r 1  A9 40          lda #RW
+0001A8r 1  8D 01 80       sta PORTA
+0001ABr 1  A9 C0          lda #(RW | E)
+0001ADr 1  8D 01 80       sta PORTA
+0001B0r 1  AD 00 80       lda PORTB
+0001B3r 1  29 80          and #%10000000
+0001B5r 1  D0 EF          bne lcd_busy
+0001B7r 1               
+0001B7r 1  A9 40          lda #RW
+0001B9r 1  8D 01 80       sta PORTA
+0001BCr 1  A9 FF          lda #%11111111                ; Port B is output
+0001BEr 1  8D 02 80       sta DDRB
+0001C1r 1  68             pla
+0001C2r 1  60             rts
+0001C3r 1               
+0001C3r 1               lcd_instruction:
+0001C3r 1  20 rr rr       jsr lcd_wait
+0001C6r 1  8D 00 80       sta PORTB
+0001C9r 1  A9 00          lda #0                        ; Clear RS/RW/E bits
+0001CBr 1  8D 01 80       sta PORTA
+0001CEr 1  A9 80          lda #E                        ; Set E bit to send instruction
+0001D0r 1  8D 01 80       sta PORTA
+0001D3r 1  A9 00          lda #0                        ; Clear RS/RW/E bits
+0001D5r 1  8D 01 80       sta PORTA
+0001D8r 1  60             rts
+0001D9r 1               
+0001D9r 1               lcd_write:
+0001D9r 1  20 rr rr       jsr lcd_wait
+0001DCr 1  8D 00 80       sta PORTB
+0001DFr 1  A9 20          lda #RS                       ; Set RS; Clear RW/E bits
+0001E1r 1  8D 01 80       sta PORTA
+0001E4r 1  A9 A0          lda #(RS | E)                 ; Set E bit to send instruction
+0001E6r 1  8D 01 80       sta PORTA
+0001E9r 1  A9 20          lda #RS                       ; Clear E bits
+0001EBr 1  8D 01 80       sta PORTA
+0001EEr 1  60             rts
+0001EFr 1               
+0001EFr 1  58 3A 2B 30  line_1_template: .asciiz "X:+000 <> Y:+000"
+0001F3r 1  30 30 20 3C  
+0001F7r 1  3E 20 59 3A  
+000200r 1  57 3A 2B 30  line_2_template: .asciiz "W:+000 <> B: ---"
+000204r 1  30 30 20 3C  
+000208r 1  3E 20 42 3A  
+000211r 1               
+000211r 1               mouse:
+000211r 1  00 00 02 05    .byte $00, $00, $02, $05, $03, $01, $03, $03
+000215r 1  03 01 03 03  
+000219r 1  00 00 08 14    .byte $00, $00, $08, $14, $18, $10, $18, $18
+00021Dr 1  18 10 18 18  
+000221r 1  07 07 07 0B    .byte $07, $07, $07, $0B, $12, $08, $04, $08
+000225r 1  12 08 04 08  
+000229r 1  1C 1C 1C 18    .byte $1C, $1C, $1C, $18, $08, $00, $00, $00
+00022Dr 1  08 00 00 00  
+000231r 1               
+000231r 1               .segment "VECTORS"
+000000r 1               
+000000r 1  00 00          .word $0000
+000002r 1  rr rr          .word reset
+000004r 1  00 00          .word $0000
+000004r 1               
