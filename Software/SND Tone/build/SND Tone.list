@@ -1,0 +1,254 @@
+ca65 V2.18 - N/A
+Main file   : ./src/SND Tone.asm
+Current file: ./src/SND Tone.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               PORTB   = $8800
+000000r 1               PORTA   = $8801
+000000r 1               DDRB    = $8802
+000000r 1               DDRA    = $8803
+000000r 1               
+000000r 1               AY_BC1  = %00000001
+000000r 1               AY_BDIR = %00000010
+000000r 1               AY_RESB = %00000100
+000000r 1               
+000000r 1               reset:
+000000r 1  A9 FF          lda #%11111111          ; Set all pins on port A and B to outputs
+000002r 1  8D 03 88       sta DDRA
+000005r 1  8D 02 88       sta DDRB
+000008r 1  A9 00          lda #$00
+00000Ar 1  8D 01 88       sta PORTA
+00000Dr 1               
+00000Dr 1  20 rr rr       jsr ay_inactive
+000010r 1  20 rr rr       jsr ay_reset
+000013r 1  20 rr rr       jsr ay_inactive
+000016r 1               
+000016r 1  20 rr rr       jsr ay_latch
+000019r 1  A9 07          lda #$07
+00001Br 1  8D 01 88       sta PORTA
+00001Er 1  20 rr rr       jsr ay_inactive
+000021r 1  20 rr rr       jsr ay_write
+000024r 1  A9 3E          lda #%00111110
+000026r 1  8D 01 88       sta PORTA
+000029r 1  20 rr rr       jsr ay_inactive
+00002Cr 1               
+00002Cr 1  20 rr rr       jsr ay_latch
+00002Fr 1  A9 08          lda #$08
+000031r 1  8D 01 88       sta PORTA
+000034r 1  20 rr rr       jsr ay_inactive
+000037r 1  20 rr rr       jsr ay_write
+00003Ar 1  A9 0F          lda #%00001111
+00003Cr 1  8D 01 88       sta PORTA
+00003Fr 1  20 rr rr       jsr ay_inactive
+000042r 1               
+000042r 1               loop:
+000042r 1  20 rr rr       jsr ay_latch
+000045r 1  A9 00          lda #$00
+000047r 1  8D 01 88       sta PORTA
+00004Ar 1  20 rr rr       jsr ay_inactive
+00004Dr 1  20 rr rr       jsr ay_write
+000050r 1  A9 DF          lda #223
+000052r 1  8D 01 88       sta PORTA
+000055r 1  20 rr rr       jsr ay_inactive
+000058r 1               
+000058r 1  20 rr rr       jsr ay_latch
+00005Br 1  A9 01          lda #$01
+00005Dr 1  8D 01 88       sta PORTA
+000060r 1  20 rr rr       jsr ay_inactive
+000063r 1  20 rr rr       jsr ay_write
+000066r 1  A9 01          lda #1
+000068r 1  8D 01 88       sta PORTA
+00006Br 1  20 rr rr       jsr ay_inactive
+00006Er 1               
+00006Er 1  20 rr rr       jsr delay
+000071r 1  20 rr rr       jsr delay
+000074r 1  20 rr rr       jsr delay
+000077r 1  20 rr rr       jsr delay
+00007Ar 1               
+00007Ar 1  20 rr rr       jsr ay_latch
+00007Dr 1  A9 00          lda #$00
+00007Fr 1  8D 01 88       sta PORTA
+000082r 1  20 rr rr       jsr ay_inactive
+000085r 1  20 rr rr       jsr ay_write
+000088r 1  A9 AA          lda #170
+00008Ar 1  8D 01 88       sta PORTA
+00008Dr 1  20 rr rr       jsr ay_inactive
+000090r 1               
+000090r 1  20 rr rr       jsr ay_latch
+000093r 1  A9 01          lda #$01
+000095r 1  8D 01 88       sta PORTA
+000098r 1  20 rr rr       jsr ay_inactive
+00009Br 1  20 rr rr       jsr ay_write
+00009Er 1  A9 01          lda #1
+0000A0r 1  8D 01 88       sta PORTA
+0000A3r 1  20 rr rr       jsr ay_inactive
+0000A6r 1               
+0000A6r 1  20 rr rr       jsr delay
+0000A9r 1  20 rr rr       jsr delay
+0000ACr 1  20 rr rr       jsr delay
+0000AFr 1  20 rr rr       jsr delay
+0000B2r 1               
+0000B2r 1  20 rr rr       jsr ay_latch
+0000B5r 1  A9 00          lda #$00
+0000B7r 1  8D 01 88       sta PORTA
+0000BAr 1  20 rr rr       jsr ay_inactive
+0000BDr 1  20 rr rr       jsr ay_write
+0000C0r 1  A9 7B          lda #123
+0000C2r 1  8D 01 88       sta PORTA
+0000C5r 1  20 rr rr       jsr ay_inactive
+0000C8r 1               
+0000C8r 1  20 rr rr       jsr ay_latch
+0000CBr 1  A9 01          lda #$01
+0000CDr 1  8D 01 88       sta PORTA
+0000D0r 1  20 rr rr       jsr ay_inactive
+0000D3r 1  20 rr rr       jsr ay_write
+0000D6r 1  A9 01          lda #1
+0000D8r 1  8D 01 88       sta PORTA
+0000DBr 1  20 rr rr       jsr ay_inactive
+0000DEr 1               
+0000DEr 1  20 rr rr       jsr delay
+0000E1r 1  20 rr rr       jsr delay
+0000E4r 1  20 rr rr       jsr delay
+0000E7r 1  20 rr rr       jsr delay
+0000EAr 1               
+0000EAr 1  20 rr rr       jsr ay_latch
+0000EDr 1  A9 00          lda #$00
+0000EFr 1  8D 01 88       sta PORTA
+0000F2r 1  20 rr rr       jsr ay_inactive
+0000F5r 1  20 rr rr       jsr ay_write
+0000F8r 1  A9 66          lda #102
+0000FAr 1  8D 01 88       sta PORTA
+0000FDr 1  20 rr rr       jsr ay_inactive
+000100r 1               
+000100r 1  20 rr rr       jsr ay_latch
+000103r 1  A9 01          lda #$01
+000105r 1  8D 01 88       sta PORTA
+000108r 1  20 rr rr       jsr ay_inactive
+00010Br 1  20 rr rr       jsr ay_write
+00010Er 1  A9 01          lda #1
+000110r 1  8D 01 88       sta PORTA
+000113r 1  20 rr rr       jsr ay_inactive
+000116r 1               
+000116r 1  20 rr rr       jsr delay
+000119r 1  20 rr rr       jsr delay
+00011Cr 1  20 rr rr       jsr delay
+00011Fr 1  20 rr rr       jsr delay
+000122r 1               
+000122r 1  20 rr rr       jsr ay_latch
+000125r 1  A9 00          lda #$00
+000127r 1  8D 01 88       sta PORTA
+00012Ar 1  20 rr rr       jsr ay_inactive
+00012Dr 1  20 rr rr       jsr ay_write
+000130r 1  A9 3F          lda #63
+000132r 1  8D 01 88       sta PORTA
+000135r 1  20 rr rr       jsr ay_inactive
+000138r 1               
+000138r 1  20 rr rr       jsr ay_latch
+00013Br 1  A9 01          lda #$01
+00013Dr 1  8D 01 88       sta PORTA
+000140r 1  20 rr rr       jsr ay_inactive
+000143r 1  20 rr rr       jsr ay_write
+000146r 1  A9 01          lda #1
+000148r 1  8D 01 88       sta PORTA
+00014Br 1  20 rr rr       jsr ay_inactive
+00014Er 1               
+00014Er 1  20 rr rr       jsr delay
+000151r 1  20 rr rr       jsr delay
+000154r 1  20 rr rr       jsr delay
+000157r 1  20 rr rr       jsr delay
+00015Ar 1               
+00015Ar 1  20 rr rr       jsr ay_latch
+00015Dr 1  A9 00          lda #$00
+00015Fr 1  8D 01 88       sta PORTA
+000162r 1  20 rr rr       jsr ay_inactive
+000165r 1  20 rr rr       jsr ay_write
+000168r 1  A9 1C          lda #28
+00016Ar 1  8D 01 88       sta PORTA
+00016Dr 1  20 rr rr       jsr ay_inactive
+000170r 1               
+000170r 1  20 rr rr       jsr ay_latch
+000173r 1  A9 01          lda #$01
+000175r 1  8D 01 88       sta PORTA
+000178r 1  20 rr rr       jsr ay_inactive
+00017Br 1  20 rr rr       jsr ay_write
+00017Er 1  A9 01          lda #1
+000180r 1  8D 01 88       sta PORTA
+000183r 1  20 rr rr       jsr ay_inactive
+000186r 1               
+000186r 1  20 rr rr       jsr delay
+000189r 1  20 rr rr       jsr delay
+00018Cr 1  20 rr rr       jsr delay
+00018Fr 1  20 rr rr       jsr delay
+000192r 1               
+000192r 1  20 rr rr       jsr ay_latch
+000195r 1  A9 00          lda #$00
+000197r 1  8D 01 88       sta PORTA
+00019Ar 1  20 rr rr       jsr ay_inactive
+00019Dr 1  20 rr rr       jsr ay_write
+0001A0r 1  A9 FD          lda #253
+0001A2r 1  8D 01 88       sta PORTA
+0001A5r 1  20 rr rr       jsr ay_inactive
+0001A8r 1               
+0001A8r 1  20 rr rr       jsr ay_latch
+0001ABr 1  A9 01          lda #$01
+0001ADr 1  8D 01 88       sta PORTA
+0001B0r 1  20 rr rr       jsr ay_inactive
+0001B3r 1  20 rr rr       jsr ay_write
+0001B6r 1  A9 00          lda #0
+0001B8r 1  8D 01 88       sta PORTA
+0001BBr 1  20 rr rr       jsr ay_inactive
+0001BEr 1               
+0001BEr 1  20 rr rr       jsr delay
+0001C1r 1  20 rr rr       jsr delay
+0001C4r 1  20 rr rr       jsr delay
+0001C7r 1  20 rr rr       jsr delay
+0001CAr 1               
+0001CAr 1  4C rr rr       jmp loop
+0001CDr 1               
+0001CDr 1               delay:
+0001CDr 1  DA             phx
+0001CEr 1  A2 FF          ldx #$FF
+0001D0r 1               delay_loop:
+0001D0r 1  CA             dex
+0001D1r 1  D0 FD          bne delay_loop
+0001D3r 1  FA             plx
+0001D4r 1  60             rts
+0001D5r 1               
+0001D5r 1               ay_reset:
+0001D5r 1  DA             phx
+0001D6r 1  A2 00          ldx #$00
+0001D8r 1  8E 00 88       stx PORTB
+0001DBr 1  A2 04          ldx #(AY_RESB)                      ; BDIR LOW, BC1 LOW, RESB LOW
+0001DDr 1  8E 00 88       stx PORTB
+0001E0r 1  FA             plx
+0001E1r 1  60             rts
+0001E2r 1               
+0001E2r 1               ay_inactive:
+0001E2r 1  DA             phx
+0001E3r 1  A2 04          ldx #(AY_RESB)                      ; BDIR LOW, BC1 LOW, RESB HIGH
+0001E5r 1  8E 00 88       stx PORTB
+0001E8r 1  FA             plx
+0001E9r 1  60             rts
+0001EAr 1               
+0001EAr 1               ay_latch:
+0001EAr 1  DA             phx
+0001EBr 1  A2 07          ldx #(AY_BC1 | AY_BDIR | AY_RESB)   ; BDIR HIGH, BC1 HIGH, RESB HIGH
+0001EDr 1  8E 00 88       stx PORTB
+0001F0r 1  FA             plx
+0001F1r 1  60             rts
+0001F2r 1               
+0001F2r 1               ay_write:
+0001F2r 1  DA             phx
+0001F3r 1  A2 06          ldx #(AY_BDIR | AY_RESB)            ; BDIR HIGH, BC1 LOW, RESB HIGH
+0001F5r 1  8E 00 88       stx PORTB
+0001F8r 1  FA             plx
+0001F9r 1  60             rts
+0001FAr 1               
+0001FAr 1               .segment "VECTORS"
+000000r 1               
+000000r 1  00 00          .word $0000
+000002r 1  rr rr          .word reset
+000004r 1  00 00          .word $0000
+000004r 1               
