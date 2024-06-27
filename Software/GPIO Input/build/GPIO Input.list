@@ -6,20 +6,23 @@ Current file: ./src/GPIO Input.asm
 000000r 1               .segment "CODE"
 000000r 1               
 000000r 1               PORTB   = $9400
+000000r 1               PORTA   = $9401
 000000r 1               DDRB    = $9402
+000000r 1               DDRA    = $9403
 000000r 1               
 000000r 1               reset:
-000000r 1  A9 FF          lda #%11111111         ; Set all pins on port B to output
+000000r 1  A9 FF          lda #%11111111         ; Set all pins on port B to outputs
 000002r 1  8D 02 94       sta DDRB
-000005r 1               
-000005r 1               loop:
-000005r 1  A9 55          lda #$55
-000007r 1  8D 00 94       sta PORTB
-00000Ar 1  A9 AA          lda #$aa
-00000Cr 1  8D 00 94       sta PORTB
-00000Fr 1  4C rr rr       jmp loop
-000012r 1               
-000012r 1               .segment "VECTORS"
+000005r 1  A9 00          lda #%00000000         ; Set all pins on port A to inputs
+000007r 1  8D 03 94       sta DDRA
+00000Ar 1               
+00000Ar 1               loop:
+00000Ar 1  AD 01 94       lda PORTA              ; Read buttons on port A
+00000Dr 1  49 FF          eor #$FF
+00000Fr 1  8D 00 94       sta PORTB              ; Write button state to port B
+000012r 1  4C rr rr       jmp loop
+000015r 1               
+000015r 1               .segment "VECTORS"
 000000r 1               
 000000r 1  00 00          .word $0000
 000002r 1  rr rr          .word reset

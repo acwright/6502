@@ -2,19 +2,17 @@
 .segment "CODE"
 
 PORTB   = $9400
-PORTA   = $9401
 DDRB    = $9402
-DDRA    = $9403
 
 reset:
-  lda #%11111111         ; Set all pins on port B to outputs
+  lda #%11111111         ; Set all pins on port B to output
   sta DDRB
-  lda #%00000000         ; Set all pins on port A to inputS
-  sta DDRA
-
+  
 loop:
-  lda PORTA              ; Read buttons on port A
-  sta PORTB              ; Write button state to port B
+  lda #$55
+  sta PORTB
+  lda #$aa
+  sta PORTB
   jmp loop
 
 .segment "VECTORS"
