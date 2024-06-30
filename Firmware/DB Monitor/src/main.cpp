@@ -36,6 +36,7 @@ USBHIDParser        hid1(usb);
 USBHIDParser        hid2(usb);
 USBHIDParser        hid3(usb);
 
+void onTimer();
 void onTick();
 void onClock();
 void onCommand(char command);
@@ -73,6 +74,7 @@ void initROM();
 unsigned int freqIndex = 20;      // 1 MHz
 bool isRunning = false;
 bool isStepping = false;
+volatile bool isClockEdge = false;
 
 bool OutputEnabled = true;
 bool RAMEnabled = true;
@@ -81,15 +83,15 @@ bool ROMEnabled = true;
 String romFile = "None";
 byte IOBank = 7;                  // By default, debugger IO bank is $9C00
 
-volatile word address = 0;
-volatile byte data = 0;
-volatile bool readWrite = HIGH;
-volatile bool be = HIGH;
-volatile bool rdy = HIGH;
-volatile bool sync = LOW;
-volatile bool resb = HIGH;
-volatile bool irqb = HIGH;
-volatile bool nmib = HIGH;
+word address = 0;
+byte data = 0;
+bool readWrite = LOW;
+bool be = LOW;
+bool rdy = LOW;
+bool sync = LOW;
+bool resb = LOW;
+bool irqb = LOW;
+bool nmib = LOW;
 
 String ROMs[ROM_MAX];
 unsigned int romPage = 0;
@@ -134,6 +136,12 @@ void setup() {
 }
 
 void loop() {
+  // Clock the CPU if an edge has occurred
+  if (isClockEdge) {
+    onTick();
+    isClockEdge = false;
+  }
+
   // Update buttons
   intButton.update();
   stepButton.update();
@@ -169,9 +177,11 @@ void loop() {
 // EVENTS
 //
 
+FASTRUN void onTimer() {
+  isClockEdge = true;
+}
+
 FASTRUN void onTick() {
-  // This is called in the timer interrupt so extra care should be taken!
-  
   if (!isRunning) { return; }
 
   if (!digitalReadFast(PHI2)) {
@@ -191,6 +201,13 @@ FASTRUN void onClock() {
   // Read the address and r/w at the beginning of cycle (low to high transition)
   address     = readAddress();
   readWrite   = digitalReadFast(RWB);
+  
+  // Read the control pins
+  resb  = digitalReadFast(RESB);
+  nmib  = digitalReadFast(NMIB);
+  irqb  = digitalReadFast(IRQB);
+  rdy   = digitalReadFast(RDY);
+
   #if DEVBOARD
   sync        = digitalReadFast(SYNC);
   be          = digitalReadFast(BE);
@@ -223,12 +240,6 @@ FASTRUN void onClock() {
     } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
       RAM[address - RAM_START] = data;
     }
-
-    // Read the control pins
-    resb  = digitalReadFast(RESB);
-    nmib  = digitalReadFast(NMIB);
-    irqb  = digitalReadFast(IRQB);
-    rdy   = digitalReadFast(RDY);
   }
 }
 

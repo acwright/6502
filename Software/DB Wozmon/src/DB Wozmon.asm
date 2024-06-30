@@ -33,6 +33,8 @@ ESCAPE:
 GETLINE:
   LDA     #$0D           ; Send CR
   JSR     ECHO
+  LDA     #$0A           ; Send LF
+  JSR     ECHO
 
   LDY     #$01           ; Initialize text index.
 BACKSPACE:      
@@ -63,9 +65,9 @@ BLSKIP:
   INY                    ; Advance text index.
 NEXTITEM:
   LDA     IN,Y           ; Get character.
-  CMP     #$0D           ; CR?
-  BEQ     GETLINE        ; Yes, done this line.
   CMP     #$0A           ; LF?
+  BEQ     GETLINE        ; Yes, done this line.
+  CMP     #$0D           ; CR?
   BEQ     GETLINE        ; Yes, done this line.
   CMP     #$2E           ; "."?
   BCC     BLSKIP         ; Skip delimiter.
@@ -135,6 +137,8 @@ NXTPRNT:
   BNE     PRDATA         ; NE means no address to print.
   LDA     #$0D           ; CR.
   JSR     ECHO           ; Output it.
+  LDA     #$0A           ; LF.
+  JSR     ECHO           ; Output it.
   LDA     XAMH           ; 'Examine index' high-order byte.
   JSR     PRBYTE         ; Output it in hex format.
   LDA     XAML           ; Low-order 'examine index' byte.
@@ -181,9 +185,7 @@ PRHEX:
   ADC     #$06           ; Add offset for letter.
 
 ECHO:
-  PHA
   STA     TERM_DATA      ; Output character.
-  PLA                    ; Restore A.
   RTS                    ; Return.
 
 .segment "VECTORS"
