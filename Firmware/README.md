@@ -9,7 +9,6 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **IB**: Input Board
 - **GS**: Giga Shield
 - **PI**: Pi Card
-- **UAY**: Uno AY-3-8912 Shield
 - **VGA**: VGA Card
 
 See README in project folder for non-prefixed project hardware environments.

@@ -65,7 +65,6 @@ void nextPage();
 byte readIO(word address);
 void writeIO(word address, byte data);
 
-void initPins();
 void initButtons();
 void initSD();
 void initRAM();
@@ -106,7 +105,6 @@ void setup() {
   initPins();
   initButtons();
   initSD();
-  
   initRAM();
   initROM();
 
