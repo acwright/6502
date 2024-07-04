@@ -15,6 +15,7 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **SCWDC**: Serial Card / Serial Card Pro (WDC 65C51)
 - **SND**: Sound Card
 - **ST**: Storage Card
+- **TC**: Teensy Card
 - **VC**: Video Card
 - **VGA**: VGA Card
 

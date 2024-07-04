@@ -9,6 +9,7 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **IB**: Input Board
 - **GS**: Giga Shield
 - **PI**: Pi Card
+- **TC**: Teensy Card
 - **VGA**: VGA Card
 
 See README in project folder for non-prefixed project hardware environments.
