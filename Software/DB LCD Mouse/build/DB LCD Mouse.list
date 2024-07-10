@@ -15,6 +15,10 @@ Current file: ./src/DB LCD Mouse.asm
 000000r 1               MOUSE_W     = $9C04
 000000r 1               MOUSE_BTN   = $9C05
 000000r 1               
+000000r 1               VALUE   = $0300
+000000r 1               MOD10   = $0302
+000000r 1               RESULT  = $0304
+000000r 1               
 000000r 1               E       = %10000000
 000000r 1               RW      = %01000000
 000000r 1               RS      = %00100000
@@ -150,121 +154,198 @@ Current file: ./src/DB LCD Mouse.asm
 00012Fr 1  A9 83          lda #($80 | $03)              ; Move to DDRAM address $03 (line 1, pos 3)
 000131r 1  20 rr rr       jsr lcd_instruction
 000134r 1  AD 02 9C       lda MOUSE_X
-000137r 1  20 rr rr       jsr lcd_write
-00013Ar 1  A9 8D          lda #($80 | $0D)              ; Move to DDRAM address $0D (line 1, pos 14)
-00013Cr 1  20 rr rr       jsr lcd_instruction
-00013Fr 1  AD 03 9C       lda MOUSE_Y
-000142r 1  20 rr rr       jsr lcd_write
-000145r 1  A9 C3          lda #($80 | $43)              ; Move to DDRAM address $43 (line 2, pos 3)
-000147r 1  20 rr rr       jsr lcd_instruction
-00014Ar 1  AD 04 9C       lda MOUSE_W
-00014Dr 1  20 rr rr       jsr lcd_write
-000150r 1  A9 CD          lda #($80 | $4D)              ; Move to DDRAM address $4D (line 2, pos 14)
-000152r 1  20 rr rr       jsr lcd_instruction
-000155r 1  20 rr rr       jsr button_test_left
-000158r 1  20 rr rr       jsr button_test_right
-00015Br 1  20 rr rr       jsr button_test_middle
-00015Er 1  4C rr rr       jmp loop
-000161r 1               
-000161r 1               button_test_left:
-000161r 1  AD 05 9C       lda MOUSE_BTN
-000164r 1  29 01          and #%00000001
-000166r 1  D0 08          bne button_test_left_pressed
-000168r 1  A9 2D          lda #$2D                      ; Dash
-00016Ar 1  20 rr rr       jsr lcd_write
-00016Dr 1  4C rr rr       jmp button_test_left_end
-000170r 1               button_test_left_pressed:
-000170r 1  A9 4C          lda #$4C                      ; L
-000172r 1  20 rr rr       jsr lcd_write
-000175r 1               button_test_left_end:
-000175r 1  60             rts
-000176r 1               
-000176r 1               button_test_right:
-000176r 1  AD 05 9C       lda MOUSE_BTN
-000179r 1  29 02          and #%00000010
-00017Br 1  D0 08          bne button_test_right_pressed
-00017Dr 1  A9 2D          lda #$2D                      ; Dash
-00017Fr 1  20 rr rr       jsr lcd_write
-000182r 1  4C rr rr       jmp button_test_right_end
-000185r 1               button_test_right_pressed:
-000185r 1  A9 52          lda #$52                      ; R
-000187r 1  20 rr rr       jsr lcd_write
-00018Ar 1               button_test_right_end:
-00018Ar 1  60             rts
-00018Br 1               
-00018Br 1               button_test_middle:
-00018Br 1  AD 05 9C       lda MOUSE_BTN
-00018Er 1  29 04          and #%00000100
-000190r 1  D0 08          bne button_test_middle_pressed
-000192r 1  A9 2D          lda #$2D                      ; Dash
-000194r 1  20 rr rr       jsr lcd_write
-000197r 1  4C rr rr       jmp button_test_middle_end
-00019Ar 1               button_test_middle_pressed:
-00019Ar 1  A9 4D          lda #$4D                      ; M
-00019Cr 1  20 rr rr       jsr lcd_write
-00019Fr 1               button_test_middle_end:
-00019Fr 1  60             rts
-0001A0r 1               
-0001A0r 1               lcd_wait:
-0001A0r 1  48             pha
-0001A1r 1  A9 00          lda #%00000000                ; Port B is input
-0001A3r 1  8D 02 80       sta DDRB
-0001A6r 1               lcd_busy:
-0001A6r 1  A9 40          lda #RW
-0001A8r 1  8D 01 80       sta PORTA
-0001ABr 1  A9 C0          lda #(RW | E)
-0001ADr 1  8D 01 80       sta PORTA
-0001B0r 1  AD 00 80       lda PORTB
-0001B3r 1  29 80          and #%10000000
-0001B5r 1  D0 EF          bne lcd_busy
-0001B7r 1               
-0001B7r 1  A9 40          lda #RW
-0001B9r 1  8D 01 80       sta PORTA
-0001BCr 1  A9 FF          lda #%11111111                ; Port B is output
-0001BEr 1  8D 02 80       sta DDRB
-0001C1r 1  68             pla
-0001C2r 1  60             rts
-0001C3r 1               
-0001C3r 1               lcd_instruction:
-0001C3r 1  20 rr rr       jsr lcd_wait
-0001C6r 1  8D 00 80       sta PORTB
-0001C9r 1  A9 00          lda #0                        ; Clear RS/RW/E bits
-0001CBr 1  8D 01 80       sta PORTA
-0001CEr 1  A9 80          lda #E                        ; Set E bit to send instruction
-0001D0r 1  8D 01 80       sta PORTA
-0001D3r 1  A9 00          lda #0                        ; Clear RS/RW/E bits
-0001D5r 1  8D 01 80       sta PORTA
-0001D8r 1  60             rts
-0001D9r 1               
-0001D9r 1               lcd_write:
-0001D9r 1  20 rr rr       jsr lcd_wait
-0001DCr 1  8D 00 80       sta PORTB
-0001DFr 1  A9 20          lda #RS                       ; Set RS; Clear RW/E bits
-0001E1r 1  8D 01 80       sta PORTA
-0001E4r 1  A9 A0          lda #(RS | E)                 ; Set E bit to send instruction
-0001E6r 1  8D 01 80       sta PORTA
-0001E9r 1  A9 20          lda #RS                       ; Clear E bits
-0001EBr 1  8D 01 80       sta PORTA
-0001EEr 1  60             rts
-0001EFr 1               
-0001EFr 1  58 3A 2B 30  line_1_template: .asciiz "X:+000 <> Y:+000"
-0001F3r 1  30 30 20 3C  
-0001F7r 1  3E 20 59 3A  
-000200r 1  57 3A 2B 30  line_2_template: .asciiz "W:+000 <> B: ---"
-000204r 1  30 30 20 3C  
-000208r 1  3E 20 42 3A  
-000211r 1               
-000211r 1               mouse:
-000211r 1  00 00 02 05    .byte $00, $00, $02, $05, $03, $01, $03, $03
-000215r 1  03 01 03 03  
-000219r 1  00 00 08 14    .byte $00, $00, $08, $14, $18, $10, $18, $18
-00021Dr 1  18 10 18 18  
-000221r 1  07 07 07 0B    .byte $07, $07, $07, $0B, $12, $08, $04, $08
-000225r 1  12 08 04 08  
-000229r 1  1C 1C 1C 18    .byte $1C, $1C, $1C, $18, $08, $00, $00, $00
-00022Dr 1  08 00 00 00  
-000231r 1               
-000231r 1               .segment "VECTORS"
+000137r 1  20 rr rr       jsr hex2dec
+00013Ar 1  20 rr rr       jsr print_result
+00013Dr 1  A9 8D          lda #($80 | $0D)              ; Move to DDRAM address $0D (line 1, pos 14)
+00013Fr 1  20 rr rr       jsr lcd_instruction
+000142r 1  AD 03 9C       lda MOUSE_Y
+000145r 1  20 rr rr       jsr hex2dec
+000148r 1  20 rr rr       jsr print_result
+00014Br 1  A9 C3          lda #($80 | $43)              ; Move to DDRAM address $43 (line 2, pos 3)
+00014Dr 1  20 rr rr       jsr lcd_instruction
+000150r 1  AD 04 9C       lda MOUSE_W
+000153r 1  20 rr rr       jsr hex2dec
+000156r 1  20 rr rr       jsr print_result
+000159r 1  A9 CD          lda #($80 | $4D)              ; Move to DDRAM address $4D (line 2, pos 14)
+00015Br 1  20 rr rr       jsr lcd_instruction
+00015Er 1  20 rr rr       jsr button_test_left
+000161r 1  20 rr rr       jsr button_test_right
+000164r 1  20 rr rr       jsr button_test_middle
+000167r 1  4C rr rr       jmp loop
+00016Ar 1               
+00016Ar 1               button_test_left:
+00016Ar 1  AD 05 9C       lda MOUSE_BTN
+00016Dr 1  29 01          and #%00000001
+00016Fr 1  D0 08          bne button_test_left_pressed
+000171r 1  A9 2D          lda #$2D                      ; Dash
+000173r 1  20 rr rr       jsr lcd_write
+000176r 1  4C rr rr       jmp button_test_left_end
+000179r 1               button_test_left_pressed:
+000179r 1  A9 4C          lda #$4C                      ; L
+00017Br 1  20 rr rr       jsr lcd_write
+00017Er 1               button_test_left_end:
+00017Er 1  60             rts
+00017Fr 1               
+00017Fr 1               button_test_right:
+00017Fr 1  AD 05 9C       lda MOUSE_BTN
+000182r 1  29 02          and #%00000010
+000184r 1  D0 08          bne button_test_right_pressed
+000186r 1  A9 2D          lda #$2D                      ; Dash
+000188r 1  20 rr rr       jsr lcd_write
+00018Br 1  4C rr rr       jmp button_test_right_end
+00018Er 1               button_test_right_pressed:
+00018Er 1  A9 52          lda #$52                      ; R
+000190r 1  20 rr rr       jsr lcd_write
+000193r 1               button_test_right_end:
+000193r 1  60             rts
+000194r 1               
+000194r 1               button_test_middle:
+000194r 1  AD 05 9C       lda MOUSE_BTN
+000197r 1  29 04          and #%00000100
+000199r 1  D0 08          bne button_test_middle_pressed
+00019Br 1  A9 2D          lda #$2D                      ; Dash
+00019Dr 1  20 rr rr       jsr lcd_write
+0001A0r 1  4C rr rr       jmp button_test_middle_end
+0001A3r 1               button_test_middle_pressed:
+0001A3r 1  A9 4D          lda #$4D                      ; M
+0001A5r 1  20 rr rr       jsr lcd_write
+0001A8r 1               button_test_middle_end:
+0001A8r 1  60             rts
+0001A9r 1               
+0001A9r 1               print_result:
+0001A9r 1  A2 00          ldx #0
+0001ABr 1               print_loop:
+0001ABr 1  BD 04 03       lda RESULT,x
+0001AEr 1  F0 07          beq print_end
+0001B0r 1  20 rr rr       jsr lcd_write
+0001B3r 1  E8             inx
+0001B4r 1  4C rr rr       jmp print_loop
+0001B7r 1               print_end:
+0001B7r 1  60             rts
+0001B8r 1               
+0001B8r 1               lcd_wait:
+0001B8r 1  48             pha
+0001B9r 1  A9 00          lda #%00000000                ; Port B is input
+0001BBr 1  8D 02 80       sta DDRB
+0001BEr 1               lcd_busy:
+0001BEr 1  A9 40          lda #RW
+0001C0r 1  8D 01 80       sta PORTA
+0001C3r 1  A9 C0          lda #(RW | E)
+0001C5r 1  8D 01 80       sta PORTA
+0001C8r 1  AD 00 80       lda PORTB
+0001CBr 1  29 80          and #%10000000
+0001CDr 1  D0 EF          bne lcd_busy
+0001CFr 1               
+0001CFr 1  A9 40          lda #RW
+0001D1r 1  8D 01 80       sta PORTA
+0001D4r 1  A9 FF          lda #%11111111                ; Port B is output
+0001D6r 1  8D 02 80       sta DDRB
+0001D9r 1  68             pla
+0001DAr 1  60             rts
+0001DBr 1               
+0001DBr 1               lcd_instruction:
+0001DBr 1  20 rr rr       jsr lcd_wait
+0001DEr 1  8D 00 80       sta PORTB
+0001E1r 1  A9 00          lda #0                        ; Clear RS/RW/E bits
+0001E3r 1  8D 01 80       sta PORTA
+0001E6r 1  A9 80          lda #E                        ; Set E bit to send instruction
+0001E8r 1  8D 01 80       sta PORTA
+0001EBr 1  A9 00          lda #0                        ; Clear RS/RW/E bits
+0001EDr 1  8D 01 80       sta PORTA
+0001F0r 1  60             rts
+0001F1r 1               
+0001F1r 1               lcd_write:
+0001F1r 1  20 rr rr       jsr lcd_wait
+0001F4r 1  8D 00 80       sta PORTB
+0001F7r 1  A9 20          lda #RS                       ; Set RS; Clear RW/E bits
+0001F9r 1  8D 01 80       sta PORTA
+0001FCr 1  A9 A0          lda #(RS | E)                 ; Set E bit to send instruction
+0001FEr 1  8D 01 80       sta PORTA
+000201r 1  A9 20          lda #RS                       ; Clear E bits
+000203r 1  8D 01 80       sta PORTA
+000206r 1  60             rts
+000207r 1               
+000207r 1               hex2dec:
+000207r 1  8D 00 03       sta VALUE
+00020Ar 1  A9 00          lda #0
+00020Cr 1  8D 01 03       sta VALUE + 1
+00020Fr 1  A9 00          lda #0
+000211r 1  8D 04 03       sta RESULT        ; Intialize the result
+000214r 1  8D 05 03       sta RESULT + 1
+000217r 1  8D 06 03       sta RESULT + 2
+00021Ar 1               
+00021Ar 1               hex2dec_divide:
+00021Ar 1  A9 00          lda #0            ; Initialize the remainder to zero
+00021Cr 1  8D 02 03       sta MOD10
+00021Fr 1  8D 03 03       sta MOD10 + 1
+000222r 1  18             clc
+000223r 1               
+000223r 1  A2 10          ldx #16
+000225r 1               hex2dec_loop:
+000225r 1  2E 00 03       rol VALUE         ; Rotate quotient and remainder
+000228r 1  2E 01 03       rol VALUE + 1
+00022Br 1  2E 02 03       rol MOD10
+00022Er 1  2E 03 03       rol MOD10 + 1
+000231r 1  38             sec               ; A,Y = dividend - divisor
+000232r 1  AD 02 03       lda MOD10
+000235r 1  E9 0A          sbc #10
+000237r 1  A8             tay               ; Save low byte in Y
+000238r 1  AD 03 03       lda MOD10 + 1
+00023Br 1  E9 00          sbc #0
+00023Dr 1  90 06          bcc hex2dec_ignore ; Branch if dividend < divisor
+00023Fr 1  8C 02 03       sty MOD10
+000242r 1  8D 03 03       sta MOD10 + 1
+000245r 1               
+000245r 1               hex2dec_ignore:
+000245r 1  CA             dex
+000246r 1  D0 DD          bne hex2dec_loop
+000248r 1  2E 00 03       rol VALUE
+00024Br 1  2E 01 03       rol VALUE + 1
+00024Er 1               
+00024Er 1  AD 02 03       lda MOD10
+000251r 1  18             clc
+000252r 1  69 30          adc #48           ; ASCII "0"
+000254r 1  20 rr rr       jsr push_char
+000257r 1               
+000257r 1  AD 00 03       lda VALUE         ; If value != 0, then continue dividing
+00025Ar 1  0D 01 03       ora VALUE + 1
+00025Dr 1  D0 BB          bne hex2dec_divide        ; Branch if value != 0
+00025Fr 1  60             rts
+000260r 1               
+000260r 1               push_char:
+000260r 1  48             pha               ; Push new first char onto stack
+000261r 1  A0 00          ldy #0
+000263r 1               push_char_loop:
+000263r 1  B9 04 03       lda RESULT,y      ; Get char on string and put in X
+000266r 1  AA             tax
+000267r 1  68             pla
+000268r 1  99 04 03       sta RESULT,y      ; Pull char off stack and add it to the string
+00026Br 1  C8             iny
+00026Cr 1  8A             txa
+00026Dr 1  48             pha               ; Push char from string onto stack
+00026Er 1  D0 F3          bne push_char_loop
+000270r 1  68             pla
+000271r 1  99 04 03       sta RESULT,y      ; Pull the null off the stack and add to the end of the string
+000274r 1  60             rts
+000275r 1               
+000275r 1  58 3A 2B 30  line_1_template: .asciiz "X:+000 <> Y:+000"
+000279r 1  30 30 20 3C  
+00027Dr 1  3E 20 59 3A  
+000286r 1  57 3A 2B 30  line_2_template: .asciiz "W:+000 <> B: ---"
+00028Ar 1  30 30 20 3C  
+00028Er 1  3E 20 42 3A  
+000297r 1               
+000297r 1               mouse:
+000297r 1  00 00 02 05    .byte $00, $00, $02, $05, $03, $01, $03, $03
+00029Br 1  03 01 03 03  
+00029Fr 1  00 00 08 14    .byte $00, $00, $08, $14, $18, $10, $18, $18
+0002A3r 1  18 10 18 18  
+0002A7r 1  07 07 07 0B    .byte $07, $07, $07, $0B, $12, $08, $04, $08
+0002ABr 1  12 08 04 08  
+0002AFr 1  1C 1C 1C 18    .byte $1C, $1C, $1C, $18, $08, $00, $00, $00
+0002B3r 1  08 00 00 00  
+0002B7r 1               
+0002B7r 1               .segment "VECTORS"
 000000r 1               
 000000r 1  00 00          .word $0000
 000002r 1  rr rr          .word reset

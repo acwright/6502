@@ -11,6 +11,10 @@ MOUSE_Y     = $9C03
 MOUSE_W     = $9C04
 MOUSE_BTN   = $9C05
 
+VALUE   = $0300
+MOD10   = $0302
+RESULT  = $0304
+
 E       = %10000000
 RW      = %01000000
 RS      = %00100000
@@ -146,15 +150,18 @@ loop:
   lda #($80 | $03)              ; Move to DDRAM address $03 (line 1, pos 3)
   jsr lcd_instruction
   lda MOUSE_X
-  jsr lcd_write
+  jsr hex2dec
+  jsr print_result
   lda #($80 | $0D)              ; Move to DDRAM address $0D (line 1, pos 14)
   jsr lcd_instruction
   lda MOUSE_Y
-  jsr lcd_write
+  jsr hex2dec
+  jsr print_result
   lda #($80 | $43)              ; Move to DDRAM address $43 (line 2, pos 3)
   jsr lcd_instruction
   lda MOUSE_W
-  jsr lcd_write
+  jsr hex2dec
+  jsr print_result
   lda #($80 | $4D)              ; Move to DDRAM address $4D (line 2, pos 14)
   jsr lcd_instruction
   jsr button_test_left
@@ -201,6 +208,17 @@ button_test_middle_pressed:
 button_test_middle_end:
   rts
 
+print_result:
+  ldx #0
+print_loop:
+  lda RESULT,x
+  beq print_end
+  jsr lcd_write
+  inx
+  jmp print_loop
+print_end:
+  rts
+
 lcd_wait:
   pha
   lda #%00000000                ; Port B is input
@@ -241,6 +259,69 @@ lcd_write:
   sta PORTA
   lda #RS                       ; Clear E bits
   sta PORTA
+  rts
+
+hex2dec:
+  sta VALUE
+  lda #0
+  sta VALUE + 1
+  lda #0
+  sta RESULT        ; Intialize the result
+  sta RESULT + 1
+  sta RESULT + 2
+  
+hex2dec_divide:
+  lda #0            ; Initialize the remainder to zero
+  sta MOD10
+  sta MOD10 + 1
+  clc
+
+  ldx #16
+hex2dec_loop:
+  rol VALUE         ; Rotate quotient and remainder
+  rol VALUE + 1
+  rol MOD10
+  rol MOD10 + 1
+  sec               ; A,Y = dividend - divisor
+  lda MOD10
+  sbc #10
+  tay               ; Save low byte in Y
+  lda MOD10 + 1
+  sbc #0
+  bcc hex2dec_ignore ; Branch if dividend < divisor
+  sty MOD10
+  sta MOD10 + 1
+
+hex2dec_ignore:
+  dex
+  bne hex2dec_loop
+  rol VALUE
+  rol VALUE + 1
+
+  lda MOD10
+  clc
+  adc #48           ; ASCII "0"
+  jsr push_char
+
+  lda VALUE         ; If value != 0, then continue dividing
+  ora VALUE + 1
+  bne hex2dec_divide        ; Branch if value != 0
+  rts
+
+push_char:
+  pha               ; Push new first char onto stack
+  ldy #0  
+push_char_loop:
+  lda RESULT,y      ; Get char on string and put in X
+  tax
+  pla
+  sta RESULT,y      ; Pull char off stack and add it to the string
+  iny
+  txa
+  pha               ; Push char from string onto stack
+  bne push_char_loop
+  pla
+  sta RESULT,y      ; Pull the null off the stack and add to the end of the string
   rts
 
 line_1_template: .asciiz "X:+000 <> Y:+000"
