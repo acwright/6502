@@ -1,4 +1,4 @@
-import { Device } from './Device'
+import { type Device } from './Device'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface Instruction {
