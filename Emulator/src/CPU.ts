@@ -1,18 +1,11 @@
-import { type Device } from './Device'
-import { v4 as uuidv4 } from 'uuid'
-
-export interface Instruction {
+export interface CPUInstruction {
   name: string
   cycles: number
   opcode: () => number
   addrMode: () => number
 }
 
-export class CPU implements Device {
-
-  id: string = uuidv4()
-  title: string = "65c02"
-  description: string = "Simulated 65c02 CPU"
+export class CPU {
 
   static C: number = 0b00000001
   static Z: number = 0b00000010
@@ -39,7 +32,11 @@ export class CPU implements Device {
 
   constructor() {}
 
-  clock(cycles: number): void {
+  step(
+    cycles: number,
+    read: (address: number) => number,
+    write: (address: number, data: number) => void
+  ): void {
     for (let i = 0; i < cycles; i++) {
       this.tick()
     }
@@ -127,7 +124,7 @@ export class CPU implements Device {
   private TYA(): number { return 0 }
   private XXX(): number { return 0 }
 
-  instructionTable: Instruction[] = [
+  instructionTable: CPUInstruction[] = [
     { name: 'BRK', cycles: 7, opcode: this.BRK, addrMode: this.IMM }, 
     { name: 'ORA', cycles: 6, opcode: this.ORA, addrMode: this.IZX },
     { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
