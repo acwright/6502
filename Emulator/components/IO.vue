@@ -1,7 +1,10 @@
 <template>
   <div class="flex flex-col grow">
     <div class="flex flex-row justify-between items-center p-2 border-b-2 border-gray-800">
-      <h2 class="text-lg">IO</h2>
+      <div class="flex flex-row items-center gap-2">
+        <UIcon name="i-heroicons-tv" />
+        <h2 class="text-lg">IO</h2>
+      </div>
       <div class="flex flex-row items-center gap-2">
         <UIcon name="i-heroicons-squares-2x2" />
         <USelectMenu size="xs" v-model="gridSelection" :options="grids" class="w-16" />

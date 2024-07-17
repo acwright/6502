@@ -1,17 +1,22 @@
 <template>
   <header class="flex flex-row justify-between items-center p-2 border-b-2 border-gray-800">
-    <h1 class="text-3xl">
-      6502 Emulator
-    </h1>
+    <div class="flex flex-row items-center gap-2">
+      <Logo class="w-6 h-6" />
+      <h1 class="text-3xl">
+        6502 Emulator
+      </h1>
+    </div>
     <Controls 
       :isRunning="isRunning" 
-      @run="run()"
-      @stop="stop()"
-      @step="step()"
-      @reset="reset()"
-      @load="load"
-      @configure="configure"
-      @debug="debug"
+      @run="run"
+      @stop="stop"
+      @step="step"
+      @reset="reset"
+      @frequency="showFrequency = true"
+      @load="showLoad = true"
+      @configure="showConfigure = true"
+      @debug="showDebug = !showDebug"
+      @help="showHelp = true"
     />
   </header>
   <main class="flex flex-row grow">
@@ -24,16 +29,24 @@
     />
   </main>
   <div>
+    <UModal v-model="showFrequency">
+      <Frequency 
+        @close="showFrequency = false"
+      />
+    </UModal>
     <UModal v-model="showLoad">
       <Load 
-        @save="onLoad"
-        @cancel="showLoad = false"
+        @close="showLoad = false"
       />
     </UModal>
     <UModal v-model="showConfigure">
       <Configure 
-        @save="onConfigure"
-        @cancel="showConfigure = false"
+        @close="showConfigure = false"
+      />
+    </UModal>
+    <UModal v-model="showHelp">
+      <Help 
+        @close="showHelp = false"
       />
     </UModal>
   </div>
@@ -41,65 +54,13 @@
 </template>
 
 <script setup lang="ts">
-  const notifications = useNotifications()
-  const machine = useMachine()
-  const isRunning = ref(false)
-  const showDebug = ref(false)
+  const emulation = useEmulation()
+  const showFrequency = ref(false)
   const showLoad = ref(false)
   const showConfigure = ref(false)
+  const showDebug = ref(false)
+  const showHelp = ref(false)
 
-  const run = () => {
-    isRunning.value = true
-  }
-
-  const stop = () => {
-    isRunning.value = false
-  }
-
-  const step = () => {
-    machine.step()
-  }
-
-  const reset = () => {
-    machine.reset()
-  }
-  
-  const load = () => {
-    showLoad.value = true
-  }
-
-  const configure = () => {
-    showConfigure.value = true
-  }
-
-  const debug = () => {
-    showDebug.value = !showDebug.value
-  }
-
-  const onLoad = async (rom?: File, cart?: File) => {
-    showLoad.value = false
-
-    if (!rom) { return }
-
-    const romData = Array.from(new Uint8Array(await rom.arrayBuffer()))
-
-    try {
-      machine.rom.load(romData)
-    } catch(error) {
-      notifications.error(error)
-    }
-
-    if (cart) {
-      const cartData = Array.from(new Uint8Array(await cart.arrayBuffer()))
-
-      const _cart = new Cart()
-      _cart.load(cartData)
-
-      machine.cart = _cart
-    }
-  }
-
-  const onConfigure = (frequency: number) => {
-    
-  }
+  const { isRunning } = storeToRefs(emulation)
+  const { run, stop, reset, step } = emulation
 </script>

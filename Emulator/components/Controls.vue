@@ -37,6 +37,15 @@
         @click="emit('reset')"
       />
     </UTooltip>
+    <UTooltip text="Clock Frequency" :shortcuts="[metaSymbol, 'F']">
+      <UButton 
+        icon="i-heroicons-clock"
+        color="gray"
+        size="xs"
+        title="Clock Frequency"
+        @click="emit('frequency')"
+      />
+    </UTooltip>
     <UTooltip text="Load ROM" :shortcuts="[metaSymbol, 'L']">
       <UButton 
         icon="i-heroicons-folder"
@@ -47,9 +56,9 @@
         @click="emit('load')"
       />
     </UTooltip>
-    <UTooltip text="Configure" :shortcuts="[metaSymbol, 'C']">
+    <UTooltip text="Configure IO" :shortcuts="[metaSymbol, 'C']">
       <UButton 
-        icon="i-heroicons-cog-6-tooth"
+        icon="i-heroicons-tv"
         color="gray"
         size="xs"
         title="Configure"
@@ -66,6 +75,15 @@
         @click="emit('debug')"
       />
     </UTooltip>
+    <UTooltip text="Help" :shortcuts="[metaSymbol, 'H']">
+      <UButton 
+        icon="i-heroicons-question-mark-circle"
+        color="gray"
+        size="xs"
+        title="Help"
+        @click="emit('help')"
+      />
+    </UTooltip>
   </div>
 </template>
 
@@ -78,10 +96,12 @@
     'run', 
     'stop', 
     'step', 
-    'reset', 
+    'reset',
+    'frequency',
     'load',
     'configure',
-    'debug'
+    'debug',
+    'help'
   ])
 
   const { metaSymbol } = useShortcuts()
@@ -107,6 +127,11 @@
         emit('reset')
       }
     },
+    meta_f: {
+      handler: () => {
+        emit('frequency')
+      }
+    },
     meta_l: {
       handler: () => {
         emit('load')
@@ -120,6 +145,11 @@
     meta_d: {
       handler: () => {
         emit('debug')
+      }
+    },
+    meta_h: {
+      handler: () => {
+        emit('help')
       }
     }
   })

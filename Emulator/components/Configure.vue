@@ -1,41 +1,71 @@
 <template>
   <UCard>
     <template #header>
-      <h1 class="text-lg">
-        Configure
-      </h1>
+      <div class="flex flex-row items-center gap-2">
+        <UIcon name="i-heroicons-tv" />
+        <h1 class="text-lg">Configure IO</h1>
+      </div>
     </template>
 
     <UForm 
       id="configure"
-      class="space-y-4 max-h-96 p-2 overflow-y-auto"
+      class="space-y-4"
     >
       <UFormGroup
-        label="Frequency"
-        name="frequency"
+        label="Slot 1"
+        hint="$8000"
+        name="slot1"
       >
-        <URange 
-          size="sm"
-          :min="1"
-          :max="2000000"
-          v-model="frequency"
-          class="mt-2 mb-2"
-        />
-        <span class="flex flex-row items-center justify-between">
-          <UButton 
-            variant="ghost"
-            icon="i-heroicons-chevron-left"
-            size="xs"
-            @click="prevFreq"
-          />
-          {{ formatFrequency(frequency) }}
-          <UButton 
-            variant="ghost"
-            icon="i-heroicons-chevron-right"
-            size="xs"
-            @click="nextFreq"
-          />
-        </span>
+        <USelectMenu v-model="slot1" :options="ios" />
+      </UFormGroup>
+      <UFormGroup
+        label="Slot 2"
+        hint="$8400"
+        name="slot2"
+      >
+        <USelectMenu v-model="slot2" :options="ios" />
+      </UFormGroup>
+      <UFormGroup
+        label="Slot 3"
+        hint="$8800"
+        name="slot3"
+      >
+        <USelectMenu v-model="slot3" :options="ios" />
+      </UFormGroup>
+      <UFormGroup
+        label="Slot 4"
+        hint="$8C00"
+        name="slot4"
+      >
+        <USelectMenu v-model="slot4" :options="ios" />
+      </UFormGroup>
+      <UFormGroup
+        label="Slot 5"
+        hint="$9000"
+        name="slot5"
+      >
+        <USelectMenu v-model="slot5" :options="ios" />
+      </UFormGroup>
+      <UFormGroup
+        label="Slot 6"
+        hint="$9400"
+        name="slot6"
+      >
+        <USelectMenu v-model="slot6" :options="ios" />
+      </UFormGroup>
+      <UFormGroup
+        label="Slot 7"
+        hint="$9800"
+        name="slot3"
+      >
+        <USelectMenu v-model="slot7" :options="ios" />
+      </UFormGroup>
+      <UFormGroup
+        label="Slot 8"
+        hint="$9C00"
+        name="slot8"
+      >
+        <USelectMenu v-model="slot8" :options="ios" />
       </UFormGroup>
     </UForm>
     
@@ -55,44 +85,41 @@
 
 <script setup lang="ts">
   const emit = defineEmits<{
-    (e: 'cancel'): void,
-    (e: 'save', frequency: number): void
+    (e: 'close'): void
   }>()
 
-  const frequencies: number[] = [
-    1, 2, 4, 8, 16, 32, 64, 122, 244, 488, 976, 
-    1953, 3906, 7812, 15625, 31250, 62500, 125000, 
-    250000, 500000, 1000000, 2000000
+  const ios = [
+    'Empty',
+    'Dev Board',
+    'GPIO Card',
+    'Input Board',
+    'LCD Card',
+    'Pi Card',
+    'Serial Card',
+    'Sound Card',
+    'Storage Card',
+    'Teensy Card',
+    'VGA Card',
+    'Video Card'
   ]
-  const frequency = ref(1000000)
+  const slot1 = ref(ios[4])
+  const slot2 = ref(ios[8])
+  const slot3 = ref(ios[7])
+  const slot4 = ref(ios[11])
+  const slot5 = ref(ios[6])
+  const slot6 = ref(ios[0])
+  const slot7 = ref(ios[0])
+  const slot8 = ref(ios[1])
+
+  const emulation = useEmulation()
+  const { configure } = emulation
 
   const cancel = () => {
-    emit('cancel')
+    emit('close')
   }
 
   const save = () => {
-    emit('save', frequency.value)
-  }
-
-  const prevFreq = () => {
-    let index = frequencies.findLastIndex((freq) => {
-      return freq < frequency.value
-    })
-    if (index === -1) {
-      frequency.value = frequencies[frequencies.length - 1]
-    } else {
-      frequency.value = frequencies[index]
-    }
-  }
-
-  const nextFreq = () => {
-    let index = frequencies.findIndex((freq) => {
-      return freq > frequency.value
-    })
-    if (index === -1) {
-      frequency.value = frequencies[0]
-    } else {
-      frequency.value = frequencies[index]
-    }
+    configure()
+    emit('close')
   }
 </script>

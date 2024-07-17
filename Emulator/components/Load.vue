@@ -1,9 +1,10 @@
 <template>
   <UCard>
     <template #header>
-      <h1 class="text-lg">
-        Load
-      </h1>
+      <div class="flex flex-row items-center gap-2">
+        <UIcon name="i-heroicons-folder" />
+        <h1 class="text-lg">Load ROM</h1>
+      </div>
     </template>
 
     <UForm 
@@ -11,7 +12,7 @@
       :state="state" 
       :validate="validate" 
       validateOn="submit"
-      class="space-y-4 max-h-96 p-2 overflow-y-auto"
+      class="space-y-4"
       @submit="save"
     >
       <UFormGroup
@@ -59,9 +60,10 @@
 <script setup lang="ts">
   import type { FormError } from '#ui/types'
 
+  const { load } = useEmulation()
+
   const emit = defineEmits<{
-    (e: 'cancel'): void,
-    (e: 'save', rom?: File, cart?: File): void
+    (e: 'close'): void
   }>()
 
   const state = reactive<{
@@ -76,11 +78,12 @@
   const cart = ref<File>()
 
   const cancel = () => {
-    emit('cancel')
+    emit('close')
   }
 
   const save = () => {
-    emit('save', rom.value, cart.value)
+    load(rom.value, cart.value)
+    emit('close')
   }
 
   const onRom = (files: FileList) => {
