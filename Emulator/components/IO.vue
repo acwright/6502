@@ -10,18 +10,18 @@
         <USelectMenu size="xs" v-model="gridSelection" :options="grids" class="w-16" />
       </div>
     </div>
-    <div 
+    <div
       class="grid grow"
       :class="gridCols + (gridSelection > 1 ? ' divide-x divide-y divide-gray-900' : '')"
     >
-      <IOSlot :index="0" />
-      <IOSlot :index="1" v-if="gridSelection > 1" />
-      <IOSlot :index="2" v-if="gridSelection > 2" />
-      <IOSlot :index="3" v-if="gridSelection > 2" />
-      <IOSlot :index="4" v-if="gridSelection > 4" />
-      <IOSlot :index="5" v-if="gridSelection > 4" />
-      <IOSlot :index="6" v-if="gridSelection > 4" />
-      <IOSlot :index="7" v-if="gridSelection > 4" />
+      <IODevice :index="0" :grid-selection="gridSelection" />
+      <IODevice :index="1" :grid-selection="gridSelection" v-if="gridSelection > 1" />
+      <IODevice :index="2" :grid-selection="gridSelection" v-if="gridSelection > 2" />
+      <IODevice :index="3" :grid-selection="gridSelection" v-if="gridSelection > 2" />
+      <IODevice :index="4" :grid-selection="gridSelection" v-if="gridSelection > 4" />
+      <IODevice :index="5" :grid-selection="gridSelection" v-if="gridSelection > 4" />
+      <IODevice :index="6" :grid-selection="gridSelection" v-if="gridSelection > 4" />
+      <IODevice :index="7" :grid-selection="gridSelection" v-if="gridSelection > 4" />
     </div>
   </div>
 </template>

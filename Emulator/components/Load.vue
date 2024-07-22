@@ -17,7 +17,7 @@
       <UFormGroup
         label="ROM"
         name="rom"
-        :hint="rom?.name || 'Empty'"
+        :hint="romFile?.name || 'Empty'"
       >
         <UInput
           type="file" 
@@ -30,7 +30,7 @@
       <UFormGroup
         label="Cartridge"
         name="cart"
-        :hint="cart?.name || 'Empty'"
+        :hint="cartFile?.name || 'Empty'"
       >
         <UInput
           type="file" 
@@ -54,25 +54,25 @@
 <script setup lang="ts">
   import type { FormError } from '#ui/types'
 
-  const emulation = useEmulation()
-  const { loadROM, loadCart } = emulation
-  const { rom, cart } = storeToRefs(emulation)
+  const machine = useMachine()
+  const romFile = ref<File | undefined>(machine.romFile)
+  const cartFile = ref<File | undefined>(machine.cartFile)
   
   const emit = defineEmits<{
     (e: 'close'): void
   }>()
 
   const onRom = (files: FileList) => {
-    loadROM(files[0])
+    machine.loadROM(files[0])
   }
 
   const onCart = (files: FileList) => {
-    loadCart(files[0])
+    machine.loadCart(files[0])
   }
 
   const validate = (): FormError[] => {
     const errors = []
-    if (rom.value && rom.value.size != 32768) errors.push({ path: 'rom', message: 'ROM size must be exactly 32768 bytes' })
+    if (romFile.value && romFile.value.size != 32768) errors.push({ path: 'rom', message: 'ROM file size must be exactly 32768 bytes' })
     return errors
   }
 </script>

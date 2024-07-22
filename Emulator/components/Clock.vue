@@ -56,8 +56,8 @@
     (e: 'close'): void
   }>()
 
-  const emulation = useEmulation()
-  const { frequency } = storeToRefs(emulation)
+  const machine = useMachine()
+  const frequency = ref(machine.frequency)
   
   const frequencies: number[] = [
     1, 2, 4, 8, 16, 32, 64, 122, 244, 488, 976, 
@@ -86,4 +86,8 @@
       frequency.value = frequencies[index]
     }
   }
+
+  watch(frequency, () => {
+    machine.frequency = frequency.value
+  })
 </script>

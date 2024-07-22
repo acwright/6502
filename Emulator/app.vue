@@ -10,8 +10,8 @@
       :isRunning="isRunning" 
       @run="run"
       @stop="stop"
-      @step="step"
-      @reset="reset"
+      @step="machine.step"
+      @reset="machine.reset"
       @clock="showClock = true"
       @load="showLoad = true"
       @configure="showConfigure = true"
@@ -54,13 +54,19 @@
 </template>
 
 <script setup lang="ts">
-  const emulation = useEmulation()
+  const machine = useMachine()
+  const isRunning = ref(false)
   const showClock = ref(false)
   const showLoad = ref(false)
   const showConfigure = ref(false)
   const showDebug = ref(false)
   const showHelp = ref(false)
 
-  const { isRunning } = storeToRefs(emulation)
-  const { run, stop, reset, step } = emulation
+  const run = () => {
+    isRunning.value = true
+  }
+
+  const stop = () => {
+    isRunning.value = false
+  }
 </script>
