@@ -24,7 +24,7 @@
       <span class="flex flex-row justify-end">
         <UButton 
           @click="emit('close')"
-        >Done</UButton>
+        >Close</UButton>
       </span>
     </template>
   </UCard>

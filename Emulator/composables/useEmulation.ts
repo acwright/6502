@@ -1,12 +1,36 @@
 import { defineStore } from 'pinia'
 
 export const useEmulation = defineStore('emulation', () => {
+  const IODEVICES = [
+    'Empty',
+    'Dev Board',
+    'GPIO Card',
+    'Input Board',
+    'LCD Card',
+    'Pi Card',
+    'Serial Card',
+    'Sound Card',
+    'Storage Card',
+    'Teensy Card',
+    'VGA Card',
+    'Video Card'
+  ]
+
   const machine = new Machine()
-  
-  const notifications = useNotifications()
 
   const isRunning = ref(false)
   const frequency = ref(1000000)
+  const rom = ref<File>()
+  const cart = ref<File>()
+
+  const slots = reactive<string[]>([
+    IODEVICES[4], IODEVICES[8], IODEVICES[7], IODEVICES[11],
+    IODEVICES[6], IODEVICES[0], IODEVICES[0], IODEVICES[1]
+  ])
+  const devices = reactive<string[]>([
+    IODEVICES[4], IODEVICES[8], IODEVICES[7], IODEVICES[11],
+    IODEVICES[6], IODEVICES[0], IODEVICES[0], IODEVICES[1]
+  ])
 
   const run = () => {
     isRunning.value = true
@@ -24,39 +48,35 @@ export const useEmulation = defineStore('emulation', () => {
     machine.step()
   }
 
-  const load = async (rom?: File, cart?: File) => {
-    if (!rom) { return }
+  const loadROM = async (_rom: File) => {
+    rom.value = _rom
 
-    const romData = Array.from(new Uint8Array(await rom.arrayBuffer()))
+    const romData = Array.from(new Uint8Array(await _rom.arrayBuffer()))
 
-    try {
-      machine.rom.load(romData)
-    } catch(error) {
-      notifications.error(error)
-    }
-
-    if (cart) {
-      const cartData = Array.from(new Uint8Array(await cart.arrayBuffer()))
-
-      const _cart = new Cart()
-      _cart.load(cartData)
-
-      machine.cart = _cart
-    }
+    machine.loadROM(romData)
   }
 
-  const configure = () => {
+  const loadCart = async (_cart: File) => {
+    cart.value = _cart
     
+    const cartData = Array.from(new Uint8Array(await _cart.arrayBuffer()))
+
+    machine.loadCart(cartData)
   }
 
   return { 
+    IODEVICES,
     isRunning,
     frequency,
+    slots,
+    devices,
+    rom,
+    cart,
     run,
     stop,
     reset,
     step,
-    load,
-    configure
+    loadROM,
+    loadCart
   }
 })

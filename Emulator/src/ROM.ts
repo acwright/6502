@@ -12,9 +12,7 @@ export class ROM {
   }
 
   load(data: number[]): void {
-    if (data.length != ROM.ROMSize) { 
-      throw new RangeError('Data length must equal ROM address range') 
-    }
+    if (data.length != ROM.ROMSize) { return }
 
     this.data = data
   }

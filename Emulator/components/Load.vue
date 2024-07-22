@@ -9,21 +9,20 @@
 
     <UForm 
       id="load"
-      :state="state" 
-      :validate="validate" 
-      validateOn="submit"
+      :state="{}"
+      :validate="validate"
+      :validateOn="['input']"
       class="space-y-4"
-      @submit="save"
     >
       <UFormGroup
         label="ROM"
         name="rom"
+        :hint="rom?.name || 'Empty'"
       >
         <UInput
           type="file" 
           icon="i-heroicons-folder"
           accept="application/octet-stream"
-          v-model="state.rom"
           @change="onRom"
         />
       </UFormGroup>
@@ -31,27 +30,22 @@
       <UFormGroup
         label="Cartridge"
         name="cart"
+        :hint="cart?.name || 'Empty'"
       >
         <UInput
           type="file" 
           icon="i-heroicons-folder"
           accept="application/octet-stream"
-          v-model="state.cart"
           @change="onCart"
         />
       </UFormGroup>
     </UForm>
     
     <template #footer>
-      <span class="flex flex-row justify-between">
+      <span class="flex flex-row justify-end">
         <UButton
-          variant="ghost"
-          @click="cancel"
-        >Cancel</UButton>
-        <UButton 
-          type="submit"
-          form="load"
-        >Save</UButton>
+          @click="emit('close')"
+        >Close</UButton>
       </span>
     </template>
   </UCard>
@@ -60,43 +54,25 @@
 <script setup lang="ts">
   import type { FormError } from '#ui/types'
 
-  const { load } = useEmulation()
-
+  const emulation = useEmulation()
+  const { loadROM, loadCart } = emulation
+  const { rom, cart } = storeToRefs(emulation)
+  
   const emit = defineEmits<{
     (e: 'close'): void
   }>()
 
-  const state = reactive<{
-    rom: string | undefined,
-    cart: string | undefined
-  }>({
-    rom: undefined,
-    cart: undefined
-  })
-
-  const rom = ref<File>()
-  const cart = ref<File>()
-
-  const cancel = () => {
-    emit('close')
-  }
-
-  const save = () => {
-    load(rom.value, cart.value)
-    emit('close')
-  }
-
   const onRom = (files: FileList) => {
-    rom.value = files[0]
+    loadROM(files[0])
   }
 
   const onCart = (files: FileList) => {
-    cart.value = files[0]
+    loadCart(files[0])
   }
 
-  const validate = (state: any): FormError[] => {
+  const validate = (): FormError[] => {
     const errors = []
-    if (!state.rom) errors.push({ path: 'rom', message: 'Required' })
+    if (rom.value && rom.value.size != 32768) errors.push({ path: 'rom', message: 'ROM size must be exactly 32768 bytes' })
     return errors
   }
 </script>

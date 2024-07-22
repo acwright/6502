@@ -43,7 +43,7 @@
         color="gray"
         size="xs"
         title="Clock Frequency"
-        @click="emit('frequency')"
+        @click="emit('clock')"
       />
     </UTooltip>
     <UTooltip text="Load ROM" :shortcuts="[metaSymbol, 'L']">
@@ -97,7 +97,7 @@
     'stop', 
     'step', 
     'reset',
-    'frequency',
+    'clock',
     'load',
     'configure',
     'debug',
@@ -129,7 +129,7 @@
     },
     meta_f: {
       handler: () => {
-        emit('frequency')
+        emit('clock')
       }
     },
     meta_l: {

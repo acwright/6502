@@ -12,7 +12,7 @@
       @stop="stop"
       @step="step"
       @reset="reset"
-      @frequency="showFrequency = true"
+      @clock="showClock = true"
       @load="showLoad = true"
       @configure="showConfigure = true"
       @debug="showDebug = !showDebug"
@@ -29,9 +29,9 @@
     />
   </main>
   <div>
-    <UModal v-model="showFrequency">
-      <Frequency 
-        @close="showFrequency = false"
+    <UModal v-model="showClock">
+      <Clock 
+        @close="showClock = false"
       />
     </UModal>
     <UModal v-model="showLoad">
@@ -55,7 +55,7 @@
 
 <script setup lang="ts">
   const emulation = useEmulation()
-  const showFrequency = ref(false)
+  const showClock = ref(false)
   const showLoad = ref(false)
   const showConfigure = ref(false)
   const showDebug = ref(false)

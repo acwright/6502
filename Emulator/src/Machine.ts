@@ -28,6 +28,17 @@ export class Machine {
   frameDelay: number = 0
   frameDelayCount: number = 0
 
+  loadROM(data: number[]): void {
+    this.rom.load(data)
+  }
+
+  loadCart(data: number[]): void {
+    const cart = new Cart()
+    cart.load(data)
+
+    this.cart = cart
+  }
+
   reset(): void {
     this.cpu.reset()
 

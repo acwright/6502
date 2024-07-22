@@ -3,7 +3,7 @@
     <div class="flex flex-row justify-between items-center p-2 border-b-2 border-gray-800">
       <div class="flex flex-row items-center gap-2">
         <UIcon name="i-heroicons-tv" />
-        <h2 class="text-lg">IO</h2>
+        <h2 class="text-lg">IO Devices</h2>
       </div>
       <div class="flex flex-row items-center gap-2">
         <UIcon name="i-heroicons-squares-2x2" />
@@ -14,14 +14,14 @@
       class="grid grow"
       :class="gridCols + (gridSelection > 1 ? ' divide-x divide-y divide-gray-900' : '')"
     >
-      <IOSlot />
-      <IOSlot v-if="gridSelection > 1" />
-      <IOSlot v-if="gridSelection > 2" />
-      <IOSlot v-if="gridSelection > 2" />
-      <IOSlot v-if="gridSelection > 4" />
-      <IOSlot v-if="gridSelection > 4" />
-      <IOSlot v-if="gridSelection > 4" />
-      <IOSlot v-if="gridSelection > 4" />
+      <IOSlot :index="0" />
+      <IOSlot :index="1" v-if="gridSelection > 1" />
+      <IOSlot :index="2" v-if="gridSelection > 2" />
+      <IOSlot :index="3" v-if="gridSelection > 2" />
+      <IOSlot :index="4" v-if="gridSelection > 4" />
+      <IOSlot :index="5" v-if="gridSelection > 4" />
+      <IOSlot :index="6" v-if="gridSelection > 4" />
+      <IOSlot :index="7" v-if="gridSelection > 4" />
     </div>
   </div>
 </template>
