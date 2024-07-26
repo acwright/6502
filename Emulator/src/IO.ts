@@ -1,8 +1,11 @@
-export interface IO {
+export interface IODescription {
 
-  id: string
-  token: string
+  className: string
   title: string
+  
+}
+
+export interface IO {
 
   raiseIRQ: () => void
   raiseNMI: () => void
@@ -11,12 +14,7 @@ export interface IO {
   write(address: number, data: number): void
   clock(cycles: number, frequency: number): void
   reset(): void
-
-}
-
-export interface IODescription {
-
-  token: string
-  title: string
+  
+  description(): IODescription
   
 }

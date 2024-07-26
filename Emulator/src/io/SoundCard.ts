@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid'
 
-export class Empty implements IO {
+export class SoundCard implements IO {
 
-  static DESCRIPTION: IODescription = { className: 'Empty', title: 'Empty' }
+  static DESCRIPTION: IODescription = { className: 'SoundCard', title: 'Sound Card' }
 
   id: string = uuidv4()
 
@@ -13,9 +13,9 @@ export class Empty implements IO {
   write(address: number, data: number): void {}
   clock(cycles: number, frequency: number): void {}
   reset(): void {}
- 
+  
   description(): IODescription {
-    return Empty.DESCRIPTION
+    return SoundCard.DESCRIPTION
   }
 
 }

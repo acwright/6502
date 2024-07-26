@@ -2,9 +2,9 @@ import { v4 as uuidv4 } from 'uuid'
 
 export class LCDCard implements IO {
 
+  static DESCRIPTION: IODescription = { className: 'LCDCard', title: 'LCD Card' }
+
   id: string = uuidv4()
-  token: string = 'lcd_card'
-  title: string = 'LCD Card'
 
   raiseIRQ = () => {}
   raiseNMI = () => {}
@@ -23,6 +23,10 @@ export class LCDCard implements IO {
 
   reset(): void {
       
+  }
+
+  description(): IODescription {
+    return LCDCard.DESCRIPTION
   }
   
 }

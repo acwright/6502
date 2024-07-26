@@ -3,40 +3,48 @@ import { RAM } from './RAM'
 import { ROM } from './ROM'
 import { Cart } from './Cart'
 import { type IO, type IODescription } from './IO'
-import { LCDCard } from './io/LCDCard'
 import { Empty } from './io/Empty'
+import { DevBoard } from './io/DevBoard'
+import { GPIOCard } from './io/GPIOCard'
+import { InputBoard } from './io/InputBoard'
+import { LCDCard } from './io/LCDCard'
+import { PiCard } from './io/PiCard'
+import { SerialCard } from './io/SerialCard'
+import { SoundCard } from './io/SoundCard'
+import { StorageCard } from './io/StorageCard'
+import { TeensyCard } from './io/TeensyCard'
+import { VGACard } from './io/VGACard'
+import { VideoCard } from './io/VideoCard'
 
 export class Machine {
 
   static IO_DESCRIPTIONS: IODescription[] = [
-    { token: 'empty', title: 'Empty' },
-    { token: 'dev_board', title: 'Dev Board' },
-    { token: 'gpio_card', title: 'GPIO Card' },
-    { token: 'input_board', title: 'Input Board' },
-    { token: 'lcd_card', title: 'LCD Card' },
-    { token: 'pi_card', title: 'Pi Card' },
-    { token: 'serial_card', title: 'Serial Card' },
-    { token: 'sound_card', title: 'Sound Card' },
-    { token: 'storage_card', title: 'Storage Card' },
-    { token: 'teensy_card', title: 'Teensy Card' },
-    { token: 'vga_card', title: 'VGA Card' },
-    { token: 'video_card', title: 'Video Card' }
+    Empty.DESCRIPTION,
+    DevBoard.DESCRIPTION,
+    GPIOCard.DESCRIPTION,
+    InputBoard.DESCRIPTION,
+    LCDCard.DESCRIPTION,
+    PiCard.DESCRIPTION,
+    SerialCard.DESCRIPTION,
+    SoundCard.DESCRIPTION,
+    StorageCard.DESCRIPTION,
+    TeensyCard.DESCRIPTION,
+    VGACard.DESCRIPTION,
+    VideoCard.DESCRIPTION
   ]
 
   cpu: CPU = new CPU()
   ram: RAM = new RAM()
   rom: ROM = new ROM()
 
-  // IODEVICES[4], IODEVICES[8], IODEVICES[7], IODEVICES[11],
-  // IODEVICES[6], IODEVICES[0], IODEVICES[0], IODEVICES[1]
   io: IO[] = [
     new LCDCard(),
-    new Empty(),
-    new Empty(),
-    new Empty(),
-    new Empty(),
-    new Empty(),
-    new Empty(),
+    new StorageCard(),
+    new SoundCard(),
+    new VideoCard(),
+    new SerialCard(),
+    new GPIOCard(),
+    new InputBoard(),
     new Empty()
   ]
 
@@ -45,6 +53,7 @@ export class Machine {
   romFile?: File
   cartFile?: File
 
+  isRunning: boolean = false
   frequency: number = 1000000 // 1 MHz
   cycles: number = 0
   frameDelay: number = 0
@@ -64,8 +73,47 @@ export class Machine {
     this.cart = cart
   }
 
-  assignSlots(slots: IODescription[]): void {
-
+  loadSlot(slot: number, description: IODescription): void {
+    if (slot < 0 || slot >= 8) { return }
+    
+    switch (description.className) {
+      case 'DevBoard':
+        this.io[slot] = new DevBoard()
+        break
+      case 'Empty':
+        this.io[slot] = new Empty()
+        break
+      case 'GPIOCard':
+        this.io[slot] = new GPIOCard()
+        break
+      case 'InputBoard':
+        this.io[slot] = new InputBoard()
+        break
+      case 'LCDCard':
+        this.io[slot] = new LCDCard()
+        break
+      case 'PiCard':
+        this.io[slot] = new PiCard()
+        break
+      case 'SerialCard':
+        this.io[slot] = new SerialCard()
+        break
+      case 'SoundCard':
+        this.io[slot] = new SoundCard()
+        break
+      case 'StorageCard':
+        this.io[slot] = new StorageCard()
+        break
+      case 'TeensyCard':
+        this.io[slot] = new TeensyCard()
+        break
+      case 'VGACard':
+        this.io[slot] = new VGACard()
+        break
+      case 'VideoCard':
+        this.io[slot] = new VideoCard()
+        break
+    }
   }
 
   reset(): void {
@@ -116,6 +164,14 @@ export class Machine {
       this.write
     )
     this.cycles += 1
+  }
+
+  run(): void {
+    this.isRunning = true
+  }
+
+  stop(): void {
+    this.isRunning = false
   }
 
   read(address: number): number {

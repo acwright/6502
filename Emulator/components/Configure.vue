@@ -21,6 +21,7 @@
           v-model="slots[0]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(0, $event)"
         />
       </UFormGroup>
       <UFormGroup
@@ -32,6 +33,7 @@
           v-model="slots[1]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(1, $event)"
         />
       </UFormGroup>
       <UFormGroup
@@ -43,6 +45,7 @@
           v-model="slots[2]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(2, $event)"
         />
       </UFormGroup>
       <UFormGroup
@@ -54,6 +57,7 @@
           v-model="slots[3]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(3, $event)"
         />
       </UFormGroup>
       <UFormGroup
@@ -65,6 +69,7 @@
           v-model="slots[4]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(4, $event)"
         />
       </UFormGroup>
       <UFormGroup
@@ -76,6 +81,7 @@
           v-model="slots[5]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(5, $event)"
         />
       </UFormGroup>
       <UFormGroup
@@ -87,6 +93,7 @@
           v-model="slots[6]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(6, $event)"
         />
       </UFormGroup>
       <UFormGroup
@@ -98,6 +105,7 @@
           v-model="slots[7]" 
           :options="Machine.IO_DESCRIPTIONS"
           option-attribute="title"
+          @change="onChange(7, $event)"
         />
       </UFormGroup>
     </UForm>
@@ -118,13 +126,13 @@
   }>()
 
   const machine = useMachine()
-  const slots = ref<IODescription[]>(machine.io.map((io) => {
-    return Machine.IO_DESCRIPTIONS.find((io_desc) => {
-      return io_desc.token === io.token
-    }) || Machine.IO_DESCRIPTIONS[0]
-  }))
-
-  watch(slots, () => {
-    machine.assignSlots(slots.value)
+  const slots = computed(() => {
+    return machine.io.map((io) => {
+      return io.description()
+    })
   })
+
+  const onChange = (slot: number, description: IODescription) => {
+    machine.loadSlot(slot, description)
+  }
 </script>

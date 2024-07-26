@@ -20,7 +20,7 @@
           size="sm"
           :min="1"
           :max="2000000"
-          v-model="frequency"
+          v-model="machine.frequency"
           class="mt-2 mb-2"
         />
         <span class="flex flex-row items-center justify-between">
@@ -30,7 +30,7 @@
             size="xs"
             @click="prevFreq"
           />
-          {{ formatFrequency(frequency) }}
+          {{ formatFrequency(machine.frequency) }}
           <UButton 
             variant="ghost"
             icon="i-heroicons-chevron-right"
@@ -57,7 +57,6 @@
   }>()
 
   const machine = useMachine()
-  const frequency = ref(machine.frequency)
   
   const frequencies: number[] = [
     1, 2, 4, 8, 16, 32, 64, 122, 244, 488, 976, 
@@ -67,27 +66,23 @@
 
   const prevFreq = () => {
     let index = frequencies.findLastIndex((freq) => {
-      return freq < frequency.value
+      return freq < machine.frequency
     })
     if (index === -1) {
-      frequency.value = frequencies[frequencies.length - 1]
+      machine.frequency = frequencies[frequencies.length - 1]
     } else {
-      frequency.value = frequencies[index]
+      machine.frequency = frequencies[index]
     }
   }
 
   const nextFreq = () => {
     let index = frequencies.findIndex((freq) => {
-      return freq > frequency.value
+      return freq > machine.frequency
     })
     if (index === -1) {
-      frequency.value = frequencies[0]
+      machine.frequency = frequencies[0]
     } else {
-      frequency.value = frequencies[index]
+      machine.frequency = frequencies[index]
     }
   }
-
-  watch(frequency, () => {
-    machine.frequency = frequency.value
-  })
 </script>

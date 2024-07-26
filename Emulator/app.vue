@@ -7,11 +7,11 @@
       </h1>
     </div>
     <Controls 
-      :isRunning="isRunning" 
-      @run="run"
-      @stop="stop"
-      @step="machine.step"
-      @reset="machine.reset"
+      :isRunning="machine.isRunning" 
+      @run="machine.run()"
+      @stop="machine.stop()"
+      @step="machine.step()"
+      @reset="machine.reset()"
       @clock="showClock = true"
       @load="showLoad = true"
       @configure="showConfigure = true"
@@ -20,7 +20,7 @@
     />
   </header>
   <main class="flex flex-row grow">
-    <IO 
+    <Devices 
       :class="showDebug ? 'w-2/3' : 'w-full'" 
     />
     <Debug 
@@ -55,18 +55,9 @@
 
 <script setup lang="ts">
   const machine = useMachine()
-  const isRunning = ref(false)
   const showClock = ref(false)
   const showLoad = ref(false)
   const showConfigure = ref(false)
   const showDebug = ref(false)
   const showHelp = ref(false)
-
-  const run = () => {
-    isRunning.value = true
-  }
-
-  const stop = () => {
-    isRunning.value = false
-  }
 </script>

@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
+const machine = reactive(new Machine())
 
-export const useMachine = defineStore('machine', () => {
-  return new Machine()
-})
+export const useMachine = () => {
+  return machine
+}
