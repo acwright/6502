@@ -1,10 +1,10 @@
 .setcpu "65C02"
 .segment "CODE"
 
-PORTB   = $8800
-PORTA   = $8801
-DDRB    = $8802
-DDRA    = $8803
+PORTB   = $9800
+PORTA   = $9801
+DDRB    = $9802
+DDRA    = $9803
 
 AY_BC1  = %00000001
 AY_BDIR = %00000010
