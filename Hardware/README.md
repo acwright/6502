@@ -15,3 +15,9 @@ Changelog
     - Added pin header for switches
     - Added pin header for Teensy serial connection
     - Relocated connections on Teensy to allow for RX/TX serial header connection 
+  - LCD Card
+    - Change JP1 from bridged to open
+  - Sound Card
+    - Change JP1 from bridged to open
+  - Video Card
+    - Change JP7 from open to bridged
