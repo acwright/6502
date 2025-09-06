@@ -18,5 +18,3 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **TC**: Teensy Card
 - **VC**: Video Card
 - **VGA**: VGA Card
-
-See README in project folder for non-prefixed project hardware environments.

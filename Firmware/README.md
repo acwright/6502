@@ -11,5 +11,3 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **PI**: Pi Card
 - **TC**: Teensy Card
 - **VGA**: VGA Card
-
-See README in project folder for non-prefixed project hardware environments.
