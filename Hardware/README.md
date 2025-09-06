@@ -17,6 +17,8 @@ Changelog
     - Relocated connections on Teensy to allow for RX/TX serial header connection 
   - LCD Card
     - Change JP1 from bridged to open
+  - Serial Card
+    - Add RTS/CTS flow control 
   - Sound Card
     - Change JP1 from bridged to open
   - Video Card
