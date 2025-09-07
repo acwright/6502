@@ -1,7 +1,7 @@
-(footprint "3386F-1-103TLF"
-	(version 20240108)
+(footprint "3386F-1-103LF"
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at -1.84 -6.565 0)
@@ -14,26 +14,13 @@
 			)
 		)
 	)
-	(property "Value" "TRIM_3386F-1-103TLF"
+	(property "Value" "TRIM_3386F-1-103LF"
 		(at 7.05 6.65 0)
 		(layer "F.Fab")
 		(uuid "86bceefa-64ee-4424-83f7-9a9a3b0fcd6c")
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "9c201d2b-2ea6-4bb6-a2e8-45edd47102d7")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -152,7 +139,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "c0235e52-f807-4027-a433-ba6bee3062c1")
 	)
@@ -283,7 +270,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "6dc7e69c-d082-4848-a890-1dfcdf17656e")
 	)
@@ -314,7 +301,8 @@
 		(solder_mask_margin 0.102)
 		(uuid "29f83695-1d5c-457b-ab56-2ff00cc1a845")
 	)
-	(model "${KIPRJMOD}/../../CAD/3386F-1-103TLF.step"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/3386F-1-103LF.step"
 		(offset
 			(xyz 0 0 0)
 		)
