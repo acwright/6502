@@ -1,7 +1,7 @@
 (footprint "LCD-16X2"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at -37.075 -19.885 0)
@@ -21,19 +21,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "c2be3d12-67a2-4e74-af74-19fbb49cf06b")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -112,7 +99,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "3de0d8d0-21e9-40bb-bbce-dbb05b099ab8")
 	)
@@ -203,7 +190,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "fcb3a2b1-b37b-4731-a5ab-bd7220fc8b33")
 	)
@@ -378,5 +365,17 @@
 		(remove_unused_layers no)
 		(solder_mask_margin 0.102)
 		(uuid "0de10c37-a782-4905-b337-7d26433367de")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/LCD 16x2 HD44780 assembly.stp"
+		(offset
+			(xyz -40 18 4.2)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
 	)
 )

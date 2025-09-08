@@ -1,7 +1,7 @@
 (footprint "Raspberry Pi Zero"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at -29.569 -17.2162 0)
@@ -25,18 +25,6 @@
 			)
 		)
 	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "673a731d-f93d-4c90-8fb6-095c6a247e16")
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-	)
 	(property "Datasheet" ""
 		(at 0 0 0)
 		(unlocked yes)
@@ -46,6 +34,7 @@
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -58,6 +47,7 @@
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -173,7 +163,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "729d4de2-a75c-467b-aac3-716fd83c132e")
 	)
@@ -588,7 +578,7 @@
 			(width 0.127)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "52e05469-a953-4ae6-8616-66da6cf08347")
 	)
@@ -599,7 +589,7 @@
 			(width 0.127)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "d0caeed5-9215-40f8-a9c0-b7d4c641dcc1")
 	)
@@ -610,7 +600,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "370576c5-e974-4ffb-ab7c-a075fdd25b52")
 	)
@@ -621,7 +611,7 @@
 			(width 0.127)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "364a68d5-50b6-4e21-bc60-af34c70458de")
 	)
@@ -632,7 +622,7 @@
 			(width 0.127)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "b759486f-280c-42bf-9d22-6ac8efc7f551")
 	)
@@ -1024,6 +1014,7 @@
 		(solder_mask_margin 0.102)
 		(uuid "585fb7bb-1110-45fb-a46b-57a11e6b15df")
 	)
+	(embedded_fonts no)
 	(model "${KICAD8_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_2x20_P2.54mm_Vertical.step"
 		(offset
 			(xyz 24 10 0)
@@ -1033,6 +1024,28 @@
 		)
 		(rotate
 			(xyz 0 0 90)
+		)
+	)
+	(model "${KIPRJMOD}/../../../CAD/Raspberry Pi Zero 2 W.step"
+		(offset
+			(xyz 0 0 12)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x20_P2.54mm_Vertical.step"
+		(offset
+			(xyz -23.5 12.5 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 180 -90)
 		)
 	)
 )

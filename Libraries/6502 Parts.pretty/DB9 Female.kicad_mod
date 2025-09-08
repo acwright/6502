@@ -1,7 +1,7 @@
 (footprint "DB9 Female"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(descr "9 PIN SERIAL CONNECTOR - FEMALE PCB MOUNT RIGHT ANGLE")
 	(tags "9 PIN SERIAL CONNECTOR - FEMALE PCB MOUNT RIGHT ANGLE")
@@ -27,18 +27,6 @@
 			)
 		)
 	)
-	(property "Footprint" "DB9 Female"
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "e9bd4bf1-06c6-4b92-85c3-2dd580c86079")
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-	)
 	(property "Datasheet" ""
 		(at 0 0 0)
 		(unlocked yes)
@@ -48,6 +36,7 @@
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -60,6 +49,7 @@
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -297,7 +287,8 @@
 		(solder_mask_margin 0.1016)
 		(uuid "932333a0-70b4-4b51-922a-dcdedc4df6f2")
 	)
-	(model "${KIPRJMOD}/../../CAD/PRT-00429.wrl"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/PRT-00429.wrl"
 		(offset
 			(xyz 0 6 4.5)
 		)

@@ -1,7 +1,7 @@
 (footprint "RHDR40W82P485X254_2X20_5740X93"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(descr "<b>5-5530843-4</b><br>\n")
 	(property "Reference" "J5"
@@ -28,18 +28,6 @@
 			(justify right top)
 		)
 	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "73ae74e0-6d17-4bd0-b5bf-7a351230588e")
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-		)
-	)
 	(property "Datasheet" ""
 		(at 0 0 0)
 		(unlocked yes)
@@ -49,6 +37,7 @@
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -61,6 +50,7 @@
 		(effects
 			(font
 				(size 1.27 1.27)
+				(thickness 0.15)
 			)
 		)
 	)
@@ -545,7 +535,8 @@
 		(solder_mask_margin 0.1016)
 		(uuid "f166d080-cf61-4fd7-a5bf-6dee80a62395")
 	)
-	(model "${KIPRJMOD}/../../CAD/5-5530843-4.step"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/5-5530843-4.step"
 		(offset
 			(xyz 24.5 2.5 15.5)
 		)

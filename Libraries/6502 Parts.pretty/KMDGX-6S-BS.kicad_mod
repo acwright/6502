@@ -1,7 +1,7 @@
 (footprint "KMDGX-6S-BS"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(descr "<b>KMDGX-6S-BS-3</b><br>")
 	(property "Reference" "REF**"
@@ -22,18 +22,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "1a5624f8-4fbb-4ba3-8bff-f3420677558d")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -284,7 +272,8 @@
 		(solder_mask_margin 0.102)
 		(uuid "fe5f43d4-118f-4c56-b5b0-0ac0a7e7e4f4")
 	)
-	(model "${KIPRJMOD}/../../CAD/KMDGX-6S-BS.step"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/KMDGX-6S-BS.step"
 		(offset
 			(xyz 1.5 8.5 0)
 		)

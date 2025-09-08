@@ -1,7 +1,7 @@
 (footprint "SWITCHCRAFT_PJRAN1X1U04X"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at -3.4 -8.635 0)
@@ -21,18 +21,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "e55d5223-de63-447b-a1b2-29f8c0f33112")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -109,7 +97,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "f28acf62-ca83-41d8-99f8-c05687b96d14")
 	)
@@ -290,7 +278,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "3c81192f-7eac-4520-be07-65509627e90e")
 	)
@@ -332,7 +320,8 @@
 		(solder_mask_margin 0.102)
 		(uuid "b59c99db-ba76-442e-bc7a-4e8ec8337b33")
 	)
-	(model "${KIPRJMOD}/../../CAD/PJRAN1X1U04X.step"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/PJRAN1X1U04X.step"
 		(offset
 			(xyz 0 0 0)
 		)

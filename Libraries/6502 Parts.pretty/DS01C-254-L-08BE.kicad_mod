@@ -1,7 +1,7 @@
 (footprint "DS01C-254-L-08BE"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at -9 -6.25 0)
@@ -21,18 +21,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "059f33b6-3cad-4eda-872c-de10b9d2dea7")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -109,7 +97,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "46877bfd-662b-4c51-afe6-4dda210a29db")
 	)
@@ -200,7 +188,7 @@
 			(width 0.2)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.Fab")
 		(uuid "87392b34-3f6c-4fa0-94ce-24ce1aca9533")
 	)
@@ -348,7 +336,8 @@
 		(solder_mask_margin 0.102)
 		(uuid "96d737bd-ca34-474e-9a31-604c743873cd")
 	)
-	(model "${KIPRJMOD}/../../CAD/DS01C-254-L-08BE.step"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/DS01C-254-L-08BE.step"
 		(offset
 			(xyz -6.25 0 1.2)
 		)

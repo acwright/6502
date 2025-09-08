@@ -1,7 +1,7 @@
 (footprint "6502 GPIO Connector"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(descr "Through hole straight pin header, 2x06, 2.54mm pitch, double rows")
 	(tags "Through hole pin header THT 2x06 2.54mm double row")
@@ -23,19 +23,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "6e5dbc0e-cfdb-4cec-995a-d2e7da10edc4")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -104,7 +91,7 @@
 			(width 0.1)
 			(type default)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "6252e4d1-d274-4750-9c37-6e81463eb8d7")
 	)
@@ -295,15 +282,16 @@
 		(remove_unused_layers no)
 		(uuid "a2ca4b59-3abc-4e91-be7e-3ff83dba1a3a")
 	)
-	(model "${KICAD8_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_2x06_P2.54mm_Vertical.wrl"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/0702461201.step"
 		(offset
-			(xyz 0 0 0)
+			(xyz 1.3 -6.4 4.5)
 		)
 		(scale
 			(xyz 1 1 1)
 		)
 		(rotate
-			(xyz 0 0 0)
+			(xyz -90 -0 -90)
 		)
 	)
 )

@@ -1,7 +1,7 @@
 (footprint "SNES Controller Port"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at 33.7 -3.7 0)
@@ -27,23 +27,11 @@
 			)
 		)
 	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "00000000-0000-0000-0000-000000000000")
-		(effects
-			(font
-				(size 1.27 1.27)
-				(thickness 0.15)
-			)
-		)
-	)
 	(property "Datasheet" ""
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "00000000-0000-0000-0000-000000000000")
+		(uuid "90b779fc-567e-4b64-a036-6e16795d7ab6")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -55,7 +43,7 @@
 		(at 0 0 0)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "00000000-0000-0000-0000-000000000000")
+		(uuid "8a15d6f1-297c-4e7f-b6e9-b9c4c508d8bc")
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -211,7 +199,7 @@
 			(width 0.05)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.CrtYd")
 		(uuid "f6258eea-76ca-457b-a01a-8a202265c226")
 	)
@@ -282,5 +270,17 @@
 		(layers "*.Cu" "*.Mask")
 		(remove_unused_layers no)
 		(uuid "3bd003e5-5860-4b5c-9356-2f0131d40ddd")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/SNES.step"
+		(offset
+			(xyz 34.8 -17 16.5)
+		)
+		(scale
+			(xyz 1.05 1.05 1.05)
+		)
+		(rotate
+			(xyz -180 -90 -0)
+		)
 	)
 )

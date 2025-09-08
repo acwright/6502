@@ -1,7 +1,7 @@
 (footprint "SW_TS-1187A-B-A-B"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at -0.825 -3.635 0)
@@ -21,19 +21,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "cec8933f-1cfc-476b-8054-afc394407294")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -348,28 +335,29 @@
 	(pad "1" smd rect
 		(at -3 -1.875)
 		(size 1 0.75)
-		(layers "F.Cu" "F.Paste" "F.Mask")
+		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "574d9483-271b-4587-8f47-5031a14718b2")
 	)
 	(pad "1" smd rect
 		(at 3 -1.875)
 		(size 1 0.75)
-		(layers "F.Cu" "F.Paste" "F.Mask")
+		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "a29f68e1-3e64-484b-b217-ab7481249bb9")
 	)
 	(pad "2" smd rect
 		(at -3 1.875)
 		(size 1 0.75)
-		(layers "F.Cu" "F.Paste" "F.Mask")
+		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "84250193-8172-4223-9b3c-95a01decffe4")
 	)
 	(pad "2" smd rect
 		(at 3 1.875)
 		(size 1 0.75)
-		(layers "F.Cu" "F.Paste" "F.Mask")
+		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "4a2d4dba-28ee-4ce9-b880-ae2f9fd4cce0")
 	)
-	(model "${KIPRJMOD}/../../CAD/TS-1187A-B-A-B.step"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/TS-1187A-B-A-B.step"
 		(offset
 			(xyz 0 0 0)
 		)
