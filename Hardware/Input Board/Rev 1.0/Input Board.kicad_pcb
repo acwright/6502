@@ -959,14 +959,14 @@
 			)
 		)
 	)
-	(footprint "Package_DIP:DIP-8_W7.62mm_LongPads"
+	(footprint "Package_DIP:DIP-8_W7.62mm_Socket_LongPads"
 		(layer "F.Cu")
 		(uuid "0772cae2-75a1-4fbf-b9d2-df4f8520f434")
 		(at 161.08 69 -90)
-		(descr "8-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils), LongPads")
-		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil LongPads")
+		(descr "8-lead though-hole mounted DIP package, row spacing 7.62mm (300 mils), Socket, LongPads")
+		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil Socket LongPads")
 		(property "Reference" "U4"
-			(at -0.5 10.38 90)
+			(at 3.8 -2.52 270)
 			(layer "F.SilkS")
 			(uuid "895284e7-3f26-4382-b76a-fb9ff95c7297")
 			(effects
@@ -977,7 +977,7 @@
 			)
 		)
 		(property "Value" "ATtiny85"
-			(at 6 10.48 90)
+			(at 3.9 10.28 270)
 			(layer "F.SilkS")
 			(uuid "e4baa527-e44d-4041-b978-1f3b06781b88")
 			(effects
@@ -987,9 +987,8 @@
 				)
 			)
 		)
-		(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/atmel-2586-avr-8-bit-microcontroller-attiny25-attiny45-attiny85_datasheet.pdf"
+		(property "Datasheet" ""
 			(at 0 0 270)
-			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "a97ae1c8-371d-44d9-a63d-014e287e63f7")
@@ -1000,9 +999,8 @@
 				)
 			)
 		)
-		(property "Description" "20MHz, 8kB Flash, 512B SRAM, 512B EEPROM, debugWIRE, DIP-8"
+		(property "Description" ""
 			(at 0 0 270)
-			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "3c7a8ce2-0054-4fc3-9d1e-cd66bdb1ca6d")
@@ -1017,7 +1015,7 @@
 		(path "/5cc34a4d-f3e2-4b4e-8f6f-54a3716ab84c")
 		(sheetname "Root")
 		(sheetfile "Input Board.kicad_sch")
-		(attr through_hole exclude_from_bom)
+		(attr through_hole)
 		(fp_line
 			(start 1.56 8.95)
 			(end 6.06 8.95)
@@ -1026,7 +1024,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "857e8f0e-2692-456b-870e-067d1fffa48d")
+			(uuid "c9f482af-0fb2-4946-9135-c5e10ccb6b0f")
 		)
 		(fp_line
 			(start 6.06 8.95)
@@ -1036,7 +1034,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "6807d58c-7620-4f98-9652-8c3d2bb11717")
+			(uuid "45640c94-348e-4c45-82d1-5a6d7f4fa3a3")
 		)
 		(fp_line
 			(start 1.56 -1.33)
@@ -1046,7 +1044,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "1d4d6c3b-8fb7-44d4-a0b9-6bf0602e08db")
+			(uuid "b422efbb-52c1-4b4a-9521-6bc175a2ac7a")
 		)
 		(fp_line
 			(start 2.81 -1.33)
@@ -1056,7 +1054,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "98631b5b-f6d3-41be-94d4-fc538cb56ac8")
+			(uuid "90c1b55f-0b9c-420a-8c1a-aae4db86fc0e")
 		)
 		(fp_line
 			(start 6.06 -1.33)
@@ -1066,7 +1064,18 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "78ad9232-4c82-4cf4-b3df-7bcc0706675b")
+			(uuid "3c144400-352a-44b3-99ef-e2c86714e2fd")
+		)
+		(fp_rect
+			(start -1.44 -1.39)
+			(end 9.06 9.01)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.SilkS")
+			(uuid "331ce494-524d-40e2-ad1b-ef64153be614")
 		)
 		(fp_arc
 			(start 4.81 -1.33)
@@ -1077,47 +1086,18 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "e6fc752a-400f-4393-b53a-eb81c7c946aa")
+			(uuid "de2135a1-1bcd-4790-8177-e7082aae126c")
 		)
-		(fp_line
-			(start -1.45 9.15)
-			(end 9.1 9.15)
+		(fp_rect
+			(start -1.52 -1.58)
+			(end 9.14 9.2)
 			(stroke
 				(width 0.05)
 				(type solid)
 			)
+			(fill no)
 			(layer "F.CrtYd")
-			(uuid "c4341f4d-0eba-430b-91d0-9b15cc0ef901")
-		)
-		(fp_line
-			(start 9.1 9.15)
-			(end 9.1 -1.55)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(layer "F.CrtYd")
-			(uuid "4eec21dd-d0b6-4eca-8d3b-100c4e5ecd63")
-		)
-		(fp_line
-			(start -1.45 -1.55)
-			(end -1.45 9.15)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(layer "F.CrtYd")
-			(uuid "95f77133-7f82-48b3-a994-af132ccf63b4")
-		)
-		(fp_line
-			(start 9.1 -1.55)
-			(end -1.45 -1.55)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(layer "F.CrtYd")
-			(uuid "d60caf99-5f11-43b1-84ec-2273d31e8da3")
+			(uuid "21ce953d-01e5-43ef-a015-7e88e7f57178")
 		)
 		(fp_line
 			(start 0.635 8.89)
@@ -1127,7 +1107,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "f367592f-3a20-4d9e-a930-192f824b17bc")
+			(uuid "ba55f60a-aa3a-449b-b333-c7ad69367e2b")
 		)
 		(fp_line
 			(start 6.985 8.89)
@@ -1137,7 +1117,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "81511c65-f6a8-4646-86d0-499fcddf1037")
+			(uuid "fb49c12e-3f51-4849-bd36-20534e5084f6")
 		)
 		(fp_line
 			(start 0.635 -0.27)
@@ -1147,7 +1127,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "3aaa5a8d-f026-40c9-b411-c4b72e3e7528")
+			(uuid "568b6eae-80c6-4b4f-a87f-796e56dd416d")
 		)
 		(fp_line
 			(start 1.635 -1.27)
@@ -1157,7 +1137,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "78eddcd5-6213-448b-9d7b-edc098fb827a")
+			(uuid "6cb6e2c5-f4c0-41cf-aa68-89a3ea62492b")
 		)
 		(fp_line
 			(start 6.985 -1.27)
@@ -1167,10 +1147,21 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "0da50f8a-c5cd-4653-bc70-843684b1642f")
+			(uuid "b867c102-7177-426b-b1de-7ab496f3f6cd")
+		)
+		(fp_rect
+			(start -1.27 -1.33)
+			(end 8.89 8.95)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "3540deae-aca6-4084-8fb1-9214f67655b4")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 3.81 3.81 90)
+			(at 3.81 3.81 0)
 			(layer "F.Fab")
 			(uuid "39a66bc8-45e8-460c-aaf8-0dd32125a529")
 			(effects
@@ -1180,12 +1171,13 @@
 				)
 			)
 		)
-		(pad "1" thru_hole rect
+		(pad "1" thru_hole roundrect
 			(at 0 0 270)
 			(size 2.4 1.6)
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
+			(roundrect_rratio 0.15625)
 			(net 84 "CA2")
 			(pinfunction "~{RESET}/PB5")
 			(pintype "bidirectional")
@@ -1269,7 +1261,7 @@
 			(uuid "4bb7ce01-4a69-4c71-898c-0141a7f32bad")
 		)
 		(embedded_fonts no)
-		(model "${KICAD8_3DMODEL_DIR}/Package_DIP.3dshapes/DIP-8_W7.62mm.wrl"
+		(model "${KICAD9_3DMODEL_DIR}/Package_DIP.3dshapes/DIP-8_W7.62mm_Socket.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -5965,14 +5957,14 @@
 			)
 		)
 	)
-	(footprint "Package_DIP:DIP-8_W7.62mm_LongPads"
+	(footprint "Package_DIP:DIP-8_W7.62mm_Socket_LongPads"
 		(layer "F.Cu")
 		(uuid "7738ac36-df05-4bc0-adec-6c155a8fd3b2")
 		(at 153.5 131.5 90)
-		(descr "8-lead though-hole mounted DIP package, row spacing 7.62 mm (300 mils), LongPads")
-		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil LongPads")
+		(descr "8-lead though-hole mounted DIP package, row spacing 7.62mm (300 mils), Socket, LongPads")
+		(tags "THT DIP DIL PDIP 2.54mm 7.62mm 300mil Socket LongPads")
 		(property "Reference" "U5"
-			(at 8.2 10.5 90)
+			(at 3.81 10.2 90)
 			(layer "F.SilkS")
 			(uuid "ecebd1b0-1415-441e-a5be-a2636d9f1201")
 			(effects
@@ -5983,7 +5975,7 @@
 			)
 		)
 		(property "Value" "ATtiny85"
-			(at 1.7 10.5 90)
+			(at 3.8 -2.7 90)
 			(layer "F.SilkS")
 			(uuid "5b9015dd-4e65-43a5-991a-b23f10a7e34d")
 			(effects
@@ -5993,9 +5985,8 @@
 				)
 			)
 		)
-		(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/atmel-2586-avr-8-bit-microcontroller-attiny25-attiny45-attiny85_datasheet.pdf"
+		(property "Datasheet" ""
 			(at 0 0 90)
-			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "b7c0f320-41d3-42c7-87cd-1617cb38cc88")
@@ -6006,9 +5997,8 @@
 				)
 			)
 		)
-		(property "Description" "20MHz, 8kB Flash, 512B SRAM, 512B EEPROM, debugWIRE, DIP-8"
+		(property "Description" ""
 			(at 0 0 90)
-			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
 			(uuid "32890d8e-64e4-443b-a3b5-cc98fdce049c")
@@ -6023,7 +6013,7 @@
 		(path "/6baf4c97-8a3a-4487-a164-5ab191988e5c")
 		(sheetname "Root")
 		(sheetfile "Input Board.kicad_sch")
-		(attr through_hole exclude_from_bom)
+		(attr through_hole)
 		(fp_line
 			(start 6.06 -1.33)
 			(end 4.81 -1.33)
@@ -6032,7 +6022,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "37041b89-b477-49d2-aec5-d7c6e41ddbf9")
+			(uuid "f47147fc-bde7-452e-a375-b7b1a5c5765c")
 		)
 		(fp_line
 			(start 2.81 -1.33)
@@ -6042,7 +6032,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "ddc3064f-e15b-455a-8be3-078cf5287dec")
+			(uuid "16046ef2-8854-4a34-ba92-b87cf9e7ffa9")
 		)
 		(fp_line
 			(start 1.56 -1.33)
@@ -6052,7 +6042,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "f1e7f6d5-91a7-48dc-bd4d-3a42673b7255")
+			(uuid "0ad98b96-0260-47a1-9774-a7bb0c897232")
 		)
 		(fp_line
 			(start 6.06 8.95)
@@ -6062,7 +6052,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "462998a2-5609-4219-b189-3b937cd9cf74")
+			(uuid "8e15338e-9531-458e-8359-3e0d7ef61987")
 		)
 		(fp_line
 			(start 1.56 8.95)
@@ -6072,7 +6062,18 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "eec7dc8f-a72e-4f27-a0f6-2b6c5960b809")
+			(uuid "f4b62491-146e-4911-89db-bbb22a5d12dd")
+		)
+		(fp_rect
+			(start -1.44 -1.39)
+			(end 9.06 9.01)
+			(stroke
+				(width 0.12)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.SilkS")
+			(uuid "a86e042b-ce0e-4608-8975-4e29b5fa3953")
 		)
 		(fp_arc
 			(start 4.81 -1.33)
@@ -6083,47 +6084,18 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "4ac22e42-a996-4e74-97a7-8d8d6088b2e7")
+			(uuid "685ee7b2-fbeb-4858-8d3f-0903c5137fdb")
 		)
-		(fp_line
-			(start 9.1 -1.55)
-			(end -1.45 -1.55)
+		(fp_rect
+			(start -1.52 -1.58)
+			(end 9.14 9.2)
 			(stroke
 				(width 0.05)
 				(type solid)
 			)
+			(fill no)
 			(layer "F.CrtYd")
-			(uuid "af171650-e1f7-48cc-adbb-c49f992153b6")
-		)
-		(fp_line
-			(start -1.45 -1.55)
-			(end -1.45 9.15)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(layer "F.CrtYd")
-			(uuid "418cfdab-2781-403e-953c-f33ee7125eea")
-		)
-		(fp_line
-			(start 9.1 9.15)
-			(end 9.1 -1.55)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(layer "F.CrtYd")
-			(uuid "a082faf7-796b-4f51-911f-e8ade0769f5f")
-		)
-		(fp_line
-			(start -1.45 9.15)
-			(end 9.1 9.15)
-			(stroke
-				(width 0.05)
-				(type solid)
-			)
-			(layer "F.CrtYd")
-			(uuid "d51ec164-a827-4134-bc44-b9b3c65485f5")
+			(uuid "a2120da6-82fb-4495-be01-0378f2ddf0e3")
 		)
 		(fp_line
 			(start 6.985 -1.27)
@@ -6133,7 +6105,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "aae20b6f-2a50-4fa9-8a8f-837cda6618be")
+			(uuid "16a0e10e-e47d-4934-8061-9ae5f59c7ef0")
 		)
 		(fp_line
 			(start 1.635 -1.27)
@@ -6143,7 +6115,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "5afbcc16-9e92-4017-a5e9-e6f483ee90e9")
+			(uuid "8370feb4-a17a-4ad1-9eea-977a3baaeb62")
 		)
 		(fp_line
 			(start 0.635 -0.27)
@@ -6153,7 +6125,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "8bf994d5-b7e1-47f3-8d45-0dca14e7565c")
+			(uuid "651d03fb-43e2-40a1-9cc6-b8b7a35f5982")
 		)
 		(fp_line
 			(start 6.985 8.89)
@@ -6163,7 +6135,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "8f1739d5-3d41-4f16-abe1-062afafa9340")
+			(uuid "97497785-23ca-4705-9900-d848029435ec")
 		)
 		(fp_line
 			(start 0.635 8.89)
@@ -6173,10 +6145,21 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "5001f02d-916d-4adc-9382-9f59c36b175e")
+			(uuid "172936a5-92a7-4f91-b2a2-13bb12793146")
+		)
+		(fp_rect
+			(start -1.27 -1.33)
+			(end 8.89 8.95)
+			(stroke
+				(width 0.1)
+				(type solid)
+			)
+			(fill no)
+			(layer "F.Fab")
+			(uuid "ba538967-8c8c-4044-9448-5225987cef18")
 		)
 		(fp_text user "${REFERENCE}"
-			(at 3.81 3.81 90)
+			(at 3.81 3.81 180)
 			(layer "F.Fab")
 			(uuid "30adbb9b-f3cd-4f55-b493-15d94fcd8533")
 			(effects
@@ -6186,12 +6169,13 @@
 				)
 			)
 		)
-		(pad "1" thru_hole rect
+		(pad "1" thru_hole roundrect
 			(at 0 0 90)
 			(size 2.4 1.6)
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
+			(roundrect_rratio 0.15625)
 			(net 84 "CA2")
 			(pinfunction "~{RESET}/PB5")
 			(pintype "bidirectional")
@@ -6275,7 +6259,7 @@
 			(uuid "976953bf-1638-4cb3-8ace-62f90c953c3d")
 		)
 		(embedded_fonts no)
-		(model "${KICAD8_3DMODEL_DIR}/Package_DIP.3dshapes/DIP-8_W7.62mm.wrl"
+		(model "${KICAD9_3DMODEL_DIR}/Package_DIP.3dshapes/DIP-8_W7.62mm_Socket.step"
 			(offset
 				(xyz 0 0 0)
 			)
@@ -8490,7 +8474,7 @@
 				(type default)
 			)
 			(layer "F.SilkS")
-			(uuid "1bdf837f-8433-47d7-a5a3-e8748b061c01")
+			(uuid "4a1325e7-7cde-4e5c-8a28-e64be8c07103")
 		)
 		(fp_line
 			(start 4.572 26.67)
@@ -8500,7 +8484,7 @@
 				(type default)
 			)
 			(layer "F.SilkS")
-			(uuid "8f665c21-f042-4ec7-8008-df640fadf67d")
+			(uuid "0203e26e-beb4-4299-9df9-194211400541")
 		)
 		(fp_line
 			(start 5.75 21.59)
@@ -8510,7 +8494,7 @@
 				(type default)
 			)
 			(layer "F.SilkS")
-			(uuid "cfa96355-0599-42cb-b70e-67cc60c0b7e2")
+			(uuid "9161bc2e-5763-4b4a-8d27-12f34d52e537")
 		)
 		(fp_rect
 			(start -3.25 -4.75)
@@ -8521,7 +8505,7 @@
 			)
 			(fill no)
 			(layer "F.SilkS")
-			(uuid "b5eab130-d649-476a-9d56-28ed4474704c")
+			(uuid "1f767f39-f8fc-486a-aceb-9b920eaf76c4")
 		)
 		(fp_line
 			(start -3.25 -4.75)
@@ -8531,7 +8515,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "990dd63f-40b8-44f7-a755-c2487755677e")
+			(uuid "145c4b87-09be-409e-af3c-712c8c4c3308")
 		)
 		(fp_line
 			(start -3.25 53.25)
@@ -8541,7 +8525,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "ac6a3f8a-8fc1-4cd2-bb59-611b5565c78d")
+			(uuid "e0291397-2171-4d59-8ec4-516e222f0ce7")
 		)
 		(fp_line
 			(start 5.75 -4.75)
@@ -8551,7 +8535,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "eeecdaab-7210-486d-852b-bbcb7d30f04b")
+			(uuid "dbfe2883-caf3-41b4-8078-ab579f72d3a6")
 		)
 		(fp_line
 			(start 5.75 53.25)
@@ -8561,7 +8545,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "994de2c5-d9d9-413c-be59-f65d3450ab5c")
+			(uuid "60a23ca8-565c-4331-a941-18e9fccce5eb")
 		)
 		(fp_line
 			(start -3.25 -4.75)
@@ -8571,7 +8555,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "d7844ca1-75e5-4ad8-bc94-f9aa4ba78d5b")
+			(uuid "91dcd7d7-299d-4120-95bd-c14d06db5d04")
 		)
 		(fp_line
 			(start -3.25 53.25)
@@ -8581,7 +8565,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "d69ab6f6-8302-4ad0-bb53-976e05efe7af")
+			(uuid "4110de4d-92a3-4934-b6e8-2cb6704cccb2")
 		)
 		(fp_line
 			(start 5.75 -4.75)
@@ -8591,7 +8575,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "fa988d9b-7e94-4df5-aa89-32404cc94e4c")
+			(uuid "49e98f0d-62e9-4171-b482-217961277b94")
 		)
 		(fp_line
 			(start 5.75 53.25)
@@ -8601,7 +8585,7 @@
 				(type solid)
 			)
 			(layer "F.Fab")
-			(uuid "19725615-1088-4023-858e-5123e37e38f8")
+			(uuid "504f4422-9007-421f-a119-70d8fc1597f9")
 		)
 		(fp_text user "${REFERENCE}"
 			(at 1.27 24.13 90)
@@ -9057,7 +9041,7 @@
 		(embedded_fonts no)
 		(model "${KIPRJMOD}/../../../CAD/61204021621.step"
 			(offset
-				(xyz 1.25 -23.5 4.5)
+				(xyz 1.25 -24 4.5)
 			)
 			(scale
 				(xyz 1 1 1)

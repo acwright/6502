@@ -1,7 +1,7 @@
 (footprint "Teensy41"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at 0 -10.16 0)
@@ -21,18 +21,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "a5e89c43-0b1e-40b1-beea-0c35be985fbf")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -419,7 +407,7 @@
 			(width 0.15)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "5f7c92b7-c8a1-4f13-91d0-e771cc005070")
 	)
@@ -431,7 +419,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "a645ae9b-e02e-49dc-8bce-74df151207a5")
 	)
@@ -443,7 +431,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "8dd48902-f6cf-454b-9a03-dfdfe635098e")
 	)
@@ -455,7 +443,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "25188e3b-b7ab-4b7c-8c24-ab646fe0ca50")
 	)
@@ -467,7 +455,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "0df8bbe9-9332-4d43-9fd3-b8586633ca75")
 	)
@@ -479,7 +467,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "8f0ffa26-3e7c-4495-832e-ba1d013ae0c1")
 	)
@@ -491,7 +479,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "36f76236-b0ba-4595-8af5-2d27bdcda821")
 	)
@@ -503,7 +491,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "f5c6cbf2-398e-4801-bca1-c802fcf7dc1c")
 	)
@@ -515,7 +503,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "a39928d7-a8b3-4018-bc0b-6cb3d4198c77")
 	)
@@ -542,7 +530,7 @@
 		)
 	)
 	(fp_text user "USB"
-		(at -26.67 0 -90)
+		(at -26.67 0 270)
 		(layer "F.SilkS")
 		(uuid "99e60b4a-da12-4a6a-8245-68a5ea856a86")
 		(effects
@@ -553,7 +541,7 @@
 		)
 	)
 	(fp_text user "DVJ6A"
-		(at -2.54 -0.18 -90)
+		(at -2.54 -0.18 270)
 		(layer "F.SilkS")
 		(uuid "b03774f1-8ea2-4c7a-b1e0-c8729c11f952")
 		(effects
@@ -564,7 +552,7 @@
 		)
 	)
 	(fp_text user "MIMXRT1062"
-		(at -1.27 0 -90)
+		(at -1.27 0 270)
 		(layer "F.SilkS")
 		(uuid "b37601a3-4508-4261-a1c3-bbca1e19d7fc")
 		(effects
@@ -1121,15 +1109,126 @@
 		(remove_unused_layers no)
 		(uuid "fb21ef08-11af-4221-aef6-52e0f20209f4")
 	)
-	(model "${KIPRJMOD}/../../CAD/Teensy_4.1_Assembly.step"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/Teensy_4.1_Assembly.step"
 		(offset
-			(xyz 0 0 0.762)
+			(xyz 0 0 11)
 		)
 		(scale
 			(xyz 1 1 1)
 		)
 		(rotate
-			(xyz 0 0 0)
+			(xyz -0 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29 7.5 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29 -7.5 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step"
+		(offset
+			(xyz 16.5 5 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x05_P2.54mm_Vertical.step"
+		(offset
+			(xyz -23 -4.5 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.00mm.3dshapes/PinHeader_2x03_P2.00mm_Vertical.step"
+		(offset
+			(xyz -14.25 5 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29 -7.5 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29 7.5 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.00mm.3dshapes/PinSocket_2x03_P2.00mm_Vertical.step"
+		(offset
+			(xyz -14.25 5 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x05_P2.54mm_Vertical.step"
+		(offset
+			(xyz 16.5 5 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x05_P2.54mm_Vertical.step"
+		(offset
+			(xyz -23 -4.5 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -90)
 		)
 	)
 )

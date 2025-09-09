@@ -1,7 +1,7 @@
 (footprint "Teensy41 Basic"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(property "Reference" "REF**"
 		(at 0 -10.16 0)
@@ -21,18 +21,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "45947c5f-7269-4096-86ae-667710e20f5d")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -309,7 +297,7 @@
 			(width 0.15)
 			(type solid)
 		)
-		(fill none)
+		(fill no)
 		(layer "F.SilkS")
 		(uuid "b15a4926-9839-4fac-b76f-47c4bbe42508")
 	)
@@ -321,7 +309,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "ab5f706a-1b2a-41bc-afa7-8ca41fe61489")
 	)
@@ -333,7 +321,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "de4c455e-baf2-4d7f-b276-fe756587980b")
 	)
@@ -345,7 +333,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "5d0e47d1-53ca-486a-aa5a-bfc79088a670")
 	)
@@ -357,7 +345,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "6e8096e6-66de-4dc4-8e13-3f259b1266ea")
 	)
@@ -369,7 +357,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "7b5dc688-893d-4b63-9177-e430ea4e8e86")
 	)
@@ -381,7 +369,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "c5c9de17-74b7-4266-a129-c5b4feafe4f4")
 	)
@@ -393,7 +381,7 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "416c71f6-7786-4f3e-8eab-c243a4f71758")
 	)
@@ -405,12 +393,12 @@
 			(width 0.1)
 			(type solid)
 		)
-		(fill solid)
+		(fill yes)
 		(layer "F.SilkS")
 		(uuid "882f2774-4f56-4c96-b716-eaa7df73f8e9")
 	)
 	(fp_text user "MIMXRT1062"
-		(at -1.27 0 -90)
+		(at -1.27 0 270)
 		(layer "F.SilkS")
 		(uuid "2c54ded3-a236-48f3-84f6-eeb23c3c37c4")
 		(effects
@@ -421,7 +409,7 @@
 		)
 	)
 	(fp_text user "DVJ6A"
-		(at -2.54 -0.18 -90)
+		(at -2.54 -0.18 270)
 		(layer "F.SilkS")
 		(uuid "aefd6641-8380-4606-bc4e-7e653a70fc63")
 		(effects
@@ -826,15 +814,60 @@
 		(remove_unused_layers no)
 		(uuid "b75e8355-29ef-47d5-aa29-a384d7eca93b")
 	)
-	(model "${KIPRJMOD}/../../CAD/Teensy_4.1_Assembly.STEP"
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../CAD/Teensy_4.1_Assembly.STEP"
 		(offset
-			(xyz 0 0 0.762)
+			(xyz 0 0 11)
 		)
 		(scale
 			(xyz 1 1 1)
 		)
 		(rotate
-			(xyz 0 0 0)
+			(xyz -0 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29.25 -7.75 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29.25 7.75 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29.25 -7.75 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -90)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x24_P2.54mm_Vertical.step"
+		(offset
+			(xyz -29.25 7.75 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -90)
 		)
 	)
 )

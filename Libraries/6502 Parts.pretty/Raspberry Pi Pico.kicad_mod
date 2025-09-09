@@ -614,17 +614,6 @@
 		(layer "F.Fab")
 		(uuid "94d24676-7ae3-483c-8bd6-88d31adf00b4")
 	)
-	(fp_text user "Copper Keepouts shown on Dwgs layer"
-		(at 0.1 -30.2 0)
-		(layer "Cmts.User")
-		(uuid "66ca01b3-51ff-4294-9b77-4492e98f6aec")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
 	(fp_text user "${REFERENCE}"
 		(at 0 0 180)
 		(layer "F.Fab")
@@ -1319,13 +1308,57 @@
 	(embedded_fonts no)
 	(model "${KIPRJMOD}/../../../CAD/Raspberry Pi Pico.wrl"
 		(offset
-			(xyz 0 0 0)
+			(xyz 0 0 11)
 		)
 		(scale
 			(xyz 1 1 1)
 		)
 		(rotate
-			(xyz 0 0 0)
+			(xyz -0 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x20_P2.54mm_Vertical.step"
+		(offset
+			(xyz 9 24 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinSocket_2.54mm.3dshapes/PinSocket_1x20_P2.54mm_Vertical.step"
+		(offset
+			(xyz -9 24 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -0 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x20_P2.54mm_Vertical.step"
+		(offset
+			(xyz 9 24 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -0)
+		)
+	)
+	(model "${KICAD9_3DMODEL_DIR}/Connector_PinHeader_2.54mm.3dshapes/PinHeader_1x20_P2.54mm_Vertical.step"
+		(offset
+			(xyz -9 24 11)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -0 -180 -0)
 		)
 	)
 )
