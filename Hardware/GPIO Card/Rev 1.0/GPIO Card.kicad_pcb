@@ -890,7 +890,7 @@
 		(sheetname "Root")
 		(sheetfile "GPIO Card.kicad_sch")
 		(zone_connect 1)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr exclude_from_pos_files exclude_from_bom allow_soldermask_bridges)
 		(net_tie_pad_groups "1, 2")
 		(fp_poly
 			(pts
@@ -902,7 +902,18 @@
 			)
 			(fill yes)
 			(layer "F.Cu")
-			(uuid "971642c8-a517-4c94-ae0e-b53111fff8e6")
+			(uuid "6e93a5e9-badd-4cd9-ad84-6f5058b32615")
+		)
+		(fp_rect
+			(start -0.15 -0.75)
+			(end 0.15 0.75)
+			(stroke
+				(width 0)
+				(type default)
+			)
+			(fill yes)
+			(layer "F.Mask")
+			(uuid "f4afa1db-3033-4bbc-9d19-e6970536107d")
 		)
 		(fp_line
 			(start -0.7 -1)
@@ -912,7 +923,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "8d1a1970-0ed9-4b0a-a975-e899d1936fe3")
+			(uuid "00a6d879-9d54-41b1-b93f-bb1534527dea")
 		)
 		(fp_line
 			(start 1.4 -0.3)
@@ -922,7 +933,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "3af2f941-68c4-4458-b028-48365b59e7cf")
+			(uuid "62cb4c22-caac-486c-bb8d-3768204db43f")
 		)
 		(fp_line
 			(start -1.4 0.3)
@@ -932,7 +943,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "249f4ae3-c0e2-4b9c-95d7-06dea6aaef52")
+			(uuid "5a06ed28-9226-420b-8c26-456f181f288d")
 		)
 		(fp_line
 			(start 0.7 1)
@@ -942,7 +953,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "776f14fe-80bd-4f5b-b0f2-c5d687706a4c")
+			(uuid "9b298def-741c-4198-b185-cb9a28c74fe9")
 		)
 		(fp_arc
 			(start 0.7 -1)
@@ -953,7 +964,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "adeb0556-9476-4adc-b7dd-397a7948b026")
+			(uuid "0d0e288d-9b3a-4ee5-927f-54d387b69654")
 		)
 		(fp_arc
 			(start -1.4 -0.3)
@@ -964,7 +975,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "fe0f589e-ec33-4384-9bbb-4d486ff34596")
+			(uuid "254bd349-a3d6-44e1-86d3-6839ab3248a8")
 		)
 		(fp_arc
 			(start 1.4 0.3)
@@ -975,7 +986,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "67aca40a-0bbb-4867-8b0a-47192e65d22f")
+			(uuid "4e69032f-4a42-4517-867d-909eb6e1fe3a")
 		)
 		(fp_arc
 			(start -0.7 1)
@@ -986,7 +997,7 @@
 				(type solid)
 			)
 			(layer "F.SilkS")
-			(uuid "a11673fa-5c4f-430c-ad73-2a869b6377d9")
+			(uuid "7736e384-c982-44c6-9d33-97e6f60ddaa7")
 		)
 		(fp_line
 			(start -1.65 -1.25)
@@ -996,7 +1007,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "fefb6ff1-15b0-4d95-9ac5-51708f11a105")
+			(uuid "14707e02-5a0a-4c82-a72b-95563b111f9c")
 		)
 		(fp_line
 			(start -1.65 -1.25)
@@ -1006,7 +1017,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "fa005e7c-c6b8-4c48-b88b-6df4697f6b5c")
+			(uuid "3a5a8719-2dd2-44d9-92b8-1805eb3e917a")
 		)
 		(fp_line
 			(start 1.65 1.25)
@@ -1016,7 +1027,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "9bd420ed-ac2f-4fa1-9608-e4d40133f677")
+			(uuid "a834e9da-3e52-49c7-9f16-ba505f5d483b")
 		)
 		(fp_line
 			(start 1.65 1.25)
@@ -1026,7 +1037,7 @@
 				(type solid)
 			)
 			(layer "F.CrtYd")
-			(uuid "bded1515-ee8d-48a8-81ca-81bf7694e8fd")
+			(uuid "e2bc4d34-39a1-4fb4-b9e0-30a7e3860b24")
 		)
 		(pad "1" smd custom
 			(at -0.65 0 90)
