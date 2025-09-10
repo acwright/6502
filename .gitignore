@@ -1,4 +1,21 @@
-Research
+# Node modules
+node_modules/
 
-*.DS_Store
-*.lck
+# VitePress cache and build output
+.vitepress/cache/
+.vitepress/dist/
+
+# Local environment variables
+.env
+.env.*.local
+
+# Editor and OS specific files
+.DS_Store
+.lck
+Thumbs.db
+.vscode/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
