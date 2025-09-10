@@ -194,6 +194,6 @@ TXDELAY:
 
 .segment "VECTORS"
 
-  .word   $0F00          ; NMI vector
+  .word   $0000          ; NMI vector
   .word   RESET          ; RESET vector
   .word   $0000          ; IRQ vector

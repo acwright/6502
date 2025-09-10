@@ -1,4 +1,4 @@
-#include "RTC.h"
+#include "rtc.h"
 
 namespace RTC {
 

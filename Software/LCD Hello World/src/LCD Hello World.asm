@@ -33,7 +33,7 @@ clear:
   ldx #0
 print:
   lda message,x
-  beq loop
+  beq halt
   jsr print_char
   inx
   jmp print

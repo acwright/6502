@@ -39,6 +39,8 @@ USBHIDParser        hid3(usb);
 void onTimer();
 void onTick();
 void onClock();
+void onRead();
+void onWrite();
 void onCommand(char command);
 
 void info();
@@ -184,14 +186,18 @@ FASTRUN void onTick() {
 
   if (!digitalReadFast(PHI2)) {
     digitalWriteFast(PHI2, HIGH);
+
     onClock();
+
+    if (readWrite == HIGH) {
+      onRead();
+    }
   } else {
+    if (readWrite == LOW) {
+      onWrite();
+    }
+
     digitalWriteFast(PHI2, LOW);
-
-    // Delay for data hold time
-    delayNanoseconds(20);
-
-    setDataDirIn();
   }
 }
 
@@ -200,6 +206,13 @@ FASTRUN void onClock() {
   address     = readAddress();
   readWrite   = digitalReadFast(RWB);
   
+  // Set the data bus direction
+  if (readWrite == HIGH) { // READING
+    setDataDirOut();
+  } else { // WRITING
+    setDataDirIn();
+  }
+
   // Read the control pins
   resb  = digitalReadFast(RESB);
   nmib  = digitalReadFast(NMIB);
@@ -212,32 +225,29 @@ FASTRUN void onClock() {
   #elif RETROSHIELD_ADAPTER
   sync        = digitalReadFast(SYNC);
   #endif
+}
 
-  if (readWrite == HIGH) { // READING
-    if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) { // IO
-      data = readIO(address);
-      setDataDirOut();
-      writeData(data);
-    } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
-      data = ROM[address - ROM_START];
-      setDataDirOut();
-      writeData(data);
-    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
-      data = RAM[address - RAM_START];
-      setDataDirOut();
-      writeData(data);
-    }
-  } else { // WRITING
-    // Delay for write data setup time
-    delayNanoseconds(150);
+FASTRUN void onRead() {
+  if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) { // IO
+    data = readIO(address);
+    writeData(data);
+  } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
+    data = ROM[address - ROM_START];
+    writeData(data);
+  } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
+    data = RAM[address - RAM_START];
+    writeData(data);
+  }
+}
 
-    data = readData();
+FASTRUN void onWrite() {
+  // Read the data lines just before the falling edge of PHI2 if the CPU is writing
+  data = readData();
 
-    if ((address >= IO_START) && (address <= IO_END) && IOEnabled) { // IO
-      writeIO(address, data);
-    } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
-      RAM[address - RAM_START] = data;
-    }
+  if ((address >= IO_START) && (address <= IO_END) && IOEnabled) { // IO
+    writeIO(address, data);
+  } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
+    RAM[address - RAM_START] = data;
   }
 }
 
@@ -439,10 +449,16 @@ void step() {
 
   if (!isRunning) {
     isStepping = true;
+    if (readWrite == LOW) {
+      onWrite();
+    }
     digitalWriteFast(PHI2, LOW);
     delay(100);
     digitalWriteFast(PHI2, HIGH);
     onClock();
+    if (readWrite == HIGH) {
+      onRead();
+    }
     log();
     isStepping = false;
   } else {

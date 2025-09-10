@@ -4,10 +4,6 @@
 TERM_DATA   = $9C00
 KBD_DATA    = $9D00
 
-reset:
-  ldx #$ff
-  txs
-
 loop:
   lda KBD_DATA
   beq loop          ; Is data ready (not zero)?
