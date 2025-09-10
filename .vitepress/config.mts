@@ -2,7 +2,6 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  base: '/6502/',
   srcDir: "Documentation",
   title: "8-Bit Retro Computer",
   description: "8-Bit Retro Computer",
