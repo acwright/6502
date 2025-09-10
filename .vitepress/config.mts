@@ -11,7 +11,7 @@ export default defineConfig({
     logo: '/6502.svg',
 
     nav: [
-      { text: 'Docs', link: '/introduction/what-is-6502' }
+      { text: 'Docs', link: '/introduction/overview' }
     ],
 
     sidebar: [
@@ -19,7 +19,8 @@ export default defineConfig({
         text: 'Introduction',
         collapsed: false,
         items: [
-          { text: 'What is the 6502 Project?', link: '/introduction/what-is-6502' },
+          { text: 'Overview', link: '/introduction/overview' },
+          { text: 'Hardware', link: '/introduction/hardware' },
         ]
       }
     ],

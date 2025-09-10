@@ -11,6 +11,6 @@ hero:
   actions:
     - theme: brand
       text: Read the Docs
-      link: /introduction/what-is-6502
+      link: /introduction/overview
 ---
 
