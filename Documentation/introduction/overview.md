@@ -1,4 +1,5 @@
-## Overview
+Overview
+========
 
 The project aims to create a retro-style 8-bit computer based on the 65(c)02 microprocessor. It includes custom-designed main board, development board, 
 backplane boards, various peripheral cards, various helper boards, and a simple operating system.

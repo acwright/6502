@@ -1,6 +1,7 @@
-## Hardware
+Hardware
+========
 
-The consists of several custom-designed PCBs. These are divided into the following categories:
+The hardware consists of several custom-designed PCBs. These are divided into the following categories:
 
 - **Boards**: The main board, development board, backplane boards and other peripheral boards.
 - **Cards**: Various peripheral cards for plugging into the backplane or main board card slot(s).
