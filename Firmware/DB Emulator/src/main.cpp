@@ -55,9 +55,11 @@ void toggleROM();
 bool readROMs();
 void listROMs();
 void loadROM(unsigned int index);
+bool loadROMPath(String path);
 bool readCarts();
 void listCarts();
 void loadCart(unsigned int index);
+bool loadCartPath(String path);
 void prevPage();
 void nextPage();
 
@@ -73,6 +75,7 @@ unsigned int freqIndex = 20;      // 1 MHz
 bool isRunning = false;
 bool isStepping = false;
 volatile bool isClockEdge = false;
+bool autoStart = false;
 
 bool CPUEnabled = false;
 bool RAMEnabled = true;
@@ -106,20 +109,6 @@ TeensyTimerTool::PeriodicTimer timer(TeensyTimerTool::TCK);
 //
 
 void setup() {
-  initPins();
-  initButtons();
-  initSD();
-  initRAM();
-  initROM();
-
-  usb.begin();
-
-  Terminal::begin();
-  Mouse::begin();
-  Joystick::begin();
-  RTC::begin();
-  Keyboard::begin();
-  
   Serial.begin(9600);
   
   // Wait up to 2 sec for serial to connect
@@ -128,13 +117,30 @@ void setup() {
     delay(1);
   }
 
+  initPins();
+  initButtons();
+  initRAM();
+  initROM();
+  initSD();
+  
+  setAddrDirIn();
+
+  usb.begin();
+
+  Terminal::begin();
+  Mouse::begin();
+  Joystick::begin();
+  RTC::begin();
+  Keyboard::begin();
+
   info();
   reset();
 
-  setAddrDirIn();
-  setDataDirIn();
-
   timer.begin(onTick, FREQ_PERIODS[freqIndex]);
+
+  if (autoStart) {
+    toggleRunStop();
+  }
 }
 
 void loop() {
@@ -645,7 +651,7 @@ void listROMs() {
 void loadROM(unsigned int index) {
   String directory = "ROMs/";
   String filename = ROMs[(romPage * 8) + index];
-
+  
   if (!filename.length()) {
     Serial.println("Invalid ROM! List RO(M)s before loading.");
     return;
@@ -653,6 +659,18 @@ void loadROM(unsigned int index) {
 
   String path = directory + filename;
 
+  if (loadROMPath(path)) {
+    romFile = ROMs[(romPage * 8) + index];
+    cartFile = "None";
+    
+    Serial.print("Loaded ROM: ");
+    Serial.println(romFile);
+  } else {
+    Serial.println("Invalid ROM!");
+  }
+}
+
+bool loadROMPath(String path) {
   File file = SD.open(path.c_str());
 
   if (file) {
@@ -663,16 +681,14 @@ void loadROM(unsigned int index) {
       i++;
     }
 
-    romFile = ROMs[(romPage * 8) + index];
-    cartFile = "None";
-    
-    Serial.print("Loaded ROM: ");
-    Serial.println(romFile);
-  } else {
-    Serial.println("Invalid ROM!");
-  }
+    file.close();
 
-  file.close();
+    return true;
+  } else {
+    file.close();
+
+    return false;
+  }
 }
 
 bool readCarts() {
@@ -745,6 +761,17 @@ void loadCart(unsigned int index) {
 
   String path = directory + filename;
 
+  if (loadCartPath(path)) {
+    cartFile = Carts[(cartPage * 8) + index];
+
+    Serial.print("Loaded Cart: ");
+    Serial.println(cartFile);
+  } else {
+    Serial.println("Invalid Cart!");
+  }
+}
+
+bool loadCartPath(String path) {
   File file = SD.open(path.c_str());
 
   if (file) {
@@ -759,15 +786,14 @@ void loadCart(unsigned int index) {
       i++;
     }
 
-    cartFile = Carts[(cartPage * 8) + index];
+    file.close();
 
-    Serial.print("Loaded Cart: ");
-    Serial.println(cartFile);
+    return true;
   } else {
-    Serial.println("Invalid Cart!");
-  }
+    file.close();
 
-  file.close();
+    return false;
+  }
 }
 
 void prevPage() {
@@ -866,6 +892,17 @@ void initButtons() {
 
 void initSD() {
   SD.begin(BUILTIN_SDCARD);
+
+  if (SD.exists("ROM.bin")) {
+    loadROMPath("ROM.bin");
+    romFile = "ROM.bin";
+    autoStart = true;
+  }
+  if (SD.exists("Cart.bin")) {
+    loadCartPath("Cart.bin");
+    cartFile = "Cart.bin";
+    autoStart = true;
+  }
 }
 
 void initRAM() {
@@ -876,6 +913,6 @@ void initRAM() {
 
 void initROM() {
   for (word a = 0x0000; a < (ROM_END - ROM_START + 1); a++) {
-    ROM[a] = 0xEA; // Fill the ROM with 0xEA's by default
+    ROM[a] = 0x00; // Fill the ROM with 0x00's by default
   }
 }
