@@ -1,8 +1,5 @@
 #include "utilities.h"
-
-#if DEVBOARD
 #include "devboard.h"
-#endif
 
 void setAddrDirIn() {
   pinMode(A0, INPUT);

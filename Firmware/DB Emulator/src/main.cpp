@@ -5,10 +5,7 @@
 #include <SD.h>
 #include <EEPROM.h>
 
-#if DEVBOARD
 #include "devboard.h"
-#endif
-
 #include "macros.h"
 #include "utilities.h"
 #include "constants.h"
@@ -22,6 +19,9 @@
 byte RAM[RAM_END - RAM_START + 1];
 byte ROM[ROM_END - ROM_START + 1];
 
+#ifdef DEVBOARD_1_1
+Button resetButton    = Button();
+#endif
 Button intButton      = Button();
 Button stepButton     = Button();
 Button runStopButton  = Button();
@@ -145,10 +145,18 @@ void loop() {
   }
 
   // Update buttons
+  #ifdef DEVBOARD_1_1
+  resetButton.update();
+  #endif
   intButton.update();
   stepButton.update();
   runStopButton.update();
 
+  #ifdef DEVBOARD_1_1
+  if (resetButton.pressed()) {
+    reset();
+  }
+  #endif
   if (intButton.pressed()) {
     increaseFrequency();
   }
@@ -207,11 +215,8 @@ FASTRUN void onClock() {
   nmib  = digitalReadFast(NMIB);
   irqb  = digitalReadFast(IRQB);
   rdy   = digitalReadFast(RDY);
-
-  #if DEVBOARD
-  sync        = digitalReadFast(SYNC);
-  be          = digitalReadFast(BE);
-  #endif
+  sync  = digitalReadFast(SYNC);
+  be    = digitalReadFast(BE);
 }
 
 FASTRUN void onRead() {
@@ -293,12 +298,10 @@ void onCommand(char command) {
     case 'P':
       snapshot();
       break;
-    #if DEVBOARD
     case 'u':
     case 'U':
       toggleCPU();
       break;
-    #endif
     case 'a':
     case 'A':
       toggleRAM();
@@ -842,7 +845,13 @@ void writeIO(word address, byte data) {
 //
 
 void initButtons() {
-  intButton.attach(INT_SWB, INPUT_PULLUP);
+  #ifdef DEVBOARD_1_1
+  resetButton.attach(RES_SWB, INPUT_PULLUP);
+  resetButton.interval(DEBOUNCE);
+  resetButton.setPressedState(LOW);
+  #endif
+
+  intButton.attach(CLK_SWB, INPUT_PULLUP);
   intButton.interval(DEBOUNCE);
   intButton.setPressedState(LOW);
 

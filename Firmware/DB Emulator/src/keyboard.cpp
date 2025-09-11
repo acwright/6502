@@ -1,9 +1,6 @@
 #include "keyboard.h"
 #include "macros.h"
-
-#if DEVBOARD
 #include "devboard.h"
-#endif
 
 namespace Keyboard {
 
