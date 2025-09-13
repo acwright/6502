@@ -4,6 +4,3 @@ make:
 
 view:
 	hexdump -C ./build/DB\ LCD\ Mouse.bin
-
-eeprom:
-	minipro -p AT28C256	-w ./build/DB\ LCD\ Mouse.bin

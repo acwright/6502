@@ -1,0 +1,67 @@
+ca65 V2.18 - N/A
+Main file   : ./src/VC Background.asm
+Current file: ./src/VC Background.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               VDP_DATA   = $9C00
+000000r 1               VDP_REG    = $9C01
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1                 ; Initialize VDP in text mode
+000003r 1  A9 00          lda #$00            ; Set mode to text
+000005r 1  8D 01 9C       sta VDP_REG
+000008r 1  A9 50          lda #80
+00000Ar 1  8D 01 9C       sta VDP_REG
+00000Dr 1  A9 D0          lda #$D0            ; 16K, Enable Display, Disable Interrupts
+00000Fr 1  8D 01 9C       sta VDP_REG
+000012r 1  A9 51          lda #81
+000014r 1  8D 01 9C       sta VDP_REG
+000017r 1  A9 02          lda #$02            ; Address of name table in VRAM = Hex $0800
+000019r 1  8D 01 9C       sta VDP_REG
+00001Cr 1  A9 82          lda #$82
+00001Er 1  8D 01 9C       sta VDP_REG
+000021r 1  A9 00          lda #$00            ; Address of pattern table in VRAM = Hex $0000
+000023r 1  8D 01 9C       sta VDP_REG
+000026r 1  A9 84          lda #$84
+000028r 1  8D 01 9C       sta VDP_REG
+00002Br 1  A9 00          lda #$00            ; White text on light blue background
+00002Dr 1  8D 01 9C       sta VDP_REG
+000030r 1  A9 87          lda #$87
+000032r 1  8D 01 9C       sta VDP_REG
+000035r 1               
+000035r 1  A6 00          ldx $00
+000037r 1               loop:
+000037r 1  E8             inx
+000038r 1  8A             txa
+000039r 1  8D 01 9C       sta VDP_REG
+00003Cr 1  A9 87          lda #$87
+00003Er 1  8D 01 9C       sta VDP_REG
+000041r 1  20 rr rr       jsr tmswait
+000044r 1  4C rr rr       jmp loop
+000047r 1               
+000047r 1               tmswait:
+000047r 1  8A             txa
+000048r 1  48             pha
+000049r 1  A0 FF          ldy #$FF            ; Outer loop counter
+00004Br 1               tmswait_inner:
+00004Br 1  A2 FF          ldx #$FF            ; Inner loop counter
+00004Dr 1               tmswait_loop:
+00004Dr 1  CA             dex
+00004Er 1  D0 FD          bne tmswait_loop
+000050r 1  88             dey                 ; Decrement outer loop counter
+000051r 1  D0 F8          bne tmswait_inner   ; Branch if outer loop counter not zero
+000053r 1  68             pla
+000054r 1  AA             tax
+000055r 1  60             rts
+000056r 1               
+000056r 1               .segment "VECTORS"
+000000r 1               
+000000r 1  rr rr          .word reset
+000002r 1  rr rr          .word reset
+000004r 1  rr rr          .word reset
+000004r 1               
