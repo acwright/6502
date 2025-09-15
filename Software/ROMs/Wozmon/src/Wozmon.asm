@@ -20,8 +20,8 @@ ACIA_CTRL   = $9003
 RESET:
   LDA     #$1F           ; 8-N-1, 19200 baud.
   STA     ACIA_CTRL
-  LDA     #$0B           ; No parity, no echo, no interrupts.
-  STA     ACIA_CMD
+  LDY     #$8B           ; No parity, no echo, no interrupts.
+  STY     ACIA_CMD
   LDA     #$1B           ; Begin with escape.
 
 NOTCR:
@@ -183,10 +183,10 @@ PRHEX:
   ADC     #$06           ; Add offset for letter.
 
 ECHO:
-  PHA                    ; Save A.
+  PHA
   STA     ACIA_DATA      ; Output character.
-  LDA     #$FF           ; Initialize delay loop.
-TXDELAY:        
+  LDA     #$FF           ; Wait for transmit to complete.
+TXDELAY:
   DEC                    ; Decrement A.
   BNE     TXDELAY        ; Until A gets to 0.
   PLA                    ; Restore A.
@@ -194,6 +194,6 @@ TXDELAY:
 
 .segment "VECTORS"
 
-  .word   RESET          ; NMI vector
+  .word   $0F00          ; NMI vector
   .word   RESET          ; RESET vector
-  .word   RESET          ; IRQ vector
+  .word   $0000          ; IRQ vector

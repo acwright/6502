@@ -1,6 +1,6 @@
 ca65 V2.18 - N/A
-Main file   : ./src/SCWDC Wozmon.asm
-Current file: ./src/SCWDC Wozmon.asm
+Main file   : ./src/Wozmon.asm
+Current file: ./src/Wozmon.asm
 
 000000r 1               .setcpu "65C02"
 000000r 1               .segment "CODE"
@@ -24,8 +24,8 @@ Current file: ./src/SCWDC Wozmon.asm
 000000r 1               RESET:
 000000r 1  A9 1F          LDA     #$1F           ; 8-N-1, 19200 baud.
 000002r 1  8D 03 90       STA     ACIA_CTRL
-000005r 1  A9 0B          LDA     #$0B           ; No parity, no echo, no interrupts.
-000007r 1  8D 02 90       STA     ACIA_CMD
+000005r 1  A0 8B          LDY     #$8B           ; No parity, no echo, no interrupts.
+000007r 1  8C 02 90       STY     ACIA_CMD
 00000Ar 1  A9 1B          LDA     #$1B           ; Begin with escape.
 00000Cr 1               
 00000Cr 1               NOTCR:
@@ -187,9 +187,9 @@ Current file: ./src/SCWDC Wozmon.asm
 0000EDr 1  69 06          ADC     #$06           ; Add offset for letter.
 0000EFr 1               
 0000EFr 1               ECHO:
-0000EFr 1  48             PHA                    ; Save A.
+0000EFr 1  48             PHA
 0000F0r 1  8D 00 90       STA     ACIA_DATA      ; Output character.
-0000F3r 1  A9 FF          LDA     #$FF           ; Initialize delay loop.
+0000F3r 1  A9 FF          LDA     #$FF           ; Wait for transmit to complete.
 0000F5r 1               TXDELAY:
 0000F5r 1  3A             DEC                    ; Decrement A.
 0000F6r 1  D0 FD          BNE     TXDELAY        ; Until A gets to 0.
@@ -198,7 +198,7 @@ Current file: ./src/SCWDC Wozmon.asm
 0000FAr 1               
 0000FAr 1               .segment "VECTORS"
 000000r 1               
-000000r 1  rr rr          .word   RESET          ; NMI vector
+000000r 1  00 0F          .word   $0F00          ; NMI vector
 000002r 1  rr rr          .word   RESET          ; RESET vector
-000004r 1  rr rr          .word   RESET          ; IRQ vector
+000004r 1  00 00          .word   $0000          ; IRQ vector
 000004r 1               
