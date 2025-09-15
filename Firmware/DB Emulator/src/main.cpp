@@ -19,9 +19,6 @@
 byte RAM[RAM_END - RAM_START + 1];
 byte ROM[ROM_END - ROM_START + 1];
 
-#ifdef DEVBOARD_1_1
-Button resetButton    = Button();
-#endif
 Button intButton      = Button();
 Button stepButton     = Button();
 Button runStopButton  = Button();
@@ -151,18 +148,10 @@ void loop() {
   }
 
   // Update buttons
-  #ifdef DEVBOARD_1_1
-  resetButton.update();
-  #endif
   intButton.update();
   stepButton.update();
   runStopButton.update();
 
-  #ifdef DEVBOARD_1_1
-  if (resetButton.pressed()) {
-    reset();
-  }
-  #endif
   if (intButton.pressed()) {
     increaseFrequency();
   }
@@ -871,12 +860,6 @@ void writeIO(word address, byte data) {
 //
 
 void initButtons() {
-  #ifdef DEVBOARD_1_1
-  resetButton.attach(RES_SWB, INPUT_PULLUP);
-  resetButton.interval(DEBOUNCE);
-  resetButton.setPressedState(LOW);
-  #endif
-
   intButton.attach(CLK_SWB, INPUT_PULLUP);
   intButton.interval(DEBOUNCE);
   intButton.setPressedState(LOW);
