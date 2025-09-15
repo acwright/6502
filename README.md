@@ -38,7 +38,6 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **GPIO Card**: A card that provides general-purpose input/output (GPIO) pins for interfacing with external devices.
 - **LCD Card**: A card that provides output to an LCD display.
 - **Memory Card**: A card that provides RAM or ROM memory. 
-- **Pi Card**: A card that hosts a Raspberry Pi Zero for additional various capabilities.
 - **Prototype Card**: A card that provides a prototyping area for custom circuits. 
 - **Serial Card**: A card that provides serial communication capabilities. 
 - **Serial Card Pro**: An enhanced version of the Serial Card with additional features. 
@@ -54,7 +53,6 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **GPIO Helper**: A board that provides eight buttons and eight LEDs for user input and output.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
-- **Retroshield Adapter**: A board that allows connection of the Retroshield to the bus.
 
 ## Schematics
 
