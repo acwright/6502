@@ -54,6 +54,10 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
 
+**Carts**:
+
+- **ROM Cart**: A cartridge that provides a ROM image for the system.
+
 ## Schematics
 
 The [Schematics](./Schematics) folder contains the schematic diagrams for all the PCBs in the project. These schematics are created using KiCad and provide detailed information about the components and connections used in each board. See the README file in the Schematics folder for more details.

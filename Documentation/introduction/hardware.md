@@ -38,3 +38,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **GPIO Helper**: A board that provides eight buttons and eight LEDs for user input and output.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
+
+**Carts**:
+
+- **ROM Cart**: A cartridge that provides a ROM image for the system.
