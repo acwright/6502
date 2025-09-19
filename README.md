@@ -53,6 +53,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **GPIO Helper**: A board that provides eight buttons and eight LEDs for user input and output.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
+- **Joystick Helper**: A board that provides an Atari 2600 style joystick interface for user input.
 
 **Carts**:
 
