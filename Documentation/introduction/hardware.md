@@ -43,3 +43,4 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 **Carts**:
 
 - **ROM Cart**: A cartridge that provides a ROM image for the system.
+- **ROM Cart Pro**: A cartridge that hosts a Raspberry Pi Pico which can emulate ROM.
