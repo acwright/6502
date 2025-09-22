@@ -6,6 +6,7 @@
 
 byte ROM[ROM_END - ROM_START + 1];
 
+void onClock();
 void onCommand(char command);
 
 void info();
@@ -50,25 +51,34 @@ void setup() {
   initROM();
   initSD();
 
-  // Serial.begin(9600);
+  Serial.begin(9600);
 
-  // info();
+  info();
 
-  noInterrupts(); // This will cause Teensy to not be programmable without pushing the button
+  attachInterrupt(digitalPinToInterrupt(PHI2), onClock, CHANGE);
 }
 
-FASTRUN void loop() {
+void loop() {
+  if (Serial.available()) {
+    noInterrupts();
+    onCommand(Serial.read());
+    interrupts();
+  }
+}
+
+//
+// EVENTS
+//
+
+FASTRUN void onClock() {
   if (
-    digitalReadFast(PHI2) == HIGH && 
+    digitalReadFast(PHI2) == HIGH &&
     digitalReadFast(A15) == HIGH &&
     (digitalReadFast(A14) == HIGH || digitalReadFast(A13) == HIGH) && 
     digitalReadFast(RWB) == HIGH &&
     !isOutputting
   ) {
-    digitalWriteFast(OE1, LOW);
-    digitalWriteFast(OE3, HIGH);
-    
-    word address      = readAddress();
+    word address = readAddress();
 
     digitalWriteFast(OE1, HIGH);
 
@@ -83,17 +93,7 @@ FASTRUN void loop() {
     digitalWriteFast(OE1, LOW);
     digitalWriteFast(OE3, HIGH);
   }
-
-  // Check for key press
-  // if (Serial.available()) 
-  // {
-  //   onCommand(Serial.read());
-  // }
 }
-
-//
-// EVENTS
-//
 
 void onCommand(char command) {
   switch (command) {
