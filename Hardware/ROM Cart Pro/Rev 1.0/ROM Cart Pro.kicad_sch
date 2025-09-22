@@ -3432,7 +3432,7 @@
 		(uuid "1aee7860-da2f-4634-8eba-70638cde218e")
 	)
 	(junction
-		(at 118.11 41.91)
+		(at 135.89 41.91)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "2175734f-b0d8-4729-9ad7-8a7c044a67a9")
@@ -3468,7 +3468,7 @@
 		(uuid "80337c21-ef15-4f1c-bd81-52e9f8242ade")
 	)
 	(junction
-		(at 118.11 26.67)
+		(at 135.89 26.67)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "80a95c38-c201-4b8d-8f24-3693caac9a13")
@@ -3957,7 +3957,7 @@
 	)
 	(wire
 		(pts
-			(xy 114.3 41.91) (xy 118.11 41.91)
+			(xy 139.7 41.91) (xy 135.89 41.91)
 		)
 		(stroke
 			(width 0)
@@ -4777,7 +4777,7 @@
 	)
 	(wire
 		(pts
-			(xy 132.08 41.91) (xy 139.7 41.91)
+			(xy 121.92 41.91) (xy 114.3 41.91)
 		)
 		(stroke
 			(width 0)
@@ -4817,7 +4817,7 @@
 	)
 	(wire
 		(pts
-			(xy 121.92 41.91) (xy 118.11 41.91)
+			(xy 132.08 41.91) (xy 135.89 41.91)
 		)
 		(stroke
 			(width 0)
@@ -5427,7 +5427,7 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 24.13) (xy 118.11 26.67)
+			(xy 135.89 24.13) (xy 135.89 26.67)
 		)
 		(stroke
 			(width 0)
@@ -5437,7 +5437,7 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 38.1) (xy 118.11 41.91)
+			(xy 135.89 38.1) (xy 135.89 41.91)
 		)
 		(stroke
 			(width 0)
@@ -5547,7 +5547,7 @@
 	)
 	(wire
 		(pts
-			(xy 118.11 26.67) (xy 118.11 30.48)
+			(xy 135.89 26.67) (xy 135.89 30.48)
 		)
 		(stroke
 			(width 0)
@@ -5557,7 +5557,7 @@
 	)
 	(wire
 		(pts
-			(xy 127 26.67) (xy 118.11 26.67)
+			(xy 127 26.67) (xy 135.89 26.67)
 		)
 		(stroke
 			(width 0)
@@ -6607,7 +6607,7 @@
 	)
 	(global_label "3V3"
 		(shape input)
-		(at 118.11 24.13 90)
+		(at 135.89 24.13 90)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -6616,7 +6616,7 @@
 		)
 		(uuid "6d992454-2e6c-4250-bcca-9980c7e8ee92")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 118.11 24.13 0)
+			(at 135.89 24.13 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7407,16 +7407,16 @@
 	)
 	(global_label "RESB"
 		(shape output)
-		(at 139.7 41.91 0)
+		(at 114.3 41.91 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
 		(uuid "c1165017-42f8-4799-a566-bd08fb097b83")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 139.7 41.91 0)
+			(at 114.3 41.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7787,16 +7787,16 @@
 	)
 	(global_label "RESB_3V3"
 		(shape input)
-		(at 114.3 41.91 180)
+		(at 139.7 41.91 0)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify right)
+			(justify left)
 		)
 		(uuid "f096dea2-a3a3-4a53-9860-4723f8e5ef62")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 114.3 41.91 0)
+			(at 139.7 41.91 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8661,7 +8661,8 @@
 	)
 	(symbol
 		(lib_id "Device:R")
-		(at 118.11 34.29 0)
+		(at 135.89 34.29 0)
+		(mirror y)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8669,7 +8670,7 @@
 		(dnp no)
 		(uuid "4d24dd1e-7b6c-4ac2-9b74-bbb2845dac4f")
 		(property "Reference" "R1"
-			(at 116.332 35.4584 0)
+			(at 137.668 35.4584 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8678,7 +8679,7 @@
 			)
 		)
 		(property "Value" "1K"
-			(at 116.332 33.147 0)
+			(at 137.668 33.147 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8687,7 +8688,7 @@
 			)
 		)
 		(property "Footprint" "Resistor_SMD:R_0805_2012Metric"
-			(at 116.332 34.29 90)
+			(at 137.668 34.29 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8696,7 +8697,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 118.11 34.29 0)
+			(at 135.89 34.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8705,7 +8706,7 @@
 			)
 		)
 		(property "Description" "Resistor"
-			(at 118.11 34.29 0)
+			(at 135.89 34.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8714,7 +8715,7 @@
 			)
 		)
 		(property "LCSC" "C17513"
-			(at 118.11 34.29 0)
+			(at 135.89 34.29 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8928,7 +8929,8 @@
 	)
 	(symbol
 		(lib_id "Transistor_FET:BSS138")
-		(at 127 39.37 270)
+		(at 127 39.37 90)
+		(mirror x)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -8936,7 +8938,7 @@
 		(dnp no)
 		(uuid "5e350c43-c897-4c3a-92dc-2cac25ecf8da")
 		(property "Reference" "Q1"
-			(at 127 55.88 90)
+			(at 127 45.974 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8944,7 +8946,7 @@
 			)
 		)
 		(property "Value" "BSS138"
-			(at 127 58.42 90)
+			(at 127 48.514 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8952,7 +8954,7 @@
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
-			(at 125.095 44.45 0)
+			(at 128.905 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -8963,7 +8965,7 @@
 			)
 		)
 		(property "Datasheet" "https://www.onsemi.com/pub/Collateral/BSS138-D.PDF"
-			(at 123.19 44.45 0)
+			(at 130.81 44.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)

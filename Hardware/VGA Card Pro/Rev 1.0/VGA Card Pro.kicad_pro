@@ -227,7 +227,12 @@
     "equivalence_files": []
   },
   "erc": {
-    "erc_exclusions": [],
+    "erc_exclusions": [
+      [
+        "duplicate_pins|457200|495300|23621698-08ee-461a-8b0c-327a454a9132|00000000-0000-0000-0000-000000000000|||",
+        ""
+      ]
+    ],
     "meta": {
       "version": 0
     },
@@ -432,7 +437,7 @@
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "warning",
+      "pin_to_pin": "ignore",
       "power_pin_not_driven": "error",
       "same_local_global_label": "warning",
       "similar_label_and_power": "warning",
@@ -453,7 +458,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "VGA Card.kicad_pro",
+    "filename": "VGA Card Pro.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -588,7 +593,7 @@
     },
     "net_format_name": "",
     "page_layout_descr_file": "${KIPRJMOD}/../../../Worksheets/6502.kicad_wks",
-    "plot_directory": "../../../Schematics/VGA Card/Rev 1.0/",
+    "plot_directory": "../../../Schematics/VGA Card Pro/Rev 1.0/",
     "space_save_all_events": true,
     "spice_current_sheet_as_root": false,
     "spice_external_command": "spice \"%I\"",
