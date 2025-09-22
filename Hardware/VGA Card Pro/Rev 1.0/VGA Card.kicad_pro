@@ -37,30 +37,23 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 3.2,
-          "height": 3.2,
-          "width": 3.2
+          "drill": 0.762,
+          "height": 1.524,
+          "width": 1.524
         },
-        "silk_line_width": 0.12,
+        "silk_line_width": 0.1,
         "silk_text_italic": false,
         "silk_text_size_h": 1.0,
         "silk_text_size_v": 1.0,
-        "silk_text_thickness": 0.25,
+        "silk_text_thickness": 0.1,
         "silk_text_upright": false,
         "zones": {
           "min_clearance": 0.254
         }
       },
-      "diff_pair_dimensions": [
-        {
-          "gap": 0.0,
-          "via_gap": 0.0,
-          "width": 0.0
-        }
-      ],
+      "diff_pair_dimensions": [],
       "drc_exclusions": [],
       "meta": {
-        "filename": "board_design_settings.json",
         "version": 2
       },
       "rule_severities": {
@@ -123,13 +116,11 @@
         "via_dangling": "warning",
         "zones_intersect": "error"
       },
-      "rule_severitieslegacy_courtyards_overlap": true,
-      "rule_severitieslegacy_no_courtyard_defined": false,
       "rules": {
         "max_error": 0.005,
         "min_clearance": 0.0,
         "min_connection": 0.0,
-        "min_copper_edge_clearance": 0.025,
+        "min_copper_edge_clearance": 0.5,
         "min_groove_width": 0.0,
         "min_hole_clearance": 0.25,
         "min_hole_to_hole": 0.25,
@@ -140,9 +131,9 @@
         "min_text_height": 0.8,
         "min_text_thickness": 0.08,
         "min_through_hole_diameter": 0.3,
-        "min_track_width": 0.2,
+        "min_track_width": 0.0,
         "min_via_annular_width": 0.1,
-        "min_via_diameter": 0.4,
+        "min_via_diameter": 0.5,
         "solder_mask_to_copper_clearance": 0.005,
         "use_height_for_length_calcs": true
       },
@@ -190,9 +181,7 @@
           "td_width_to_size_filter_ratio": 0.9
         }
       ],
-      "track_widths": [
-        0.0
-      ],
+      "track_widths": [],
       "tuning_pattern_settings": {
         "diff_pair_defaults": {
           "corner_radius_percentage": 80,
@@ -219,12 +208,7 @@
           "spacing": 0.6
         }
       },
-      "via_dimensions": [
-        {
-          "diameter": 0.0,
-          "drill": 0.0
-        }
-      ],
+      "via_dimensions": [],
       "zones_allow_external_fillets": false
     },
     "ipc2581": {
@@ -443,14 +427,14 @@
       "missing_power_pin": "error",
       "missing_unit": "warning",
       "multiple_net_names": "warning",
-      "net_not_bus_member": "ignore",
+      "net_not_bus_member": "warning",
       "no_connect_connected": "warning",
       "no_connect_dangling": "warning",
       "pin_not_connected": "error",
       "pin_not_driven": "error",
-      "pin_to_pin": "ignore",
+      "pin_to_pin": "warning",
       "power_pin_not_driven": "error",
-      "same_local_global_label": "ignore",
+      "same_local_global_label": "warning",
       "similar_label_and_power": "warning",
       "similar_labels": "warning",
       "similar_power": "warning",
@@ -469,14 +453,14 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "ROM Cart Pro.kicad_pro",
+    "filename": "VGA Card.kicad_pro",
     "version": 3
   },
   "net_settings": {
     "classes": [
       {
         "bus_width": 12,
-        "clearance": 0.127,
+        "clearance": 0.2,
         "diff_pair_gap": 0.25,
         "diff_pair_via_gap": 0.25,
         "diff_pair_width": 0.2,
@@ -487,9 +471,9 @@
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 2147483647,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.25,
-        "via_diameter": 0.8,
-        "via_drill": 0.4,
+        "track_width": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
         "wire_width": 6
       }
     ],
@@ -498,218 +482,17 @@
     },
     "net_colors": null,
     "netclass_assignments": null,
-    "netclass_patterns": [
-      {
-        "netclass": "Default",
-        "pattern": "/A0"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A1"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A10"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A11"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A12"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A2"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A3"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A4"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A5"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A6"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A7"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A8"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/A9"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D0"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D1"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D2"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D3"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D4"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D5"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D6"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "/D7"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "A13"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "A14"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "A15"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "EXP0"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "EXP1"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "GND"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(CONN1-PadBE)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(CONN1-PadRDY)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(CONN1-Pad~{IRQ})"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(CONN1-Pad~{ML})"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(CONN1-Pad~{NMI})"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(CONN1-Pad~{RES})"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(IC2-Pad27)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U1-Pad12)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U1-Pad5)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U2-Pad10)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U2-Pad12)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U2-Pad13)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U2-Pad3)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U3-Pad10)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U3-Pad13)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "Net-(U3-Pad3)"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "PHI2"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "R~{W}"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "VCC"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "~{HI_ROM_DISABLE}"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "~{READ}"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "~{ROM_ENABLE}"
-      },
-      {
-        "netclass": "Default",
-        "pattern": "~{WRITE}"
-      }
-    ]
+    "netclass_patterns": []
   },
   "pcbnew": {
     "last_paths": {
       "gencad": "",
       "idf": "",
-      "netlist": "Memory Card.net",
+      "netlist": "",
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "../../Assets/PCB Models/ROM Cart Pro/Rev 1.0/ROM Cart Pro.step",
+      "step": "../../Assets/PCB Models/VGA Card/Rev 1.0/VGA Card.step",
       "svg": "",
       "vrml": ""
     },
@@ -789,25 +572,24 @@
       "intersheets_ref_show": false,
       "intersheets_ref_suffix": "",
       "junction_size_choice": 3,
-      "label_size_ratio": 0.25,
+      "label_size_ratio": 0.375,
       "operating_point_overlay_i_precision": 3,
       "operating_point_overlay_i_range": "~A",
       "operating_point_overlay_v_precision": 3,
       "operating_point_overlay_v_range": "~V",
       "overbar_offset_ratio": 1.23,
-      "pin_symbol_size": 0.0,
-      "text_offset_ratio": 0.08
+      "pin_symbol_size": 25.0,
+      "text_offset_ratio": 0.15
     },
     "legacy_lib_dir": "",
     "legacy_lib_list": [],
     "meta": {
       "version": 1
     },
-    "net_format_name": "Pcbnew",
+    "net_format_name": "",
     "page_layout_descr_file": "${KIPRJMOD}/../../../Worksheets/6502.kicad_wks",
-    "plot_directory": "../../../Schematics/ROM Cart Pro/Rev 1.0/",
+    "plot_directory": "../../../Schematics/VGA Card/Rev 1.0/",
     "space_save_all_events": true,
-    "spice_adjust_passive_values": false,
     "spice_current_sheet_as_root": false,
     "spice_external_command": "spice \"%I\"",
     "spice_model_current_sheet_as_root": true,
@@ -819,7 +601,7 @@
   },
   "sheets": [
     [
-      "24157f0f-c5f9-4ba2-930b-b501b00d1e61",
+      "0e80058d-06c9-4042-9128-fb5310867aa3",
       "Root"
     ]
   ],
