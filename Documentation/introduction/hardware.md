@@ -35,6 +35,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 
 - **Breadboard Helper**: A board that allows easy connection to a breadboard for prototyping.
 - **GPIO Helper**: A board that provides eight buttons and eight LEDs for user input and output.
+- **GPIO Breadboard Helper**: A board that allows easy connection of GPIO ports to a breadboard for prototyping.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
 - **Joystick Helper**: A board that provides an Atari 2600 style joystick interface for user input.
