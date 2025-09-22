@@ -29,6 +29,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **Storage Card**: A card that provides storage capabilities using a CompactFlash card.
 - **Teensy Card**: A card that hosts a Teensy 4.1 microcontroller for various capabilities.
 - **VGA Card**: A card that provides VGA output capabilities.
+- **VGA Card Pro**: An enhanced version of the VGA Card with additional features.
 - **Video Card**: A card that provides composite video output capabilities using the TMS9918A.
 
 **Helpers**:
