@@ -24,11 +24,11 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 
 **Boards**:
 
-- **Main Board**: The main board that contains the 65(c)02 CPU, memory, memory decoding ICs, one peripheral card slot, and a bus connector.
 - **Backplane Board**: A backplane board that provides multiple card slots for peripheral cards and connects to the main board via a ribbon cable.
 - **Backplane Board Pro**: An enhanced version of the backplane board with additional features.
-- **Input Board**: A board that provides PS/2 keyboard and mouse interfaces along with SNES controller support.
 - **Front Panel Board**: A board that provides a front panel interface with switches and LEDs for controlling and monitoring the system.
+- **Input Board**: A board that provides PS/2 keyboard and mouse interfaces along with SNES controller support.
+- **Main Board**: The main board that contains the 65(c)02 CPU, memory, memory decoding ICs, one peripheral card slot, and a bus connector.
 
 **Cards**:
 
@@ -52,9 +52,10 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Breadboard Helper**: A board that allows easy connection to a breadboard for prototyping.
 - **GPIO Helper**: A board that provides eight buttons and eight LEDs for user input and output.
 - **GPIO Breadboard Helper**: A board that allows easy connection of GPIO ports to a breadboard for prototyping.
+- **Joystick Helper**: A board that provides an Atari 2600 style joystick interface for user input.
+- **Keyboard Helper**: A board that allows connection of a PS/2 keyboard.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
-- **Joystick Helper**: A board that provides an Atari 2600 style joystick interface for user input.
 
 **Carts**:
 
