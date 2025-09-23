@@ -38,6 +38,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **LCD Card**: A card that provides output to an LCD display.
 - **Memory Card**: A card that provides RAM or ROM memory. 
 - **Prototype Card**: A card that provides a prototyping area for custom circuits. 
+- **RTC Card**: A card that provides real-time clock functionality. 
 - **Serial Card**: A card that provides serial communication capabilities. 
 - **Serial Card Pro**: An enhanced version of the Serial Card with additional features. 
 - **Sound Card**: A card that provides audio output capabilities.
