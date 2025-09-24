@@ -3408,6 +3408,18 @@
 		(uuid "01f7c05f-8e83-46f0-84d6-2c551c7b54c8")
 	)
 	(junction
+		(at 218.44 147.32)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "02a1c7c0-7459-4242-9f48-50500f7ceb41")
+	)
+	(junction
+		(at 218.44 160.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "060509c6-4eeb-4a66-9016-9b6d6b19d4de")
+	)
+	(junction
 		(at 207.01 160.02)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -3438,7 +3450,7 @@
 		(uuid "2175734f-b0d8-4729-9ad7-8a7c044a67a9")
 	)
 	(junction
-		(at 96.52 181.61)
+		(at 101.6 181.61)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "4b456782-92eb-4fe4-91c1-b1712ba49072")
@@ -3478,12 +3490,6 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "8b95c340-a804-40a1-856b-f4b5ee316627")
-	)
-	(junction
-		(at 96.52 179.07)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "8befcb07-f35d-4b1b-8541-af49fa293bee")
 	)
 	(junction
 		(at 176.53 62.23)
@@ -3767,6 +3773,16 @@
 	)
 	(wire
 		(pts
+			(xy 228.6 147.32) (xy 218.44 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0b009dfb-1204-4074-a0f5-df6dca81d9d0")
+	)
+	(wire
+		(pts
 			(xy 121.92 63.5) (xy 119.38 63.5)
 		)
 		(stroke
@@ -3827,7 +3843,7 @@
 	)
 	(wire
 		(pts
-			(xy 218.44 143.51) (xy 218.44 149.86)
+			(xy 218.44 143.51) (xy 218.44 147.32)
 		)
 		(stroke
 			(width 0)
@@ -4257,16 +4273,6 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 154.94) (xy 96.52 163.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "44bef5c7-03a9-4a71-b7d2-e6b01b5c576a")
-	)
-	(wire
-		(pts
 			(xy 219.71 62.23) (xy 219.71 49.53)
 		)
 		(stroke
@@ -4277,7 +4283,7 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 193.04) (xy 96.52 181.61)
+			(xy 101.6 193.04) (xy 101.6 181.61)
 		)
 		(stroke
 			(width 0)
@@ -4327,7 +4333,7 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 181.61) (xy 116.84 181.61)
+			(xy 101.6 181.61) (xy 116.84 181.61)
 		)
 		(stroke
 			(width 0)
@@ -4417,7 +4423,17 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 179.07) (xy 116.84 179.07)
+			(xy 218.44 147.32) (xy 218.44 149.86)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5a6d7385-7e1d-4f1e-b7ad-76f6cb2e15d4")
+	)
+	(wire
+		(pts
+			(xy 101.6 179.07) (xy 116.84 179.07)
 		)
 		(stroke
 			(width 0)
@@ -4447,7 +4463,17 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 193.04) (xy 127 193.04)
+			(xy 228.6 160.02) (xy 218.44 160.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "697f815d-ff6a-4bf7-9a52-e20f39a6a171")
+	)
+	(wire
+		(pts
+			(xy 101.6 193.04) (xy 127 193.04)
 		)
 		(stroke
 			(width 0)
@@ -4977,16 +5003,6 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 171.45) (xy 96.52 179.07)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "aed88c25-0dd9-4b4e-8c5e-e11fe8646274")
-	)
-	(wire
-		(pts
 			(xy 218.44 160.02) (xy 207.01 160.02)
 		)
 		(stroke
@@ -5014,6 +5030,16 @@
 			(type default)
 		)
 		(uuid "b278312d-90bf-42bd-8a38-9e3a15760b60")
+	)
+	(wire
+		(pts
+			(xy 228.6 149.86) (xy 228.6 147.32)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b3b0874d-5c99-45e3-841f-c1caf9d5db41")
 	)
 	(wire
 		(pts
@@ -5104,6 +5130,16 @@
 			(type default)
 		)
 		(uuid "cc2615bb-28ee-4828-b3c3-9138b803e5dd")
+	)
+	(wire
+		(pts
+			(xy 228.6 157.48) (xy 228.6 160.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ce2cd070-3945-4bfa-a81f-a8fb09bec4b4")
 	)
 	(wire
 		(pts
@@ -5294,16 +5330,6 @@
 			(type default)
 		)
 		(uuid "e557d868-f5d2-42da-89b4-617bcde0a354")
-	)
-	(wire
-		(pts
-			(xy 127 154.94) (xy 96.52 154.94)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "e6a82940-0dfa-4895-9211-585b2e815e47")
 	)
 	(wire
 		(pts
@@ -5587,7 +5613,7 @@
 	)
 	(wire
 		(pts
-			(xy 96.52 181.61) (xy 96.52 179.07)
+			(xy 101.6 181.61) (xy 101.6 179.07)
 		)
 		(stroke
 			(width 0)
@@ -7605,8 +7631,8 @@
 			)
 		)
 	)
-	(global_label "EXP0"
-		(shape output)
+	(global_label "HI ROM DISABLE"
+		(shape input)
 		(at 83.82 35.56 0)
 		(effects
 			(font
@@ -7665,7 +7691,7 @@
 			)
 		)
 	)
-	(global_label "EXP0"
+	(global_label "HI ROM DISABLE"
 		(shape output)
 		(at 119.38 60.96 180)
 		(effects
@@ -8516,6 +8542,82 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:C")
+		(at 228.6 153.67 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1d6fa9ad-db37-4920-9513-72b0535ee0a8")
+		(property "Reference" "C5"
+			(at 235.0008 153.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "100nF"
+			(at 232.6894 153.67 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
+			(at 229.5652 157.48 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 228.6 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 228.6 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "LCSC" "C49678"
+			(at 228.6 153.67 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4aa7de60-4e1a-4114-84b5-031c4d9a2f8f")
+		)
+		(pin "2"
+			(uuid "babca4f1-24b9-42a4-9de5-511b5f4b4ec0")
+		)
+		(instances
+			(project "ROM Cart Pro"
+				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
+					(reference "C5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "power:PWR_FLAG")
 		(at 127 193.04 270)
 		(unit 1)
@@ -8578,82 +8680,6 @@
 			(project "ROM Cart Pro"
 				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
 					(reference "#FLG03")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 96.52 167.64 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "3c96f6ef-026f-4f4b-93c0-0db9ed20c28d")
-		(property "Reference" "C5"
-			(at 102.9208 167.64 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "100nF"
-			(at 100.6094 167.64 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" "Capacitor_SMD:C_0805_2012Metric"
-			(at 97.4852 171.45 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "~"
-			(at 96.52 167.64 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" ""
-			(at 96.52 167.64 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "LCSC" "C49678"
-			(at 96.52 167.64 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "8395929a-9fa3-48f4-9701-1cc5f0931c5b")
-		)
-		(pin "2"
-			(uuid "9c7c6bbf-4676-404a-89a1-c29fb2ee5b65")
-		)
-		(instances
-			(project "ROM Cart Pro"
-				(path "/24157f0f-c5f9-4ba2-930b-b501b00d1e61"
-					(reference "C5")
 					(unit 1)
 				)
 			)
