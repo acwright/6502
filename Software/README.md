@@ -5,7 +5,6 @@ This folder contains assembly code demo's for the 6502 project.
 
 Folder names are prefixed with the following to indicate specific hardware environments:
 
-- **IB**: Input Board
 - **GPIO**: GPIO Card / GPIO Helper
 - **LCD**: LCD Card
 - **SC**: Serial Card / Serial Card Pro
