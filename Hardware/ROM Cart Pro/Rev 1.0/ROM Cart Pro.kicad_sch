@@ -3557,12 +3557,6 @@
 		(color 0 0 0 0)
 		(uuid "f05296ac-d898-48c5-83d3-060adaf1df89")
 	)
-	(junction
-		(at 78.74 35.56)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "f5c733f8-16f5-4c29-8a10-2ed696d2a392")
-	)
 	(no_connect
 		(at 44.45 43.18)
 		(uuid "07007e83-6eaf-44f8-b7ab-9e825e0619f0")
@@ -3590,6 +3584,10 @@
 	(no_connect
 		(at 215.9 44.45)
 		(uuid "3d3291c1-02c1-4faf-b6f3-7119c9e7ea13")
+	)
+	(no_connect
+		(at 74.93 33.02)
+		(uuid "5226717d-0f69-4748-a090-dccba26d3e46")
 	)
 	(no_connect
 		(at 137.16 168.91)
@@ -4943,16 +4941,6 @@
 	)
 	(wire
 		(pts
-			(xy 78.74 35.56) (xy 83.82 35.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a2b67962-15c6-45db-a436-b79385aa5c48")
-	)
-	(wire
-		(pts
 			(xy 46.99 127) (xy 36.83 127)
 		)
 		(stroke
@@ -5233,16 +5221,6 @@
 	)
 	(wire
 		(pts
-			(xy 74.93 33.02) (xy 78.74 33.02)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "db81d512-3fd8-450a-bdfd-88ad2dc1fca8")
-	)
-	(wire
-		(pts
 			(xy 184.15 160.02) (xy 184.15 161.29)
 		)
 		(stroke
@@ -5273,7 +5251,7 @@
 	)
 	(wire
 		(pts
-			(xy 74.93 35.56) (xy 78.74 35.56)
+			(xy 74.93 35.56) (xy 77.47 35.56)
 		)
 		(stroke
 			(width 0)
@@ -5390,16 +5368,6 @@
 			(type default)
 		)
 		(uuid "eab4b2ee-309b-4693-915a-4ed0d593a35a")
-	)
-	(wire
-		(pts
-			(xy 78.74 33.02) (xy 78.74 35.56)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "ef4819f4-b090-4331-ab2c-bc6b531b6add")
 	)
 	(wire
 		(pts
@@ -7631,9 +7599,9 @@
 			)
 		)
 	)
-	(global_label "HI ROM DISABLE"
+	(global_label "EXP0"
 		(shape input)
-		(at 83.82 35.56 0)
+		(at 77.47 35.56 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -7642,7 +7610,7 @@
 		)
 		(uuid "dc51031f-c04b-45b5-b737-956f88f51b7f")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 83.82 35.56 90)
+			(at 77.47 35.56 90)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7691,7 +7659,7 @@
 			)
 		)
 	)
-	(global_label "HI ROM DISABLE"
+	(global_label "EXP0"
 		(shape output)
 		(at 119.38 60.96 180)
 		(effects
