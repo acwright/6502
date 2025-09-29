@@ -37,9 +37,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.0,
-          "height": 0.65,
-          "width": 1.56
+          "drill": 1.0,
+          "height": 1.6,
+          "width": 1.6
         },
         "silk_line_width": 0.1,
         "silk_text_italic": false,
@@ -52,7 +52,16 @@
         }
       },
       "diff_pair_dimensions": [],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "lib_footprint_mismatch|95520000|94910000|71d563c3-c0ba-411b-8672-10f517302dbf|00000000-0000-0000-0000-000000000000",
+          ""
+        ],
+        [
+          "lib_footprint_mismatch|95660090|115510575|1c4f0a6c-6545-4ab0-81a0-a755d00227f9|00000000-0000-0000-0000-000000000000",
+          ""
+        ]
+      ],
       "meta": {
         "version": 2
       },
@@ -492,7 +501,7 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "../../Assets/PCB Models/VGA Card/Rev 1.0/VGA Card.step",
+      "step": "../../../Assets/PCB Models/VGA Card Pro/Rev 1.0/VGA Card Pro.step",
       "svg": "",
       "vrml": ""
     },
