@@ -52,6 +52,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Breadboard Helper**: A board that allows easy connection to a breadboard for prototyping.
 - **GPIO Helper**: A board that provides eight buttons and eight LEDs for user input and output.
 - **GPIO Breadboard Helper**: A board that allows easy connection of GPIO ports to a breadboard for prototyping.
+- **GPIO DB25 Helper**: A board that allows easy connection of GPIO ports to a DB25 connector.
 - **Joystick Helper**: A board that provides an Atari 2600 style joystick interface for user input.
 - **Keyboard Helper**: A board that provides a 64 key matrix keyboard interface and dual joystick ports for user input.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
