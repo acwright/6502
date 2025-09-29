@@ -185,7 +185,7 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 2.6526 1.958752) (xy 2.669948 1.966334) (xy 2.711356 1.999128) (xy 2.746765 2.046547) (xy 2.768664 2.097151)
@@ -1278,7 +1278,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 0.950383 0.628795) (xy 1.001975 0.630695) (xy 1.04959 0.633291) (xy 1.08987 0.636334) (xy 1.11946 0.639576)
@@ -1522,7 +1522,7 @@
 		(at 159.3011 88.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H2"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -1534,7 +1534,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -1546,7 +1546,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1559,7 +1559,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1572,7 +1572,10 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(sheetname "/")
+		(sheetfile "PS2 Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -1632,7 +1635,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20with%20picoPower%20Technology%20Data%20Sheet%2040001984A.pdf"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -1644,7 +1647,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "20MHz, 32kB Flash, 2kB SRAM, 1kB EEPROM, DIP-28"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -2526,7 +2529,7 @@
 				)
 			)
 		)
-		(attr board_only exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy -0.505547 -0.173478) (xy -0.505547 0.867201) (xy -0.191432 0.868285) (xy 0.122684 0.86937) (xy 0.123789 1.041764)
@@ -3207,7 +3210,7 @@
 		(at 159.3011 127.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H4"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -3219,7 +3222,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3231,7 +3234,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3244,7 +3247,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3257,7 +3260,10 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(sheetname "/")
+		(sheetfile "PS2 Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -3631,7 +3637,7 @@
 		(at 71.3011 88.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H1"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -3643,7 +3649,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3655,7 +3661,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3668,7 +3674,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3681,7 +3687,10 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(sheetname "/")
+		(sheetfile "PS2 Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -4943,7 +4952,7 @@
 		(at 71.3011 127.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H3"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -4955,7 +4964,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -4967,7 +4976,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4980,7 +4989,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4993,7 +5002,10 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(sheetname "/")
+		(sheetfile "PS2 Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -5076,12 +5088,12 @@
 				)
 			)
 		)
-		(property "Mouser" "774-MP107-E"
+		(property "Digikey" "3155-16M20P2/49US-ND"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "a96d13d0-1a42-41d6-8f8e-5a92ea24e797")
+			(uuid "067e4ee7-07a0-42db-b36e-018a4b7d7dd6")
 			(effects
 				(font
 					(size 1 1)

@@ -1296,6 +1296,42 @@
 					)
 				)
 				(pin power_in line
+					(at -6.35 -48.26 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "52"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -3.81 -48.26 90)
+					(length 5.08)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "51"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
 					(at -1.27 44.45 270)
 					(length 5.08)
 					(name "VCC"
@@ -4547,6 +4583,12 @@
 		(uuid "990ab9bd-1191-45f2-aa71-7f92c67f5c94")
 	)
 	(junction
+		(at 194.31 124.46)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "a5bcde78-d39d-404d-ba76-6caaa9c92587")
+	)
+	(junction
 		(at 166.37 102.87)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -5156,6 +5198,16 @@
 	)
 	(wire
 		(pts
+			(xy 191.77 123.19) (xy 191.77 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "447a3f7a-ee76-4615-b3d8-f34c3fc14693")
+	)
+	(wire
+		(pts
 			(xy 67.31 175.26) (xy 81.28 175.26)
 		)
 		(stroke
@@ -5466,6 +5518,16 @@
 	)
 	(wire
 		(pts
+			(xy 194.31 124.46) (xy 196.85 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7a21e05e-9086-4453-9302-84c9c656d9a9")
+	)
+	(wire
+		(pts
 			(xy 26.67 186.69) (xy 26.67 172.72)
 		)
 		(stroke
@@ -5573,6 +5635,16 @@
 			(type default)
 		)
 		(uuid "8537ea32-c6b1-49ad-995c-0a45122863e4")
+	)
+	(wire
+		(pts
+			(xy 191.77 124.46) (xy 194.31 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "878871af-69dc-48b0-9e47-f7416cac57ee")
 	)
 	(wire
 		(pts
@@ -6253,6 +6325,16 @@
 			(type default)
 		)
 		(uuid "fa5d68f2-c093-4ead-b1cf-44d560aba8e7")
+	)
+	(wire
+		(pts
+			(xy 194.31 123.19) (xy 194.31 124.46)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fdd25e37-c27e-48d4-aa1e-545c733bccb7")
 	)
 	(label "$8000"
 		(at 71.12 160.02 0)
@@ -7989,6 +8071,12 @@
 		)
 		(pin "17"
 			(uuid "0d2a471c-e018-4aea-a7b5-9397c095e27b")
+		)
+		(pin "52"
+			(uuid "f55ada0a-161e-404c-8791-94bbb2149b8a")
+		)
+		(pin "51"
+			(uuid "11e713a8-080f-486e-81d0-d68acedbae89")
 		)
 		(instances
 			(project ""

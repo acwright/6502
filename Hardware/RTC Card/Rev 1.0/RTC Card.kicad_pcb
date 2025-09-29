@@ -2345,7 +2345,7 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 2.6526 1.958752) (xy 2.669948 1.966334) (xy 2.711356 1.999128) (xy 2.746765 2.046547) (xy 2.768664 2.097151)
@@ -2784,7 +2784,7 @@
 				)
 			)
 		)
-		(attr board_only exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy -5.72177 -1.040707) (xy -5.72177 -0.867255) (xy -5.920604 -0.867255) (xy -6.119438 -0.867255)
@@ -5387,6 +5387,19 @@
 				)
 			)
 		)
+		(property "Digikey" "DS1511Y+-ND"
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "a63ead06-e585-4b4a-bd12-c98ea7582236")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(path "/2fb2ac4f-ebcf-41d5-b21f-cf87485306d9")
 		(sheetname "/")
 		(sheetfile "RTC Card.kicad_sch")
@@ -6663,7 +6676,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 0.475191 0.314397) (xy 0.500987 0.315347) (xy 0.524795 0.316645) (xy 0.544935 0.318167) (xy 0.55973 0.319788)

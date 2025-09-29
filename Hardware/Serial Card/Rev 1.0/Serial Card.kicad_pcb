@@ -3159,7 +3159,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -3171,7 +3171,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "9-pin D-SUB connector, socket (female), Mounting Hole"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -3183,12 +3183,25 @@
 				)
 			)
 		)
-		(property "Sparkfun" "PRT-00429"
+		(property "Digikey" "609-1487-ND"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "62494268-44f4-4aee-a9d5-78efc8759da8")
+			(uuid "f18b8fee-ed62-47b1-b0a3-a0165a2e75b6")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "D09S33E4GX00LF"
+			(at 0 0 90)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "a1044fc4-6fe3-41d0-922b-56b71112bfeb")
 			(effects
 				(font
 					(size 1 1)
@@ -4562,7 +4575,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 1.0287 1.214966) (xy 0.6477 1.214966) (xy 0.6477 -1.214967) (xy 1.0287 -1.214967) (xy 1.0287 1.214966)
@@ -5656,7 +5669,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 0.950383 0.628795) (xy 1.001975 0.630695) (xy 1.04959 0.633291) (xy 1.08987 0.636334) (xy 1.11946 0.639576)
@@ -7663,7 +7676,7 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 2.6526 1.958752) (xy 2.669948 1.966334) (xy 2.711356 1.999128) (xy 2.746765 2.046547) (xy 2.768664 2.097151)

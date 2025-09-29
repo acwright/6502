@@ -167,7 +167,7 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 2.6526 1.958752) (xy 2.669948 1.966334) (xy 2.711356 1.999128) (xy 2.746765 2.046547) (xy 2.768664 2.097151)
@@ -606,7 +606,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 0.950383 0.628795) (xy 1.001975 0.630695) (xy 1.04959 0.633291) (xy 1.08987 0.636334) (xy 1.11946 0.639576)
@@ -872,7 +872,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -900,7 +900,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/46a8309f-ceaa-47c6-8a51-94cf8840690d")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -1102,7 +1102,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1130,7 +1130,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/c11a110b-aeab-4f3b-b375-7ef3d2388ad3")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -1303,7 +1303,7 @@
 		(at 159.3011 88.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H2"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -1315,7 +1315,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -1327,7 +1327,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1340,7 +1340,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1353,7 +1353,11 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(path "/00000000-0000-0000-0000-0000605fef09")
+		(sheetname "/")
+		(sheetfile "GPIO Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -1424,7 +1428,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1452,7 +1456,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/eb30f01d-d225-4cb7-8654-c18db7b0144e")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -1625,7 +1629,7 @@
 		(at 84.06555 114.48)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H5"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -1637,7 +1641,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -1649,7 +1653,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1662,7 +1666,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1675,7 +1679,11 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(path "/14edd6da-3b19-4f96-9787-8530ac6b9717")
+		(sheetname "/")
+		(sheetfile "GPIO Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -1746,7 +1754,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1773,7 +1781,7 @@
 			)
 		)
 		(path "/ea87f10e-5b07-4a2d-8dda-f89a0b82e252")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -2093,7 +2101,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2121,7 +2129,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/a5126bff-2385-4354-b2e1-fe6a25e4e018")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -2323,7 +2331,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2350,7 +2358,7 @@
 			)
 		)
 		(path "/0e4c0cc1-f12c-4e4b-b945-3885d1a55932")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -2670,7 +2678,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2698,7 +2706,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/d8f059ae-8b76-4ea5-9075-55d92fd0bda7")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -2893,7 +2901,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2920,7 +2928,7 @@
 			)
 		)
 		(path "/2110f860-a946-4a47-80df-59376b4e788d")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -3240,7 +3248,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3268,7 +3276,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/e20803b2-3c33-4f9b-a1f0-e5400e2624d6")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -3470,7 +3478,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3498,7 +3506,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/8a111a44-6692-493e-b3b6-f9efc7a7fb23")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -3832,7 +3840,7 @@
 				)
 			)
 		)
-		(attr board_only exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy -3.066174 0) (xy -3.066174 0.728471) (xy -3.180394 0.728471) (xy -3.294614 0.728471) (xy -3.294614 0)
@@ -4557,7 +4565,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4585,7 +4593,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/2e7f27d0-1a47-4f8d-9fe3-13a8370ed139")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -4780,7 +4788,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4808,7 +4816,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/06dc7b30-d64c-44a9-92c5-80c96a502be0")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -5010,7 +5018,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5038,7 +5046,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/41495348-7aa7-45f0-a354-bb0cd88f0603")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -5211,7 +5219,7 @@
 		(at 159.3011 127.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H4"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -5223,7 +5231,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -5235,7 +5243,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5248,7 +5256,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5261,7 +5269,11 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(path "/00000000-0000-0000-0000-0000605ff343")
+		(sheetname "/")
+		(sheetfile "GPIO Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -5332,7 +5344,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5360,7 +5372,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/16538b68-66ef-46eb-b9be-545cf1c15d88")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -5555,7 +5567,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5583,7 +5595,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/5e7779aa-0f83-4bd0-bb86-bc8da7ea8f0f")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -5891,7 +5903,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5919,7 +5931,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/b3247f63-7baa-49fa-ac5b-2707be2eda4c")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -6099,7 +6111,7 @@
 		(at 71.3011 88.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H1"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -6111,7 +6123,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -6123,7 +6135,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6136,7 +6148,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6149,7 +6161,11 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(path "/00000000-0000-0000-0000-0000605fe4a5")
+		(sheetname "/")
+		(sheetfile "GPIO Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -6220,7 +6236,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6248,7 +6264,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/37315628-029a-4c9e-b71d-5699183dc5ea")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -6443,7 +6459,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6470,7 +6486,7 @@
 			)
 		)
 		(path "/0014fc91-c063-4677-bb4e-6a4cb8db46ad")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -6790,7 +6806,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6818,7 +6834,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/18ecd90b-d38b-4938-9302-11318039e77d")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -7020,7 +7036,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7048,7 +7064,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/98715b5c-bf40-420a-8e9f-0e60d65c5e76")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -7243,7 +7259,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7270,7 +7286,7 @@
 			)
 		)
 		(path "/49e7d484-8330-4fed-9459-4f9b9a5d3fef")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -7590,7 +7606,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7618,7 +7634,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/a1056697-100f-4716-b2af-e1697883d166")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -7813,7 +7829,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7841,7 +7857,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/4b73245a-5c73-4c8e-b052-22c40bcf7999")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -8036,7 +8052,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8064,7 +8080,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/20aa27d6-60b4-499d-9537-6c1ced631cef")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -8259,7 +8275,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8287,7 +8303,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/c34efe0b-f3b1-469d-be5b-9496c9a901d3")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -8482,7 +8498,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8510,7 +8526,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/804aeaec-5533-4121-b8d5-13a588ed1691")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -8712,7 +8728,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8739,7 +8755,7 @@
 			)
 		)
 		(path "/1e1bcd8d-088f-40d7-8952-8957ecf18fb3")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -9059,7 +9075,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9086,7 +9102,7 @@
 			)
 		)
 		(path "/b2e6aa1d-176f-414e-945d-05912de7d9d5")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -9406,7 +9422,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9434,7 +9450,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/339d87fd-c4b7-496c-a2c0-18ab7b1dd1d0")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -9629,7 +9645,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9657,7 +9673,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/9a6d1404-6d7d-40f6-bc2f-2a1781f60a2c")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -9852,7 +9868,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9879,7 +9895,7 @@
 			)
 		)
 		(path "/3427238b-2d67-4133-adf1-7a148fc946f6")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -10177,7 +10193,7 @@
 		(at 71.3011 127.8136)
 		(descr "Mounting Hole 3.2mm, no annular, M3")
 		(tags "mounting hole 3.2mm no annular m3")
-		(property "Reference" "REF**"
+		(property "Reference" "H3"
 			(at 0 -4.2 0)
 			(layer "F.SilkS")
 			(hide yes)
@@ -10189,7 +10205,7 @@
 				)
 			)
 		)
-		(property "Value" "MountingHole_3.2mm_M3"
+		(property "Value" "MountingHole"
 			(at 0 4.2 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -10201,7 +10217,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10214,7 +10230,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Mounting Hole without connection"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10227,7 +10243,11 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(property ki_fp_filters "MountingHole*")
+		(path "/00000000-0000-0000-0000-0000605ff14c")
+		(sheetname "/")
+		(sheetfile "GPIO Helper.kicad_sch")
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -10298,7 +10318,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10326,7 +10346,7 @@
 		)
 		(property ki_fp_filters "LED* LED_SMD:* LED_THT:*")
 		(path "/c317a72b-0753-43b4-8eb5-3407536929e7")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -10528,7 +10548,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10556,7 +10576,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/7626feb4-b1e6-43d6-b343-265dfe9f0faa")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -10751,7 +10771,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10779,7 +10799,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/f27c5023-c545-4d32-b715-a1d65a3664e1")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "GPIO Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line

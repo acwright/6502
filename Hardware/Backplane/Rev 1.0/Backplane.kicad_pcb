@@ -175,10 +175,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605fef09")
 		(sheetname "Root")
 		(sheetfile "Backplane.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -267,10 +266,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605ff343")
 		(sheetname "Root")
 		(sheetfile "Backplane.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -318,7 +316,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_02x20_Odd_Even"
+		(property "Value" "6502 Card Connector"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -331,7 +329,7 @@
 				(justify left top)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -372,7 +370,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/00000000-0000-0000-0000-0000605f74ea")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Backplane.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -1004,7 +1002,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_02x20_Odd_Even"
+		(property "Value" "6502 Card Connector"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -1017,7 +1015,7 @@
 				(justify left top)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1058,7 +1056,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/00000000-0000-0000-0000-0000605fa539")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Backplane.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -1690,7 +1688,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_02x20_Odd_Even"
+		(property "Value" "6502 Card Connector"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -1703,7 +1701,7 @@
 				(justify left top)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1744,7 +1742,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/00000000-0000-0000-0000-0000605febc4")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Backplane.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -2376,7 +2374,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_02x20_Odd_Even"
+		(property "Value" "6502 Card Connector"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -2389,7 +2387,7 @@
 				(justify left top)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2430,7 +2428,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/00000000-0000-0000-0000-0000606013a2")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Backplane.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -3103,10 +3101,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605fe4a5")
 		(sheetname "Root")
 		(sheetfile "Backplane.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -3139,7 +3136,6 @@
 		(embedded_fonts no)
 	)
 	(footprint "6502 Logos:6502 Backplane Logo 5mm"
-		(locked yes)
 		(layer "F.Cu")
 		(uuid "00000000-0000-0000-0000-0000605e1306")
 		(at 165.608 55.88 180)
@@ -3193,7 +3189,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 6.4516 0.901699) (xy 7.078133 0.901699) (xy 7.078133 1.248833) (xy 6.066367 1.248833) (xy 6.066367 -1.1811)
@@ -3953,10 +3949,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605ff14c")
 		(sheetname "Root")
 		(sheetfile "Backplane.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -4004,7 +3999,7 @@
 				)
 			)
 		)
-		(property "Value" "Conn_02x20_Odd_Even"
+		(property "Value" "6502 Card Connector"
 			(at 0 0 90)
 			(layer "F.Fab")
 			(hide yes)
@@ -4017,7 +4012,7 @@
 				(justify left top)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4058,7 +4053,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/00000000-0000-0000-0000-0000605f3d8a")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Backplane.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -4728,7 +4723,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 0.950383 0.628795) (xy 1.001975 0.630695) (xy 1.04959 0.633291) (xy 1.08987 0.636334) (xy 1.11946 0.639576)
@@ -5022,7 +5017,7 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 5.33569 3.940018) (xy 5.370585 3.955269) (xy 5.453877 4.021235) (xy 5.525103 4.116618) (xy 5.569153 4.218406)
@@ -5438,7 +5433,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5464,9 +5459,22 @@
 				)
 			)
 		)
+		(property "Digikey" "732-5401-ND"
+			(at 0 0 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "7728eb8c-7b1a-45eb-9c82-0c96d1665448")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/129cda9d-de73-40c1-80eb-adf4d1594cd5")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Backplane.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -6083,7 +6091,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6109,9 +6117,22 @@
 				)
 			)
 		)
+		(property "Digikey" "732-5401-ND"
+			(at 0 0 270)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "1fbde52d-3356-4956-bb4d-05cff0e9daad")
+			(effects
+				(font
+					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/6673c1e7-69e4-40ae-95c6-bcd94b0109a3")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Backplane.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line

@@ -164,7 +164,7 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 2.6526 1.958752) (xy 2.669948 1.966334) (xy 2.711356 1.999128) (xy 2.746765 2.046547) (xy 2.768664 2.097151)
@@ -605,7 +605,7 @@
 		)
 		(property ki_fp_filters "DIP*W7.62mm* SO14*")
 		(path "/c5b20a35-0e55-4cde-a58b-bb703da61e16")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -1002,7 +1002,7 @@
 		)
 		(property ki_fp_filters "D*DO?35*")
 		(path "/0fc23b4c-4859-4d76-a96d-eae94880b36d")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -1334,7 +1334,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 0.475191 0.314397) (xy 0.500987 0.315347) (xy 0.524795 0.316645) (xy 0.544935 0.318167) (xy 0.55973 0.319788)
@@ -1599,7 +1599,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1626,7 +1626,7 @@
 			)
 		)
 		(path "/924ee840-68f3-4f7c-86b4-485a89f17381")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -1884,7 +1884,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -1911,7 +1911,7 @@
 			)
 		)
 		(path "/4387b0dc-8039-40c0-ac65-66344ae8b5a1")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -2169,7 +2169,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2196,7 +2196,7 @@
 			)
 		)
 		(path "/4bd1660c-9c9d-4c65-953f-7f3eebfc4713")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -2454,7 +2454,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2481,7 +2481,7 @@
 			)
 		)
 		(path "/7a1f82d3-7757-4cd7-a7d0-71e58a4d92fb")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -2739,7 +2739,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2766,7 +2766,7 @@
 			)
 		)
 		(path "/902c1b8c-c787-4a43-ad69-c6d6ae7b6049")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -3024,7 +3024,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3051,7 +3051,7 @@
 			)
 		)
 		(path "/e03fffa1-f50e-43c4-afea-0c2fa6255b5b")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -3309,7 +3309,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3336,7 +3336,7 @@
 			)
 		)
 		(path "/74a83f8f-406e-456e-80c9-45479fc229a0")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -3594,7 +3594,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3621,7 +3621,7 @@
 			)
 		)
 		(path "/035eda16-c4d6-448b-84a0-e25098272ae2")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -3908,10 +3908,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/7e2ac43a-df78-4b7c-b9b4-8f8b5236ccf7")
 		(sheetname "Root")
 		(sheetfile "Keypad Helper.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -3983,7 +3982,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4011,7 +4010,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/dbf07944-e2b4-4894-b7c9-821247f3ba14")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -4206,7 +4205,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -4233,7 +4232,7 @@
 			)
 		)
 		(path "/df7fd016-22fb-4d28-bf73-a015706b87bd")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -4515,7 +4514,7 @@
 				)
 			)
 		)
-		(attr board_only exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 3.54517 -0.173451) (xy 3.54517 0.867255) (xy 3.860343 0.867255) (xy 4.175516 0.867255) (xy 4.175516 1.040706)
@@ -5306,7 +5305,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5333,7 +5332,7 @@
 			)
 		)
 		(path "/1bdc3c03-5e2f-49f1-a146-d1fff6210eb7")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -5591,7 +5590,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5618,7 +5617,7 @@
 			)
 		)
 		(path "/fdaea784-9dba-43cb-96eb-5fb7b99b4866")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -5876,7 +5875,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5903,7 +5902,7 @@
 			)
 		)
 		(path "/f2cb6e59-2a0f-4d02-8387-bd24dd1980f8")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -6161,7 +6160,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6188,7 +6187,7 @@
 			)
 		)
 		(path "/9702b556-6969-4f29-b1c5-d90f4a54be95")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -6446,7 +6445,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6473,7 +6472,7 @@
 			)
 		)
 		(path "/a9d51c8f-fe78-4757-9575-7f508cb7b7cf")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -6731,7 +6730,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -6758,7 +6757,7 @@
 			)
 		)
 		(path "/e583426f-5bea-4a40-a580-4990c930aebf")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -7016,7 +7015,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7043,7 +7042,7 @@
 			)
 		)
 		(path "/fffb6ee4-aa35-4350-bde0-011ee500d235")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -7301,7 +7300,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7328,7 +7327,7 @@
 			)
 		)
 		(path "/636e32c6-fc15-46e7-ba40-64954dd21310")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -7586,7 +7585,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -7613,7 +7612,7 @@
 			)
 		)
 		(path "/d62efcfa-3f69-4714-9f1c-edd954c49913")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -7900,10 +7899,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/fa1cecf1-891e-4e1b-a53b-3d2b8822ee03")
 		(sheetname "Root")
 		(sheetfile "Keypad Helper.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -8003,10 +8001,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/2d5b3658-cecf-429b-be03-160bf413a2c6")
 		(sheetname "Root")
 		(sheetfile "Keypad Helper.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -8078,7 +8075,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8106,7 +8103,7 @@
 		)
 		(property ki_fp_filters "C_*")
 		(path "/50be9acc-5c4e-4435-8dd7-9b301dbe94f3")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -8349,9 +8346,9 @@
 		)
 		(property ki_fp_filters "DIP?20*")
 		(path "/db69ebbb-f2b1-407a-94e3-44ae6984f768")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
-		(attr through_hole)
+		(attr through_hole exclude_from_bom)
 		(fp_line
 			(start 6.06 -1.33)
 			(end 4.81 -1.33)
@@ -8747,7 +8744,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -8774,7 +8771,7 @@
 			)
 		)
 		(path "/a3300dbf-5a1a-4f3a-8986-9462b121da82")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -9033,7 +9030,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9061,7 +9058,7 @@
 		)
 		(property ki_fp_filters "C_*")
 		(path "/2502db1a-e43d-4b52-818b-95fb99df2933")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -9276,7 +9273,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9303,7 +9300,7 @@
 			)
 		)
 		(path "/75c20a24-315e-4d12-bb06-0db5327e0cbd")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -9561,7 +9558,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9588,7 +9585,7 @@
 			)
 		)
 		(path "/f0e1bef9-f581-4f2f-aea0-dc4aa36091d9")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -9846,7 +9843,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -9873,7 +9870,7 @@
 			)
 		)
 		(path "/7385489b-f7d0-45b3-88e7-d8622329c8b7")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -10132,7 +10129,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10160,7 +10157,7 @@
 		)
 		(property ki_fp_filters "Connector*:*_2x??_*")
 		(path "/5e7779aa-0f83-4bd0-bb86-bc8da7ea8f0f")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -10497,10 +10494,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/e1ded860-c0d0-49c1-afd4-785a99f9ace5")
 		(sheetname "Root")
 		(sheetfile "Keypad Helper.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -10572,7 +10568,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -10600,7 +10596,7 @@
 		)
 		(property ki_fp_filters "C_*")
 		(path "/e659bdda-e0de-423b-a4b8-e44b4cf7584f")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -10870,7 +10866,7 @@
 		)
 		(property ki_fp_filters "D*DO?35*")
 		(path "/01fc9d5d-3795-4c9b-a3df-da2f3ecf7d06")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -11179,7 +11175,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 90)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11207,7 +11203,7 @@
 		)
 		(property ki_fp_filters "R_*")
 		(path "/dc3f8995-4250-471e-b921-790f74cba009")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -11403,7 +11399,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 180)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11431,7 +11427,7 @@
 		)
 		(property ki_fp_filters "C_*")
 		(path "/63d81137-e677-45f5-ac00-5c798fb183b9")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole)
 		(fp_line
@@ -11646,7 +11642,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11673,7 +11669,7 @@
 			)
 		)
 		(path "/54c14ec6-e5ab-4536-b04c-eb969e306428")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line
@@ -11931,7 +11927,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -11958,7 +11954,7 @@
 			)
 		)
 		(path "/59c0f7a6-561c-428c-89a3-d3ef9bba7485")
-		(sheetname "Root")
+		(sheetname "/")
 		(sheetfile "Keypad Helper.kicad_sch")
 		(attr through_hole exclude_from_bom)
 		(fp_line

@@ -249,10 +249,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605fef09")
 		(sheetname "/")
 		(sheetfile "Dev Board.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -341,10 +340,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605ff343")
 		(sheetname "/")
 		(sheetfile "Dev Board.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -433,10 +431,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605fe4a5")
 		(sheetname "/")
 		(sheetfile "Dev Board.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -525,10 +522,9 @@
 			)
 		)
 		(property ki_fp_filters "MountingHole*")
-		(path "/00000000-0000-0000-0000-0000605ff14c")
 		(sheetname "/")
 		(sheetfile "Dev Board.kicad_sch")
-		(attr exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom)
 		(fp_circle
 			(center 0 0)
 			(end 3.2 0)
@@ -1760,7 +1756,7 @@
 				)
 			)
 		)
-		(attr through_hole)
+		(attr through_hole board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 0.950383 0.628795) (xy 1.001975 0.630695) (xy 1.04959 0.633291) (xy 1.08987 0.636334) (xy 1.11946 0.639576)
@@ -2050,7 +2046,7 @@
 				)
 			)
 		)
-		(attr board_only exclude_from_pos_files exclude_from_bom)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy -0.732725 -0.832566) (xy -0.732725 -0.693805) (xy -0.98994 -0.693805) (xy -1.247156 -0.693805)
@@ -13959,7 +13955,6 @@
 			(drill 1.6)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 1 "GND")
 			(solder_mask_margin 0.102)
 			(uuid "94ec270b-f38f-42a1-a41e-0555134a0967")
 		)
@@ -13969,7 +13964,6 @@
 			(drill 1.6)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 1 "GND")
 			(solder_mask_margin 0.102)
 			(uuid "f448f787-5acf-4cc6-a140-16f2bf3fec81")
 		)
@@ -15242,7 +15236,7 @@
 				)
 			)
 		)
-		(attr exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
+		(attr board_only exclude_from_pos_files exclude_from_bom allow_missing_courtyard)
 		(fp_poly
 			(pts
 				(xy 2.6526 1.958752) (xy 2.669948 1.966334) (xy 2.711356 1.999128) (xy 2.746765 2.046547) (xy 2.768664 2.097151)
