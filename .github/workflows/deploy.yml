@@ -2,6 +2,10 @@
 #
 name: Deploy VitePress site to Pages
 
+defaults:
+  run:
+    working-directory: Documentation
+
 on:
   # Runs on pushes targeting the `main` branch. Change this to `master` if you're
   # using the `master` branch as the default branch.
