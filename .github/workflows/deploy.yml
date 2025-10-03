@@ -26,6 +26,9 @@ concurrency:
 jobs:
   # Build job
   build:
+    defaults:
+      run:
+        working-directory: Documentation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,15 +48,12 @@ jobs:
         uses: actions/configure-pages@v4
       - name: Install dependencies
         run: npm ci # or pnpm install / yarn install / bun install
-        working-directory: Documentation
       - name: Build with VitePress
         run: npm run docs:build # or pnpm docs:build / yarn docs:build / bun run docs:build
-        working-directory: Documentation
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: .vitepress/dist
-        working-directory: Documentation
 
   # Deployment job
   deploy:
