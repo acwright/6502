@@ -15,11 +15,11 @@ Current file: ./src/VC Background.asm
 000003r 1                 ; Initialize VDP in text mode
 000003r 1  A9 00          lda #$00            ; Set mode to text
 000005r 1  8D 01 9C       sta VDP_REG
-000008r 1  A9 50          lda #80
+000008r 1  A9 80          lda #$80
 00000Ar 1  8D 01 9C       sta VDP_REG
 00000Dr 1  A9 D0          lda #$D0            ; 16K, Enable Display, Disable Interrupts
 00000Fr 1  8D 01 9C       sta VDP_REG
-000012r 1  A9 51          lda #81
+000012r 1  A9 81          lda #$81
 000014r 1  8D 01 9C       sta VDP_REG
 000017r 1  A9 02          lda #$02            ; Address of name table in VRAM = Hex $0800
 000019r 1  8D 01 9C       sta VDP_REG

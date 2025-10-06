@@ -11,11 +11,11 @@ reset:
   ; Initialize VDP in text mode
   lda #$00            ; Set mode to text
   sta VDP_REG         
-  lda #80
+  lda #$80
   sta VDP_REG
   lda #$D0            ; 16K, Enable Display, Disable Interrupts
   sta VDP_REG         
-  lda #81
+  lda #$81
   sta VDP_REG
   lda #$02            ; Address of name table in VRAM = Hex $0800
   sta VDP_REG
