@@ -27,5 +27,6 @@ export default defineConfig({
     socialLinks: [
       { icon: 'github', link: 'https://github.com/acwright/6502' }
     ]
-  }
+  },
+  ignoreDeadLinks: 'localhostLinks'
 })
