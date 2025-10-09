@@ -28,6 +28,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Backplane Board Pro**: An enhanced version of the backplane board with additional features.
 - **Dev Board**: The development board is an alternative to the main board which acts as a 65(c)02 emulator using a Teensy 4.1.
 - **Front Panel Board**: A board that provides a front panel interface with switches and LEDs for controlling and monitoring the system.
+- **Input Board**: A board that provides PS/2 keyboard and mouse interfaces along with SNES controller support.
 - **Main Board**: The main board that contains the 65(c)02 CPU, memory, memory decoding ICs, one peripheral card slot, and a bus connector.
 
 **Cards**:
