@@ -1,0 +1,117 @@
+ca65 V2.18 - N/A
+Main file   : ./src/IB Keyboard Transmit.asm
+Current file: ./src/IB Keyboard Transmit.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1  xx           READ_PTR:     .res 1
+000001r 1  xx           WRITE_PTR:    .res 1
+000002r 1               
+000002r 1               .segment "INPUT_BUFFER"
+000000r 1  xx xx xx xx  INPUT_BUFFER: .res $100
+000004r 1  xx xx xx xx  
+000008r 1  xx xx xx xx  
+000100r 1               
+000100r 1               .segment "CODE"
+000000r 1               
+000000r 1               VIA_PORTB  = $9400
+000000r 1               VIA_PORTA  = $9401
+000000r 1               VIA_DDRB   = $9402
+000000r 1               VIA_DDRA   = $9403
+000000r 1               VIA_PCR    = $940C
+000000r 1               VIA_IFR    = $940D
+000000r 1               VIA_IER    = $940E
+000000r 1               
+000000r 1               ACIA_DATA   = $9000
+000000r 1               ACIA_STATUS = $9001
+000000r 1               ACIA_CMD    = $9002
+000000r 1               ACIA_CTRL   = $9003
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1  A9 00          lda #$00
+000005r 1  85 rr          sta READ_PTR   ; Initialize the read pointer
+000007r 1  85 rr          sta WRITE_PTR  ; Initilize the write pointer
+000009r 1               
+000009r 1  8D 03 94       sta VIA_DDRA   ; Set VIA A as input
+00000Cr 1  8D 02 94       sta VIA_DDRB   ; Set VIA B as input
+00000Fr 1  A9 82          lda #%10000010 ; Enable IRQ on CA1
+000011r 1  8D 0E 94       sta VIA_IER
+000014r 1  A9 0D          lda #%00001101 ; Set CA2 to LOW output, CA1 to positive edge
+000016r 1  8D 0C 94       sta VIA_PCR
+000019r 1               
+000019r 1  A9 00          lda #$00
+00001Br 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
+00001Er 1  A9 1F          lda #%00011111  ; N-8-1, 19200 baud
+000020r 1  8D 03 90       sta ACIA_CTRL
+000023r 1  A9 0B          lda #%00001011  ; No parity, No echo, No interrupts
+000025r 1  8D 02 90       sta ACIA_CMD
+000028r 1               
+000028r 1  58             cli            ; Enable interrupts
+000029r 1               
+000029r 1               loop:
+000029r 1  20 rr rr       jsr buffer_size   ; Is there a new input?
+00002Cr 1  F0 FB          beq loop
+00002Er 1  20 rr rr       jsr read_buffer
+000031r 1  20 rr rr       jsr send_char
+000034r 1  4C rr rr       jmp loop          ; Infinite loop
+000037r 1               
+000037r 1               ; Write a byte from the A register to the input buffer
+000037r 1               ; Modifies: flags, X
+000037r 1               write_buffer:
+000037r 1  A6 rr          ldx WRITE_PTR
+000039r 1  9D rr rr       sta INPUT_BUFFER,x
+00003Cr 1  E6 rr          inc WRITE_PTR
+00003Er 1  60             rts
+00003Fr 1               
+00003Fr 1               ; Read a byte from the input buffer and load into A register
+00003Fr 1               ; Modifies: flags, X, A
+00003Fr 1               read_buffer:
+00003Fr 1  A6 rr          ldx READ_PTR
+000041r 1  BD rr rr       lda INPUT_BUFFER,x
+000044r 1  E6 rr          inc READ_PTR
+000046r 1  60             rts
+000047r 1               
+000047r 1               ; Return (in A) the number of bytes in the input buffer
+000047r 1               ; Modifies: flags, A
+000047r 1               buffer_size:
+000047r 1  A5 rr          lda WRITE_PTR
+000049r 1  38             sec
+00004Ar 1  E5 rr          sbc READ_PTR
+00004Cr 1  60             rts
+00004Dr 1               
+00004Dr 1               ; Transmit a byte using the ACIA
+00004Dr 1               ; Modifies: flags
+00004Dr 1               send_char:
+00004Dr 1  8D 00 90       sta ACIA_DATA
+000050r 1  48             pha
+000051r 1               tx_wait:
+000051r 1  AD 01 90       lda ACIA_STATUS
+000054r 1  29 10          and #%00010000  ; Check if tx buffer not empty
+000056r 1  F0 F9          beq tx_wait     ; Loop if tx buffer not empty
+000058r 1  68             pla
+000059r 1  60             rts
+00005Ar 1               
+00005Ar 1               nmi:
+00005Ar 1               irq:
+00005Ar 1  48             pha
+00005Br 1  DA             phx
+00005Cr 1  AD 0D 94       lda VIA_IFR
+00005Fr 1  29 02          and #%00000010    ; Check if CA1 caused the interrupt
+000061r 1  F0 06          beq irq_exit      ; If not, exit
+000063r 1  AD 01 94       lda VIA_PORTA     ; Read the key state from VIA A
+000066r 1  20 rr rr       jsr write_buffer  ; Store to the input buffer
+000069r 1               irq_exit:
+000069r 1  FA             plx
+00006Ar 1  68             pla
+00006Br 1  40             rti
+00006Cr 1               
+00006Cr 1               .segment "VECTORS"
+000000r 1               
+000000r 1  rr rr          .word nmi
+000002r 1  rr rr          .word reset
+000004r 1  rr rr          .word irq
+000004r 1               
