@@ -35,7 +35,7 @@ reset:
   sta VIA_DDRB   ; Set VIA B as input
   lda #%10000010 ; Enable IRQ on CA1
   sta VIA_IER
-  lda #%00001101 ; Set CA2 to LOW output, CA1 to positive edge
+  lda #%00001111 ; Set CA2 to HIGH output, CA1 to positive edge
   sta VIA_PCR
 
   lda #$00

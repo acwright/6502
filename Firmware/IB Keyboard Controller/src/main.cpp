@@ -14,38 +14,67 @@
 
 CircularBuffer<uint8_t, BUFFER_SIZE> buffer;
 
+bool enabled = false;
+
 void onInterrupt();
+void enable();
+void disable();
 
 void setup() {
   pinMode(CSB, INPUT_PULLUP);
-  pinMode(DATA, OUTPUT);
-  pinMode(CLK, OUTPUT);
   pinMode(INT, OUTPUT);
-
-  digitalWrite(CLK, HIGH);
-  digitalWrite(DATA, LOW);
-  digitalWrite(INT, LOW);
-
   pinMode(PS2CLK, INPUT_PULLUP);
   pinMode(PS2DATA, INPUT_PULLUP);
 
-  shiftOut(DATA, CLK, MSBFIRST, 0x00);
-
+  digitalWrite(INT, LOW);
+  
   attachInterrupt(digitalPinToInterrupt(PS2CLK), onInterrupt, FALLING);
 }
 
 void loop() {
-  if (digitalRead(CSB) == HIGH || buffer.isEmpty()) { return; } // Not selected or buffer empty
+  int csbState = digitalRead(CSB);
+
+  if (csbState == LOW && !enabled) {
+    enable();
+  } else if (csbState == HIGH && enabled) {
+    disable();
+  }
+
+  if (csbState == HIGH || buffer.isEmpty()) { return; } // Not selected or buffer empty
 
   shiftOut(DATA, CLK, MSBFIRST, buffer.shift()); // Shift out the keycode
   digitalWrite(DATA, LOW);
-  digitalWrite(CLK, LOW); // Clock out one more time to latch the data
+  digitalWrite(CLK, HIGH); // Clock out one more time to latch the data
   delayMicroseconds(5);
-  digitalWrite(CLK, HIGH);
+  digitalWrite(CLK, LOW);
   digitalWrite(INT, HIGH); // Signal that data is ready
   delayMicroseconds(5);
   digitalWrite(INT, LOW);
   delayMicroseconds(100); // Wait a bit before triggering next interrupt
+}
+
+void enable() {
+  enabled = true;
+
+  pinMode(DATA, OUTPUT);
+  pinMode(CLK, OUTPUT);
+
+  digitalWrite(CLK, HIGH);
+  digitalWrite(DATA, LOW);
+
+  // Clear the shift register
+  shiftOut(DATA, CLK, MSBFIRST, 0x00);
+  digitalWrite(DATA, LOW);
+  digitalWrite(CLK, HIGH);
+  delayMicroseconds(5);
+  digitalWrite(CLK, LOW);
+}
+
+void disable() {
+  enabled = false;
+
+  pinMode(DATA, INPUT);
+  pinMode(CLK, INPUT);
 }
 
 void onInterrupt() {
@@ -89,9 +118,10 @@ void onInterrupt() {
         parity = 0xFD;                   // To ensure at next bit count clear and discard
       break;
     case 11: // Stop bit
-      //if (parity < 0xFD) {               // Good so save byte in buffer
+      if (parity < 0xFD) {               // Good so save byte in buffer, otherwise discard
         buffer.push(incoming);           // Add to circular buffer (if full, oldest data lost)
-      //}
+      }
+      bitcount = 0;
       break;
     default:
       bitcount = 0;                      // Shouldn't be here so reset state machine

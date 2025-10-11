@@ -1,6 +1,6 @@
 ca65 V2.18 - N/A
-Main file   : ./src/IB Keyboard Transmit.asm
-Current file: ./src/IB Keyboard Transmit.asm
+Main file   : ./src/IB Mouse Transmit.asm
+Current file: ./src/IB Mouse Transmit.asm
 
 000000r 1               .setcpu "65C02"
 000000r 1               
@@ -41,7 +41,7 @@ Current file: ./src/IB Keyboard Transmit.asm
 00000Dr 1  8D 02 94       sta VIA_DDRB   ; Set VIA B as input
 000010r 1  A9 82          lda #%10000010 ; Enable IRQ on CA1
 000012r 1  8D 0E 94       sta VIA_IER
-000015r 1  A9 0D          lda #%00001101 ; Set CA2 to LOW output, CA1 to positive edge
+000015r 1  A9 0F          lda #%00001111 ; Set CA2 to HIGH output, CA1 to positive edge
 000017r 1  8D 0C 94       sta VIA_PCR
 00001Ar 1               
 00001Ar 1  A9 00          lda #$00
