@@ -17,14 +17,14 @@ void enable();
 void disable();
 
 void setup() {
+  pinMode(CS, INPUT_PULLUP);
+  pinMode(INT, OUTPUT);
+  
+  digitalWrite(INT, LOW);
+  
   delay(100);
 
   mouse.initialize();
-
-  pinMode(CS, INPUT_PULLUP);
-  pinMode(INT, OUTPUT);
-
-  digitalWrite(INT, LOW);
 }
 
 void loop() {
@@ -105,6 +105,7 @@ void enable() {
 void disable() {
   enabled = false;
 
+  pinMode(INT, INPUT);
   pinMode(DATA, INPUT);
   pinMode(CLK, INPUT);
 }

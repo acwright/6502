@@ -45,6 +45,8 @@ reset:
   lda #%00001011  ; No parity, No echo, No interrupts
   sta ACIA_CMD
 
+  lda VIA_PORTA   ; Clear any inital interrupts
+
   cli            ; Enable interrupts
 
 loop:
