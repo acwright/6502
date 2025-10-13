@@ -5,10 +5,12 @@ PORTB   = $9800
 PORTA   = $9801
 DDRB    = $9802
 DDRA    = $9803
+PCR     = $980C
 
-AY_BC1  = %00000001
-AY_BDIR = %00000010
-AY_RESB = %00000100
+AY_BC1H  = %11100000       ; VIA PCR CA2
+AY_BC1L  = %11000000       ; VIA PCR CA2
+AY_BDIRH = %00001110       ; VIA PCR CB2
+AY_BDIRL = %00001100       ; VIA PCR CB2
 
 reset:
   lda #%11111111          ; Set all pins on port A and B to outputs
@@ -17,8 +19,6 @@ reset:
   lda #$00
   sta PORTA
   
-  jsr ay_inactive
-  jsr ay_reset
   jsr ay_inactive
 
   jsr ay_latch
@@ -212,33 +212,24 @@ delay_loop:
   plx
   rts
 
-ay_reset:
-  phx
-  ldx #$00
-  stx PORTB
-  ldx #(AY_RESB)                      ; BDIR LOW, BC1 LOW, RESB LOW
-  stx PORTB
-  plx
-  rts
-
 ay_inactive:
   phx
-  ldx #(AY_RESB)                      ; BDIR LOW, BC1 LOW, RESB HIGH
-  stx PORTB
+  ldx #(AY_BDIRL | AY_BC1L)   ; BDIR LOW, BC1 LOW
+  stx PCR
   plx
   rts
 
 ay_latch:
   phx
-  ldx #(AY_BC1 | AY_BDIR | AY_RESB)   ; BDIR HIGH, BC1 HIGH, RESB HIGH
-  stx PORTB
+  ldx #(AY_BDIRH | AY_BC1H)   ; BDIR HIGH, BC1 HIGH
+  stx PCR
   plx
   rts
 
 ay_write:
   phx
-  ldx #(AY_BDIR | AY_RESB)            ; BDIR HIGH, BC1 LOW, RESB HIGH
-  stx PORTB
+  ldx #(AY_BDIRH | AY_BC1L)   ; BDIR HIGH, BC1 LOW
+  stx PCR
   plx
   rts
 
