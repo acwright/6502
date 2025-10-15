@@ -8,6 +8,7 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **DB**: Dev Board
 - **GPIO**: GPIO Card / GPIO Helper / PS2 Helper / Keyboard Helper
 - **LCD**: LCD Card
+- **RTC**: Real-Time Clock Card
 - **SC**: Serial Card / Serial Card Pro
 - **SND**: Sound Card
 - **ST**: Storage Card
