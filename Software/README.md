@@ -12,5 +12,4 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **SC**: Serial Card / Serial Card Pro
 - **SND**: Sound Card
 - **ST**: Storage Card
-- **VC**: Video Card
-- **VGA**: VGA Card
+- **VC**: Video Card / VGA Card
