@@ -72,7 +72,7 @@ The [Schematics](./Schematics) folder contains the schematic diagrams for all th
 
 ## Firmware
 
-The [Firmware](./Firmware) folder contains the source code for the firmware running on the various microcontrollers used in the project, such as the Teensy 4.1 and Raspberry Pi Zero. The firmware is written in C/C++ and is designed to interface with the 65(c)02 and other hardware components. See the README file in the Firmware folder for more details.
+The [Firmware](./Firmware) folder contains the source code for the firmware running on the various microcontrollers used in the project, such as the Teensy 4.1, Arduino Nano. The firmware is written in C/C++ and is designed to interface with the 65(c)02 and other hardware components. See the README file in the Firmware folder for more details.
 
 ## Software
 
