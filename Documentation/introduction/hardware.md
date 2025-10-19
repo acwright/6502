@@ -20,6 +20,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 
 - **Blinkenlights Card**: A card that provides a set of LEDs for visual output. 
 - **CPU Card**: A card that can host a 65(c)02 CPU and associated components. 
+- **CPU Card Pro**: A card that can host a 65816 CPU and associated components. 
 - **GPIO Card**: A card that provides general-purpose input/output (GPIO) pins for interfacing with external devices.
 - **LCD Card**: A card that provides output to an LCD display.
 - **Memory Card**: A card that provides RAM or ROM memory. 
