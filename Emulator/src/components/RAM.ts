@@ -1,10 +1,10 @@
 export class RAM {
   
-  static firstAddress: number = 0x0000
-  static lastAddress: number = 0x7FFF
-  static RAMSize: number = RAM.lastAddress - RAM.firstAddress + 1
+  static START: number = 0x0000
+  static END: number = 0x7FFF
+  static SIZE: number = RAM.END - RAM.START + 1
 
-  data: number[] = [...Array(RAM.RAMSize)].fill(0x00)
+  data: number[] = [...Array(RAM.SIZE)].fill(0x00)
 
   read(address: number): number {
     return this.data[address]

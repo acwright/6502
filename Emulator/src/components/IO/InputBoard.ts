@@ -12,7 +12,7 @@ export class InputBoard implements IO {
 
   read(address: number): number { return 0 }
   write(address: number, data: number): void {}
-  clock(cycles: number, frequency: number): void {}
+  step(cycles: number, frequency: number): void {}
   reset(): void {}
   
   description(): IODescription {

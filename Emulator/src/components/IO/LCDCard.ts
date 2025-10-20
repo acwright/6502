@@ -10,21 +10,10 @@ export class LCDCard implements IO {
   raiseIRQ = () => {}
   raiseNMI = () => {}
 
-  read(address: number): number {
-    return 0
-  }
-
-  write(address: number, data: number): void {
-      
-  }
-
-  clock(cycles: number, frequency: number): void {
-      
-  }
-
-  reset(): void {
-      
-  }
+  read(address: number): number { return 0 }
+  write(address: number, data: number): void {}
+  step(cycles: number, frequency: number): void {}
+  reset(): void {}
 
   description(): IODescription {
     return LCDCard.DESCRIPTION
