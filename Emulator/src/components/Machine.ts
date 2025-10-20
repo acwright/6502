@@ -4,15 +4,13 @@ import { ROM } from './ROM'
 import { Cart } from './Cart'
 import { type IO, type IODescription } from './IO'
 import { Empty } from './IO/Empty'
-import { DevBoard } from './IO/DevBoard'
 import { GPIOCard } from './IO/GPIOCard'
 import { InputBoard } from './IO/InputBoard'
 import { LCDCard } from './IO/LCDCard'
-import { PiCard } from './IO/PiCard'
+import { RTCCard } from './IO/RTCCard'
 import { SerialCard } from './IO/SerialCard'
 import { SoundCard } from './IO/SoundCard'
 import { StorageCard } from './IO/StorageCard'
-import { TeensyCard } from './IO/TeensyCard'
 import { VGACard } from './IO/VGACard'
 import { VideoCard } from './IO/VideoCard'
 
@@ -20,32 +18,30 @@ export class Machine {
 
   static IO_DESCRIPTIONS: IODescription[] = [
     Empty.DESCRIPTION,
-    DevBoard.DESCRIPTION,
     GPIOCard.DESCRIPTION,
     InputBoard.DESCRIPTION,
     LCDCard.DESCRIPTION,
-    PiCard.DESCRIPTION,
+    RTCCard.DESCRIPTION,
     SerialCard.DESCRIPTION,
     SoundCard.DESCRIPTION,
     StorageCard.DESCRIPTION,
-    TeensyCard.DESCRIPTION,
     VGACard.DESCRIPTION,
     VideoCard.DESCRIPTION
   ]
 
-  cpu: CPU = new CPU()
+  cpu: CPU = new CPU(this.read, this.write)
   ram: RAM = new RAM()
   rom: ROM = new ROM()
 
   io: IO[] = [
     new LCDCard(),
+    new Empty(),
+    new RTCCard(),
     new StorageCard(),
-    new SoundCard(),
-    new VideoCard(),
     new SerialCard(),
     new GPIOCard(),
-    new InputBoard(),
-    new Empty()
+    new SoundCard(),
+    new VideoCard()
   ]
 
   cart?: Cart
@@ -77,9 +73,6 @@ export class Machine {
     if (slot < 0 || slot >= 8) { return }
     
     switch (description.className) {
-      case 'DevBoard':
-        this.io[slot] = new DevBoard()
-        break
       case 'Empty':
         this.io[slot] = new Empty()
         break
@@ -92,8 +85,8 @@ export class Machine {
       case 'LCDCard':
         this.io[slot] = new LCDCard()
         break
-      case 'PiCard':
-        this.io[slot] = new PiCard()
+      case 'RTCCard':
+        this.io[slot] = new RTCCard()
         break
       case 'SerialCard':
         this.io[slot] = new SerialCard()
@@ -103,9 +96,6 @@ export class Machine {
         break
       case 'StorageCard':
         this.io[slot] = new StorageCard()
-        break
-      case 'TeensyCard':
-        this.io[slot] = new TeensyCard()
         break
       case 'VGACard':
         this.io[slot] = new VGACard()
@@ -133,20 +123,14 @@ export class Machine {
     if (this.frequency >= refreshRate) {
       let cpuCycles = Math.floor(this.frequency / refreshRate)
       this.cpu.step(
-        cpuCycles, 
-        this.read, 
-        this.write
+        cpuCycles
       )
       this.cycles += cpuCycles
     } else {
       this.frameDelay = Math.floor(refreshRate / this.frequency)
 
       if (this.frameDelayCount >= this.frameDelay) {
-        this.cpu.step(
-          1, 
-          this.read, 
-          this.write
-        )
+        this.cpu.step(1)
         this.cycles += 1
         this.frameDelayCount = 0
       } else {
@@ -158,11 +142,7 @@ export class Machine {
   step(): void {
     // This is missing IO stepping at IO freq rate...
 
-    this.cpu.step(
-      1, 
-      this.read, 
-      this.write
-    )
+    this.cpu.step(1)
     this.cycles += 1
   }
 

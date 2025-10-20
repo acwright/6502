@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid'
 import { IO, IODescription } from '../IO'
 
-export class PiCard implements IO {
+export class RTCCard implements IO {
 
-  static DESCRIPTION: IODescription = { className: 'PiCard', title: 'Pi Card' }
+  static DESCRIPTION: IODescription = { className: 'RTCCard', title: 'RTC Card' }
 
   id: string = uuidv4()
 
@@ -16,7 +16,7 @@ export class PiCard implements IO {
   reset(): void {}
   
   description(): IODescription {
-    return PiCard.DESCRIPTION
+    return RTCCard.DESCRIPTION
   }
 
 }

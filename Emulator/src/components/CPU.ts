@@ -1,3 +1,6 @@
+// 6502 CPU
+// Adapted from: https://github.com/OneLoneCoder/olcNES/blob/master/Part%232%20-%20CPU/olc6502.cpp
+
 export interface CPUInstruction {
   name: string
   cycles: number
@@ -7,62 +10,295 @@ export interface CPUInstruction {
 
 export class CPU {
 
-  static C: number = 0b00000001
-  static Z: number = 0b00000010
-  static I: number = 0b00000100
-  static D: number = 0b00001000
-  static B: number = 0b00010000
-  static U: number = 0b00100000
-  static V: number = 0b01000000
-  static N: number = 0b10000000
-
-  a: number   = 0x00
-  x: number   = 0x00
-  y: number   = 0x00
-  pc: number  = 0x0000
-  s: number   = 0x00
-  p: number   = 0b00100000
+  private static C: number = 0b00000001
+  private static Z: number = 0b00000010
+  private static I: number = 0b00000100
+  private static D: number = 0b00001000
+  private static B: number = 0b00010000
+  private static U: number = 0b00100000
+  private static V: number = 0b01000000
+  private static N: number = 0b10000000
 
   private fetched: number   = 0x00    // Working input value to the ALU
   private temp: number      = 0x0000  // A convenience var used everywhere
   private addrAbs: number   = 0x0000  // All used memory addresses end up here
   private addrRel: number   = 0x0000  // Represents abs address following a branch
   private opcode: number    = 0x00    // The instruction byte
-  private cyclesRem: number = 0       // Counts how many cycles the instruction has remaining
+  private cyclesRem: number = 0       // Counts how many cycles the current instruction has remaining
 
-  constructor() {}
+  a: number   = 0x00
+  x: number   = 0x00
+  y: number   = 0x00
+  pc: number  = 0x0000
+  sp: number  = 0xFD
+  st: number  = 0x00 | CPU.U
 
-  step(
-    cycles: number,
+  read: (address: number) => number
+  write: (address: number, data: number) => void
+
+  constructor(
     read: (address: number) => number,
     write: (address: number, data: number) => void
-  ): void {
+  ) {
+    this.read = read
+    this.write = write
+
+    this.reset()
+  }
+
+  step(cycles: number): void {
     for (let i = 0; i < cycles; i++) {
       this.tick()
     }
   }
 
-  reset(): void {}
-  irq(): void {}
-  nmi(): void {}
+  reset(): void {
+    // Read the PC location from the Reset vector
+    const resetVector = 0xFFFC
+    const lo: number = this.read(resetVector + 0)
+    const hi: number = this.read(resetVector + 1)
+    this.pc = (hi << 8) | lo
 
-  private tick(): void {}     // Perform one clock cycle
-  private fetch(): void {}    // Fetch the next instruction
+    // Clear the registers
+    this.a = 0x00
+    this.x = 0x00
+    this.y = 0x00
+    this.sp = 0xFD
+    this.st = 0x00 | CPU.U
+
+    // Clear our helper variables
+    this.addrRel = 0x0000
+    this.addrAbs = 0x0000
+    this.fetched = 0x00
+
+    // Reset takes 7 clock cycles
+    this.cyclesRem = 7
+  }
+
+  irq(): void {
+    // Are interrupts enabled?
+    if (this.getFlag(CPU.I) == 0) {
+      // Push the program counter onto the stack
+      this.write(0x0100 + this.sp, (this.pc >> 8) & 0x00FF)
+      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+      this.write(0x0100 + this.sp, this.pc & 0x00FF)
+      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+
+      // Push the status register onto the stack
+      this.setFlag(CPU.B, 0)
+      this.setFlag(CPU.I, 1)
+      this.write(0x0100 + this.sp, this.st)
+      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+
+      // Read new PC location from IRQ vector
+      const irqVector = 0xFFFE
+      const lo: number = this.read(irqVector + 0)
+      const hi: number = this.read(irqVector + 1)
+      this.pc = (hi << 8) | lo
+
+      // IRQ takes 7 clock cycles
+      this.cyclesRem = 7
+    }
+  }
+
+  nmi(): void {
+      // Push the program counter onto the stack
+      this.write(0x0100 + this.sp, (this.pc >> 8) & 0x00FF)
+      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+      this.write(0x0100 + this.sp, this.pc & 0x00FF)
+      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+
+      // Push the status register onto the stack
+      this.setFlag(CPU.B, 0)
+      this.setFlag(CPU.I, 1)
+      this.write(0x0100 + this.sp, this.st)
+      this.sp--
+
+      // Read new PC location from NMI vector
+      const nmiVector = 0xFFFA
+      const lo: number = this.read(nmiVector + 0)
+      const hi: number = this.read(nmiVector + 1)
+      this.pc = (hi << 8) | lo
+
+      // IRQ takes 7 clock cycles
+      this.cyclesRem = 7
+  }
+
+  // Perform one clock cycle
+  private tick(): void {
+    if (this.cyclesRem == 0) {
+      this.opcode = this.read(this.pc)
+      this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+
+      const instruction = this.instructionTable[this.opcode]
+
+      this.cyclesRem = instruction.cycles
+
+      const addCycleAddrMode = instruction.addrMode()
+      const addCycleOpcode = instruction.opcode()
+      
+      // addrMode() and opcode() return 1 or 0 if additional clock cycles are required
+      this.cyclesRem += addCycleAddrMode & addCycleOpcode
+    }
+
+    this.cyclesRem--
+  }
+
+  // Fetch the data
+  private fetch(): number {
+    if (!(this.instructionTable[this.opcode].addrMode == this.IMP)) {
+      this.fetched = this.read(this.addrAbs)
+    }
+    return this.fetched
+  }
+
+  // Get the value of flag in the status register
+  private getFlag(flag: number): number {
+    return (this.st & flag) > 0 ? 1 : 0
+  }
+
+  // Set or clear a flag in the status register
+  private setFlag(flag: number, value: number): void {
+    if (value > 0) {
+      this.st |= flag
+    } else {
+      this.st &= ~flag
+    }
+  }
 
   // Addressing Modes
 
-  private IMP(): number { return 0 }
-  private IMM(): number { return 0 }
-  private ZP0(): number { return 0 }
-  private ZPX(): number { return 0 }
-  private ZPY(): number { return 0 }
-  private REL(): number { return 0 }
-  private ABS(): number { return 0 }
-  private ABX(): number { return 0 }
-  private ABY(): number { return 0 }
-  private IND(): number { return 0 }
-  private IZX(): number { return 0 }
-  private IZY(): number { return 0 }
+  private IMP(): number {
+    this.fetched = this.a
+    return 0 
+  }
+
+  private IMM(): number {
+    this.addrAbs = this.pc++;
+    return 0
+  }
+
+  private ZP0(): number {
+    this.addrAbs = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.addrAbs &= 0x00FF
+    return 0
+  }
+
+  private ZPX(): number {
+    this.addrAbs = this.read(this.pc) + this.x
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.addrAbs &= 0x00FF
+    return 0
+  }
+
+  private ZPY(): number {
+    this.addrAbs = this.read(this.pc) + this.y
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.addrAbs &= 0x00FF
+    return 0
+  }
+
+  private REL(): number {
+    this.addrRel = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    if (this.addrRel & 0x80) {
+      this.addrRel |= 0xFF00
+    }
+    return 0
+  }
+
+  private ABS(): number {
+    const lo: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    const hi: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+
+    this.addrAbs = (hi << 8) | lo
+
+    return 0
+  }
+
+  private ABX(): number {
+    const lo: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    const hi: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+
+    this.addrAbs = (hi << 8) | lo
+    this.addrAbs += this.x
+
+    if ((this.addrAbs & 0xFF00) != (hi << 8)) {
+      return 1
+    } else {
+      return 0
+    }
+  }
+
+  private ABY(): number {
+    const lo: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    const hi: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+
+    this.addrAbs = (hi << 8) | lo
+    this.addrAbs += this.y
+
+    if ((this.addrAbs & 0xFF00) != (hi << 8)) {
+      return 1
+    } else {
+      return 0
+    }
+  }
+
+  private IND(): number {
+    const ptrLo: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    const ptrHi: number = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+
+    const ptr = (ptrHi << 8) | ptrLo
+
+    // Simulate page boundary hardware bug
+    if (ptrLo == 0x00FF) {
+      this.addrAbs = (this.read(ptr & 0xFF00) << 8) | this.read(ptr)
+    } else {
+      this.addrAbs = (this.read(ptr + 1) << 8) | this.read(ptr)
+    }
+
+    return 0
+  }
+
+  private IZX(): number {
+    const t = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+
+    const lo = this.read((t + this.x) & 0x00FF)
+    const hi = this.read((t + this.x + 1) & 0x00FF)
+
+    this.addrAbs = (hi << 8) | lo
+
+    // TODO: Why is this different than IZY?
+
+    return 0
+  }
+
+  private IZY(): number {
+    const t = this.read(this.pc)
+    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+
+    const lo = this.read((t ) & 0x00FF)
+    const hi = this.read((t + 1) & 0x00FF)
+
+    this.addrAbs = (hi << 8) | lo
+    this.addrAbs += this.y
+
+    if ((this.addrAbs & 0xFF00) != (hi << 8)) {
+      return 1
+    } else {
+      return 0
+    }
+  }
 
   // Opcodes
 
@@ -125,7 +361,7 @@ export class CPU {
   private XXX(): number { return 0 }
 
   instructionTable: CPUInstruction[] = [
-    { name: 'BRK', cycles: 7, opcode: this.BRK, addrMode: this.IMM }, 
+    { name: 'BRK', cycles: 7, opcode: this.BRK, addrMode: this.IMM },
     { name: 'ORA', cycles: 6, opcode: this.ORA, addrMode: this.IZX },
     { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
     { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
@@ -141,21 +377,261 @@ export class CPU {
     { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ABS },
     { name: 'ASL', cycles: 6, opcode: this.ASL, addrMode: this.ABS },
     { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-		// { "BPL", &a::BPL, &a::REL, 2 },{ "ORA", &a::ORA, &a::IZY, 5 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 4 },{ "ORA", &a::ORA, &a::ZPX, 4 },{ "ASL", &a::ASL, &a::ZPX, 6 },{ "???", &a::XXX, &a::IMP, 6 },{ "CLC", &a::CLC, &a::IMP, 2 },{ "ORA", &a::ORA, &a::ABY, 4 },{ "???", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 7 },{ "???", &a::NOP, &a::IMP, 4 },{ "ORA", &a::ORA, &a::ABX, 4 },{ "ASL", &a::ASL, &a::ABX, 7 },{ "???", &a::XXX, &a::IMP, 7 },
-		// { "JSR", &a::JSR, &a::ABS, 6 },{ "AND", &a::AND, &a::IZX, 6 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "BIT", &a::BIT, &a::ZP0, 3 },{ "AND", &a::AND, &a::ZP0, 3 },{ "ROL", &a::ROL, &a::ZP0, 5 },{ "???", &a::XXX, &a::IMP, 5 },{ "PLP", &a::PLP, &a::IMP, 4 },{ "AND", &a::AND, &a::IMM, 2 },{ "ROL", &a::ROL, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 2 },{ "BIT", &a::BIT, &a::ABS, 4 },{ "AND", &a::AND, &a::ABS, 4 },{ "ROL", &a::ROL, &a::ABS, 6 },{ "???", &a::XXX, &a::IMP, 6 },
-		// { "BMI", &a::BMI, &a::REL, 2 },{ "AND", &a::AND, &a::IZY, 5 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 4 },{ "AND", &a::AND, &a::ZPX, 4 },{ "ROL", &a::ROL, &a::ZPX, 6 },{ "???", &a::XXX, &a::IMP, 6 },{ "SEC", &a::SEC, &a::IMP, 2 },{ "AND", &a::AND, &a::ABY, 4 },{ "???", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 7 },{ "???", &a::NOP, &a::IMP, 4 },{ "AND", &a::AND, &a::ABX, 4 },{ "ROL", &a::ROL, &a::ABX, 7 },{ "???", &a::XXX, &a::IMP, 7 },
-		// { "RTI", &a::RTI, &a::IMP, 6 },{ "EOR", &a::EOR, &a::IZX, 6 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 3 },{ "EOR", &a::EOR, &a::ZP0, 3 },{ "LSR", &a::LSR, &a::ZP0, 5 },{ "???", &a::XXX, &a::IMP, 5 },{ "PHA", &a::PHA, &a::IMP, 3 },{ "EOR", &a::EOR, &a::IMM, 2 },{ "LSR", &a::LSR, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 2 },{ "JMP", &a::JMP, &a::ABS, 3 },{ "EOR", &a::EOR, &a::ABS, 4 },{ "LSR", &a::LSR, &a::ABS, 6 },{ "???", &a::XXX, &a::IMP, 6 },
-		// { "BVC", &a::BVC, &a::REL, 2 },{ "EOR", &a::EOR, &a::IZY, 5 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 4 },{ "EOR", &a::EOR, &a::ZPX, 4 },{ "LSR", &a::LSR, &a::ZPX, 6 },{ "???", &a::XXX, &a::IMP, 6 },{ "CLI", &a::CLI, &a::IMP, 2 },{ "EOR", &a::EOR, &a::ABY, 4 },{ "???", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 7 },{ "???", &a::NOP, &a::IMP, 4 },{ "EOR", &a::EOR, &a::ABX, 4 },{ "LSR", &a::LSR, &a::ABX, 7 },{ "???", &a::XXX, &a::IMP, 7 },
-		// { "RTS", &a::RTS, &a::IMP, 6 },{ "ADC", &a::ADC, &a::IZX, 6 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 3 },{ "ADC", &a::ADC, &a::ZP0, 3 },{ "ROR", &a::ROR, &a::ZP0, 5 },{ "???", &a::XXX, &a::IMP, 5 },{ "PLA", &a::PLA, &a::IMP, 4 },{ "ADC", &a::ADC, &a::IMM, 2 },{ "ROR", &a::ROR, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 2 },{ "JMP", &a::JMP, &a::IND, 5 },{ "ADC", &a::ADC, &a::ABS, 4 },{ "ROR", &a::ROR, &a::ABS, 6 },{ "???", &a::XXX, &a::IMP, 6 },
-		// { "BVS", &a::BVS, &a::REL, 2 },{ "ADC", &a::ADC, &a::IZY, 5 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 4 },{ "ADC", &a::ADC, &a::ZPX, 4 },{ "ROR", &a::ROR, &a::ZPX, 6 },{ "???", &a::XXX, &a::IMP, 6 },{ "SEI", &a::SEI, &a::IMP, 2 },{ "ADC", &a::ADC, &a::ABY, 4 },{ "???", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 7 },{ "???", &a::NOP, &a::IMP, 4 },{ "ADC", &a::ADC, &a::ABX, 4 },{ "ROR", &a::ROR, &a::ABX, 7 },{ "???", &a::XXX, &a::IMP, 7 },
-		// { "???", &a::NOP, &a::IMP, 2 },{ "STA", &a::STA, &a::IZX, 6 },{ "???", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 6 },{ "STY", &a::STY, &a::ZP0, 3 },{ "STA", &a::STA, &a::ZP0, 3 },{ "STX", &a::STX, &a::ZP0, 3 },{ "???", &a::XXX, &a::IMP, 3 },{ "DEY", &a::DEY, &a::IMP, 2 },{ "???", &a::NOP, &a::IMP, 2 },{ "TXA", &a::TXA, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 2 },{ "STY", &a::STY, &a::ABS, 4 },{ "STA", &a::STA, &a::ABS, 4 },{ "STX", &a::STX, &a::ABS, 4 },{ "???", &a::XXX, &a::IMP, 4 },
-		// { "BCC", &a::BCC, &a::REL, 2 },{ "STA", &a::STA, &a::IZY, 6 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 6 },{ "STY", &a::STY, &a::ZPX, 4 },{ "STA", &a::STA, &a::ZPX, 4 },{ "STX", &a::STX, &a::ZPY, 4 },{ "???", &a::XXX, &a::IMP, 4 },{ "TYA", &a::TYA, &a::IMP, 2 },{ "STA", &a::STA, &a::ABY, 5 },{ "TXS", &a::TXS, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 5 },{ "???", &a::NOP, &a::IMP, 5 },{ "STA", &a::STA, &a::ABX, 5 },{ "???", &a::XXX, &a::IMP, 5 },{ "???", &a::XXX, &a::IMP, 5 },
-		// { "LDY", &a::LDY, &a::IMM, 2 },{ "LDA", &a::LDA, &a::IZX, 6 },{ "LDX", &a::LDX, &a::IMM, 2 },{ "???", &a::XXX, &a::IMP, 6 },{ "LDY", &a::LDY, &a::ZP0, 3 },{ "LDA", &a::LDA, &a::ZP0, 3 },{ "LDX", &a::LDX, &a::ZP0, 3 },{ "???", &a::XXX, &a::IMP, 3 },{ "TAY", &a::TAY, &a::IMP, 2 },{ "LDA", &a::LDA, &a::IMM, 2 },{ "TAX", &a::TAX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 2 },{ "LDY", &a::LDY, &a::ABS, 4 },{ "LDA", &a::LDA, &a::ABS, 4 },{ "LDX", &a::LDX, &a::ABS, 4 },{ "???", &a::XXX, &a::IMP, 4 },
-		// { "BCS", &a::BCS, &a::REL, 2 },{ "LDA", &a::LDA, &a::IZY, 5 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 5 },{ "LDY", &a::LDY, &a::ZPX, 4 },{ "LDA", &a::LDA, &a::ZPX, 4 },{ "LDX", &a::LDX, &a::ZPY, 4 },{ "???", &a::XXX, &a::IMP, 4 },{ "CLV", &a::CLV, &a::IMP, 2 },{ "LDA", &a::LDA, &a::ABY, 4 },{ "TSX", &a::TSX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 4 },{ "LDY", &a::LDY, &a::ABX, 4 },{ "LDA", &a::LDA, &a::ABX, 4 },{ "LDX", &a::LDX, &a::ABY, 4 },{ "???", &a::XXX, &a::IMP, 4 },
-		// { "CPY", &a::CPY, &a::IMM, 2 },{ "CMP", &a::CMP, &a::IZX, 6 },{ "???", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "CPY", &a::CPY, &a::ZP0, 3 },{ "CMP", &a::CMP, &a::ZP0, 3 },{ "DEC", &a::DEC, &a::ZP0, 5 },{ "???", &a::XXX, &a::IMP, 5 },{ "INY", &a::INY, &a::IMP, 2 },{ "CMP", &a::CMP, &a::IMM, 2 },{ "DEX", &a::DEX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 2 },{ "CPY", &a::CPY, &a::ABS, 4 },{ "CMP", &a::CMP, &a::ABS, 4 },{ "DEC", &a::DEC, &a::ABS, 6 },{ "???", &a::XXX, &a::IMP, 6 },
-		// { "BNE", &a::BNE, &a::REL, 2 },{ "CMP", &a::CMP, &a::IZY, 5 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 4 },{ "CMP", &a::CMP, &a::ZPX, 4 },{ "DEC", &a::DEC, &a::ZPX, 6 },{ "???", &a::XXX, &a::IMP, 6 },{ "CLD", &a::CLD, &a::IMP, 2 },{ "CMP", &a::CMP, &a::ABY, 4 },{ "NOP", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 7 },{ "???", &a::NOP, &a::IMP, 4 },{ "CMP", &a::CMP, &a::ABX, 4 },{ "DEC", &a::DEC, &a::ABX, 7 },{ "???", &a::XXX, &a::IMP, 7 },
-		// { "CPX", &a::CPX, &a::IMM, 2 },{ "SBC", &a::SBC, &a::IZX, 6 },{ "???", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "CPX", &a::CPX, &a::ZP0, 3 },{ "SBC", &a::SBC, &a::ZP0, 3 },{ "INC", &a::INC, &a::ZP0, 5 },{ "???", &a::XXX, &a::IMP, 5 },{ "INX", &a::INX, &a::IMP, 2 },{ "SBC", &a::SBC, &a::IMM, 2 },{ "NOP", &a::NOP, &a::IMP, 2 },{ "???", &a::SBC, &a::IMP, 2 },{ "CPX", &a::CPX, &a::ABS, 4 },{ "SBC", &a::SBC, &a::ABS, 4 },{ "INC", &a::INC, &a::ABS, 6 },{ "???", &a::XXX, &a::IMP, 6 },
-		// { "BEQ", &a::BEQ, &a::REL, 2 },{ "SBC", &a::SBC, &a::IZY, 5 },{ "???", &a::XXX, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 8 },{ "???", &a::NOP, &a::IMP, 4 },{ "SBC", &a::SBC, &a::ZPX, 4 },{ "INC", &a::INC, &a::ZPX, 6 },{ "???", &a::XXX, &a::IMP, 6 },{ "SED", &a::SED, &a::IMP, 2 },{ "SBC", &a::SBC, &a::ABY, 4 },{ "NOP", &a::NOP, &a::IMP, 2 },{ "???", &a::XXX, &a::IMP, 7 },{ "???", &a::NOP, &a::IMP, 4 },{ "SBC", &a::SBC, &a::ABX, 4 },{ "INC", &a::INC, &a::ABX, 7 },{ "???", &a::XXX, &a::IMP, 7 }
+
+    { name: 'BPL', cycles: 2, opcode: this.BPL, addrMode: this.REL },
+    { name: 'ORA', cycles: 5, opcode: this.ORA, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ZPX },
+    { name: 'ASL', cycles: 6, opcode: this.ASL, addrMode: this.ZPX },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CLC', cycles: 2, opcode: this.CLC, addrMode: this.IMP },
+    { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ABY },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ABX },
+    { name: 'ASL', cycles: 7, opcode: this.ASL, addrMode: this.ABX },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'JSR', cycles: 6, opcode: this.JSR, addrMode: this.ABS },
+    { name: 'AND', cycles: 6, opcode: this.AND, addrMode: this.IZX },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BIT', cycles: 3, opcode: this.BIT, addrMode: this.ZP0 },
+    { name: 'AND', cycles: 3, opcode: this.AND, addrMode: this.ZP0 },
+    { name: 'ROL', cycles: 5, opcode: this.ROL, addrMode: this.ZP0 },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'PLP', cycles: 4, opcode: this.PLP, addrMode: this.IMP },
+    { name: 'AND', cycles: 2, opcode: this.AND, addrMode: this.IMM },
+    { name: 'ROL', cycles: 2, opcode: this.ROL, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BIT', cycles: 4, opcode: this.BIT, addrMode: this.ABS },
+    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ABS },
+    { name: 'ROL', cycles: 6, opcode: this.ROL, addrMode: this.ABS },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'BMI', cycles: 2, opcode: this.BMI, addrMode: this.REL },
+    { name: 'AND', cycles: 5, opcode: this.AND, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ZPX },
+    { name: 'ROL', cycles: 6, opcode: this.ROL, addrMode: this.ZPX },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'SEC', cycles: 2, opcode: this.SEC, addrMode: this.IMP },
+    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ABY },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ABX },
+    { name: 'ROL', cycles: 7, opcode: this.ROL, addrMode: this.ABX },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'RTI', cycles: 6, opcode: this.RTI, addrMode: this.IMP },
+    { name: 'EOR', cycles: 6, opcode: this.EOR, addrMode: this.IZX },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 3, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'EOR', cycles: 3, opcode: this.EOR, addrMode: this.ZP0 },
+    { name: 'LSR', cycles: 5, opcode: this.LSR, addrMode: this.ZP0 },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'PHA', cycles: 3, opcode: this.PHA, addrMode: this.IMP },
+    { name: 'EOR', cycles: 2, opcode: this.EOR, addrMode: this.IMM },
+    { name: 'LSR', cycles: 2, opcode: this.LSR, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'JMP', cycles: 3, opcode: this.JMP, addrMode: this.ABS },
+    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ABS },
+    { name: 'LSR', cycles: 6, opcode: this.LSR, addrMode: this.ABS },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'BVC', cycles: 2, opcode: this.BVC, addrMode: this.REL },
+    { name: 'EOR', cycles: 5, opcode: this.EOR, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ZPX },
+    { name: 'LSR', cycles: 6, opcode: this.LSR, addrMode: this.ZPX },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CLI', cycles: 2, opcode: this.CLI, addrMode: this.IMP },
+    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ABY },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ABX },
+    { name: 'LSR', cycles: 7, opcode: this.LSR, addrMode: this.ABX },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'RTS', cycles: 6, opcode: this.RTS, addrMode: this.IMP },
+    { name: 'ADC', cycles: 6, opcode: this.ADC, addrMode: this.IZX },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 3, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'ADC', cycles: 3, opcode: this.ADC, addrMode: this.ZP0 },
+    { name: 'ROR', cycles: 5, opcode: this.ROR, addrMode: this.ZP0 },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'PLA', cycles: 4, opcode: this.PLA, addrMode: this.IMP },
+    { name: 'ADC', cycles: 2, opcode: this.ADC, addrMode: this.IMM },
+    { name: 'ROR', cycles: 2, opcode: this.ROR, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'JMP', cycles: 5, opcode: this.JMP, addrMode: this.IND },
+    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ABS },
+    { name: 'ROR', cycles: 6, opcode: this.ROR, addrMode: this.ABS },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'BVS', cycles: 2, opcode: this.BVS, addrMode: this.REL },
+    { name: 'ADC', cycles: 5, opcode: this.ADC, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ZPX },
+    { name: 'ROR', cycles: 6, opcode: this.ROR, addrMode: this.ZPX },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'SEI', cycles: 2, opcode: this.SEI, addrMode: this.IMP },
+    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ABY },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ABX },
+    { name: 'ROR', cycles: 7, opcode: this.ROR, addrMode: this.ABX },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'STA', cycles: 6, opcode: this.STA, addrMode: this.IZX },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'STY', cycles: 3, opcode: this.STY, addrMode: this.ZP0 },
+    { name: 'STA', cycles: 3, opcode: this.STA, addrMode: this.ZP0 },
+    { name: 'STX', cycles: 3, opcode: this.STX, addrMode: this.ZP0 },
+    { name: '???', cycles: 3, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'DEY', cycles: 2, opcode: this.DEY, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'TXA', cycles: 2, opcode: this.TXA, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'STY', cycles: 4, opcode: this.STY, addrMode: this.ABS },
+    { name: 'STA', cycles: 4, opcode: this.STA, addrMode: this.ABS },
+    { name: 'STX', cycles: 4, opcode: this.STX, addrMode: this.ABS },
+    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'BCC', cycles: 2, opcode: this.BCC, addrMode: this.REL },
+    { name: 'STA', cycles: 6, opcode: this.STA, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'STY', cycles: 4, opcode: this.STY, addrMode: this.ZPX },
+    { name: 'STA', cycles: 4, opcode: this.STA, addrMode: this.ZPX },
+    { name: 'STX', cycles: 4, opcode: this.STX, addrMode: this.ZPY },
+    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'TYA', cycles: 2, opcode: this.TYA, addrMode: this.IMP },
+    { name: 'STA', cycles: 5, opcode: this.STA, addrMode: this.ABY },
+    { name: 'TXS', cycles: 2, opcode: this.TXS, addrMode: this.IMP },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 5, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'STA', cycles: 5, opcode: this.STA, addrMode: this.ABX },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'LDY', cycles: 2, opcode: this.LDY, addrMode: this.IMM },
+    { name: 'LDA', cycles: 6, opcode: this.LDA, addrMode: this.IZX },
+    { name: 'LDX', cycles: 2, opcode: this.LDX, addrMode: this.IMM },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'LDY', cycles: 3, opcode: this.LDY, addrMode: this.ZP0 },
+    { name: 'LDA', cycles: 3, opcode: this.LDA, addrMode: this.ZP0 },
+    { name: 'LDX', cycles: 3, opcode: this.LDX, addrMode: this.ZP0 },
+    { name: '???', cycles: 3, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'TAY', cycles: 2, opcode: this.TAY, addrMode: this.IMP },
+    { name: 'LDA', cycles: 2, opcode: this.LDA, addrMode: this.IMM },
+    { name: 'TAX', cycles: 2, opcode: this.TAX, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'LDY', cycles: 4, opcode: this.LDY, addrMode: this.ABS },
+    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ABS },
+    { name: 'LDX', cycles: 4, opcode: this.LDX, addrMode: this.ABS },
+    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'BCS', cycles: 2, opcode: this.BCS, addrMode: this.REL },
+    { name: 'LDA', cycles: 5, opcode: this.LDA, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'LDY', cycles: 4, opcode: this.LDY, addrMode: this.ZPX },
+    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ZPX },
+    { name: 'LDX', cycles: 4, opcode: this.LDX, addrMode: this.ZPY },
+    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CLV', cycles: 2, opcode: this.CLV, addrMode: this.IMP },
+    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ABY },
+    { name: 'TSX', cycles: 2, opcode: this.TSX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'LDY', cycles: 4, opcode: this.LDY, addrMode: this.ABX },
+    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ABX },
+    { name: 'LDX', cycles: 4, opcode: this.LDX, addrMode: this.ABY },
+    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'CPY', cycles: 2, opcode: this.CPY, addrMode: this.IMM },
+    { name: 'CMP', cycles: 6, opcode: this.CMP, addrMode: this.IZX },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CPY', cycles: 3, opcode: this.CPY, addrMode: this.ZP0 },
+    { name: 'CMP', cycles: 3, opcode: this.CMP, addrMode: this.ZP0 },
+    { name: 'DEC', cycles: 5, opcode: this.DEC, addrMode: this.ZP0 },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'INY', cycles: 2, opcode: this.INY, addrMode: this.IMP },
+    { name: 'CMP', cycles: 2, opcode: this.CMP, addrMode: this.IMM },
+    { name: 'DEX', cycles: 2, opcode: this.DEX, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CPY', cycles: 4, opcode: this.CPY, addrMode: this.ABS },
+    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ABS },
+    { name: 'DEC', cycles: 6, opcode: this.DEC, addrMode: this.ABS },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'BNE', cycles: 2, opcode: this.BNE, addrMode: this.REL },
+    { name: 'CMP', cycles: 5, opcode: this.CMP, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ZPX },
+    { name: 'DEC', cycles: 6, opcode: this.DEC, addrMode: this.ZPX },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CLD', cycles: 2, opcode: this.CLD, addrMode: this.IMP },
+    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ABY },
+    { name: 'NOP', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ABX },
+    { name: 'DEC', cycles: 7, opcode: this.DEC, addrMode: this.ABX },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'CPX', cycles: 2, opcode: this.CPX, addrMode: this.IMM },
+    { name: 'SBC', cycles: 6, opcode: this.SBC, addrMode: this.IZX },
+    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CPX', cycles: 3, opcode: this.CPX, addrMode: this.ZP0 },
+    { name: 'SBC', cycles: 3, opcode: this.SBC, addrMode: this.ZP0 },
+    { name: 'INC', cycles: 5, opcode: this.INC, addrMode: this.ZP0 },
+    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'INX', cycles: 2, opcode: this.INX, addrMode: this.IMP },
+    { name: 'SBC', cycles: 2, opcode: this.SBC, addrMode: this.IMM },
+    { name: 'NOP', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CPX', cycles: 4, opcode: this.CPX, addrMode: this.ABS },
+    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ABS },
+    { name: 'INC', cycles: 6, opcode: this.INC, addrMode: this.ABS },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+
+    { name: 'BEQ', cycles: 2, opcode: this.BEQ, addrMode: this.REL },
+    { name: 'SBC', cycles: 5, opcode: this.SBC, addrMode: this.IZY },
+    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ZPX },
+    { name: 'INC', cycles: 6, opcode: this.INC, addrMode: this.ZPX },
+    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'SED', cycles: 2, opcode: this.SED, addrMode: this.IMP },
+    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ABY },
+    { name: 'NOP', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
+    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ABX },
+    { name: 'INC', cycles: 7, opcode: this.INC, addrMode: this.ABX },
+    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP } 
   ]
 
 }
