@@ -35,7 +35,7 @@ export class Machine {
   static MAX_FPS: number = 60
   static FRAME_INTERVAL_MS: number = 1000 / Machine.MAX_FPS
   private startTime: number = 0
-  private previousTime: number = 0
+  private previousTime: number = Date.now()
 
   cpu: CPU
   ram: RAM
@@ -138,9 +138,6 @@ export class Machine {
   }
 
   loop(): void {
-    // TODO: Step the clock forward n cycles based on the frequency and display refresh rate (60Hz)
-    // https://www.reddit.com/r/EmuDev/comments/ksbvgx/how_to_set_clock_speed_in_c/
-
     this.frames += 1
 
     if (!this.isRunning || this.window?.destroyed) { return }
@@ -148,30 +145,40 @@ export class Machine {
     const currentTime = Date.now()
     const deltaTime = currentTime - this.previousTime;
     this.previousTime = currentTime
+    const fps = 1 / (deltaTime / 1000)
 
-    // TODO: Use deltaTime
+    if (this.frequency >= fps) {
+      const cycles = Math.floor(this.frequency / fps)
 
-    if (this.frequency >= Machine.MAX_FPS) {
-      const cycles = Math.floor(this.frequency / Machine.MAX_FPS)
-      this.cpu.step(
-        cycles
-      )
+      for (let i = 0; i < cycles; i++) {
+        this.cpu.tick()
+        this.io[0].tick()
+        this.io[1].tick()
+        this.io[2].tick()
+        this.io[3].tick()
+        this.io[4].tick()
+        this.io[5].tick()
+        this.io[6].tick()
+        this.io[7].tick() // This is faster than looping over IO array!
+      }
+
       this.cycles += cycles
-
-      this.io.forEach((io) => {
-        io.step(cycles, this.frequency)
-      })
     } else {
-      this.frameDelay = Math.floor(Machine.MAX_FPS / this.frequency)
+      this.frameDelay = Math.floor(fps / this.frequency)
 
       if (this.frameDelayCount >= this.frameDelay) {
-        this.cpu.step(1)
+        this.cpu.tick()
+        this.io[0].tick()
+        this.io[1].tick()
+        this.io[2].tick()
+        this.io[3].tick()
+        this.io[4].tick()
+        this.io[5].tick()
+        this.io[6].tick()
+        this.io[7].tick() // This is faster than looping over IO array!
+
         this.cycles += 1
         this.frameDelayCount = 0
-
-        this.io.forEach((io) => {
-          io.step(1, this.frequency)
-        })
       } else {
         this.frameDelayCount += 1
       }
@@ -179,16 +186,7 @@ export class Machine {
 
     this.render()
 
-    setTimeout(this.loop.bind(this), Machine.FRAME_INTERVAL_MS)
-  }
-
-  step(cycles: number = 1): void {
-    this.cpu.step(cycles)
-    this.cycles += cycles
-
-    this.io.forEach((io) => {
-      io.step(cycles, this.frequency)
-    })
+    setTimeout(this.loop.bind(this), Math.floor(Machine.FRAME_INTERVAL_MS))
   }
 
   launch(onComplete: (uptime: number) => void): void {
@@ -214,23 +212,37 @@ export class Machine {
   render(): void {
     if (!this.window || !this.ctx) { return }
 
-    this.ctx.imageSmoothingEnabled = false
-    this.ctx.fillStyle = 'black'
-    this.ctx.fillRect(0, 0, 256, 192)
-    this.ctx.fillStyle = 'green'
-    this.ctx.fillRect(160, 16, 1, 1)
-    this.ctx.fillRect(161, 17, 1, 1)
-    // this.ctx.font = "monospace 16px"
+    // this.ctx.imageSmoothingEnabled = false
+    // this.ctx.fillStyle = 'black'
+    // this.ctx.fillRect(0, 0, 256, 192)
     // this.ctx.fillStyle = 'green'
-    // this.ctx.fillText("00 00 FF 00", 0, 16)
+    // this.ctx.fillRect(160, 16, 1, 1)
+    // this.ctx.fillRect(161, 17, 1, 1)
+    // // this.ctx.font = "monospace 16px"
+    // // this.ctx.fillStyle = 'green'
+    // // this.ctx.fillText("00 00 FF 00", 0, 16)
 
-    this.window.render(
-      256,
-      192,
-      256 * 4,
-      'rgba32',
-      Buffer.from(this.ctx.getImageData(0, 0, 256, 192).data)
-    )
+    // this.window.render(
+    //   256,
+    //   192,
+    //   256 * 4,
+    //   'rgba32',
+    //   Buffer.from(this.ctx.getImageData(0, 0, 256, 192).data)
+    // )
+
+    const buffer = Buffer.alloc(256 * 192 * 4)
+
+    let offset = 0
+    for (let i = 0; i < 192; i++) {
+      for (let j = 0; j < 256; j++) {
+        buffer[offset++] = Math.floor(256 * i / 192)    // R
+        buffer[offset++] = Math.floor(256 * j / 256)    // G
+        buffer[offset++] = 0                            // B
+        buffer[offset++] = 255                          // A
+      }
+    }
+
+    this.window.render(256, 192, 256 * 4, 'rgba32', buffer)
   }
 
   run(): void {

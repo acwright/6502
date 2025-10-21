@@ -46,12 +46,6 @@ export class CPU {
     this.reset()
   }
 
-  step(cycles: number): void {
-    for (let i = 0; i < cycles; i++) {
-      this.tick()
-    }
-  }
-
   reset(): void {
     // Read the PC location from the Reset vector
     const resetVector = 0xFFFC
@@ -80,15 +74,15 @@ export class CPU {
     if (this.getFlag(CPU.I) == 0) {
       // Push the program counter onto the stack
       this.write(0x0100 + this.sp, (this.pc >> 8) & 0x00FF)
-      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+      this.decSP()
       this.write(0x0100 + this.sp, this.pc & 0x00FF)
-      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+      this.decSP()
 
       // Push the status register onto the stack
-      this.setFlag(CPU.B, 0)
-      this.setFlag(CPU.I, 1)
+      this.setFlag(CPU.B, false)
+      this.setFlag(CPU.I, true)
       this.write(0x0100 + this.sp, this.st)
-      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+      this.decSP()
 
       // Read new PC location from IRQ vector
       const irqVector = 0xFFFE
@@ -104,15 +98,15 @@ export class CPU {
   nmi(): void {
       // Push the program counter onto the stack
       this.write(0x0100 + this.sp, (this.pc >> 8) & 0x00FF)
-      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+      this.decSP()
       this.write(0x0100 + this.sp, this.pc & 0x00FF)
-      this.sp-- // TODO: This might not work since we don't have uint8; what if we cross zero?
+      this.decSP()
 
       // Push the status register onto the stack
-      this.setFlag(CPU.B, 0)
-      this.setFlag(CPU.I, 1)
+      this.setFlag(CPU.B, false)
+      this.setFlag(CPU.I, true)
       this.write(0x0100 + this.sp, this.st)
-      this.sp--
+      this.decSP()
 
       // Read new PC location from NMI vector
       const nmiVector = 0xFFFA
@@ -125,19 +119,20 @@ export class CPU {
   }
 
   // Perform one clock cycle
-  private tick(): void {
+  tick(): void {
     if (this.cyclesRem == 0) {
       this.opcode = this.read(this.pc)
-      this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+      this.incPC()
 
       const instruction = this.instructionTable[this.opcode]
 
       this.cyclesRem = instruction.cycles
 
-      const addCycleAddrMode = instruction.addrMode()
-      const addCycleOpcode = instruction.opcode()
+      const addCycleAddrMode  = instruction.addrMode()
+      const addCycleOpcode    = instruction.opcode()
       
       // addrMode() and opcode() return 1 or 0 if additional clock cycles are required
+      // TODO: Why is this & instead of +?
       this.cyclesRem += addCycleAddrMode & addCycleOpcode
     }
 
@@ -158,11 +153,41 @@ export class CPU {
   }
 
   // Set or clear a flag in the status register
-  private setFlag(flag: number, value: number): void {
-    if (value > 0) {
+  private setFlag(flag: number, value: boolean): void {
+    if (value) {
       this.st |= flag
     } else {
       this.st &= ~flag
+    }
+  }
+
+  private incPC() {
+    this.pc++
+    if (this.pc > 0xFFFF) {
+      this.pc = 0x0000
+    }
+  }
+
+  private decPC() {
+    if (this.pc > 0x0000) {
+      this.pc--
+    } else {
+      this.pc = 0xFFFF
+    }
+  }
+
+  private incSP() {
+    this.sp++
+    if (this.sp > 0xFF) {
+      this.sp = 0x00
+    }
+  }
+
+  private decSP() {
+    if (this.sp > 0x00) {
+      this.sp--
+    } else {
+      this.sp = 0xFF
     }
   }
 
@@ -180,28 +205,28 @@ export class CPU {
 
   private ZP0(): number {
     this.addrAbs = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     this.addrAbs &= 0x00FF
     return 0
   }
 
   private ZPX(): number {
     this.addrAbs = this.read(this.pc) + this.x
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     this.addrAbs &= 0x00FF
     return 0
   }
 
   private ZPY(): number {
     this.addrAbs = this.read(this.pc) + this.y
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     this.addrAbs &= 0x00FF
     return 0
   }
 
   private REL(): number {
     this.addrRel = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     if (this.addrRel & 0x80) {
       this.addrRel |= 0xFF00
     }
@@ -210,9 +235,9 @@ export class CPU {
 
   private ABS(): number {
     const lo: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     const hi: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
 
     this.addrAbs = (hi << 8) | lo
 
@@ -221,9 +246,9 @@ export class CPU {
 
   private ABX(): number {
     const lo: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     const hi: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
 
     this.addrAbs = (hi << 8) | lo
     this.addrAbs += this.x
@@ -237,9 +262,9 @@ export class CPU {
 
   private ABY(): number {
     const lo: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     const hi: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
 
     this.addrAbs = (hi << 8) | lo
     this.addrAbs += this.y
@@ -253,9 +278,9 @@ export class CPU {
 
   private IND(): number {
     const ptrLo: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
     const ptrHi: number = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
 
     const ptr = (ptrHi << 8) | ptrLo
 
@@ -271,7 +296,7 @@ export class CPU {
 
   private IZX(): number {
     const t = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
 
     const lo = this.read((t + this.x) & 0x00FF)
     const hi = this.read((t + this.x + 1) & 0x00FF)
@@ -285,7 +310,7 @@ export class CPU {
 
   private IZY(): number {
     const t = this.read(this.pc)
-    this.pc++ // TODO: This might not work since we don't have uint16; what if we cross 0xFFFF?
+    this.incPC()
 
     const lo = this.read((t ) & 0x00FF)
     const hi = this.read((t + 1) & 0x00FF)
@@ -301,6 +326,7 @@ export class CPU {
   }
 
   // Opcodes
+  // https://github.com/OneLoneCoder/olcNES/blob/master/Part%232%20-%20CPU/olc6502.cpp
 
   private ADC(): number { return 0 }
   private AND(): number { return 0 }
@@ -335,7 +361,20 @@ export class CPU {
   private LDX(): number { return 0 }
   private LDY(): number { return 0 }
   private LSR(): number { return 0 }
-  private NOP(): number { return 0 }
+
+  private NOP(): number {
+    switch (this.opcode) {
+      case 0x1C:
+      case 0x3C:
+      case 0x5C:
+      case 0x7C:
+      case 0xDC:
+      case 0xFC:
+        return 1
+      }
+    return 0
+  }
+
   private ORA(): number { return 0 }
   private PHA(): number { return 0 }
   private PHP(): number { return 0 }
@@ -344,20 +383,90 @@ export class CPU {
   private ROL(): number { return 0 }
   private ROR(): number { return 0 }
   private RTI(): number { return 0 }
-  private RTS(): number { return 0 }
+
+  private RTS(): number {
+    this.incSP()
+    this.pc = this.read(0x0100 + this.sp)
+    this.incSP()
+    this.pc |= this.read(0x0100 + this.sp) << 8
+    this.incPC()
+
+    return 0
+  }
+
+  // TODO
   private SBC(): number { return 0 }
-  private SEC(): number { return 0 }
-  private SED(): number { return 0 }
-  private SEI(): number { return 0 }
-  private STA(): number { return 0 }
-  private STX(): number { return 0 }
-  private STY(): number { return 0 }
-  private TAX(): number { return 0 }
-  private TAY(): number { return 0 }
-  private TSX(): number { return 0 }
-  private TXA(): number { return 0 }
-  private TXS(): number { return 0 }
-  private TYA(): number { return 0 }
+
+  private SEC(): number {
+    this.setFlag(CPU.C, true)
+    return 0
+  }
+
+  private SED(): number {
+    this.setFlag(CPU.D, true)
+    return 0
+  }
+
+  private SEI(): number {
+    this.setFlag(CPU.I, true)
+    return 0
+  }
+
+  private STA(): number {
+    this.write(this.addrAbs, this.a)
+	  return 0
+  }
+
+  private STX(): number {
+    this.write(this.addrAbs, this.x)
+	  return 0
+  }
+
+  private STY(): number {
+    this.write(this.addrAbs, this.y)
+	  return 0
+  }
+
+  private TAX(): number {
+    this.x = this.a
+    this.setFlag(CPU.Z, this.x == 0x00)
+    this.setFlag(CPU.N, (this.x & 0x80) > 0)
+    return 0
+  }
+
+  private TAY(): number {
+    this.y = this.a
+    this.setFlag(CPU.Z, this.y == 0x00)
+    this.setFlag(CPU.N, (this.y & 0x80) > 0)
+    return 0
+  }
+
+  private TSX(): number {
+    this.x = this.sp
+    this.setFlag(CPU.Z, this.x == 0x00)
+    this.setFlag(CPU.N, (this.x & 0x80) > 0)
+    return 0
+  }
+
+  private TXA(): number {
+    this.a = this.x
+    this.setFlag(CPU.Z, this.a == 0x00)
+    this.setFlag(CPU.N, (this.a & 0x80) > 0)
+    return 0
+  }
+
+  private TXS(): number {
+    this.sp = this.x
+    return 0
+  }
+
+  private TYA(): number {
+    this.a = this.y
+    this.setFlag(CPU.Z, this.a == 0x00)
+    this.setFlag(CPU.N, (this.a & 0x80) > 0)
+    return 0
+  }
+
   private XXX(): number { return 0 }
 
   instructionTable: CPUInstruction[] = [

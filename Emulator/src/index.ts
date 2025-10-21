@@ -80,6 +80,6 @@ machine.launch((uptime) => {
     'Time Elapsed': uptime / 1000,
     'CPU Cycles': machine.cycles,
     'Frames': machine.frames,
-    'Avg FPS': machine.frames / (uptime / 1000)
+    'Avg FPS': parseFloat((machine.frames / (uptime / 1000)).toFixed(4))
   })
 })

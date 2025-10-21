@@ -12,7 +12,7 @@ export interface IO {
 
   read(address: number): number
   write(address: number, data: number): void
-  step(cycles: number, frequency: number): void
+  tick(): void
   reset(): void
   
   description(): IODescription
