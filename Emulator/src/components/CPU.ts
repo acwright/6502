@@ -26,6 +26,8 @@ export class CPU {
   private opcode: number    = 0x00    // The instruction byte
   private cyclesRem: number = 0       // Counts how many cycles the current instruction has remaining
 
+  cycles: number            = 0       // Counts the total number of cycles executed
+
   a: number   = 0x00
   x: number   = 0x00
   y: number   = 0x00
@@ -67,6 +69,7 @@ export class CPU {
 
     // Reset takes 7 clock cycles
     this.cyclesRem = 7
+    this.cycles += 7
   }
 
   irq(): void {
@@ -92,6 +95,7 @@ export class CPU {
 
       // IRQ takes 7 clock cycles
       this.cyclesRem = 7
+      this.cycles += 7
     }
   }
 
@@ -114,8 +118,9 @@ export class CPU {
       const hi: number = this.read(nmiVector + 1)
       this.pc = (hi << 8) | lo
 
-      // IRQ takes 7 clock cycles
+      // NMI takes 8 clock cycles
       this.cyclesRem = 7
+      this.cycles += 7
   }
 
   // Perform one clock cycle
@@ -126,7 +131,8 @@ export class CPU {
 
       const instruction = this.instructionTable[this.opcode]
 
-      this.cyclesRem = instruction.cycles
+      this.cyclesRem  = instruction.cycles
+      this.cycles     += instruction.cycles
 
       const addCycleAddrMode  = instruction.addrMode()
       const addCycleOpcode    = instruction.opcode()
@@ -134,9 +140,28 @@ export class CPU {
       // addrMode() and opcode() return 1 or 0 if additional clock cycles are required
       // TODO: Why is this & instead of +?
       this.cyclesRem += addCycleAddrMode & addCycleOpcode
+      this.cycles    += addCycleAddrMode & addCycleOpcode
     }
 
     this.cyclesRem--
+  }
+
+  // Execute one instruction
+  step(): number {
+    // Finish current instruction
+    if (this.cyclesRem > 0) {
+      do {
+        this.tick()
+      } while (this.cyclesRem > 0)
+    }
+
+    const startCycles = this.cycles
+
+    do {
+      this.tick()
+    } while (this.cyclesRem > 0)
+
+    return this.cycles - startCycles
   }
 
   // Fetch the data
@@ -329,6 +354,7 @@ export class CPU {
   // https://github.com/OneLoneCoder/olcNES/blob/master/Part%232%20-%20CPU/olc6502.cpp
 
   private ADC(): number { return 0 }
+  
   private AND(): number { return 0 }
   private ASL(): number { return 0 }
   private BCC(): number { return 0 }
@@ -375,14 +401,82 @@ export class CPU {
     return 0
   }
 
-  private ORA(): number { return 0 }
-  private PHA(): number { return 0 }
-  private PHP(): number { return 0 }
-  private PLA(): number { return 0 }
-  private PLP(): number { return 0 }
-  private ROL(): number { return 0 }
-  private ROR(): number { return 0 }
-  private RTI(): number { return 0 }
+  private ORA(): number {
+    this.fetch()
+    this.a |= this.fetched
+    this.setFlag(CPU.Z, this.a == 0x00)
+    this.setFlag(CPU.N, (this.a & 0x80) != 0)
+    return 1
+  }
+
+  private PHA(): number {
+    this.write(0x0100 + this.sp, this.a)
+    this.decSP()
+    return 0
+  }
+
+  private PHP(): number {
+    this.write(0x0100 + this.sp, this.st | CPU.B | CPU.U)
+    this.setFlag(CPU.B, false)
+    this.setFlag(CPU.U, false)
+    this.decSP()
+    return 0
+  }
+
+  private PLA(): number {
+    this.incSP()
+    this.a = this.read(0x0100 + this.sp)
+    this.setFlag(CPU.Z, this.a == 0x00)
+    this.setFlag(CPU.N, (this.a & 0x80) != 0)
+    return 0
+  }
+
+  private PLP(): number {
+    this.incSP()
+    this.st = this.read(0x0100 + this.sp)
+    this.setFlag(CPU.U, true)
+    return 0
+  }
+
+  private ROL(): number {
+    this.fetch()
+    this.temp = (this.fetched << 1) | this.getFlag(CPU.C)
+    this.setFlag(CPU.C, (this.temp & 0xFF00) != 0)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x00)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    if (this.instructionTable[this.opcode].addrMode == this.IMP) {
+      this.a = this.temp & 0x00FF
+    } else {
+      this.write(this.addrAbs, this.temp & 0x00FF)
+    }
+    return 0
+  }
+
+  private ROR(): number {
+    this.fetch()
+    this.temp = (this.getFlag(CPU.C) << 7) | (this.fetched >> 1)
+    this.setFlag(CPU.C, (this.fetched & 0x01) != 0)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x00)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    if (this.instructionTable[this.opcode].addrMode == this.IMP) {
+      this.a = this.temp & 0x00FF
+    } else {
+      this.write(this.addrAbs, this.temp & 0x00FF)
+    }
+    return 0
+  }
+
+  private RTI(): number {
+    this.incSP()
+    this.st = this.read(0x0100 + this.sp)
+    this.st &= ~CPU.B
+    this.st &= ~CPU.U
+    this.incSP()
+    this.pc = this.read(0x0100 + this.sp)
+    this.incSP()
+    this.pc |= this.read(0x0100 + this.sp) << 8
+    return 0
+  }
 
   private RTS(): number {
     this.incSP()
@@ -394,8 +488,21 @@ export class CPU {
     return 0
   }
 
-  // TODO
-  private SBC(): number { return 0 }
+  private SBC(): number {
+    this.fetch()
+
+    const value = this.fetched ^ 0x00FF
+    
+    this.temp = this.a + value + this.getFlag(CPU.C)
+    this.setFlag(CPU.C, (this.temp & 0xFF00) != 0)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0)
+    this.setFlag(CPU.V, ((this.temp ^ this.a) & (this.temp ^ value) & 0x0080) != 0)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+
+    this.a = this.temp & 0x00FF
+
+    return 1
+  }
 
   private SEC(): number {
     this.setFlag(CPU.C, true)
@@ -430,28 +537,28 @@ export class CPU {
   private TAX(): number {
     this.x = this.a
     this.setFlag(CPU.Z, this.x == 0x00)
-    this.setFlag(CPU.N, (this.x & 0x80) > 0)
+    this.setFlag(CPU.N, (this.x & 0x80) != 0)
     return 0
   }
 
   private TAY(): number {
     this.y = this.a
     this.setFlag(CPU.Z, this.y == 0x00)
-    this.setFlag(CPU.N, (this.y & 0x80) > 0)
+    this.setFlag(CPU.N, (this.y & 0x80) != 0)
     return 0
   }
 
   private TSX(): number {
     this.x = this.sp
     this.setFlag(CPU.Z, this.x == 0x00)
-    this.setFlag(CPU.N, (this.x & 0x80) > 0)
+    this.setFlag(CPU.N, (this.x & 0x80) != 0)
     return 0
   }
 
   private TXA(): number {
     this.a = this.x
     this.setFlag(CPU.Z, this.a == 0x00)
-    this.setFlag(CPU.N, (this.a & 0x80) > 0)
+    this.setFlag(CPU.N, (this.a & 0x80) != 0)
     return 0
   }
 
@@ -463,7 +570,7 @@ export class CPU {
   private TYA(): number {
     this.a = this.y
     this.setFlag(CPU.Z, this.a == 0x00)
-    this.setFlag(CPU.N, (this.a & 0x80) > 0)
+    this.setFlag(CPU.N, (this.a & 0x80) != 0)
     return 0
   }
 

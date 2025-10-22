@@ -22,7 +22,7 @@ program
   .option('-d, --debug', 'Enable debug mode', false)
   .option('-f, --freq <freq>', 'Set the clock frequency in Hz', '1000000')
   .option('-r, --rom <path>', 'Path to 32K ROM binary file')
-  .option('-s, --scale <scale>', 'Set the emulator scale', '1')
+  .option('-s, --scale <scale>', 'Set the emulator scale', '2')
   .parse(process.argv)
 
 const options = program.opts()
@@ -78,7 +78,7 @@ machine.launch((uptime) => {
   console.log('Result:')
   console.table({
     'Time Elapsed': uptime / 1000,
-    'CPU Cycles': machine.cycles,
+    'CPU Cycles': machine.cpu.cycles,
     'Frames': machine.frames,
     'Avg FPS': parseFloat((machine.frames / (uptime / 1000)).toFixed(4))
   })

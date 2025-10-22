@@ -15,9 +15,10 @@ import { VGACard } from './IO/VGACard'
 import { VideoCard } from './IO/VideoCard'
 import { readFile } from 'fs/promises'
 import sdl, { Sdl } from '@kmamal/sdl'
-import { Canvas, createCanvas, SKRSContext2D } from '@napi-rs/canvas'
 
 export class Machine {
+
+  static FREQUENCIES: number[] = [1, 2, 4, 8, 16, 32, 64, 122, 244, 488, 976, 1900, 3900, 7800, 15600, 31200, 62500, 125000, 250000, 500000, 1000000, 2000000]
 
   static IO_DESCRIPTIONS: IODescription[] = [
     Empty.DESCRIPTION,
@@ -36,6 +37,7 @@ export class Machine {
   static FRAME_INTERVAL_MS: number = 1000 / Machine.MAX_FPS
   private startTime: number = 0
   private previousTime: number = Date.now()
+  private debuggerMemoryPage: number = 0x00
 
   cpu: CPU
   ram: RAM
@@ -46,16 +48,14 @@ export class Machine {
 
   isRunning: boolean = false
   isDebugging: boolean = false
+  frequencyIndex: number = 20 // 1 MHz
   frequency: number = 1000000 // 1 MHz
-  scale: number = 1
-  cycles: number = 0
+  scale: number = 2
   frames: number = 0
   frameDelay: number = 0
   frameDelayCount: number = 0
 
   window?: Sdl.Video.Window
-  canvas?: Canvas
-  ctx?: SKRSContext2D
 
   constructor() {
     this.ram = new RAM()
@@ -72,6 +72,10 @@ export class Machine {
     ]
     this.cpu = new CPU(this.read.bind(this), this.write.bind(this))
   }
+
+  //
+  // Initialization
+  //
 
   loadROM = async (path: string) => {
     try {
@@ -129,66 +133,6 @@ export class Machine {
     }
   }
 
-  reset(): void {
-    this.cpu.reset()
-
-    this.io.forEach((io) => {
-      io.reset()
-    })
-  }
-
-  loop(): void {
-    this.frames += 1
-
-    if (!this.isRunning || this.window?.destroyed) { return }
-
-    const currentTime = Date.now()
-    const deltaTime = currentTime - this.previousTime;
-    this.previousTime = currentTime
-    const fps = 1 / (deltaTime / 1000)
-
-    if (this.frequency >= fps) {
-      const cycles = Math.floor(this.frequency / fps)
-
-      for (let i = 0; i < cycles; i++) {
-        this.cpu.tick()
-        this.io[0].tick()
-        this.io[1].tick()
-        this.io[2].tick()
-        this.io[3].tick()
-        this.io[4].tick()
-        this.io[5].tick()
-        this.io[6].tick()
-        this.io[7].tick() // This is faster than looping over IO array!
-      }
-
-      this.cycles += cycles
-    } else {
-      this.frameDelay = Math.floor(fps / this.frequency)
-
-      if (this.frameDelayCount >= this.frameDelay) {
-        this.cpu.tick()
-        this.io[0].tick()
-        this.io[1].tick()
-        this.io[2].tick()
-        this.io[3].tick()
-        this.io[4].tick()
-        this.io[5].tick()
-        this.io[6].tick()
-        this.io[7].tick() // This is faster than looping over IO array!
-
-        this.cycles += 1
-        this.frameDelayCount = 0
-      } else {
-        this.frameDelayCount += 1
-      }
-    }
-
-    this.render()
-
-    setTimeout(this.loop.bind(this), Math.floor(Machine.FRAME_INTERVAL_MS))
-  }
-
   launch(onComplete: (uptime: number) => void): void {
     this.window = sdl.video.createWindow({ 
       title: "6502 Emulator",
@@ -196,39 +140,142 @@ export class Machine {
       height: 192 * this.scale
     })
 
-    this.canvas = createCanvas(256, 192)
-    this.ctx = this.canvas.getContext('2d')
-
     this.window.on('close', () => {
       onComplete(Date.now() - this.startTime)
     })
 
-    this.isRunning = true
-    this.startTime = Date.now()
+    this.window.on('keyDown', (event) => {
+      switch (event.key) {
+        case 'pause':
+          this.isRunning ? this.stop() : this.run()
+          break
+        case 'home':
+          this.debuggerMemoryPage = 0x00
+          break
+        case 'end':
+          this.debuggerMemoryPage = 0xFF
+          break
+        case 'pageUp':
+          if (this.debuggerMemoryPage < 0xFF) {
+            this.debuggerMemoryPage += 0x01
+          }
+          break
+        case 'pageDown':
+          if (this.debuggerMemoryPage > 0x00) {
+            this.debuggerMemoryPage -= 0x01
+          }
+          break
+        case 'f10':
+          this.reset()
+          break
+        case 'f11':
+          this.decreaseFrequency()
+          break
+        case 'f12':
+          this.increaseFrequency()
+          break
+        case 'space':
+          if (!this.isRunning) {
+            this.step()
+          }
+          break
+        default:
+          // TODO: Pass key to GPIO card
+          break
+      }
+    })
 
+    this.startTime = Date.now()
+    this.isRunning = !this.isDebugging
     this.loop()
   }
 
+  decreaseFrequency(): void {
+    if (this.frequencyIndex > 0) {
+      this.frequencyIndex -= 1
+      this.frequency = Machine.FREQUENCIES[this.frequencyIndex]
+    }
+  }
+
+  increaseFrequency(): void {
+    if (this.frequencyIndex < (Machine.FREQUENCIES.length - 1)) {
+      this.frequencyIndex += 1
+      this.frequency = Machine.FREQUENCIES[this.frequencyIndex]
+    }
+  }
+
+  //
+  // Loop Operations
+  //
+
+  loop(): void {
+    if (this.window?.destroyed) { return }
+
+    if (this.isRunning) {
+      const currentTime = Date.now()
+      const deltaTime = currentTime - this.previousTime;
+      this.previousTime = currentTime
+      const fps = 1 / (deltaTime / 1000)
+      const frequency = this.frequency
+
+      if (frequency >= fps) {
+        const cycles = Math.floor(frequency / fps)
+
+        for (let i = 0; i < cycles; i++) {
+          this.cpu.tick()
+          this.io[0].tick()
+          this.io[1].tick()
+          this.io[2].tick()
+          this.io[3].tick()
+          this.io[4].tick()
+          this.io[5].tick()
+          this.io[6].tick()
+          this.io[7].tick()
+        }
+      } else {
+        this.frameDelay = Math.floor(fps / frequency)
+
+        if (this.frameDelayCount >= this.frameDelay) {
+          this.cpu.tick()
+          this.io[0].tick()
+          this.io[1].tick()
+          this.io[2].tick()
+          this.io[3].tick()
+          this.io[4].tick()
+          this.io[5].tick()
+          this.io[6].tick()
+          this.io[7].tick()
+
+          this.frameDelayCount = 0
+        } else {
+          this.frameDelayCount += 1
+        }
+      }
+    }
+    
+    this.render()
+    this.frames += 1
+
+    setTimeout(this.loop.bind(this), Math.floor(Machine.FRAME_INTERVAL_MS))
+  }
+
+  step(): void {
+    const cycles = this.cpu.step()
+
+    for (let i = 0; i < cycles; i++) {
+      this.io[0].tick()
+      this.io[1].tick()
+      this.io[2].tick()
+      this.io[3].tick()
+      this.io[4].tick()
+      this.io[5].tick()
+      this.io[6].tick()
+      this.io[7].tick()
+    }
+  }
+
   render(): void {
-    if (!this.window || !this.ctx) { return }
-
-    // this.ctx.imageSmoothingEnabled = false
-    // this.ctx.fillStyle = 'black'
-    // this.ctx.fillRect(0, 0, 256, 192)
-    // this.ctx.fillStyle = 'green'
-    // this.ctx.fillRect(160, 16, 1, 1)
-    // this.ctx.fillRect(161, 17, 1, 1)
-    // // this.ctx.font = "monospace 16px"
-    // // this.ctx.fillStyle = 'green'
-    // // this.ctx.fillText("00 00 FF 00", 0, 16)
-
-    // this.window.render(
-    //   256,
-    //   192,
-    //   256 * 4,
-    //   'rgba32',
-    //   Buffer.from(this.ctx.getImageData(0, 0, 256, 192).data)
-    // )
+    if (!this.window) { return }
 
     const buffer = Buffer.alloc(256 * 192 * 4)
 
@@ -251,6 +298,21 @@ export class Machine {
 
   stop(): void {
     this.isRunning = false
+
+    // Ensure CPU stops on finished instruction
+    this.cpu.step()
+  }
+
+  //
+  // Bus Operations
+  //
+
+  reset(): void {
+    this.cpu.reset()
+
+    this.io.forEach((io) => {
+      io.reset()
+    })
   }
 
   read(address: number): number {
