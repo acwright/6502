@@ -14,7 +14,6 @@ import { StorageCard } from './IO/StorageCard'
 import { VGACard } from './IO/VGACard'
 import { VideoCard } from './IO/VideoCard'
 import { readFile } from 'fs/promises'
-import sdl, { Sdl } from '@kmamal/sdl'
 
 export class Machine {
 
@@ -35,9 +34,10 @@ export class Machine {
 
   static MAX_FPS: number = 60
   static FRAME_INTERVAL_MS: number = 1000 / Machine.MAX_FPS
-  private startTime: number = 0
-  private previousTime: number = Date.now()
-  private debuggerMemoryPage: number = 0x00
+
+  startTime: number = 0
+  previousTime: number = Date.now()
+  debuggerMemoryPage: number = 0x00
 
   cpu: CPU
   ram: RAM
@@ -46,6 +46,7 @@ export class Machine {
 
   cart?: Cart
 
+  isAlive: boolean = false
   isRunning: boolean = false
   isDebugging: boolean = false
   frequencyIndex: number = 20 // 1 MHz
@@ -55,7 +56,7 @@ export class Machine {
   frameDelay: number = 0
   frameDelayCount: number = 0
 
-  window?: Sdl.Video.Window
+  render?: () => void
 
   constructor() {
     this.ram = new RAM()
@@ -133,61 +134,16 @@ export class Machine {
     }
   }
 
-  launch(onComplete: (uptime: number) => void): void {
-    this.window = sdl.video.createWindow({ 
-      title: "6502 Emulator",
-      width: 256 * this.scale,
-      height: 192 * this.scale
-    })
-
-    this.window.on('close', () => {
-      onComplete(Date.now() - this.startTime)
-    })
-
-    this.window.on('keyDown', (event) => {
-      switch (event.key) {
-        case 'pause':
-          this.isRunning ? this.stop() : this.run()
-          break
-        case 'home':
-          this.debuggerMemoryPage = 0x00
-          break
-        case 'end':
-          this.debuggerMemoryPage = 0xFF
-          break
-        case 'pageUp':
-          if (this.debuggerMemoryPage < 0xFF) {
-            this.debuggerMemoryPage += 0x01
-          }
-          break
-        case 'pageDown':
-          if (this.debuggerMemoryPage > 0x00) {
-            this.debuggerMemoryPage -= 0x01
-          }
-          break
-        case 'f10':
-          this.reset()
-          break
-        case 'f11':
-          this.decreaseFrequency()
-          break
-        case 'f12':
-          this.increaseFrequency()
-          break
-        case 'space':
-          if (!this.isRunning) {
-            this.step()
-          }
-          break
-        default:
-          // TODO: Pass key to GPIO card
-          break
-      }
-    })
-
+  start(): void {
     this.startTime = Date.now()
     this.isRunning = !this.isDebugging
+    this.isAlive = true
     this.loop()
+  }
+
+  end(): void {
+    this.isRunning = false
+    this.isAlive = false
   }
 
   decreaseFrequency(): void {
@@ -208,9 +164,35 @@ export class Machine {
   // Loop Operations
   //
 
-  loop(): void {
-    if (this.window?.destroyed) { return }
+  run(): void {
+    this.isRunning = true
+  }
 
+  stop(): void {
+    this.isRunning = false
+
+    // Ensure CPU stops on finished instruction
+    this.cpu.step()
+  }
+
+  step(): void {
+    const cycles = this.cpu.step()
+
+    for (let i = 0; i < cycles; i++) {
+      this.io[0].tick()
+      this.io[1].tick()
+      this.io[2].tick()
+      this.io[3].tick()
+      this.io[4].tick()
+      this.io[5].tick()
+      this.io[6].tick()
+      this.io[7].tick()
+    }
+  }
+
+  private loop(): void {
+    if (!this.isAlive) { return }
+    
     if (this.isRunning) {
       const currentTime = Date.now()
       const deltaTime = currentTime - this.previousTime;
@@ -252,55 +234,13 @@ export class Machine {
         }
       }
     }
-    
-    this.render()
+
+    if (this.render) {
+      this.render()
+    }
     this.frames += 1
 
     setTimeout(this.loop.bind(this), Math.floor(Machine.FRAME_INTERVAL_MS))
-  }
-
-  step(): void {
-    const cycles = this.cpu.step()
-
-    for (let i = 0; i < cycles; i++) {
-      this.io[0].tick()
-      this.io[1].tick()
-      this.io[2].tick()
-      this.io[3].tick()
-      this.io[4].tick()
-      this.io[5].tick()
-      this.io[6].tick()
-      this.io[7].tick()
-    }
-  }
-
-  render(): void {
-    if (!this.window) { return }
-
-    const buffer = Buffer.alloc(256 * 192 * 4)
-
-    let offset = 0
-    for (let i = 0; i < 192; i++) {
-      for (let j = 0; j < 256; j++) {
-        buffer[offset++] = Math.floor(256 * i / 192)    // R
-        buffer[offset++] = Math.floor(256 * j / 256)    // G
-        buffer[offset++] = 0                            // B
-        buffer[offset++] = 255                          // A
-      }
-    }
-
-    this.window.render(256, 192, 256 * 4, 'rgba32', buffer)
-  }
-
-  run(): void {
-    this.isRunning = true
-  }
-
-  stop(): void {
-    this.isRunning = false
-
-    // Ensure CPU stops on finished instruction
-    this.cpu.step()
   }
 
   //

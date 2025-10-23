@@ -3,6 +3,7 @@
 import figlet from 'figlet'
 import { Machine } from './components/Machine'
 import { Command } from 'commander'
+import sdl, { Sdl } from '@kmamal/sdl'
 
 const VERSION = '1.0.0'
 
@@ -73,7 +74,75 @@ if (options.debug) {
   console.log("Debug: Disabled")
 }
 
-machine.launch((uptime) => {
+const window = sdl.video.createWindow({ 
+  title: "6502 Emulator",
+  width: 256 * machine.scale,
+  height: 192 * machine.scale
+})
+
+window.on('keyDown', (event) => {
+  switch (event.key) {
+    case 'pause':
+      machine.isRunning ? machine.stop() : machine.run()
+      break
+    case 'home':
+      machine.debuggerMemoryPage = 0x00
+      break
+    case 'end':
+      machine.debuggerMemoryPage = 0xFF
+      break
+    case 'pageUp':
+      if (machine.debuggerMemoryPage < 0xFF) {
+        machine.debuggerMemoryPage += 0x01
+      }
+      break
+    case 'pageDown':
+      if (machine.debuggerMemoryPage > 0x00) {
+        machine.debuggerMemoryPage -= 0x01
+      }
+      break
+    case 'f10':
+      machine.reset()
+      break
+    case 'f11':
+      machine.decreaseFrequency()
+      break
+    case 'f12':
+      machine.increaseFrequency()
+      break
+    case 'space':
+      if (!machine.isRunning) {
+        machine.step()
+      }
+      break
+    default:
+      // TODO: Pass key to GPIO card
+      break
+  }
+})
+
+machine.render = () => {
+  if (!window) { return }
+
+  const buffer = Buffer.alloc(256 * 192 * 4)
+
+  let offset = 0
+  for (let i = 0; i < 192; i++) {
+    for (let j = 0; j < 256; j++) {
+      buffer[offset++] = Math.floor(256 * i / 192)    // R
+      buffer[offset++] = Math.floor(256 * j / 256)    // G
+      buffer[offset++] = 0                            // B
+      buffer[offset++] = 255                          // A
+    }
+  }
+
+  window.render(256, 192, 256 * 4, 'rgba32', buffer)
+}
+
+window.on('close', () => {
+  const uptime = Date.now() - machine.startTime
+  machine.end()
+
   console.log()
   console.log('Result:')
   console.table({
@@ -83,3 +152,5 @@ machine.launch((uptime) => {
     'Avg FPS': parseFloat((machine.frames / (uptime / 1000)).toFixed(4))
   })
 })
+
+machine.start()

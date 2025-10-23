@@ -1,5 +1,5 @@
 // 6502 CPU
-// Adapted from: https://github.com/OneLoneCoder/olcNES/blob/master/Part%232%20-%20CPU/olc6502.cpp
+// Adapted from: https://github.com/OneLoneCoder/olcNES
 
 export interface CPUInstruction {
   name: string
@@ -10,22 +10,22 @@ export interface CPUInstruction {
 
 export class CPU {
 
-  private static C: number = 0b00000001
-  private static Z: number = 0b00000010
-  private static I: number = 0b00000100
-  private static D: number = 0b00001000
-  private static B: number = 0b00010000
-  private static U: number = 0b00100000
-  private static V: number = 0b01000000
-  private static N: number = 0b10000000
+  static C: number = 0b00000001
+  static Z: number = 0b00000010
+  static I: number = 0b00000100
+  static D: number = 0b00001000
+  static B: number = 0b00010000
+  static U: number = 0b00100000
+  static V: number = 0b01000000
+  static N: number = 0b10000000
 
   private fetched: number   = 0x00    // Working input value to the ALU
   private temp: number      = 0x0000  // A convenience var used everywhere
   private addrAbs: number   = 0x0000  // All used memory addresses end up here
   private addrRel: number   = 0x0000  // Represents abs address following a branch
   private opcode: number    = 0x00    // The instruction byte
-  private cyclesRem: number = 0       // Counts how many cycles the current instruction has remaining
 
+  cyclesRem: number = 0       // Counts how many cycles the current instruction has remaining
   cycles: number            = 0       // Counts the total number of cycles executed
 
   a: number   = 0x00
@@ -47,6 +47,10 @@ export class CPU {
 
     this.reset()
   }
+
+  //
+  // Interface
+  //
 
   reset(): void {
     // Read the PC location from the Reset vector
@@ -123,10 +127,18 @@ export class CPU {
       this.cycles += 7
   }
 
-  // Perform one clock cycle
   tick(): void {
     if (this.cyclesRem == 0) {
+      // Perform one clock cycle
       this.opcode = this.read(this.pc)
+
+      // console.log('PC: 0x' + this.pc.toString(16).toUpperCase())
+      // console.log('INS: ' + this.instructionTable[this.opcode].name)
+      // console.log('OP CODE: ' + this.opcode.toString(16).toUpperCase())
+      // console.log('ADDR MODE: ' + this.instructionTable[this.opcode].addrMode.name)
+      // console.log()
+
+      this.setFlag(CPU.U, true)
       this.incPC()
 
       const instruction = this.instructionTable[this.opcode]
@@ -146,7 +158,6 @@ export class CPU {
     this.cyclesRem--
   }
 
-  // Execute one instruction
   step(): number {
     // Finish current instruction
     if (this.cyclesRem > 0) {
@@ -157,6 +168,7 @@ export class CPU {
 
     const startCycles = this.cycles
 
+    // Execute one instruction
     do {
       this.tick()
     } while (this.cyclesRem > 0)
@@ -164,20 +176,21 @@ export class CPU {
     return this.cycles - startCycles
   }
 
-  // Fetch the data
-  private fetch(): number {
+
+  //
+  // Helpers
+  //
+
+  private fetch() {
     if (!(this.instructionTable[this.opcode].addrMode == this.IMP)) {
       this.fetched = this.read(this.addrAbs)
     }
-    return this.fetched
   }
 
-  // Get the value of flag in the status register
   private getFlag(flag: number): number {
     return (this.st & flag) > 0 ? 1 : 0
   }
 
-  // Set or clear a flag in the status register
   private setFlag(flag: number, value: boolean): void {
     if (value) {
       this.st |= flag
@@ -187,9 +200,10 @@ export class CPU {
   }
 
   private incPC() {
-    this.pc++
-    if (this.pc > 0xFFFF) {
+    if (this.pc == 0xFFFF) {
       this.pc = 0x0000
+    } else {
+      this.pc++
     }
   }
 
@@ -202,9 +216,10 @@ export class CPU {
   }
 
   private incSP() {
-    this.sp++
-    if (this.sp > 0xFF) {
+    if (this.sp == 0xFF) {
       this.sp = 0x00
+    } else {
+      this.sp++
     }
   }
 
@@ -216,7 +231,9 @@ export class CPU {
     }
   }
 
+  //
   // Addressing Modes
+  //
 
   private IMP(): number {
     this.fetched = this.a
@@ -224,7 +241,8 @@ export class CPU {
   }
 
   private IMM(): number {
-    this.addrAbs = this.pc++;
+    this.addrAbs = this.pc;
+    this.incPC()
     return 0
   }
 
@@ -252,8 +270,8 @@ export class CPU {
   private REL(): number {
     this.addrRel = this.read(this.pc)
     this.incPC()
-    if (this.addrRel & 0x80) {
-      this.addrRel |= 0xFF00
+    if ((this.addrRel & 0x80) != 0) {
+      this.addrRel = (this.addrRel << 24) >> 24
     }
     return 0
   }
@@ -350,43 +368,343 @@ export class CPU {
     }
   }
 
+  //
   // Opcodes
-  // https://github.com/OneLoneCoder/olcNES/blob/master/Part%232%20-%20CPU/olc6502.cpp
+  //
 
-  private ADC(): number { return 0 }
+  private ADC(): number {
+    this.fetch()
+
+    const value = this.fetched ^ 0x00FF
+
+    this.temp = this.a + value + this.getFlag(CPU.C)
+    this.setFlag(CPU.C, (this.temp & 0xFF00) != 0)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0)
+    this.setFlag(CPU.V, ((this.temp ^ this.a) & (this.temp ^ value) & 0x0080) != 0)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+
+    this.a = this.temp & 0x00FF
+
+    return 1
+  }
   
-  private AND(): number { return 0 }
-  private ASL(): number { return 0 }
-  private BCC(): number { return 0 }
-  private BCS(): number { return 0 }
-  private BEQ(): number { return 0 }
-  private BIT(): number { return 0 }
-  private BMI(): number { return 0 }
-  private BNE(): number { return 0 }
-  private BPL(): number { return 0 }
-  private BRK(): number { return 0 }
-  private BVC(): number { return 0 }
-  private BVS(): number { return 0 }
-  private CLC(): number { return 0 }
-  private CLD(): number { return 0 }
-  private CLI(): number { return 0 }
-  private CLV(): number { return 0 }
-  private CMP(): number { return 0 }
-  private CPX(): number { return 0 }
-  private CPY(): number { return 0 }
-  private DEC(): number { return 0 }
-  private DEX(): number { return 0 }
-  private DEY(): number { return 0 }
-  private EOR(): number { return 0 }
-  private INC(): number { return 0 }
-  private INX(): number { return 0 }
-  private INY(): number { return 0 }
-  private JMP(): number { return 0 }
-  private JSR(): number { return 0 }
-  private LDA(): number { return 0 }
-  private LDX(): number { return 0 }
-  private LDY(): number { return 0 }
-  private LSR(): number { return 0 }
+  private AND(): number {
+    this.fetch()
+    this.a &= this.fetched
+    this.setFlag(CPU.Z, this.a == 0x00)
+    this.setFlag(CPU.N, (this.a & 0x80) != 0)
+    return 1
+  }
+
+  private ASL(): number {
+    this.fetch()
+    this.temp = this.fetched << 1
+    this.setFlag(CPU.C, (this.temp & 0xFF00) > 0)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x00)
+    this.setFlag(CPU.N, (this.temp & 0x80) != 0)
+    if (this.instructionTable[this.opcode].addrMode == this.IMP) {
+      this.a = this.temp & 0x00FF
+    } else {
+      this.write(this.addrAbs, this.temp & 0x00FF)
+    }
+    return 0
+  }
+
+  private BCC(): number {
+    if (this.getFlag(CPU.C) == 0) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private BCS(): number {
+    if (this.getFlag(CPU.C) == 1) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private BEQ(): number {
+    if (this.getFlag(CPU.Z) == 1) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private BIT(): number {
+    this.fetch()
+    this.temp = this.a & this.fetched
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x00)
+    this.setFlag(CPU.N, (this.fetched & (1 << 7)) != 0)
+    this.setFlag(CPU.V, (this.fetched & (1 << 6)) != 0)
+    return 0
+  }
+
+  private BMI(): number {
+    if (this.getFlag(CPU.N) == 1) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private BNE(): number {
+    if (this.getFlag(CPU.Z) == 0) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private BPL(): number {
+    if (this.getFlag(CPU.N) == 0) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private BRK(): number {
+    this.incPC()
+
+    this.setFlag(CPU.I, true)
+    this.write(0x0100 + this.sp, (this.pc >> 8) & 0x00FF)
+    this.decSP()
+    this.write(0x0100 + this.sp, this.pc & 0x00FF)
+    this.decSP()
+
+    this.setFlag(CPU.B, true)
+    this.write(0x0100 + this.sp, this.st)
+    this.decSP()
+    this.setFlag(CPU.B, false)
+
+    this.pc = this.read(0xFFFE) | this.read(0xFFFF) << 8
+
+    return 0
+  }
+  
+  private BVC(): number {
+    if (this.getFlag(CPU.V) == 0) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private BVS(): number {
+    if (this.getFlag(CPU.V) == 1) {
+      this.cycles++
+      this.addrAbs = this.pc + this.addrRel
+
+      if ((this.addrAbs & 0xFF00) != (this.pc & 0xFF00)) {
+        this.cycles++
+      }
+
+      this.pc = this.addrAbs
+    }
+    return 0
+  }
+
+  private CLC(): number {
+    this.setFlag(CPU.C, false)
+    return 0
+  }
+
+  private CLD(): number {
+    this.setFlag(CPU.D, false)
+    return 0
+  }
+
+  private CLI(): number {
+    this.setFlag(CPU.I, false)
+    return 0
+  }
+
+  private CLV(): number {
+    this.setFlag(CPU.V, false)
+    return 0
+  }
+
+  private CMP(): number {
+    this.fetch()
+    this.temp = this.a - this.fetched
+    this.setFlag(CPU.C, this.a >= this.fetched)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x0000)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    return 1
+  }
+
+  private CPX(): number {
+    this.fetch()
+    this.temp = this.x - this.fetched
+    this.setFlag(CPU.C, this.x >= this.fetched)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x0000)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    return 0
+  }
+
+  private CPY(): number {
+    this.fetch()
+    this.temp = this.y - this.fetched
+    this.setFlag(CPU.C, this.y >= this.fetched)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x0000)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    return 0
+  }
+
+  private DEC(): number {
+    this.fetch()
+    this.temp = this.fetched - 0x01
+    this.write(this.addrAbs, this.temp & 0x00FF)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x0000)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    return 0
+  }
+
+  private DEX(): number {
+    this.x--
+    this.setFlag(CPU.Z, this.x == 0x00)
+    this.setFlag(CPU.N, (this.x & 0x80) != 0)
+    return 0
+  }
+
+  private DEY(): number {
+    this.y--
+    this.setFlag(CPU.Z, this.y == 0x00)
+    this.setFlag(CPU.N, (this.y & 0x80) != 0)
+    return 0
+  }
+
+  private EOR(): number {
+    this.fetch()
+    this.a ^= this.fetched
+    this.setFlag(CPU.Z, this.a == 0x00)
+    this.setFlag(CPU.N, (this.a & 0x80) != 0)
+    return 1
+  }
+
+  private INC(): number {
+    this.fetch()
+    this.temp = this.fetched + 1
+    this.write(this.addrAbs, this.temp & 0x00FF)
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x0000)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    return 0
+  }
+
+  private INX(): number {
+    this.x++
+    this.setFlag(CPU.Z, this.x == 0x00)
+    this.setFlag(CPU.N, (this.x & 0x80) != 0)
+    return 0
+  }
+
+  private INY(): number {
+    this.y++
+    this.setFlag(CPU.Z, this.y == 0x00)
+    this.setFlag(CPU.N, (this.y & 0x80) != 0)
+    return 0
+  }
+
+  private JMP(): number {
+    this.pc = this.addrAbs
+    return 0
+  }
+
+  private JSR(): number {
+    this.decPC()
+
+    this.write(0x0100 + this.sp, (this.pc << 8) & 0x00FF)
+    this.decSP()
+    this.write(0x0100 + this.sp, this.pc & 0x00FF)
+    this.decSP()
+
+    this.pc = this.addrAbs
+
+    return 0
+  }
+
+  private LDA(): number {
+    this.fetch()
+    this.a = this.fetched
+    this.setFlag(CPU.Z, this.a == 0x00)
+    this.setFlag(CPU.N, (this.a & 0x80) != 0)
+    return 1
+  }
+
+  private LDX(): number {
+    this.fetch()
+    this.x = this.fetched
+    this.setFlag(CPU.Z, this.x == 0x00)
+    this.setFlag(CPU.N, (this.x & 0x80) != 0)
+    return 1
+  }
+
+  private LDY(): number {
+    this.fetch()
+    this.y = this.fetched
+    this.setFlag(CPU.Z, this.y == 0x00)
+    this.setFlag(CPU.N, (this.y & 0x80) != 0)
+    return 1
+  }
+
+  private LSR(): number {
+    this.fetch()
+    this.setFlag(CPU.C, (this.fetched & 0x0001) != 0)
+    this.temp = this.fetched >> 1
+    this.setFlag(CPU.Z, (this.temp & 0x00FF) == 0x0000)
+    this.setFlag(CPU.N, (this.temp & 0x0080) != 0)
+    if (this.instructionTable[this.opcode].addrMode == this.IMP) {
+      this.a = this.temp & 0x00FF
+    } else {
+      this.write(this.addrAbs, this.temp & 0x00FF)
+    }
+    return 0
+  }
 
   private NOP(): number {
     switch (this.opcode) {
@@ -576,278 +894,282 @@ export class CPU {
 
   private XXX(): number { return 0 }
 
+  //
+  // Instruction Table
+  //
+
   instructionTable: CPUInstruction[] = [
-    { name: 'BRK', cycles: 7, opcode: this.BRK, addrMode: this.IMM },
-    { name: 'ORA', cycles: 6, opcode: this.ORA, addrMode: this.IZX },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 3, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'ORA', cycles: 3, opcode: this.ORA, addrMode: this.ZP0 },
-    { name: 'ASL', cycles: 5, opcode: this.ASL, addrMode: this.ZP0 },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'PHP', cycles: 3, opcode: this.PHP, addrMode: this.IMP },
-    { name: 'ORA', cycles: 2, opcode: this.ORA, addrMode: this.IMM },
-    { name: 'ASL', cycles: 2, opcode: this.ASL, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ABS },
-    { name: 'ASL', cycles: 6, opcode: this.ASL, addrMode: this.ABS },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BRK', cycles: 7, opcode: this.BRK.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'ORA', cycles: 6, opcode: this.ORA.bind(this), addrMode: this.IZX.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 3, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ORA', cycles: 3, opcode: this.ORA.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'ASL', cycles: 5, opcode: this.ASL.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'PHP', cycles: 3, opcode: this.PHP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ORA', cycles: 2, opcode: this.ORA.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'ASL', cycles: 2, opcode: this.ASL.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ORA', cycles: 4, opcode: this.ORA.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'ASL', cycles: 6, opcode: this.ASL.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BPL', cycles: 2, opcode: this.BPL, addrMode: this.REL },
-    { name: 'ORA', cycles: 5, opcode: this.ORA, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ZPX },
-    { name: 'ASL', cycles: 6, opcode: this.ASL, addrMode: this.ZPX },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CLC', cycles: 2, opcode: this.CLC, addrMode: this.IMP },
-    { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ABY },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'ORA', cycles: 4, opcode: this.ORA, addrMode: this.ABX },
-    { name: 'ASL', cycles: 7, opcode: this.ASL, addrMode: this.ABX },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BPL', cycles: 2, opcode: this.BPL.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'ORA', cycles: 5, opcode: this.ORA.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ORA', cycles: 4, opcode: this.ORA.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'ASL', cycles: 6, opcode: this.ASL.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CLC', cycles: 2, opcode: this.CLC.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ORA', cycles: 4, opcode: this.ORA.bind(this), addrMode: this.ABY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ORA', cycles: 4, opcode: this.ORA.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'ASL', cycles: 7, opcode: this.ASL.bind(this), addrMode: this.ABX.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'JSR', cycles: 6, opcode: this.JSR, addrMode: this.ABS },
-    { name: 'AND', cycles: 6, opcode: this.AND, addrMode: this.IZX },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'BIT', cycles: 3, opcode: this.BIT, addrMode: this.ZP0 },
-    { name: 'AND', cycles: 3, opcode: this.AND, addrMode: this.ZP0 },
-    { name: 'ROL', cycles: 5, opcode: this.ROL, addrMode: this.ZP0 },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'PLP', cycles: 4, opcode: this.PLP, addrMode: this.IMP },
-    { name: 'AND', cycles: 2, opcode: this.AND, addrMode: this.IMM },
-    { name: 'ROL', cycles: 2, opcode: this.ROL, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'BIT', cycles: 4, opcode: this.BIT, addrMode: this.ABS },
-    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ABS },
-    { name: 'ROL', cycles: 6, opcode: this.ROL, addrMode: this.ABS },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'JSR', cycles: 6, opcode: this.JSR.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'AND', cycles: 6, opcode: this.AND.bind(this), addrMode: this.IZX.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'BIT', cycles: 3, opcode: this.BIT.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'AND', cycles: 3, opcode: this.AND.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'ROL', cycles: 5, opcode: this.ROL.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'PLP', cycles: 4, opcode: this.PLP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'AND', cycles: 2, opcode: this.AND.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'ROL', cycles: 2, opcode: this.ROL.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'BIT', cycles: 4, opcode: this.BIT.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'AND', cycles: 4, opcode: this.AND.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'ROL', cycles: 6, opcode: this.ROL.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BMI', cycles: 2, opcode: this.BMI, addrMode: this.REL },
-    { name: 'AND', cycles: 5, opcode: this.AND, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ZPX },
-    { name: 'ROL', cycles: 6, opcode: this.ROL, addrMode: this.ZPX },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'SEC', cycles: 2, opcode: this.SEC, addrMode: this.IMP },
-    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ABY },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'AND', cycles: 4, opcode: this.AND, addrMode: this.ABX },
-    { name: 'ROL', cycles: 7, opcode: this.ROL, addrMode: this.ABX },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BMI', cycles: 2, opcode: this.BMI.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'AND', cycles: 5, opcode: this.AND.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'AND', cycles: 4, opcode: this.AND.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'ROL', cycles: 6, opcode: this.ROL.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'SEC', cycles: 2, opcode: this.SEC.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'AND', cycles: 4, opcode: this.AND.bind(this), addrMode: this.ABY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'AND', cycles: 4, opcode: this.AND.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'ROL', cycles: 7, opcode: this.ROL.bind(this), addrMode: this.ABX.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'RTI', cycles: 6, opcode: this.RTI, addrMode: this.IMP },
-    { name: 'EOR', cycles: 6, opcode: this.EOR, addrMode: this.IZX },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 3, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'EOR', cycles: 3, opcode: this.EOR, addrMode: this.ZP0 },
-    { name: 'LSR', cycles: 5, opcode: this.LSR, addrMode: this.ZP0 },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'PHA', cycles: 3, opcode: this.PHA, addrMode: this.IMP },
-    { name: 'EOR', cycles: 2, opcode: this.EOR, addrMode: this.IMM },
-    { name: 'LSR', cycles: 2, opcode: this.LSR, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'JMP', cycles: 3, opcode: this.JMP, addrMode: this.ABS },
-    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ABS },
-    { name: 'LSR', cycles: 6, opcode: this.LSR, addrMode: this.ABS },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'RTI', cycles: 6, opcode: this.RTI.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'EOR', cycles: 6, opcode: this.EOR.bind(this), addrMode: this.IZX.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 3, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'EOR', cycles: 3, opcode: this.EOR.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'LSR', cycles: 5, opcode: this.LSR.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'PHA', cycles: 3, opcode: this.PHA.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'EOR', cycles: 2, opcode: this.EOR.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'LSR', cycles: 2, opcode: this.LSR.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'JMP', cycles: 3, opcode: this.JMP.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'EOR', cycles: 4, opcode: this.EOR.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'LSR', cycles: 6, opcode: this.LSR.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BVC', cycles: 2, opcode: this.BVC, addrMode: this.REL },
-    { name: 'EOR', cycles: 5, opcode: this.EOR, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ZPX },
-    { name: 'LSR', cycles: 6, opcode: this.LSR, addrMode: this.ZPX },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CLI', cycles: 2, opcode: this.CLI, addrMode: this.IMP },
-    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ABY },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'EOR', cycles: 4, opcode: this.EOR, addrMode: this.ABX },
-    { name: 'LSR', cycles: 7, opcode: this.LSR, addrMode: this.ABX },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BVC', cycles: 2, opcode: this.BVC.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'EOR', cycles: 5, opcode: this.EOR.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'EOR', cycles: 4, opcode: this.EOR.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'LSR', cycles: 6, opcode: this.LSR.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CLI', cycles: 2, opcode: this.CLI.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'EOR', cycles: 4, opcode: this.EOR.bind(this), addrMode: this.ABY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'EOR', cycles: 4, opcode: this.EOR.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'LSR', cycles: 7, opcode: this.LSR.bind(this), addrMode: this.ABX.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'RTS', cycles: 6, opcode: this.RTS, addrMode: this.IMP },
-    { name: 'ADC', cycles: 6, opcode: this.ADC, addrMode: this.IZX },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 3, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'ADC', cycles: 3, opcode: this.ADC, addrMode: this.ZP0 },
-    { name: 'ROR', cycles: 5, opcode: this.ROR, addrMode: this.ZP0 },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'PLA', cycles: 4, opcode: this.PLA, addrMode: this.IMP },
-    { name: 'ADC', cycles: 2, opcode: this.ADC, addrMode: this.IMM },
-    { name: 'ROR', cycles: 2, opcode: this.ROR, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'JMP', cycles: 5, opcode: this.JMP, addrMode: this.IND },
-    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ABS },
-    { name: 'ROR', cycles: 6, opcode: this.ROR, addrMode: this.ABS },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'RTS', cycles: 6, opcode: this.RTS.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ADC', cycles: 6, opcode: this.ADC.bind(this), addrMode: this.IZX.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 3, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ADC', cycles: 3, opcode: this.ADC.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'ROR', cycles: 5, opcode: this.ROR.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'PLA', cycles: 4, opcode: this.PLA.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ADC', cycles: 2, opcode: this.ADC.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'ROR', cycles: 2, opcode: this.ROR.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'JMP', cycles: 5, opcode: this.JMP.bind(this), addrMode: this.IND.bind(this) },
+    { name: 'ADC', cycles: 4, opcode: this.ADC.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'ROR', cycles: 6, opcode: this.ROR.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BVS', cycles: 2, opcode: this.BVS, addrMode: this.REL },
-    { name: 'ADC', cycles: 5, opcode: this.ADC, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ZPX },
-    { name: 'ROR', cycles: 6, opcode: this.ROR, addrMode: this.ZPX },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'SEI', cycles: 2, opcode: this.SEI, addrMode: this.IMP },
-    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ABY },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'ADC', cycles: 4, opcode: this.ADC, addrMode: this.ABX },
-    { name: 'ROR', cycles: 7, opcode: this.ROR, addrMode: this.ABX },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BVS', cycles: 2, opcode: this.BVS.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'ADC', cycles: 5, opcode: this.ADC.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ADC', cycles: 4, opcode: this.ADC.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'ROR', cycles: 6, opcode: this.ROR.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'SEI', cycles: 2, opcode: this.SEI.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ADC', cycles: 4, opcode: this.ADC.bind(this), addrMode: this.ABY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'ADC', cycles: 4, opcode: this.ADC.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'ROR', cycles: 7, opcode: this.ROR.bind(this), addrMode: this.ABX.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'STA', cycles: 6, opcode: this.STA, addrMode: this.IZX },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'STY', cycles: 3, opcode: this.STY, addrMode: this.ZP0 },
-    { name: 'STA', cycles: 3, opcode: this.STA, addrMode: this.ZP0 },
-    { name: 'STX', cycles: 3, opcode: this.STX, addrMode: this.ZP0 },
-    { name: '???', cycles: 3, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'DEY', cycles: 2, opcode: this.DEY, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'TXA', cycles: 2, opcode: this.TXA, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'STY', cycles: 4, opcode: this.STY, addrMode: this.ABS },
-    { name: 'STA', cycles: 4, opcode: this.STA, addrMode: this.ABS },
-    { name: 'STX', cycles: 4, opcode: this.STX, addrMode: this.ABS },
-    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'STA', cycles: 6, opcode: this.STA.bind(this), addrMode: this.IZX.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'STY', cycles: 3, opcode: this.STY.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'STA', cycles: 3, opcode: this.STA.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'STX', cycles: 3, opcode: this.STX.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 3, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'DEY', cycles: 2, opcode: this.DEY.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'TXA', cycles: 2, opcode: this.TXA.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'STY', cycles: 4, opcode: this.STY.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'STA', cycles: 4, opcode: this.STA.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'STX', cycles: 4, opcode: this.STX.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 4, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BCC', cycles: 2, opcode: this.BCC, addrMode: this.REL },
-    { name: 'STA', cycles: 6, opcode: this.STA, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'STY', cycles: 4, opcode: this.STY, addrMode: this.ZPX },
-    { name: 'STA', cycles: 4, opcode: this.STA, addrMode: this.ZPX },
-    { name: 'STX', cycles: 4, opcode: this.STX, addrMode: this.ZPY },
-    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'TYA', cycles: 2, opcode: this.TYA, addrMode: this.IMP },
-    { name: 'STA', cycles: 5, opcode: this.STA, addrMode: this.ABY },
-    { name: 'TXS', cycles: 2, opcode: this.TXS, addrMode: this.IMP },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 5, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'STA', cycles: 5, opcode: this.STA, addrMode: this.ABX },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BCC', cycles: 2, opcode: this.BCC.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'STA', cycles: 6, opcode: this.STA.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'STY', cycles: 4, opcode: this.STY.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'STA', cycles: 4, opcode: this.STA.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'STX', cycles: 4, opcode: this.STX.bind(this), addrMode: this.ZPY.bind(this) },
+    { name: '???', cycles: 4, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'TYA', cycles: 2, opcode: this.TYA.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'STA', cycles: 5, opcode: this.STA.bind(this), addrMode: this.ABY.bind(this) },
+    { name: 'TXS', cycles: 2, opcode: this.TXS.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 5, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'STA', cycles: 5, opcode: this.STA.bind(this), addrMode: this.ABX.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'LDY', cycles: 2, opcode: this.LDY, addrMode: this.IMM },
-    { name: 'LDA', cycles: 6, opcode: this.LDA, addrMode: this.IZX },
-    { name: 'LDX', cycles: 2, opcode: this.LDX, addrMode: this.IMM },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'LDY', cycles: 3, opcode: this.LDY, addrMode: this.ZP0 },
-    { name: 'LDA', cycles: 3, opcode: this.LDA, addrMode: this.ZP0 },
-    { name: 'LDX', cycles: 3, opcode: this.LDX, addrMode: this.ZP0 },
-    { name: '???', cycles: 3, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'TAY', cycles: 2, opcode: this.TAY, addrMode: this.IMP },
-    { name: 'LDA', cycles: 2, opcode: this.LDA, addrMode: this.IMM },
-    { name: 'TAX', cycles: 2, opcode: this.TAX, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'LDY', cycles: 4, opcode: this.LDY, addrMode: this.ABS },
-    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ABS },
-    { name: 'LDX', cycles: 4, opcode: this.LDX, addrMode: this.ABS },
-    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'LDY', cycles: 2, opcode: this.LDY.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'LDA', cycles: 6, opcode: this.LDA.bind(this), addrMode: this.IZX.bind(this) },
+    { name: 'LDX', cycles: 2, opcode: this.LDX.bind(this), addrMode: this.IMM.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'LDY', cycles: 3, opcode: this.LDY.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'LDA', cycles: 3, opcode: this.LDA.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'LDX', cycles: 3, opcode: this.LDX.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 3, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'TAY', cycles: 2, opcode: this.TAY.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'LDA', cycles: 2, opcode: this.LDA.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'TAX', cycles: 2, opcode: this.TAX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'LDY', cycles: 4, opcode: this.LDY.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'LDA', cycles: 4, opcode: this.LDA.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'LDX', cycles: 4, opcode: this.LDX.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 4, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BCS', cycles: 2, opcode: this.BCS, addrMode: this.REL },
-    { name: 'LDA', cycles: 5, opcode: this.LDA, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'LDY', cycles: 4, opcode: this.LDY, addrMode: this.ZPX },
-    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ZPX },
-    { name: 'LDX', cycles: 4, opcode: this.LDX, addrMode: this.ZPY },
-    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CLV', cycles: 2, opcode: this.CLV, addrMode: this.IMP },
-    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ABY },
-    { name: 'TSX', cycles: 2, opcode: this.TSX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'LDY', cycles: 4, opcode: this.LDY, addrMode: this.ABX },
-    { name: 'LDA', cycles: 4, opcode: this.LDA, addrMode: this.ABX },
-    { name: 'LDX', cycles: 4, opcode: this.LDX, addrMode: this.ABY },
-    { name: '???', cycles: 4, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BCS', cycles: 2, opcode: this.BCS.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'LDA', cycles: 5, opcode: this.LDA.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'LDY', cycles: 4, opcode: this.LDY.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'LDA', cycles: 4, opcode: this.LDA.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'LDX', cycles: 4, opcode: this.LDX.bind(this), addrMode: this.ZPY.bind(this) },
+    { name: '???', cycles: 4, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CLV', cycles: 2, opcode: this.CLV.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'LDA', cycles: 4, opcode: this.LDA.bind(this), addrMode: this.ABY.bind(this) },
+    { name: 'TSX', cycles: 2, opcode: this.TSX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'LDY', cycles: 4, opcode: this.LDY.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'LDA', cycles: 4, opcode: this.LDA.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'LDX', cycles: 4, opcode: this.LDX.bind(this), addrMode: this.ABY.bind(this) },
+    { name: '???', cycles: 4, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'CPY', cycles: 2, opcode: this.CPY, addrMode: this.IMM },
-    { name: 'CMP', cycles: 6, opcode: this.CMP, addrMode: this.IZX },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CPY', cycles: 3, opcode: this.CPY, addrMode: this.ZP0 },
-    { name: 'CMP', cycles: 3, opcode: this.CMP, addrMode: this.ZP0 },
-    { name: 'DEC', cycles: 5, opcode: this.DEC, addrMode: this.ZP0 },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'INY', cycles: 2, opcode: this.INY, addrMode: this.IMP },
-    { name: 'CMP', cycles: 2, opcode: this.CMP, addrMode: this.IMM },
-    { name: 'DEX', cycles: 2, opcode: this.DEX, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CPY', cycles: 4, opcode: this.CPY, addrMode: this.ABS },
-    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ABS },
-    { name: 'DEC', cycles: 6, opcode: this.DEC, addrMode: this.ABS },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CPY', cycles: 2, opcode: this.CPY.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'CMP', cycles: 6, opcode: this.CMP.bind(this), addrMode: this.IZX.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CPY', cycles: 3, opcode: this.CPY.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'CMP', cycles: 3, opcode: this.CMP.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'DEC', cycles: 5, opcode: this.DEC.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'INY', cycles: 2, opcode: this.INY.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CMP', cycles: 2, opcode: this.CMP.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'DEX', cycles: 2, opcode: this.DEX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CPY', cycles: 4, opcode: this.CPY.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'CMP', cycles: 4, opcode: this.CMP.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'DEC', cycles: 6, opcode: this.DEC.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BNE', cycles: 2, opcode: this.BNE, addrMode: this.REL },
-    { name: 'CMP', cycles: 5, opcode: this.CMP, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ZPX },
-    { name: 'DEC', cycles: 6, opcode: this.DEC, addrMode: this.ZPX },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CLD', cycles: 2, opcode: this.CLD, addrMode: this.IMP },
-    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ABY },
-    { name: 'NOP', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'CMP', cycles: 4, opcode: this.CMP, addrMode: this.ABX },
-    { name: 'DEC', cycles: 7, opcode: this.DEC, addrMode: this.ABX },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'BNE', cycles: 2, opcode: this.BNE.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'CMP', cycles: 5, opcode: this.CMP.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CMP', cycles: 4, opcode: this.CMP.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'DEC', cycles: 6, opcode: this.DEC.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CLD', cycles: 2, opcode: this.CLD.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CMP', cycles: 4, opcode: this.CMP.bind(this), addrMode: this.ABY.bind(this) },
+    { name: 'NOP', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CMP', cycles: 4, opcode: this.CMP.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'DEC', cycles: 7, opcode: this.DEC.bind(this), addrMode: this.ABX.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'CPX', cycles: 2, opcode: this.CPX, addrMode: this.IMM },
-    { name: 'SBC', cycles: 6, opcode: this.SBC, addrMode: this.IZX },
-    { name: '???', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CPX', cycles: 3, opcode: this.CPX, addrMode: this.ZP0 },
-    { name: 'SBC', cycles: 3, opcode: this.SBC, addrMode: this.ZP0 },
-    { name: 'INC', cycles: 5, opcode: this.INC, addrMode: this.ZP0 },
-    { name: '???', cycles: 5, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'INX', cycles: 2, opcode: this.INX, addrMode: this.IMP },
-    { name: 'SBC', cycles: 2, opcode: this.SBC, addrMode: this.IMM },
-    { name: 'NOP', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'CPX', cycles: 4, opcode: this.CPX, addrMode: this.ABS },
-    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ABS },
-    { name: 'INC', cycles: 6, opcode: this.INC, addrMode: this.ABS },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
+    { name: 'CPX', cycles: 2, opcode: this.CPX.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'SBC', cycles: 6, opcode: this.SBC.bind(this), addrMode: this.IZX.bind(this) },
+    { name: '???', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CPX', cycles: 3, opcode: this.CPX.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'SBC', cycles: 3, opcode: this.SBC.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: 'INC', cycles: 5, opcode: this.INC.bind(this), addrMode: this.ZP0.bind(this) },
+    { name: '???', cycles: 5, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'INX', cycles: 2, opcode: this.INX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'SBC', cycles: 2, opcode: this.SBC.bind(this), addrMode: this.IMM.bind(this) },
+    { name: 'NOP', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'CPX', cycles: 4, opcode: this.CPX.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'SBC', cycles: 4, opcode: this.SBC.bind(this), addrMode: this.ABS.bind(this) },
+    { name: 'INC', cycles: 6, opcode: this.INC.bind(this), addrMode: this.ABS.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
 
-    { name: 'BEQ', cycles: 2, opcode: this.BEQ, addrMode: this.REL },
-    { name: 'SBC', cycles: 5, opcode: this.SBC, addrMode: this.IZY },
-    { name: '???', cycles: 2, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 8, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ZPX },
-    { name: 'INC', cycles: 6, opcode: this.INC, addrMode: this.ZPX },
-    { name: '???', cycles: 6, opcode: this.XXX, addrMode: this.IMP },
-    { name: 'SED', cycles: 2, opcode: this.SED, addrMode: this.IMP },
-    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ABY },
-    { name: 'NOP', cycles: 2, opcode: this.NOP, addrMode: this.IMP },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP },
-    { name: '???', cycles: 4, opcode: this.NOP, addrMode: this.IMP },
-    { name: 'SBC', cycles: 4, opcode: this.SBC, addrMode: this.ABX },
-    { name: 'INC', cycles: 7, opcode: this.INC, addrMode: this.ABX },
-    { name: '???', cycles: 7, opcode: this.XXX, addrMode: this.IMP } 
+    { name: 'BEQ', cycles: 2, opcode: this.BEQ.bind(this), addrMode: this.REL.bind(this) },
+    { name: 'SBC', cycles: 5, opcode: this.SBC.bind(this), addrMode: this.IZY.bind(this) },
+    { name: '???', cycles: 2, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 8, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'SBC', cycles: 4, opcode: this.SBC.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: 'INC', cycles: 6, opcode: this.INC.bind(this), addrMode: this.ZPX.bind(this) },
+    { name: '???', cycles: 6, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'SED', cycles: 2, opcode: this.SED.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'SBC', cycles: 4, opcode: this.SBC.bind(this), addrMode: this.ABY.bind(this) },
+    { name: 'NOP', cycles: 2, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) },
+    { name: '???', cycles: 4, opcode: this.NOP.bind(this), addrMode: this.IMP.bind(this) },
+    { name: 'SBC', cycles: 4, opcode: this.SBC.bind(this), addrMode: this.ABX.bind(this) },
+    { name: 'INC', cycles: 7, opcode: this.INC.bind(this), addrMode: this.ABX.bind(this) },
+    { name: '???', cycles: 7, opcode: this.XXX.bind(this), addrMode: this.IMP.bind(this) } 
   ]
 
 }

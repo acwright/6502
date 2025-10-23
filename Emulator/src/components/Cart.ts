@@ -5,7 +5,7 @@ export class Cart {
   static CODE: number = 0xC000
   static SIZE: number = Cart.END - Cart.START + 1
 
-  data: number[] = []
+  data: number[] = [...Array(Cart.SIZE)].fill(0x00)
 
   read(address: number): number {
     return this.data[address]
