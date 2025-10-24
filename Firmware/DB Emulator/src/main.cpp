@@ -4,20 +4,21 @@
 #include <Bounce2.h>
 #include <SD.h>
 #include <EEPROM.h>
+#include <USBHost_t36.h>
+#include <vrEmu6502.h>
 
-#include "devboard.h"
+#include "pins.h"
 #include "macros.h"
-#include "utilities.h"
 #include "constants.h"
 
-#include "terminal.h"
-#include "mouse.h"
-#include "joystick.h"
-#include "rtc.h"
-#include "keyboard.h"
+// #include "IO/terminal.h"
+// #include "IO/mouse.h"
+// #include "IO/joystick.h"
+// #include "IO/rtc.h"
+// #include "IO/keyboard.h"
 
-byte RAM[RAM_END - RAM_START + 1];
-byte ROM[ROM_END - ROM_START + 1];
+uint8_t RAM[RAM_END - RAM_START + 1];
+uint8_t ROM[ROM_END - ROM_START + 1];
 
 Button intButton      = Button();
 Button stepButton     = Button();
@@ -29,11 +30,11 @@ USBHIDParser        hid1(usb);
 USBHIDParser        hid2(usb);
 USBHIDParser        hid3(usb);
 
-void onTimer();
+// void onTimer();
 void onTick();
-void onClock();
-void onRead();
-void onWrite();
+// void onClock();
+// void onRead();
+// void onWrite();
 void onCommand(char command);
 
 void info();
@@ -44,10 +45,8 @@ void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
 void toggleRunStop();
-void toggleCPU();
 void toggleRAM();
 void toggleIO();
-void toggleIOBank();
 void toggleROM();
 bool readROMs();
 void listROMs();
@@ -60,38 +59,43 @@ bool loadCartPath(String path);
 void prevPage();
 void nextPage();
 
-byte readIO(word address);
-void writeIO(word address, byte data);
+uint8_t read(uint16_t addr, bool isDbg);
+void write(uint16_t addr, uint8_t val);
 
+void initPins();
 void initButtons();
 void initSD();
 void initRAM();
 void initROM();
 
+void setDataDirIn();
+void setDataDirOut();
+uint8_t readData();
+void writeData(uint8_t data);
+void writeAddress(uint16_t address);
+
 unsigned int freqIndex = 20;      // 1 MHz
 bool isRunning = false;
 bool isStepping = false;
-volatile bool isClockEdge = false;
 bool autoStart = false;
 
-bool CPUEnabled = false;
 bool RAMEnabled = true;
 bool IOEnabled = true;
 bool ROMEnabled = true;
 String romFile = "None";
 String cartFile = "None";
 bool fileCtx = FILE_CTX_ROM;
-byte IOBank = 2;                  // By default, debugger IO bank is $8800
+uint8_t IOBank = 2;                  // By default, debugger IO bank is $8800
 
-word address = 0;
-byte data = 0;
-bool readWrite = LOW;
-bool be = LOW;
-bool rdy = LOW;
-bool sync = LOW;
-bool resb = LOW;
-bool irqb = LOW;
-bool nmib = LOW;
+uint16_t address = 0;
+uint8_t data = 0;
+bool readWrite = HIGH;
+bool be = HIGH;
+bool rdy = HIGH;
+bool sync = HIGH;
+bool resb = HIGH;
+bool irqb = HIGH;
+bool nmib = HIGH;
 
 String ROMs[ROM_MAX];
 unsigned int romPage = 0;
@@ -101,35 +105,29 @@ unsigned int cartPage = 0;
 
 TeensyTimerTool::PeriodicTimer timer(TeensyTimerTool::TCK);
 
+VrEmu6502 *cpu = vrEmu6502New(CPU_W65C02, read, write);
+
 //
 // MAIN LOOPS
 //
 
 void setup() {
-  Serial.begin(9600);
-  
-  // Wait up to 2 sec for serial to connect
-  int timeout = 2000;
-  while (!Serial && timeout--) {
-    delay(1);
-  }
+  Serial.begin(115200);
 
   initPins();
   initButtons();
   initRAM();
   initROM();
   initSD();
-  
-  setAddrDirIn();
 
   usb.begin();
 
-  Terminal::begin();
-  Mouse::begin();
-  Joystick::begin();
-  RTC::begin();
-  Keyboard::begin();
-
+  // Terminal::begin();
+  // Mouse::begin();
+  // Joystick::begin();
+  // RTC::begin();
+  // Keyboard::begin();
+  
   info();
   reset();
 
@@ -141,12 +139,7 @@ void setup() {
 }
 
 void loop() {
-  // Clock the CPU if an edge has occurred
-  if (isClockEdge) {
-    onTick();
-    isClockEdge = false;
-  }
-
+  
   // Update buttons
   intButton.update();
   stepButton.update();
@@ -167,88 +160,16 @@ void loop() {
   {
     onCommand(Serial.read());
   }
-
-  // Update USB
-  usb.Task();
-
-  Terminal::update();
-  Mouse::update();
-  Joystick::update();
-  RTC::update();
-  Keyboard::update();
 }
 
 //
 // EVENTS
 //
 
-FASTRUN void onTimer() {
-  isClockEdge = true;
-}
-
 FASTRUN void onTick() {
   if (!isRunning) { return; }
 
-  if (!digitalReadFast(PHI2)) {
-    digitalWriteFast(PHI2, HIGH);
-
-    onClock();
-  } else {
-    readWrite ? onRead() : onWrite();
-
-    digitalWriteFast(PHI2, LOW);
-  }
-}
-
-FASTRUN void onClock() {
-  // Read the address and r/w at the beginning of cycle (low to high transition)
-  address     = readAddress();
-  readWrite   = digitalReadFast(RWB);
-
-  // Read the control pins
-  resb  = digitalReadFast(RESB);
-  nmib  = digitalReadFast(NMIB);
-  irqb  = digitalReadFast(IRQB);
-  rdy   = digitalReadFast(RDY);
-  sync  = digitalReadFast(SYNC);
-  be    = digitalReadFast(BE);
-}
-
-FASTRUN void onRead() {
-  if ((address >= IO_BANKS[IOBank]) && (address <= IO_BANKS[IOBank] + IO_BANK_SIZE) && IOEnabled) { // IO
-    digitalWriteFast(OE1, HIGH);
-    setDataDirOut();
-    data = readIO(address);
-    writeData(data);
-  } else if ((address >= ROM_CODE) && (address <= ROM_END) && ROMEnabled) { // ROM
-    digitalWriteFast(OE1, HIGH);
-    setDataDirOut();
-    data = ROM[address - ROM_START];
-    writeData(data);
-  } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
-    digitalWriteFast(OE1, HIGH);
-    setDataDirOut();
-    data = RAM[address - RAM_START];
-    writeData(data);
-  } else {
-    digitalWriteFast(OE1, LOW);
-  }
-}
-
-FASTRUN void onWrite() {
-  if ((address >= IO_START) && (address <= IO_END) && IOEnabled) { // IO
-    digitalWriteFast(OE1, HIGH);
-    setDataDirIn();
-    data = readData();
-    writeIO(address, data);
-  } else if ((address >= RAM_START) && (address <= RAM_END) && RAMEnabled) { // RAM
-    digitalWriteFast(OE1, HIGH);
-    setDataDirIn();
-    data = readData();
-    RAM[address - RAM_START] = data;
-  } else {
-    digitalWriteFast(OE1, LOW);
-  }
+  vrEmu6502Tick(cpu);
 }
 
 void onCommand(char command) {
@@ -293,10 +214,6 @@ void onCommand(char command) {
     case 'P':
       snapshot();
       break;
-    case 'u':
-    case 'U':
-      toggleCPU();
-      break;
     case 'a':
     case 'A':
       toggleRAM();
@@ -304,10 +221,6 @@ void onCommand(char command) {
     case 'i':
     case 'I':
       toggleIO();
-      break;
-    case 'k':
-    case 'K':
-      toggleIOBank();
       break;
     case 'o':
     case 'O':
@@ -367,35 +280,29 @@ void info() {
   Serial.println("| Created by A.C. Wright © 2024 |");
   Serial.println("---------------------------------");
   Serial.println();
-  Serial.print("CPU: ");
-  Serial.print(CPUEnabled ? "Enabled" : "Disabled");
-  Serial.println(" (Not yet implemented)");
   Serial.print("RAM: ");
   Serial.println(RAMEnabled ? "Enabled" : "Disabled");
   Serial.print("ROM: ");
   Serial.print(ROMEnabled ? "Enabled" : "Disabled");
-  Serial.print(" ROM(");
+  Serial.print(" | ROM(");
   Serial.print(romFile);
   Serial.print(") |");
   Serial.print(" Cart(");
   Serial.print(cartFile);
   Serial.println(")");
   Serial.print("IO: ");
-  Serial.print(IOEnabled ? "Enabled" : "Disabled");
-  Serial.print(" ($");
-  Serial.print(IO_BANKS[IOBank], HEX);
-  Serial.println(")");
+  Serial.println(IOEnabled ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
-  Serial.print("Date / Time: ");
-  Serial.println(RTC::formattedDateTime());
+  // Serial.print("Date / Time: ");
+  // Serial.println(RTC::formattedDateTime());
   Serial.println();
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (R)un / Stop          | (S)tep           | Rese(T)         |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| Toggle CP(U)          | Toggle R(A)M     | Toggle R(O)M    |");
+  Serial.println("| Toggle (I)O           | Toggle R(A)M     | Toggle R(O)M    |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| List RO(M)s / (C)arts | Change IO Ban(K) | Toggle (I)O     |");
+  Serial.println("| List RO(M)s / (C)arts |                  |                 |");
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (+/-) Clk Frequency   | Sna(P)shot       | In(F)o / Lo(G)  |");
   Serial.println("--------------------------------------------------------------");
@@ -407,19 +314,13 @@ void log() {
 
   sprintf(
     output, 
-    "| %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c | %c%c%c%c%c%c%c%c | 0x%04X | 0x%02X | %c | RDY: %01X | BE: %01X | RESB: %01X | NMIB: %01X | IRQB: %01X | SYNC: %01X |", 
+    "| %c%c%c%c%c%c%c%c%c%c%c%c%c%c%c%c | %c%c%c%c%c%c%c%c | 0x%04X | 0x%02X | %c |", 
     BYTE_TO_BINARY((address >> 8) & 0xFF),
     BYTE_TO_BINARY(address & 0xFF), 
     BYTE_TO_BINARY(data),
     address, 
     data, 
-    readWrite ? 'R' : 'W',
-    rdy,
-    be,
-    resb,
-    nmib,
-    irqb,
-    sync
+    readWrite ? 'R' : 'W'
   );
 
   Serial.println(output);
@@ -439,6 +340,8 @@ void reset() {
   digitalWriteFast(RESB, HIGH);
   delay(100);
 
+  vrEmu6502Reset(cpu);
+
   Serial.println("Done");
 
   if (isCurrentlyRunning) {
@@ -451,11 +354,7 @@ void step() {
 
   if (!isRunning) {
     isStepping = true;
-    readWrite ? onRead() : onWrite();
-    digitalWriteFast(PHI2, LOW);
-    delay(100);
-    digitalWriteFast(PHI2, HIGH);
-    onClock();
+    vrEmu6502InstCycle(cpu);
     log();
     isStepping = false;
   } else {
@@ -525,19 +424,7 @@ void increaseFrequency() {
 void toggleRunStop() {
   isRunning = !isRunning;
 
-  if (!isRunning && digitalReadFast(PHI2) == LOW) {
-    digitalWriteFast(PHI2, HIGH);
-    onClock();
-  }
-
   Serial.println(isRunning ? "Running…" : "Stopped");
-}
-
-void toggleCPU() {
-  CPUEnabled = !CPUEnabled;
-
-  Serial.print("CPU: ");
-  Serial.println(CPUEnabled ? "Enabled" : "Disabled");
 }
 
 void toggleRAM() {
@@ -549,20 +436,6 @@ void toggleRAM() {
 
 void toggleIO() {
   IOEnabled = !IOEnabled;
-
-  Serial.print("IO: ");
-  Serial.print(IOEnabled ? "Enabled" : "Disabled");
-  Serial.print(" ($");
-  Serial.print(IO_BANKS[IOBank], HEX);
-  Serial.println(")");
-}
-
-void toggleIOBank() {
-  if (IOBank < 7) {
-    IOBank++;
-  } else {
-    IOBank = 0;
-  }
 
   Serial.print("IO: ");
   Serial.print(IOEnabled ? "Enabled" : "Disabled");
@@ -822,42 +695,142 @@ void nextPage() {
 }
 
 //
-// IO
+// READ / WRITE
 //
 
-byte readIO(word address) {
-  if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
-    return Terminal::read(address - IO_BANKS[IOBank] - TERM_START);
-  } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
-    return Mouse::read(address - IO_BANKS[IOBank] - MOUSE_START);
-  } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
-    return Joystick::read(address - IO_BANKS[IOBank] - JOY_START);
-  } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
-    return RTC::read(address - IO_BANKS[IOBank] - RTC_START);
-  } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
-    return Keyboard::read(address - IO_BANKS[IOBank] - KBD_START);
+uint8_t read(uint16_t addr, bool isDbg) {
+  address = addr;
+  readWrite = HIGH;
+
+  if ((addr >= ROM_CODE) && (addr <= ROM_END) && ROMEnabled) { // ROM
+    data = ROM[addr - ROM_START];
+    return ROM[addr - ROM_START];
+  } else if ((addr >= RAM_START) && (addr <= RAM_END) && RAMEnabled) { // RAM
+    data = RAM[addr - RAM_START];
+    return RAM[addr - RAM_START];
+  } else {
+    digitalWriteFast(PHI2, LOW);
+    digitalWriteFast(RWB, HIGH);
+    writeAddress(addr);
+    setDataDirIn();
+    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    digitalWriteFast(PHI2, HIGH);
+    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    data = readData();
+    digitalWriteFast(PHI2, LOW);
+    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    digitalWriteFast(PHI2, HIGH);
+    return data;
   }
 
-  return 0;
+  return 0x00;
+
+  // if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
+  //   return Terminal::read(address - IO_BANKS[IOBank] - TERM_START);
+  // } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
+  //   return Mouse::read(address - IO_BANKS[IOBank] - MOUSE_START);
+  // } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
+  //   return Joystick::read(address - IO_BANKS[IOBank] - JOY_START);
+  // } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
+  //   return RTC::read(address - IO_BANKS[IOBank] - RTC_START);
+  // } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
+  //   return Keyboard::read(address - IO_BANKS[IOBank] - KBD_START);
+  // }
 }
 
-void writeIO(word address, byte data) {
-  if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
-    Terminal::write(address - IO_BANKS[IOBank] - TERM_START, data);
-  } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
-    Mouse::write(address - IO_BANKS[IOBank] - MOUSE_START, data);
-  } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
-    Joystick::write(address - IO_BANKS[IOBank] - JOY_START, data);
-  } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
-    RTC::write(address - IO_BANKS[IOBank] - RTC_START, data);
-  } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
-    Keyboard::write(address - IO_BANKS[IOBank] - KBD_START, data);
+void write(uint16_t addr, uint8_t val) {
+  address = addr;
+  data = val;
+  readWrite = LOW;
+
+  if ((addr >= ROM_CODE) && (addr <= ROM_END)) { // ROM
+    return;
+  } else if ((addr >= RAM_START) && (addr <= RAM_END) && RAMEnabled) { // RAM
+    RAM[addr - RAM_START] = data;
+  } else {
+    digitalWriteFast(PHI2, LOW);
+    digitalWriteFast(RWB, LOW);
+    writeAddress(addr);
+    setDataDirOut();
+    writeData(val);
+    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    digitalWriteFast(PHI2, HIGH);
+    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    digitalWriteFast(PHI2, LOW);
+    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    digitalWriteFast(PHI2, HIGH);
   }
+
+  // if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
+  //   Terminal::write(address - IO_BANKS[IOBank] - TERM_START, data);
+  // } else if ((address - IO_BANKS[IOBank]) >= MOUSE_START && (address - IO_BANKS[IOBank]) <= MOUSE_END) {
+  //   Mouse::write(address - IO_BANKS[IOBank] - MOUSE_START, data);
+  // } else if ((address - IO_BANKS[IOBank]) >= JOY_START && (address - IO_BANKS[IOBank]) <= JOY_END) {
+  //   Joystick::write(address - IO_BANKS[IOBank] - JOY_START, data);
+  // } else if ((address - IO_BANKS[IOBank]) >= RTC_START && (address - IO_BANKS[IOBank]) <= RTC_END) {
+  //   RTC::write(address - IO_BANKS[IOBank] - RTC_START, data);
+  // } else if ((address - IO_BANKS[IOBank]) >= KBD_START && (address - IO_BANKS[IOBank]) <= KBD_END) {
+  //   Keyboard::write(address - IO_BANKS[IOBank] - KBD_START, data);
+  // }
 }
 
 //
 // INITIALIZATION
 //
+
+void initPins() {
+  pinMode(A0, OUTPUT);
+  pinMode(A1, OUTPUT);
+  pinMode(A2, OUTPUT);
+  pinMode(A3, OUTPUT);
+  pinMode(A4, OUTPUT);
+  pinMode(A5, OUTPUT);
+  pinMode(A6, OUTPUT);
+  pinMode(A7, OUTPUT);
+  pinMode(A8, OUTPUT);
+  pinMode(A9, OUTPUT);
+  pinMode(A10, OUTPUT);
+  pinMode(A11, OUTPUT);
+  pinMode(A12, OUTPUT);
+  pinMode(A13, OUTPUT);
+  pinMode(A14, OUTPUT);
+  pinMode(A15, OUTPUT);
+
+  pinMode(RESB, OUTPUT);
+  pinMode(SYNC, OUTPUT);
+  pinMode(RWB, OUTPUT);
+  pinMode(PHI2, OUTPUT);
+  
+  pinMode(IRQB, INPUT_PULLUP);
+  pinMode(NMIB, INPUT_PULLUP);
+  pinMode(RDY, INPUT_PULLUP);
+  pinMode(BE, INPUT_PULLUP);
+
+  pinMode(CLK_SWB, INPUT);
+  pinMode(STEP_SWB, INPUT);
+  pinMode(RS_SWB, INPUT);
+
+  pinMode(GPIO0, OUTPUT);
+  pinMode(GPIO1, OUTPUT);
+  pinMode(GPIO2, OUTPUT);
+  pinMode(GPIO3, OUTPUT);
+
+  pinMode(OE1, OUTPUT);
+  pinMode(OE2, OUTPUT);
+  pinMode(OE3, OUTPUT);
+
+  digitalWriteFast(RESB, HIGH);
+  digitalWriteFast(SYNC, HIGH);
+  digitalWriteFast(RWB, HIGH);
+  digitalWriteFast(PHI2, HIGH);
+
+  digitalWriteFast(OE1, HIGH);
+  digitalWriteFast(OE2, HIGH);
+  digitalWriteFast(OE3, HIGH);
+
+  setDataDirIn();
+  writeAddress(0xFFFC);
+}
 
 void initButtons() {
   intButton.attach(CLK_SWB, INPUT_PULLUP);
@@ -889,13 +862,113 @@ void initSD() {
 }
 
 void initRAM() {
-  for (word a = 0x0000; a < (RAM_END - RAM_START + 1); a++) {
+  for (uint16_t a = 0x0000; a < (RAM_END - RAM_START + 1); a++) {
     RAM[a] = 0x00; 
   }
 }
 
 void initROM() {
-  for (word a = 0x0000; a < (ROM_END - ROM_START + 1); a++) {
-    ROM[a] = 0x00; // Fill the ROM with 0x00's by default
+  for (uint16_t a = 0x0000; a < (ROM_END - ROM_START + 1); a++) {
+    ROM[a] = 0xEA;
   }
+}
+
+//
+// UTILITIES
+//
+
+void setDataDirIn() {
+  pinMode(D0, INPUT_PULLUP);
+  pinMode(D1, INPUT_PULLUP);
+  pinMode(D2, INPUT_PULLUP);
+  pinMode(D3, INPUT_PULLUP);
+  pinMode(D4, INPUT_PULLUP);
+  pinMode(D5, INPUT_PULLUP);
+  pinMode(D6, INPUT_PULLUP);
+  pinMode(D7, INPUT_PULLUP);
+}
+
+void setDataDirOut() {
+  pinMode(D0, OUTPUT);
+  pinMode(D1, OUTPUT);
+  pinMode(D2, OUTPUT);
+  pinMode(D3, OUTPUT);
+  pinMode(D4, OUTPUT);
+  pinMode(D5, OUTPUT);
+  pinMode(D6, OUTPUT);
+  pinMode(D7, OUTPUT);
+}
+
+void writeAddress(uint16_t address) {
+  digitalWriteFast(A0, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A1, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A2, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A3, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A4, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A5, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A6, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A7, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A8, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A9, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A10, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A11, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A12, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A13, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A14, address & 1);
+  address = address >> 1;
+  digitalWriteFast(A15, address & 1);
+}
+
+uint8_t readData() {
+  uint8_t data = 0;
+
+  data = data | digitalReadFast(D7);
+  data = data << 1;
+  data = data | digitalReadFast(D6);
+  data = data << 1;
+  data = data | digitalReadFast(D5);
+  data = data << 1;
+  data = data | digitalReadFast(D4);
+  data = data << 1;
+  data = data | digitalReadFast(D3);
+  data = data << 1;
+  data = data | digitalReadFast(D2);
+  data = data << 1;
+  data = data | digitalReadFast(D1);
+  data = data << 1;
+  data = data | digitalReadFast(D0);
+
+  return data;
+}
+
+void writeData(uint8_t data) {
+  digitalWriteFast(D0, data & 1);
+  data = data >> 1;
+  digitalWriteFast(D1, data & 1);
+  data = data >> 1;
+  digitalWriteFast(D2, data & 1);
+  data = data >> 1;
+  digitalWriteFast(D3, data & 1);
+  data = data >> 1;
+  digitalWriteFast(D4, data & 1);
+  data = data >> 1;
+  digitalWriteFast(D5, data & 1);
+  data = data >> 1;
+  digitalWriteFast(D6, data & 1);
+  data = data >> 1;
+  digitalWriteFast(D7, data & 1);
 }
