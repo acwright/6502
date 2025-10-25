@@ -30,11 +30,7 @@ USBHIDParser        hid1(usb);
 USBHIDParser        hid2(usb);
 USBHIDParser        hid3(usb);
 
-// void onTimer();
 void onTick();
-// void onClock();
-// void onRead();
-// void onWrite();
 void onCommand(char command);
 
 void info();
@@ -399,7 +395,7 @@ void decreaseFrequency() {
   if (freqIndex > 0) {
     freqIndex--;
   } else {
-    freqIndex = 20;
+    freqIndex = 21;
   }
 
   Serial.print("Frequency: ");
@@ -409,7 +405,7 @@ void decreaseFrequency() {
 }
 
 void increaseFrequency() {
-  if (freqIndex < 20) {
+  if (freqIndex < 21) {
     freqIndex++;
   } else {
     freqIndex = 0;
@@ -709,17 +705,24 @@ uint8_t read(uint16_t addr, bool isDbg) {
     data = RAM[addr - RAM_START];
     return RAM[addr - RAM_START];
   } else {
-    digitalWriteFast(PHI2, LOW);
-    digitalWriteFast(RWB, HIGH);
-    writeAddress(addr);
-    setDataDirIn();
-    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    // For some reason this extra clock pulse is needed only for 65C22 ??
     digitalWriteFast(PHI2, HIGH);
-    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
+
+    digitalWriteFast(PHI2, LOW);
+    writeAddress(address);
+    digitalWriteFast(RWB, readWrite);
+    setDataDirIn();
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
+    digitalWriteFast(PHI2, HIGH);
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
     data = readData();
     digitalWriteFast(PHI2, LOW);
-    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
-    digitalWriteFast(PHI2, HIGH);
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
+    setDataDirOut();
+
+    writeAddress(0xFFFF); // Write address back to ROM space due to above extra clock pulse
+
     return data;
   }
 
@@ -748,17 +751,22 @@ void write(uint16_t addr, uint8_t val) {
   } else if ((addr >= RAM_START) && (addr <= RAM_END) && RAMEnabled) { // RAM
     RAM[addr - RAM_START] = data;
   } else {
+    // For some reason this extra clock pulse is needed only for 65C22 ??
+    digitalWriteFast(PHI2, HIGH);
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
+
     digitalWriteFast(PHI2, LOW);
-    digitalWriteFast(RWB, LOW);
-    writeAddress(addr);
+    writeAddress(address);
+    digitalWriteFast(RWB, readWrite);
     setDataDirOut();
-    writeData(val);
-    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    writeData(data);
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
     digitalWriteFast(PHI2, HIGH);
-    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
     digitalWriteFast(PHI2, LOW);
-    delayNanoseconds(FREQ_PERIODS[freqIndex] * 1000);
-    digitalWriteFast(PHI2, HIGH);
+    delayMicroseconds(FREQ_PERIODS[freqIndex]);
+
+    writeAddress(0xFFFF); // Write address back to ROM space due to above extra clock pulse
   }
 
   // if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
@@ -795,11 +803,27 @@ void initPins() {
   pinMode(A13, OUTPUT);
   pinMode(A14, OUTPUT);
   pinMode(A15, OUTPUT);
+  
+  writeAddress(0xFFFF);
+  setDataDirIn();
 
   pinMode(RESB, OUTPUT);
   pinMode(SYNC, OUTPUT);
   pinMode(RWB, OUTPUT);
   pinMode(PHI2, OUTPUT);
+
+  digitalWriteFast(RESB, HIGH);
+  digitalWriteFast(SYNC, HIGH);
+  digitalWriteFast(RWB, HIGH);
+  digitalWriteFast(PHI2, LOW);
+
+  pinMode(OE1, OUTPUT);
+  pinMode(OE2, OUTPUT);
+  pinMode(OE3, OUTPUT);
+
+  digitalWriteFast(OE1, HIGH);
+  digitalWriteFast(OE2, HIGH);
+  digitalWriteFast(OE3, HIGH);
   
   pinMode(IRQB, INPUT_PULLUP);
   pinMode(NMIB, INPUT_PULLUP);
@@ -814,22 +838,6 @@ void initPins() {
   pinMode(GPIO1, OUTPUT);
   pinMode(GPIO2, OUTPUT);
   pinMode(GPIO3, OUTPUT);
-
-  pinMode(OE1, OUTPUT);
-  pinMode(OE2, OUTPUT);
-  pinMode(OE3, OUTPUT);
-
-  digitalWriteFast(RESB, HIGH);
-  digitalWriteFast(SYNC, HIGH);
-  digitalWriteFast(RWB, HIGH);
-  digitalWriteFast(PHI2, HIGH);
-
-  digitalWriteFast(OE1, HIGH);
-  digitalWriteFast(OE2, HIGH);
-  digitalWriteFast(OE3, HIGH);
-
-  setDataDirIn();
-  writeAddress(0xFFFC);
 }
 
 void initButtons() {
