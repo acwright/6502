@@ -30,7 +30,6 @@ USBHIDParser        hid1(usb);
 USBHIDParser        hid2(usb);
 USBHIDParser        hid3(usb);
 
-void onTick();
 void onCommand(char command);
 
 void info();
@@ -99,8 +98,6 @@ unsigned int romPage = 0;
 String Carts[CART_MAX];
 unsigned int cartPage = 0;
 
-TeensyTimerTool::PeriodicTimer timer(TeensyTimerTool::TCK);
-
 VrEmu6502 *cpu = vrEmu6502New(CPU_W65C02, read, write);
 
 //
@@ -127,15 +124,12 @@ void setup() {
   info();
   reset();
 
-  timer.begin(onTick, FREQ_PERIODS[freqIndex]);
-
   if (autoStart) {
     toggleRunStop();
   }
 }
 
 void loop() {
-  
   // Update buttons
   intButton.update();
   stepButton.update();
@@ -156,17 +150,15 @@ void loop() {
   {
     onCommand(Serial.read());
   }
+
+  if (isRunning) {
+    vrEmu6502Tick(cpu);
+  }
 }
 
 //
 // EVENTS
 //
-
-FASTRUN void onTick() {
-  if (!isRunning) { return; }
-
-  vrEmu6502Tick(cpu);
-}
 
 void onCommand(char command) {
   switch (command) {
@@ -395,17 +387,15 @@ void decreaseFrequency() {
   if (freqIndex > 0) {
     freqIndex--;
   } else {
-    freqIndex = 21;
+    freqIndex = 20;
   }
 
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
-
-  timer.setPeriod(FREQ_PERIODS[freqIndex]);
 }
 
 void increaseFrequency() {
-  if (freqIndex < 21) {
+  if (freqIndex < 20) {
     freqIndex++;
   } else {
     freqIndex = 0;
@@ -413,8 +403,6 @@ void increaseFrequency() {
 
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
-
-  timer.setPeriod(FREQ_PERIODS[freqIndex]);
 }
 
 void toggleRunStop() {
@@ -694,39 +682,29 @@ void nextPage() {
 // READ / WRITE
 //
 
-uint8_t read(uint16_t addr, bool isDbg) {
+FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   address = addr;
+  data = 0x00;
   readWrite = HIGH;
+
+  digitalWriteFast(PHI2, LOW);
+  delayNanoseconds(20);
+  writeAddress(address);
+  digitalWriteFast(RWB, readWrite);
+  setDataDirIn();
+  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
+  digitalWriteFast(PHI2, HIGH);
+  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
 
   if ((addr >= ROM_CODE) && (addr <= ROM_END) && ROMEnabled) { // ROM
     data = ROM[addr - ROM_START];
-    return ROM[addr - ROM_START];
   } else if ((addr >= RAM_START) && (addr <= RAM_END) && RAMEnabled) { // RAM
     data = RAM[addr - RAM_START];
-    return RAM[addr - RAM_START];
   } else {
-    // For some reason this extra clock pulse is needed only for 65C22 ??
-    digitalWriteFast(PHI2, HIGH);
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
-
-    digitalWriteFast(PHI2, LOW);
-    writeAddress(address);
-    digitalWriteFast(RWB, readWrite);
-    setDataDirIn();
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
-    digitalWriteFast(PHI2, HIGH);
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
     data = readData();
-    digitalWriteFast(PHI2, LOW);
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
-    setDataDirOut();
-
-    writeAddress(0xFFFF); // Write address back to ROM space due to above extra clock pulse
-
-    return data;
   }
 
-  return 0x00;
+  return data;
 
   // if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
   //   return Terminal::read(address - IO_BANKS[IOBank] - TERM_START);
@@ -741,32 +719,25 @@ uint8_t read(uint16_t addr, bool isDbg) {
   // }
 }
 
-void write(uint16_t addr, uint8_t val) {
+FASTRUN void write(uint16_t addr, uint8_t val) {
   address = addr;
   data = val;
   readWrite = LOW;
 
+  digitalWriteFast(PHI2, LOW);
+  delayNanoseconds(20);
+  writeAddress(address);
+  digitalWriteFast(RWB, readWrite);
+  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
+  digitalWriteFast(PHI2, HIGH);
+  setDataDirOut();
+  writeData(data);
+  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
+
   if ((addr >= ROM_CODE) && (addr <= ROM_END)) { // ROM
-    return;
+    // Do nothing
   } else if ((addr >= RAM_START) && (addr <= RAM_END) && RAMEnabled) { // RAM
     RAM[addr - RAM_START] = data;
-  } else {
-    // For some reason this extra clock pulse is needed only for 65C22 ??
-    digitalWriteFast(PHI2, HIGH);
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
-
-    digitalWriteFast(PHI2, LOW);
-    writeAddress(address);
-    digitalWriteFast(RWB, readWrite);
-    setDataDirOut();
-    writeData(data);
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
-    digitalWriteFast(PHI2, HIGH);
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
-    digitalWriteFast(PHI2, LOW);
-    delayMicroseconds(FREQ_PERIODS[freqIndex]);
-
-    writeAddress(0xFFFF); // Write address back to ROM space due to above extra clock pulse
   }
 
   // if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
@@ -815,7 +786,7 @@ void initPins() {
   digitalWriteFast(RESB, HIGH);
   digitalWriteFast(SYNC, HIGH);
   digitalWriteFast(RWB, HIGH);
-  digitalWriteFast(PHI2, LOW);
+  digitalWriteFast(PHI2, HIGH);
 
   pinMode(OE1, OUTPUT);
   pinMode(OE2, OUTPUT);
