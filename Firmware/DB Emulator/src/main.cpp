@@ -687,14 +687,23 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   data = 0x00;
   readWrite = HIGH;
 
+  bool useNanoseconds = FREQ_PERIODS[freqIndex] <= 1;
+  uint32_t delay = 0;
+
+  if (useNanoseconds) {
+    delay = (FREQ_PERIODS[freqIndex] * 1000) / 2;
+  } else {
+    delay = FREQ_PERIODS[freqIndex] / 2;
+  }
+  
   digitalWriteFast(PHI2, LOW);
   delayNanoseconds(20);
   writeAddress(address);
   digitalWriteFast(RWB, readWrite);
   setDataDirIn();
-  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
+  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
   digitalWriteFast(PHI2, HIGH);
-  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
+  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
 
   if ((addr >= ROM_CODE) && (addr <= ROM_END) && ROMEnabled) { // ROM
     data = ROM[addr - ROM_START];
@@ -724,15 +733,24 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   data = val;
   readWrite = LOW;
 
+  bool useNanoseconds = FREQ_PERIODS[freqIndex] <= 1;
+  uint32_t delay = 0;
+
+  if (useNanoseconds) {
+    delay = (FREQ_PERIODS[freqIndex] * 1000) / 2;
+  } else {
+    delay = FREQ_PERIODS[freqIndex] / 2;
+  }
+
   digitalWriteFast(PHI2, LOW);
   delayNanoseconds(20);
   writeAddress(address);
   digitalWriteFast(RWB, readWrite);
-  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
+  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
   digitalWriteFast(PHI2, HIGH);
   setDataDirOut();
   writeData(data);
-  delayMicroseconds(FREQ_PERIODS[freqIndex] / 2);
+  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
 
   if ((addr >= ROM_CODE) && (addr <= ROM_END)) { // ROM
     // Do nothing
