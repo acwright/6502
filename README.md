@@ -41,6 +41,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Memory Card**: A card that provides RAM or ROM memory. 
 - **Nano Card**: A card that hosts an Arduino Nano for uploading code to RAM or ROM. 
 - **Prototype Card**: A card that provides a prototyping area for custom circuits. 
+- **RAM Card**: A card that provides 512k of extra RAM. 
 - **RTC Card**: A card that provides real-time clock functionality. 
 - **Serial Card**: A card that provides serial communication capabilities. 
 - **Serial Card Pro**: An enhanced version of the Serial Card with additional features. 
