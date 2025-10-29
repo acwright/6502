@@ -37,7 +37,8 @@
 #define ROM_START       0x8000
 #define ROM_CODE        0xA000
 #define ROM_END         0xFFFF
-#define CART_START      0xC000
+#define CART_START      0x8000
+#define CART_CODE       0xC000
 #define CART_END        0xFFFF
 
 #define FREQS           (String[21])  { "1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz" }
@@ -55,6 +56,7 @@
 #define ROM_MAX         256
 #define CART_MAX        256
 
-#define FILE_CTX_ROM    0
-#define FILE_CTX_CART   1
+#define INPUT_CTX_ROM    0
+#define INPUT_CTX_CART   1
+#define INPUT_CTX_IO     2
 #endif

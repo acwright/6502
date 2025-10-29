@@ -5,20 +5,20 @@
 #include <SD.h>
 #include <EEPROM.h>
 #include <USBHost_t36.h>
-#include <vrEmu6502.h>
+
+#include <CPU.h>
+#include <RAM.h>
+#include <ROM.h>
+#include <Cart.h>
+#include <RTC.h>
 
 #include "pins.h"
 #include "macros.h"
 #include "constants.h"
 
-// #include "IO/terminal.h"
 // #include "IO/mouse.h"
 // #include "IO/joystick.h"
-// #include "IO/rtc.h"
 // #include "IO/keyboard.h"
-
-uint8_t RAM[RAM_END - RAM_START + 1];
-uint8_t ROM[ROM_END - ROM_START + 1];
 
 Button intButton      = Button();
 Button stepButton     = Button();
@@ -31,6 +31,7 @@ USBHIDParser        hid2(usb);
 USBHIDParser        hid3(usb);
 
 void onCommand(char command);
+void onNumeric(uint8_t num);
 
 void info();
 void log();
@@ -41,8 +42,8 @@ void decreaseFrequency();
 void increaseFrequency();
 void toggleRunStop();
 void toggleRAM();
-void toggleIO();
 void toggleROM();
+void toggleCart();
 bool readROMs();
 void listROMs();
 void loadROM(unsigned int index);
@@ -51,6 +52,7 @@ bool readCarts();
 void listCarts();
 void loadCart(unsigned int index);
 bool loadCartPath(String path);
+void listIO();
 void prevPage();
 void nextPage();
 
@@ -60,8 +62,6 @@ void write(uint16_t addr, uint8_t val);
 void initPins();
 void initButtons();
 void initSD();
-void initRAM();
-void initROM();
 
 void setDataDirIn();
 void setDataDirOut();
@@ -74,12 +74,7 @@ bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
 
-bool RAMEnabled = true;
-bool IOEnabled = true;
-bool ROMEnabled = true;
-String romFile = "None";
-String cartFile = "None";
-bool fileCtx = FILE_CTX_ROM;
+uint8_t inputCtx = INPUT_CTX_ROM;
 uint8_t IOBank = 2;                  // By default, debugger IO bank is $8800
 
 uint16_t address = 0;
@@ -98,27 +93,26 @@ unsigned int romPage = 0;
 String Carts[CART_MAX];
 unsigned int cartPage = 0;
 
-VrEmu6502 *cpu = vrEmu6502New(CPU_W65C02, read, write);
+CPU cpu = CPU(read, write);
+RTC rtc = RTC();
+RAM ram = RAM(RAM_END - RAM_START + 1);
+ROM rom = ROM(ROM_END - ROM_START + 1);
+Cart cart = Cart(CART_END - CART_START + 1);
 
 //
 // MAIN LOOPS
 //
 
 void setup() {
-  Serial.begin(115200);
-
   initPins();
   initButtons();
-  initRAM();
-  initROM();
   initSD();
 
+  Serial.begin(115200);
   usb.begin();
 
-  // Terminal::begin();
   // Mouse::begin();
   // Joystick::begin();
-  // RTC::begin();
   // Keyboard::begin();
   
   info();
@@ -152,7 +146,7 @@ void loop() {
   }
 
   if (isRunning) {
-    vrEmu6502Tick(cpu);
+    cpu.tick();
   }
 }
 
@@ -162,29 +156,29 @@ void loop() {
 
 void onCommand(char command) {
   switch (command) {
-    case '0':
-      fileCtx ? loadCart(0) : loadROM(0);
+    case '0': 
+      onNumeric(0);
       break;
     case '1':
-      fileCtx ? loadCart(1) : loadROM(1);
+      onNumeric(1);
       break;
     case '2':
-      fileCtx ? loadCart(2) : loadROM(2);
+      onNumeric(2);
       break;
     case '3':
-      fileCtx ? loadCart(3) : loadROM(3);
+      onNumeric(3);
       break;
     case '4':
-      fileCtx ? loadCart(4) : loadROM(4);
+      onNumeric(4);
       break;
     case '5':
-      fileCtx ? loadCart(5) : loadROM(5);
+      onNumeric(5);
       break;
     case '6':
-      fileCtx ? loadCart(6) : loadROM(6);
+      onNumeric(6);
       break;
     case '7':
-      fileCtx ? loadCart(7) : loadROM(7);
+      onNumeric(7);
       break;
     case 'r':
     case 'R':
@@ -202,13 +196,17 @@ void onCommand(char command) {
     case 'P':
       snapshot();
       break;
+    case 'i':
+    case 'I':
+      listIO();
+      break;
+    case 'l':
+    case 'L':
+      toggleCart();
+      break;
     case 'a':
     case 'A':
       toggleRAM();
-      break;
-    case 'i':
-    case 'I':
-      toggleIO();
       break;
     case 'o':
     case 'O':
@@ -246,6 +244,19 @@ void onCommand(char command) {
   }
 }
 
+void onNumeric(uint8_t num) {
+  switch(inputCtx) {
+    case INPUT_CTX_ROM:
+      loadROM(num);
+      break;
+    case INPUT_CTX_CART:
+      loadCart(num);
+      break;
+    case INPUT_CTX_IO:
+      break;
+  }
+}
+
 //
 // METHODS
 //
@@ -269,28 +280,28 @@ void info() {
   Serial.println("---------------------------------");
   Serial.println();
   Serial.print("RAM: ");
-  Serial.println(RAMEnabled ? "Enabled" : "Disabled");
+  Serial.println(ram.enabled ? "Enabled" : "Disabled");
   Serial.print("ROM: ");
-  Serial.print(ROMEnabled ? "Enabled" : "Disabled");
-  Serial.print(" | ROM(");
-  Serial.print(romFile);
-  Serial.print(") |");
-  Serial.print(" Cart(");
-  Serial.print(cartFile);
+  Serial.print(rom.enabled ? "Enabled" : "Disabled");
+  Serial.print(" (");
+  Serial.print(rom.file);
   Serial.println(")");
-  Serial.print("IO: ");
-  Serial.println(IOEnabled ? "Enabled" : "Disabled");
+  Serial.print("Cart: ");
+  Serial.print(cart.enabled ? "Enabled" : "Disabled");
+  Serial.print(" (");
+  Serial.print(cart.file);
+  Serial.println(")");
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
-  // Serial.print("Date / Time: ");
-  // Serial.println(RTC::formattedDateTime());
+  Serial.print("Date / Time: ");
+  Serial.println(RTC::formattedDateTime());
   Serial.println();
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (R)un / Stop          | (S)tep           | Rese(T)         |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| Toggle (I)O           | Toggle R(A)M     | Toggle R(O)M    |");
+  Serial.println("| Toggle R(A)M          | Toggle R(O)M     | Toggle Cart (L) |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| List RO(M)s / (C)arts |                  |                 |");
+  Serial.println("| List RO(M)s / (C)arts |                  | Configure (I)O  |");
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (+/-) Clk Frequency   | Sna(P)shot       | In(F)o / Lo(G)  |");
   Serial.println("--------------------------------------------------------------");
@@ -328,7 +339,7 @@ void reset() {
   digitalWriteFast(RESB, HIGH);
   delay(100);
 
-  vrEmu6502Reset(cpu);
+  cpu.reset();
 
   Serial.println("Done");
 
@@ -342,7 +353,7 @@ void step() {
 
   if (!isRunning) {
     isStepping = true;
-    vrEmu6502InstCycle(cpu);
+    cpu.step();
     log();
     isStepping = false;
   } else {
@@ -373,7 +384,7 @@ void snapshot() {
 
   if (snapshot) {
     for(unsigned int i = 0; i < (RAM_END - RAM_START); i++) {
-      snapshot.write(RAM[i]);
+      snapshot.write(ram.read(i));
     }
     snapshot.close();
   }
@@ -412,27 +423,24 @@ void toggleRunStop() {
 }
 
 void toggleRAM() {
-  RAMEnabled = !RAMEnabled;
+  ram.enabled = !ram.enabled;
 
   Serial.print("RAM: ");
-  Serial.println(RAMEnabled ? "Enabled" : "Disabled");
-}
-
-void toggleIO() {
-  IOEnabled = !IOEnabled;
-
-  Serial.print("IO: ");
-  Serial.print(IOEnabled ? "Enabled" : "Disabled");
-  Serial.print(" ($");
-  Serial.print(IO_BANKS[IOBank], HEX);
-  Serial.println(")");
+  Serial.println(ram.enabled ? "Enabled" : "Disabled");
 }
 
 void toggleROM() {
-  ROMEnabled = !ROMEnabled;
+  rom.enabled = !rom.enabled;
 
   Serial.print("ROM: ");
-  Serial.println(ROMEnabled ? "Enabled" : "Disabled");
+  Serial.println(rom.enabled ? "Enabled" : "Disabled");
+}
+
+void toggleCart() {
+  cart.enabled = !cart.enabled;
+
+  Serial.print("Cart: ");
+  Serial.println(cart.enabled ? "Enabled" : "Disabled");
 }
 
 bool readROMs() {
@@ -475,7 +483,7 @@ bool readROMs() {
 void listROMs() {
   if (!readROMs()) { return; }
 
-  fileCtx = FILE_CTX_ROM;
+  inputCtx = INPUT_CTX_ROM;
 
   Serial.println();
 
@@ -506,11 +514,10 @@ void loadROM(unsigned int index) {
   String path = directory + filename;
 
   if (loadROMPath(path)) {
-    romFile = ROMs[(romPage * 8) + index];
-    cartFile = "None";
+    rom.file = filename;
     
     Serial.print("Loaded ROM: ");
-    Serial.println(romFile);
+    Serial.println(rom.file);
   } else {
     Serial.println("Invalid ROM!");
   }
@@ -523,7 +530,7 @@ bool loadROMPath(String path) {
     unsigned int i = 0;
 
     while(file.available()) {
-      ROM[i] = file.read();
+      rom.write(i, file.read());
       i++;
     }
 
@@ -577,7 +584,7 @@ bool readCarts() {
 void listCarts() {
   if (!readCarts()) { return; }
 
-  fileCtx = FILE_CTX_CART;
+  inputCtx = INPUT_CTX_CART;
 
   Serial.println();
 
@@ -608,10 +615,11 @@ void loadCart(unsigned int index) {
   String path = directory + filename;
 
   if (loadCartPath(path)) {
-    cartFile = Carts[(cartPage * 8) + index];
+    cart.file = filename;
+    cart.enabled = true;
 
     Serial.print("Loaded Cart: ");
-    Serial.println(cartFile);
+    Serial.println(cart.file);
   } else {
     Serial.println("Invalid Cart!");
   }
@@ -627,7 +635,7 @@ bool loadCartPath(String path) {
       if (i < 0x4000) { 
         file.read(); // Skip the first 16K
       } else {
-        ROM[i] = file.read();
+        rom.write(i, file.read());
       }
       i++;
     }
@@ -642,39 +650,57 @@ bool loadCartPath(String path) {
   }
 }
 
+void listIO() {
+  inputCtx = INPUT_CTX_IO;
+
+  Serial.println();
+
+  // TODO: List IO
+}
+
 void prevPage() {
-  if (fileCtx == FILE_CTX_ROM) {
-    if (romPage > 0)  {
-      romPage--;
-    } else {
-      romPage = 31;
-    }
-    listROMs();
-  } else {
-    if (cartPage > 0)  {
-      cartPage--;
-    } else {
-      cartPage = 31;
-    }
-    listCarts();
+  switch(inputCtx) {
+    case INPUT_CTX_ROM:
+      if (romPage > 0)  {
+        romPage--;
+      } else {
+        romPage = 31;
+      }
+      listROMs();
+      break;
+    case INPUT_CTX_CART:
+      if (cartPage > 0)  {
+        cartPage--;
+      } else {
+        cartPage = 31;
+      }
+      listCarts();
+      break;
+    default:
+      break;
   }
 }
 
 void nextPage() {
-  if (fileCtx == FILE_CTX_ROM) {
-    if (romPage < 31) {
-      romPage++;
-    } else {
-      romPage = 0;
-    }
-    listROMs();
-  } else {
-    if (cartPage < 31) {
-      cartPage++;
-    } else {
-      cartPage = 0;
-    }
-    listCarts();
+  switch(inputCtx) {
+    case INPUT_CTX_ROM:
+      if (romPage < 31) {
+        romPage++;
+      } else {
+        romPage = 0;
+      }
+      listROMs();
+      break;
+    case INPUT_CTX_CART:
+      if (cartPage < 31) {
+        cartPage++;
+      } else {
+        cartPage = 0;
+      }
+      listCarts();
+      break;
+    default:
+      break;
   }
 }
 
@@ -705,10 +731,12 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   digitalWriteFast(PHI2, HIGH);
   useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
 
-  if ((addr >= ROM_CODE) && (addr <= ROM_END) && ROMEnabled) { // ROM
-    data = ROM[addr - ROM_START];
-  } else if ((addr >= RAM_START) && (addr <= RAM_END) && RAMEnabled) { // RAM
-    data = RAM[addr - RAM_START];
+  if ((addr >= CART_CODE) && (addr <= CART_END) && cart.enabled) { // Cart
+    data = cart.read(addr - CART_START);
+  } else if ((addr >= ROM_CODE) && (addr <= ROM_END) && rom.enabled) { // ROM
+    data = rom.read(addr - ROM_START);
+  } else if ((addr >= RAM_START) && (addr <= RAM_END) && ram.enabled) { // RAM
+    data = ram.read(addr - RAM_START);
   } else {
     data = readData();
   }
@@ -752,10 +780,12 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   writeData(data);
   useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
 
-  if ((addr >= ROM_CODE) && (addr <= ROM_END)) { // ROM
-    // Do nothing
-  } else if ((addr >= RAM_START) && (addr <= RAM_END) && RAMEnabled) { // RAM
-    RAM[addr - RAM_START] = data;
+  if ((addr >= CART_CODE) && (addr <= CART_END) && cart.enabled) { // Cart
+    cart.write(addr - CART_START, data);
+  } else if ((addr >= ROM_CODE) && (addr <= ROM_END) && rom.enabled) { // ROM
+    rom.write(addr - ROM_START, data);
+  } else if ((addr >= RAM_START) && (addr <= RAM_END) && ram.enabled) { // RAM
+    ram.write(addr - RAM_START, data);
   }
 
   // if ((address - IO_BANKS[IOBank]) >= TERM_START && (address - IO_BANKS[IOBank]) <= TERM_END) {
@@ -848,25 +878,14 @@ void initSD() {
 
   if (SD.exists("ROM.bin")) {
     loadROMPath("ROM.bin");
-    romFile = "ROM.bin";
+    rom.file = "ROM.bin";
     autoStart = true;
   }
   if (SD.exists("Cart.bin")) {
     loadCartPath("Cart.bin");
-    cartFile = "Cart.bin";
+    cart.file = "Cart.bin";
+    cart.enabled = true;
     autoStart = true;
-  }
-}
-
-void initRAM() {
-  for (uint16_t a = 0x0000; a < (RAM_END - RAM_START + 1); a++) {
-    RAM[a] = 0x00; 
-  }
-}
-
-void initROM() {
-  for (uint16_t a = 0x0000; a < (ROM_END - ROM_START + 1); a++) {
-    ROM[a] = 0xEA;
   }
 }
 
