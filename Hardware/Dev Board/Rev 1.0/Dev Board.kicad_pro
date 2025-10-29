@@ -58,7 +58,16 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "starved_thermal|113290000|58355000|00000000-0000-0000-0000-0000607092e7|bf17ec28-e87c-4e0b-a3a8-5b208df2d774|F.Cu",
+          ""
+        ],
+        [
+          "starved_thermal|113290000|58355000|00000000-0000-0000-0000-0000607092e7|e83a5a01-53cc-449d-88fc-b8c95ce9afe2|F.Cu",
+          ""
+        ]
+      ],
       "meta": {
         "version": 2
       },
@@ -109,7 +118,7 @@
         "starved_thermal": "error",
         "text_height": "ignore",
         "text_on_edge_cuts": "error",
-        "text_thickness": "warning",
+        "text_thickness": "ignore",
         "through_hole_pad_without_hole": "error",
         "too_many_vias": "error",
         "track_angle": "error",
