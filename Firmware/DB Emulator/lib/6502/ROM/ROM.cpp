@@ -13,8 +13,12 @@ ROM::~ROM() {
   delete[] this->data;
 }
 
-uint8_t ROM::read(uint16_t index) {
-  return this->data[index];
+uint8_t ROM::read(uint16_t address) {
+  return this->data[address];
 }
 
-void ROM::write(uint16_t index, uint8_t value) { /* Do nothing */ }
+void ROM::write(uint16_t address, uint8_t value) { /* Do nothing */ }
+
+void ROM::load(uint16_t address, uint8_t value) {
+  this->data[address] = value;
+}

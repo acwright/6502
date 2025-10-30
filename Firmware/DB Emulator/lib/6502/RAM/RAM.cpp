@@ -13,10 +13,10 @@ RAM::~RAM() {
   delete[] this->data;
 }
 
-uint8_t RAM::read(uint16_t index) {
-  return this->data[index];
+uint8_t RAM::read(uint16_t address) {
+  return this->data[address];
 }
 
-void RAM::write(uint16_t index, uint8_t value) {
-  this->data[index] = value;
+void RAM::write(uint16_t address, uint8_t value) {
+  this->data[address] = value;
 }

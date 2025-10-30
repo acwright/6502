@@ -14,8 +14,8 @@ class RAM {
 
     bool enabled = true;
 
-    uint8_t read(uint16_t index);
-    void write(uint16_t index, uint8_t value);
+    uint8_t read(uint16_t address);
+    void write(uint16_t address, uint8_t value);
 };
 
 #endif

@@ -16,6 +16,6 @@ void CPU::tick() {
   vrEmu6502Tick(this->cpu);
 }
 
-void CPU::step() {
-  vrEmu6502InstCycle(this->cpu);
+uint8_t CPU::step() {
+  return vrEmu6502InstCycle(this->cpu);
 }

@@ -1,7 +1,7 @@
 #ifndef _CPU_H
 #define _CPU_H
 
-#include <vrEmu6502.h>
+#include "vrEmu6502/vrEmu6502.h"
 
 class CPU {
   private:
@@ -13,7 +13,7 @@ class CPU {
 
     void reset();
     void tick();
-    void step();
+    uint8_t step();
 };
 
 #endif
