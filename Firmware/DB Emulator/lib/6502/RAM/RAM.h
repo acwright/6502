@@ -2,14 +2,14 @@
 #define _RAM_H
 
 #include <Arduino.h>
+#include "constants.h"
 
 class RAM {
   private:
-    uint16_t size;
     uint8_t *data;
 
   public:
-    RAM(uint16_t size);
+    RAM();
     ~RAM();
 
     bool enabled = true;

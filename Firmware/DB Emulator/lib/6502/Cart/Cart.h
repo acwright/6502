@@ -2,14 +2,14 @@
 #define _CART_H
 
 #include <Arduino.h>
+#include "constants.h"
 
 class Cart {
   private:
-    uint16_t size;
     uint8_t *data;
     
   public:
-    Cart(uint16_t size);
+    Cart();
     ~Cart();
     
     bool enabled = false;

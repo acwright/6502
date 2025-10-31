@@ -13,6 +13,15 @@
 
 #include "IO/IO.h"
 #include "IO/Empty.h"
-#include "IO/RAM Card.h"
+#include "IO/Emulator.h"
+#include "IO/GPIOCard.h"
+#include "IO/InputBoard.h"
+#include "IO/LCDCard.h"
+#include "IO/RAMCard.h"
+#include "IO/RTCCard.h"
+#include "IO/SerialCard.h"
+#include "IO/SoundCard.h"
+#include "IO/StorageCard.h"
+#include "IO/VideoCard.h"
 
 #endif

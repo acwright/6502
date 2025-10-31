@@ -33,7 +33,7 @@ void onJoystick();
 void info();
 void log();
 void reset();
-void step(); 
+void step();
 void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
@@ -92,12 +92,12 @@ unsigned int cartPage = 0;
 
 CPU cpu = CPU(read, write);
 RTC rtc = RTC();
-RAM ram = RAM(RAM_END - RAM_START + 1);
-ROM rom = ROM(ROM_END - ROM_START + 1);
-Cart cart = Cart(CART_END - CART_START + 1);
+RAM ram = RAM();
+ROM rom = ROM();
+Cart cart = Cart();
 IO *io[8] = {
   new RAMCard(),
-  new Empty(),
+  new Emulator(),
   new Empty(),
   new Empty(),
   new Empty(),
@@ -167,9 +167,14 @@ void loop() {
 
   if (isRunning) {
     cpu.tick();
-
+    
+    uint8_t interrupt = 0x00;
     for(int i = 0; i < 8; i++) {
-      io[i]->tick();
+      interrupt |= io[i]->tick();
+    }
+
+    if (interrupt != 0x00) {
+      // TODO: Do something with interrupt
     }
   }
 }
@@ -383,18 +388,22 @@ void onMouse() {
   int mouseX = mouse.getMouseX();
   int mouseY = mouse.getMouseY();
   int mouseW = mouse.getWheel();
-  uint8_t mouseBtns = mouse.getButtons();
+  uint8_t mouseButtons = mouse.getButtons();
 
-  // uint8_t mouseX    = _mouseX < 0 ? (abs(_mouseX) | 0b10000000) : _mouseX;  // If negative, set bit 7 (Left = -X)
-  // uint8_t mouseY    = _mouseY < 0 ? (abs(_mouseY) | 0b10000000) : _mouseY;  // If negative, set bit 7 (Up = -Y)
-  // uint8_t mouseW    = _mouseW < 0 ? (abs(_mouseW) | 0b10000000) : _mouseW;  // If negative, set bit 7 (Up = -W)
+  for (int i = 0; i < 8; i++) {
+    uint8_t id = io[i]->id();
+    if (id == IO_INPUT_BOARD) {
+      InputBoard *ib = (InputBoard *)io[i];
+      ib->updateMouse(mouseX, mouseY, mouseW, mouseButtons);
+    }
+  }
 
   mouse.mouseDataClear();
 
   #ifdef MOUSE_DEBUG
   if (mouseBtns > 0 || mouseX > 0 || mouseY > 0 || mouseW || 0) {
     Serial.print("Mouse: Buttons = ");
-    Serial.print(mouseBtns);
+    Serial.print(mouseButtons);
     Serial.print(",  X = ");
     Serial.print(mouseX);
     Serial.print(",  Y = ");
@@ -412,45 +421,13 @@ void onJoystick() {
   if (joystick.joystickType() == JoystickController::XBOX360 || 
       joystick.joystickType() == JoystickController::XBOXONE) 
   {
-    // XBOX Button Values
-    // LFUNC (View): 0x8 1000
-    // RFUNC (Menu): 0x4 0100
-    // A: 0x10 0001 0000
-    // B: 0x20 0010 0000
-    // X: 0x40 0100 0000
-    // Y: 0x80 1000 0000
-    // UP: 0x100 0001 0000 0000
-    // DOWN: 0x200 0010 0000 0000
-    // LEFT: 0x400 0100 0000 0000
-    // RIGHT: 0x800 1000 0000 0000
-    // LBTN: 0x1000 0001 0000 0000 0000
-    // RBTN: 0x2000 0010 0000 0000 0000
-    // LABTN: 0x4000 0100 0000 0000 0000
-    // RABTN: 0x8000 1000 0000 0000 0000
-
-    // XBOX Analog Values
-    // Left Analog X: 0:-32768(left) +32768(right) 
-    // Left Analog Y: 1:-32768(down) +32768(up)
-    // Right Analog X: 2:-32768(left) +32768(right) 
-    // LTRIG: 3:0-1023
-    // RTRIG: 4:0-1023
-    // Right Analog Y: 5:-32768(down) +32768(up)
-
-    // uint8_t joystickBtnL = buttons & 0xFF;
-    // uint8_t joystickBtnH = (buttons >> 8) & 0xFF;
-    // uint8_t joystickBtn  = (joystickBtnL & 0xF0) | (joystickBtnH & 0x0F);
-    // uint8_t joystickLAnXL = joystick.getAxis(0) & 0xFF;
-    // uint8_t joystickLAnXH = (joystick.getAxis(0) >> 8) & 0xFF;
-    // uint8_t joystickLAnYL = joystick.getAxis(1) & 0xFF;
-    // uint8_t joystickLAnYH = (joystick.getAxis(1) >> 8) & 0xFF;
-    // uint8_t joystickRAnXL = joystick.getAxis(2) & 0xFF;
-    // uint8_t joystickRAnXH = (joystick.getAxis(2) >> 8) & 0xFF;
-    // uint8_t joystickRAnYL = joystick.getAxis(5) & 0xFF;
-    // uint8_t joystickRAnYH = (joystick.getAxis(5) >> 8) & 0xFF;
-    // uint8_t joystickLTrL = joystick.getAxis(3) & 0xFF;
-    // uint8_t joystickLTrH = (joystick.getAxis(3) >> 8) & 0xFF;
-    // uint8_t joystickRTrL = joystick.getAxis(4) & 0xFF;
-    // uint8_t joystickRTrH = (joystick.getAxis(4) >> 8) & 0xFF;
+    for (int i = 0; i < 8; i++) {
+      uint8_t id = io[i]->id();
+      if (id == IO_GPIO_CARD_GH || id == IO_GPIO_CARD_KB || id == IO_GPIO_CARD_KH) {
+        GPIOCard *gpio = (GPIOCard *)io[i];
+        gpio->updateJoystick(buttons);
+      }
+    } 
   }
 
   joystick.joystickDataClear();
@@ -959,7 +936,7 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
     data = ram.read(addr - RAM_START);
   } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
     for (int i = 0; i < 8; i++) {
-      if ((addr >= IO_BANKS[i]) && (addr <= (IO_BANKS[i] + IO_BANK_SIZE)) && !io[i]->passthrough()) {
+      if ((addr >= IO_BANKS[i]) && (addr <= (IO_BANKS[i] + IO_BANK_SIZE - 1)) && !io[i]->passthrough()) {
         data = io[i]->read(addr - IO_BANKS[i]);
       }
     }
@@ -1000,7 +977,7 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
     ram.write(addr - RAM_START, data);
   } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
     for (int i = 0; i < 8; i++) {
-      if ((addr >= IO_BANKS[i]) && (addr <= (IO_BANKS[i] + IO_BANK_SIZE)) && !io[i]->passthrough()) {
+      if ((addr >= IO_BANKS[i]) && (addr <= (IO_BANKS[i] + IO_BANK_SIZE - 1)) && !io[i]->passthrough()) {
         io[i]->write(addr - IO_BANKS[i], data);
       }
     }

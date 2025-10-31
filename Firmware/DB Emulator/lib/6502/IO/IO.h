@@ -7,6 +7,7 @@ class IO {
   public:
     virtual ~IO() = default;
 
+    virtual uint8_t id() = 0;
     virtual String  description() = 0;
     virtual bool    passthrough() = 0;
     virtual uint8_t read(uint16_t address) = 0;

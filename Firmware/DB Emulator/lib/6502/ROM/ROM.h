@@ -2,14 +2,14 @@
 #define _ROM_H
 
 #include <Arduino.h>
+#include "constants.h"
 
 class ROM {
   private:
-    uint16_t size;
     uint8_t *data;
     
   public:
-    ROM(uint16_t size);
+    ROM();
     ~ROM();
 
     bool enabled = true;

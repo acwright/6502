@@ -1,7 +1,8 @@
 #include "ROM.h"
 
-ROM::ROM(uint16_t size) {
-  this->size = size;
+ROM::ROM() {
+  uint16_t size = ROM_END - ROM_START + 1;
+  
   this->data = new uint8_t[size];
 
   for (uint16_t a = 0x0000; a < size; a++) {

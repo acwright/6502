@@ -1,7 +1,8 @@
 #include "RAM.h"
 
-RAM::RAM(uint16_t size) {
-  this->size = size;
+RAM::RAM() {
+  uint16_t size = RAM_END - RAM_START + 1;
+
   this->data = new uint8_t[size];
 
   for (uint16_t a = 0x0000; a < size; a++) {

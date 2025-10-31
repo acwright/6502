@@ -63,15 +63,22 @@
 #define IO_NYI_3        14
 #define IO_EMPTY        15
 #define IO_BANKS        (uint16_t[8]) { 0x8000, 0x8400, 0x8800, 0x8C00, 0x9000, 0x9400, 0x9800, 0x9C00 }
-#define IO_BANK_SIZE    0x3FF
+#define IO_BANK_SIZE    0x400
 #define IO_IRQ_FLAG     0b00000001
 #define IO_NMI_FLAG     0b00000010
 
 #define ROM_MAX         256
 #define CART_MAX        256
 
-#define INPUT_CTX_ROM    0
-#define INPUT_CTX_CART   1
-#define INPUT_CTX_IO     2
+#define INPUT_CTX_ROM   0
+#define INPUT_CTX_CART  1
+#define INPUT_CTX_IO    2
+
+#define RC_BLOCK_SIZE   0x400
+#ifdef MEM_EXTMEM
+#define RC_BLOCK_COUNT  0x100
+#else
+#define RC_BLOCK_COUNT  0x10
+#endif
 
 #endif

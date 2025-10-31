@@ -2,12 +2,23 @@
 #define _RAM_CARD_H
 
 #include "IO.h"
+#include "constants.h"
 
 class RAMCard: public IO {
-  public:
-    RAMCard() {}
-    ~RAMCard() {}
+  private:
+    #ifdef MEM_EXTMEM
+    EXTMEM uint8_t *data;
+    #else
+    uint8_t *data;
+    #endif
+    
+    uint8_t bank;
 
+  public:
+    RAMCard();
+    ~RAMCard();
+
+    uint8_t id() { return IO_RAM_CARD; }
     String  description() override { return "RAM Card"; }
     bool    passthrough() override { return false; }
     uint8_t read(uint16_t address) override;
