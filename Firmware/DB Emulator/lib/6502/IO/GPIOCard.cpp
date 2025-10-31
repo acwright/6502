@@ -1,6 +1,35 @@
 #include "GPIOCard.h"
 
-GPIOCard::GPIOCard() {}
+GPIOCard::GPIOCard(uint8_t attachment) {
+  this->attachment = attachment;
+}
+
+uint8_t GPIOCard::id() {
+  switch(this->attachment) {
+    case GPIOCARD_ATTACHMENT_GPIO_HELPER:
+      return IO_GPIO_CARD_GH;
+    case GPIOCARD_ATTACHMENT_KEYBOARD:
+      return IO_GPIO_CARD_KB;
+    case GPIOCARD_ATTACHMENT_KEYPAD_HELPER:
+      return IO_GPIO_CARD_KH;
+    default:
+      return 0xFF; // Shouldn't happen
+  }
+}
+
+String GPIOCard::description() {
+  switch(this->attachment) {
+    case GPIOCARD_ATTACHMENT_GPIO_HELPER:
+      return "GPIO Card (GPIO Helper)";
+    case GPIOCARD_ATTACHMENT_KEYBOARD:
+      return "GPIO Card (Keyboard / PS2 Helper)";
+    case GPIOCARD_ATTACHMENT_KEYPAD_HELPER:
+      return "GPIO Card (Keypad Helper)";
+    default:
+      return "GPIO Card"; // Shouldn't happen
+  }
+}
+
 uint8_t GPIOCard::read(uint16_t address) { return 0x00; }
 void GPIOCard::write(uint16_t address, uint8_t value) {}
 void GPIOCard::reset() {}

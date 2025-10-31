@@ -4,15 +4,20 @@
 #include "IO.h"
 #include "constants.h"
 
+#define GPIOCARD_ATTACHMENT_GPIO_HELPER   0
+#define GPIOCARD_ATTACHMENT_KEYBOARD      1
+#define GPIOCARD_ATTACHMENT_KEYPAD_HELPER 2
+
 class GPIOCard: public IO {
   private:
+    uint8_t attachment;
 
   public:
-    GPIOCard();
+    GPIOCard(uint8_t attachment);
     ~GPIOCard() {}
 
-    uint8_t id() { return IO_GPIO_CARD_KB; }
-    String  description() override { return "GPIO Card"; }
+    uint8_t id() override;
+    String  description() override;
     bool    passthrough() override { return false; }
     uint8_t read(uint16_t address) override;
     void    write(uint16_t address, uint8_t value) override;

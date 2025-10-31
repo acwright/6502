@@ -48,8 +48,8 @@
 
 #define IO_VIDEO_CARD   0
 #define IO_SOUND_CARD   1
-#define IO_GPIO_CARD_KB 2
-#define IO_GPIO_CARD_GH 3
+#define IO_GPIO_CARD_GH 2
+#define IO_GPIO_CARD_KB 3
 #define IO_GPIO_CARD_KH 4
 #define IO_INPUT_BOARD  5
 #define IO_SERIAL_CARD  6

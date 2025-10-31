@@ -43,13 +43,14 @@ void toggleROM();
 void toggleCart();
 bool readROMs();
 void listROMs();
-void loadROM(unsigned int index);
+void loadROM(uint index);
 bool loadROMPath(String path);
 bool readCarts();
 void listCarts();
-void loadCart(unsigned int index);
+void loadCart(uint index);
 bool loadCartPath(String path);
 void listIO();
+void configureIO(uint index);
 void prevPage();
 void nextPage();
 
@@ -66,7 +67,7 @@ uint8_t readData();
 void writeData(uint8_t data);
 void writeAddress(uint16_t address);
 
-unsigned int freqIndex = 20;      // 1 MHz
+uint freqIndex = 20;      // 1 MHz
 bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
@@ -85,10 +86,10 @@ bool irqb = HIGH;
 bool nmib = HIGH;
 
 String ROMs[ROM_MAX];
-unsigned int romPage = 0;
+uint romPage = 0;
 
 String Carts[CART_MAX];
-unsigned int cartPage = 0;
+uint cartPage = 0;
 
 CPU cpu = CPU(read, write);
 RTC rtc = RTC();
@@ -98,12 +99,12 @@ Cart cart = Cart();
 IO *io[8] = {
   new RAMCard(),
   new Emulator(),
-  new Empty(),
-  new Empty(),
-  new Empty(),
-  new Empty(),
-  new Empty(),
-  new Empty()
+  new RTCCard(),
+  new StorageCard(),
+  new SerialCard(),
+  new GPIOCard(GPIOCARD_ATTACHMENT_KEYBOARD),
+  new SoundCard(),
+  new VideoCard()
 };
 
 //
@@ -169,7 +170,7 @@ void loop() {
     cpu.tick();
     
     uint8_t interrupt = 0x00;
-    for(int i = 0; i < 8; i++) {
+    for(uint i = 0; i < 8; i++) {
       interrupt |= io[i]->tick();
     }
 
@@ -282,6 +283,7 @@ void onNumeric(uint8_t num) {
       loadCart(num);
       break;
     case INPUT_CTX_IO:
+      configureIO(num);
       break;
   }
 }
@@ -525,7 +527,7 @@ void reset() {
 
   cpu.reset();
   
-  for(int i = 0; i < 8; i++) {
+  for(uint i = 0; i < 8; i++) {
     io[i]->reset();
   }
 
@@ -547,7 +549,7 @@ void step() {
   if (!isRunning) {
     isStepping = true;
     uint8_t ticks = cpu.step();
-    for(int i = 0; i < ticks; i++) {
+    for(uint i = 0; i < ticks; i++) {
       io[i]->tick();
     }
     log();
@@ -579,7 +581,7 @@ void snapshot() {
   File snapshot = SD.open(path.c_str(), FILE_WRITE);
 
   if (snapshot) {
-    for(unsigned int i = 0; i < (RAM_END - RAM_START); i++) {
+    for(uint i = 0; i < (RAM_END - RAM_START); i++) {
       snapshot.write(ram.read(i));
     }
     snapshot.close();
@@ -649,13 +651,13 @@ bool readROMs() {
     SD.mkdir("ROMs");
   }
 
-  for (unsigned int i = 0; i < ROM_MAX; i++) {
+  for (uint i = 0; i < ROM_MAX; i++) {
     ROMs[i] = "?";
   }
 
   File ROMDirectory = SD.open("ROMs");
 
-  unsigned int index = 0;
+  uint index = 0;
 
   while(true) {
     File file = ROMDirectory.openNextFile();
@@ -683,7 +685,7 @@ void listROMs() {
 
   Serial.println();
 
-  for (unsigned int j = (romPage * 8); j < ((romPage * 8) + 8); j++) {
+  for (uint j = (romPage * 8); j < ((romPage * 8) + 8); j++) {
     Serial.print("(");
     Serial.print(j - (romPage * 8));
     Serial.print(")");
@@ -698,7 +700,7 @@ void listROMs() {
   Serial.println();
 }
 
-void loadROM(unsigned int index) {
+void loadROM(uint index) {
   String directory = "ROMs/";
   String filename = ROMs[(romPage * 8) + index];
   
@@ -723,7 +725,7 @@ bool loadROMPath(String path) {
   File file = SD.open(path.c_str());
 
   if (file) {
-    unsigned int i = 0;
+    uint i = 0;
 
     while(file.available()) {
       rom.load(i, file.read());
@@ -750,13 +752,13 @@ bool readCarts() {
     SD.mkdir("Carts");
   }
 
-  for (unsigned int i = 0; i < CART_MAX; i++) {
+  for (uint i = 0; i < CART_MAX; i++) {
     Carts[i] = "?";
   }
 
   File CartDirectory = SD.open("Carts");
 
-  unsigned int index = 0;
+  uint index = 0;
 
   while(true) {
     File file = CartDirectory.openNextFile();
@@ -784,7 +786,7 @@ void listCarts() {
 
   Serial.println();
 
-  for (unsigned int j = (cartPage * 8); j < ((cartPage * 8) + 8); j++) {
+  for (uint j = (cartPage * 8); j < ((cartPage * 8) + 8); j++) {
     Serial.print("(");
     Serial.print(j - (cartPage * 8));
     Serial.print(")");
@@ -799,7 +801,7 @@ void listCarts() {
   Serial.println();
 }
 
-void loadCart(unsigned int index) {
+void loadCart(uint index) {
   String directory = "Carts/";
   String filename = Carts[(cartPage * 8) + index];
 
@@ -825,7 +827,7 @@ bool loadCartPath(String path) {
   File file = SD.open(path.c_str());
 
   if (file) {
-    unsigned int i = 0;
+    uint i = 0;
 
     while(file.available()) {
       if (i < 0x4000) { 
@@ -851,7 +853,87 @@ void listIO() {
 
   Serial.println();
 
-  // TODO: List IO
+  for (uint i = 0; i < 8; i++) {
+    Serial.print("(");
+    Serial.print(i);
+    Serial.print(") IO ");
+    Serial.print(i + 1);
+    Serial.print(" $");
+    Serial.print(IO_BANKS[i], HEX);
+    Serial.print(" - ");
+    Serial.println(io[i]->description());
+  }
+
+  Serial.println();
+}
+
+void configureIO(uint index) {
+  uint8_t currentID = io[index]->id();
+  uint8_t nextID;
+
+  if (currentID < 15) {
+    nextID = currentID + 1;
+  } else {
+    nextID = 0;
+  }
+
+  delete io[index];
+
+  switch (nextID) {
+    case IO_VIDEO_CARD:
+      io[index] = new VideoCard();
+      break;
+    case IO_SOUND_CARD:
+      io[index] = new SoundCard();
+      break;
+    case IO_GPIO_CARD_GH:
+      io[index] = new GPIOCard(GPIOCARD_ATTACHMENT_GPIO_HELPER);
+      break;
+    case IO_GPIO_CARD_KB:
+      io[index] = new GPIOCard(GPIOCARD_ATTACHMENT_KEYBOARD);
+      break;
+    case IO_GPIO_CARD_KH:
+      io[index] = new GPIOCard(GPIOCARD_ATTACHMENT_KEYPAD_HELPER);
+      break;
+    case IO_INPUT_BOARD:
+      io[index] = new InputBoard();
+      break;
+    case IO_SERIAL_CARD:
+      io[index] = new SerialCard();
+      break;
+    case IO_STORAGE_CARD:
+      io[index] = new StorageCard();
+      break;
+    case IO_RTC_CARD:
+      io[index] = new RTCCard();
+      break;
+    case IO_EMULATOR:
+      io[index] = new Emulator();
+      break;
+    case IO_LCD_CARD:
+      io[index] = new LCDCard();
+      break;
+    case IO_RAM_CARD:
+      io[index] = new RAMCard();
+      break;
+    case IO_NYI_1:
+    case IO_NYI_2:
+    case IO_NYI_3:
+    case IO_EMPTY:
+      io[index] = new Empty();
+      break;
+    default:
+      break;
+  }
+
+  Serial.print("(");
+  Serial.print(index);
+  Serial.print(") IO");
+  Serial.print(index + 1);
+  Serial.print(" $");
+  Serial.print(IO_BANKS[index], HEX);
+  Serial.print(" - ");
+  Serial.println(io[index]->description());
 }
 
 void prevPage() {
