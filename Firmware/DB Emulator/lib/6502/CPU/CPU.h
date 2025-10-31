@@ -6,6 +6,8 @@
 class CPU {
   private:
     VrEmu6502 *cpu;
+    vrEmu6502Interrupt *irq;
+    vrEmu6502Interrupt *nmi;
 
   public:
     CPU(vrEmu6502MemRead readFn, vrEmu6502MemWrite writeFn);
@@ -14,8 +16,9 @@ class CPU {
     void reset();
     void tick();
     uint8_t step();
-    void irq();
-    void nmi();
+    void irqTrigger();
+    void irqClear();
+    void nmiTrigger();
 };
 
 #endif

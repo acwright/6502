@@ -2,6 +2,8 @@
 
 CPU::CPU(vrEmu6502MemRead readFn, vrEmu6502MemWrite writeFn) {
   this->cpu = vrEmu6502New(CPU_W65C02, readFn, writeFn);
+  this->irq = vrEmu6502Int(this->cpu);
+  this->nmi = vrEmu6502Nmi(this->cpu);
 }
 
 CPU::~CPU() {
@@ -20,12 +22,14 @@ uint8_t CPU::step() {
   return vrEmu6502InstCycle(this->cpu);
 }
 
-void CPU::irq() {
-  vrEmu6502Interrupt *irq = vrEmu6502Int(this->cpu);
+void CPU::irqTrigger() {
   *irq = IntRequested;
 }
 
-void CPU::nmi() {
-  vrEmu6502Interrupt *nmi = vrEmu6502Nmi(this->cpu);
+void CPU::irqClear() {
+  *irq = IntCleared;
+}
+
+void CPU::nmiTrigger() {
   *nmi = IntRequested;
 }

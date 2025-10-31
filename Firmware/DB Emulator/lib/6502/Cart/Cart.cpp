@@ -5,8 +5,8 @@ Cart::Cart() {
 
   this->data = new uint8_t[size];
 
-  for (uint16_t a = 0x0000; a < size; a++) {
-    this->data[a] = 0xEA; // Load with NOPs
+  for (uint16_t i = 0x0000; i < size; i++) {
+    this->data[i] = 0xEA; // Load with NOPs
   }
 }
 
@@ -19,3 +19,7 @@ uint8_t Cart::read(uint16_t index) {
 }
 
 void Cart::write(uint16_t index, uint8_t value) { /* Do nothing */ }
+
+void Cart::load(uint16_t index, uint8_t value) {
+  this->data[index] = value;
+}

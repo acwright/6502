@@ -171,13 +171,13 @@ void loop() {
       interrupt |= io[i]->tick();
     }
 
-    if (interrupt != 0x00) {
-      if (interrupt && 0x80) {
-        cpu.irq();
-      }
-      if (interrupt && 0x40) {
-        cpu.nmi();
-      }
+    if ((interrupt & 0x40) != 0x00) {
+      cpu.nmiTrigger();
+    }
+    if ((interrupt & 0x80) != 0x00) {
+      cpu.irqTrigger();
+    } else {
+      cpu.irqClear();
     }
   }
 }
@@ -559,16 +559,16 @@ void step() {
         interrupt |= io[i]->tick();
       }
 
-      if (interrupt != 0x00) {
-        if (interrupt && 0x80) {
-          cpu.irq();
-        }
-        if (interrupt && 0x40) {
-          cpu.nmi();
-        }
+      if ((interrupt & 0x40) != 0x00) {
+        cpu.nmiTrigger();
+      }
+      if ((interrupt & 0x80) != 0x00) {
+        cpu.irqTrigger();
+      } else {
+        cpu.irqClear();
       }
     }
-    
+
     log();
     isStepping = false;
   } else {
@@ -730,6 +730,8 @@ void loadROM(uint index) {
 
   if (loadROMPath(path)) {
     rom.file = filename;
+    rom.enabled = true;
+    cart.enabled = false;
     
     Serial.print("Loaded ROM: ");
     Serial.println(rom.file);
@@ -850,7 +852,7 @@ bool loadCartPath(String path) {
       if (i < 0x4000) { 
         file.read(); // Skip the first 16K
       } else {
-        rom.write(i, file.read());
+        cart.load(i, file.read());
       }
       i++;
     }
