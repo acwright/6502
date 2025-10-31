@@ -162,9 +162,6 @@ void loop() {
   if (Serial.available()) {
     onCommand(Serial.read());
   }
-  if (SerialUSB1.available()) {
-    // TODO: Do something with SerialUSB1 receive
-  }
 
   if (isRunning) {
     cpu.tick();
@@ -175,7 +172,12 @@ void loop() {
     }
 
     if (interrupt != 0x00) {
-      // TODO: Do something with interrupt
+      if (interrupt && 0x80) {
+        cpu.irq();
+      }
+      if (interrupt && 0x40) {
+        cpu.nmi();
+      }
     }
   }
 }
@@ -548,10 +550,25 @@ void step() {
 
   if (!isRunning) {
     isStepping = true;
+
     uint8_t ticks = cpu.step();
+
     for(uint i = 0; i < ticks; i++) {
-      io[i]->tick();
+      uint8_t interrupt = 0x00;
+      for(uint i = 0; i < 8; i++) {
+        interrupt |= io[i]->tick();
+      }
+
+      if (interrupt != 0x00) {
+        if (interrupt && 0x80) {
+          cpu.irq();
+        }
+        if (interrupt && 0x40) {
+          cpu.nmi();
+        }
+      }
     }
+    
     log();
     isStepping = false;
   } else {

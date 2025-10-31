@@ -14,6 +14,8 @@ class CPU {
     void reset();
     void tick();
     uint8_t step();
+    void irq();
+    void nmi();
 };
 
 #endif

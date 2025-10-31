@@ -19,3 +19,13 @@ void CPU::tick() {
 uint8_t CPU::step() {
   return vrEmu6502InstCycle(this->cpu);
 }
+
+void CPU::irq() {
+  vrEmu6502Interrupt *irq = vrEmu6502Int(this->cpu);
+  *irq = IntRequested;
+}
+
+void CPU::nmi() {
+  vrEmu6502Interrupt *nmi = vrEmu6502Nmi(this->cpu);
+  *nmi = IntRequested;
+}
