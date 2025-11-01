@@ -13,7 +13,7 @@ class GPIOCard: public IO {
     uint8_t attachment;
 
   public:
-    GPIOCard(uint8_t attachment);
+    GPIOCard(uint8_t attachment = GPIOCARD_ATTACHMENT_KEYBOARD);
     ~GPIOCard() {}
 
     uint8_t id() override;

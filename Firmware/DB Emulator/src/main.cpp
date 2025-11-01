@@ -6,6 +6,10 @@
 #include <USBHost_t36.h>
 #include <6502.h>
 
+#ifdef DEVBOARD_1
+#include <SPI.h>
+#endif
+
 Button intButton      = Button();
 Button stepButton     = Button();
 Button runStopButton  = Button();
@@ -23,6 +27,7 @@ KeyboardController  keyboard(usb);
 MouseController     mouse(usb);
 JoystickController  joystick(usb);
 
+void onTick();
 void onCommand(char command);
 void onNumeric(uint8_t num);
 void onKeyPress(uint8_t keycode);
@@ -102,7 +107,7 @@ IO *io[8] = {
   new RTCCard(),
   new StorageCard(),
   new SerialCard(),
-  new GPIOCard(GPIOCARD_ATTACHMENT_KEYBOARD),
+  new GPIOCard(),
   new SoundCard(),
   new VideoCard()
 };
@@ -112,9 +117,15 @@ IO *io[8] = {
 //
 
 void setup() {
+  Serial.begin(115200);
+
   initPins();
   initButtons();
   initSD();
+
+  #ifdef DEVBOARD_1
+  SPI1.begin();
+  #endif
 
   usb.begin();
   keyboard.attachRawPress(onKeyPress);
@@ -165,26 +176,29 @@ void loop() {
 
   if (isRunning) {
     cpu.tick();
-    
-    uint8_t interrupt = 0x00;
-    for(uint i = 0; i < 8; i++) {
-      interrupt |= io[i]->tick();
-    }
-
-    if ((interrupt & 0x40) != 0x00) {
-      cpu.nmiTrigger();
-    }
-    if ((interrupt & 0x80) != 0x00) {
-      cpu.irqTrigger();
-    } else {
-      cpu.irqClear();
-    }
+    onTick();
   }
 }
 
 //
 // EVENTS
 //
+
+void onTick() {
+  uint8_t interrupt = 0x00;
+  for(uint i = 0; i < 8; i++) {
+    interrupt |= io[i]->tick();
+  }
+
+  if ((interrupt & 0x40) != 0x00) {
+    cpu.nmiTrigger();
+  }
+  if ((interrupt & 0x80) != 0x00) {
+    cpu.irqTrigger();
+  } else {
+    cpu.irqClear();
+  }
+}
 
 void onCommand(char command) {
   switch (command) {
@@ -552,21 +566,8 @@ void step() {
     isStepping = true;
 
     uint8_t ticks = cpu.step();
-
     for(uint i = 0; i < ticks; i++) {
-      uint8_t interrupt = 0x00;
-      for(uint i = 0; i < 8; i++) {
-        interrupt |= io[i]->tick();
-      }
-
-      if ((interrupt & 0x40) != 0x00) {
-        cpu.nmiTrigger();
-      }
-      if ((interrupt & 0x80) != 0x00) {
-        cpu.irqTrigger();
-      } else {
-        cpu.irqClear();
-      }
+      onTick();
     }
 
     log();
@@ -1134,10 +1135,10 @@ void initPins() {
   pinMode(OE2, OUTPUT);
   pinMode(OE3, OUTPUT);
 
-  pinMode(GPIO0, OUTPUT);
-  pinMode(GPIO1, OUTPUT);
-  pinMode(GPIO2, OUTPUT);
-  pinMode(GPIO3, OUTPUT);
+  pinMode(GPIO0, INPUT);
+  pinMode(GPIO1, INPUT);
+  pinMode(GPIO2, INPUT);
+  pinMode(GPIO3, INPUT);
 
   digitalWriteFast(OE1, HIGH);
   digitalWriteFast(OE2, HIGH);
@@ -1153,6 +1154,10 @@ void initPins() {
   pinMode(CS0, OUTPUT);
   pinMode(CS1, OUTPUT);
   pinMode(CS2, OUTPUT);
+
+  digitalWriteFast(CS0, HIGH);
+  digitalWriteFast(CS1, HIGH);
+  digitalWriteFast(CS2, HIGH);
   #endif
 }
 
