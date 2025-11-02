@@ -5,7 +5,7 @@ Current file: ./src/DB Hello World.asm
 000000r 1               .setcpu "65C02"
 000000r 1               .segment "CODE"
 000000r 1               
-000000r 1               TERM_DATA   = $8800
+000000r 1               DB_DATA   = $8400
 000000r 1               
 000000r 1               reset:
 000000r 1  A2 FF          ldx #$ff
@@ -15,15 +15,15 @@ Current file: ./src/DB Hello World.asm
 000005r 1               print:
 000005r 1  BD rr rr       lda message,x
 000008r 1  F0 07          beq end
-00000Ar 1  8D 00 88       sta TERM_DATA   ; Write char to Terminal data register
+00000Ar 1  8D 00 84       sta DB_DATA     ; Write char to DB print data register
 00000Dr 1  E8             inx
 00000Er 1  4C rr rr       jmp print
 000011r 1               
 000011r 1               end:
 000011r 1  A9 0D          lda #$0D        ; Carriage Return
-000013r 1  8D 00 88       sta TERM_DATA
+000013r 1  8D 00 84       sta DB_DATA
 000016r 1  A9 0A          lda #$0A        ; Line feed
-000018r 1  8D 00 88       sta TERM_DATA
+000018r 1  8D 00 84       sta DB_DATA
 00001Br 1               
 00001Br 1               halt:
 00001Br 1  4C rr rr       jmp halt

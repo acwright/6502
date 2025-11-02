@@ -1,7 +1,7 @@
 .setcpu "65C02"
 .segment "CODE"
 
-TERM_DATA   = $8800
+DB_DATA   = $8400
 
 reset:
   ldx #$ff
@@ -11,15 +11,15 @@ reset:
 print:
   lda message,x
   beq end
-  sta TERM_DATA   ; Write char to Terminal data register
+  sta DB_DATA     ; Write char to DB print data register
   inx
   jmp print
 
 end:
   lda #$0D        ; Carriage Return
-  sta TERM_DATA
+  sta DB_DATA
   lda #$0A        ; Line feed
-  sta TERM_DATA
+  sta DB_DATA
 
 halt:
   jmp halt
