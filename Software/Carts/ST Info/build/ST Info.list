@@ -69,7 +69,7 @@ Current file: ./src/ST Info.asm
 000029r 1  8D 07 8C       sta CF_CMD
 00002Cr 1  20 rr rr       jsr cf_wait
 00002Fr 1  A9 00          lda #$00
-000031r 1  8D 04 8C       sta CF_LBA1
+000031r 1  8D 03 8C       sta CF_LBA0
 000034r 1  8D 04 8C       sta CF_LBA1
 000037r 1  8D 05 8C       sta CF_LBA2
 00003Ar 1  A9 E0          lda #$E0        ; LBA3=0, Master, Mode=LBA
@@ -121,48 +121,6 @@ Current file: ./src/ST Info.asm
 000092r 1  20 rr rr       jsr acia_send_char
 000095r 1               cf_no_err:
 000095r 1  60             rts
-000096r 1               
-000096r 1               ; cf_set_sector:
-000096r 1               ;   lda #1           ; Read 1 sector
-000096r 1               ;   sta CF_SECT
-000096r 1               ;   jsr cf_wait
-000096r 1               ;   lda #$20         ; Read sector command
-000096r 1               ;   sta CF_CMD
-000096r 1               ;   jsr cf_wait
-000096r 1               ;   rts
-000096r 1               
-000096r 1               ; cf_read_sector:
-000096r 1               ;   phy
-000096r 1               ;   lda #<CF_BUFFER
-000096r 1               ;   sta CF_BUFFER_PTR
-000096r 1               ;   lda #>CF_BUFFER
-000096r 1               ;   sta CF_BUFFER_PTR + 1
-000096r 1               ;   ldy #0
-000096r 1               ; cf_read_1:
-000096r 1               ;   jsr cf_wait
-000096r 1               ;   lda CF_DATA
-000096r 1               ;   sta (CF_BUFFER_PTR),y
-000096r 1               ;   iny
-000096r 1               ;   bne cf_read_1
-000096r 1               ;   inc CF_BUFFER_PTR + 1
-000096r 1               ; cf_read_2:
-000096r 1               ;   jsr cf_wait
-000096r 1               ;   lda CF_DATA
-000096r 1               ;   sta (CF_BUFFER_PTR),y
-000096r 1               ;   iny
-000096r 1               ;   bne cf_read_2
-000096r 1               ;   dec CF_BUFFER_PTR + 1
-000096r 1               ; cf_read_3:
-000096r 1               ;   jsr cf_wait
-000096r 1               ;   lda CF_CMD
-000096r 1               ;   and #$08
-000096r 1               ;   beq cf_read_exit
-000096r 1               ;   lda CF_DATA
-000096r 1               ;   iny
-000096r 1               ;   bne cf_read_3
-000096r 1               ; cf_read_exit:
-000096r 1               ;   ply
-000096r 1               ;   rts
 000096r 1               
 000096r 1               print:
 000096r 1  BD rr rr       lda success,x

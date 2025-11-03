@@ -61,7 +61,7 @@ cf_init:
   sta CF_CMD
   jsr cf_wait
   lda #$00
-  sta CF_LBA1
+  sta CF_LBA0
   sta CF_LBA1
   sta CF_LBA2
   lda #$E0        ; LBA3=0, Master, Mode=LBA
@@ -113,48 +113,6 @@ cf_err:
   jsr acia_send_char
 cf_no_err:
   rts
-
-; cf_set_sector:
-;   lda #1           ; Read 1 sector
-;   sta CF_SECT
-;   jsr cf_wait
-;   lda #$20         ; Read sector command
-;   sta CF_CMD
-;   jsr cf_wait
-;   rts
-
-; cf_read_sector:
-;   phy
-;   lda #<CF_BUFFER
-;   sta CF_BUFFER_PTR
-;   lda #>CF_BUFFER
-;   sta CF_BUFFER_PTR + 1
-;   ldy #0
-; cf_read_1:
-;   jsr cf_wait
-;   lda CF_DATA
-;   sta (CF_BUFFER_PTR),y
-;   iny
-;   bne cf_read_1
-;   inc CF_BUFFER_PTR + 1
-; cf_read_2:
-;   jsr cf_wait
-;   lda CF_DATA
-;   sta (CF_BUFFER_PTR),y
-;   iny
-;   bne cf_read_2
-;   dec CF_BUFFER_PTR + 1
-; cf_read_3:
-;   jsr cf_wait
-;   lda CF_CMD
-;   and #$08
-;   beq cf_read_exit
-;   lda CF_DATA
-;   iny
-;   bne cf_read_3
-; cf_read_exit:
-;   ply
-;   rts
 
 print:
   lda success,x
