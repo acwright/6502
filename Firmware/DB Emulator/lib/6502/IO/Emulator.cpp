@@ -2,9 +2,7 @@
 
 #ifdef DEVBOARD_0
 Emulator::Emulator() {
-  this->scratch = 0x00;
-  this->gpioData = 0x00;
-  this->gpioDataDir = 0x00;
+  this->reset();
 }
 
 uint8_t Emulator::read(uint16_t address) {
@@ -65,11 +63,7 @@ void Emulator::reset() {
 
 #if DEVBOARD_1
 Emulator::Emulator() {
-  this->spiTransfer = 0x00;
-  this->spiControl = 0x20;  // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
-  this->spiStatus = 0x20;   // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
-  this->spiClock = 0x04;    // 4MHz
-  this->spiTransferPending = false;
+  this->reset();
 }
 
 uint8_t Emulator::read(uint16_t address) {
@@ -141,5 +135,6 @@ void Emulator::reset() {
   this->spiControl = 0x20;  // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
   this->spiStatus = 0x20;   // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
   this->spiClock = 0x04;    // 4MHz
+  this->spiTransferPending = false;
 }
 #endif

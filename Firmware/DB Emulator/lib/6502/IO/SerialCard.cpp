@@ -1,11 +1,7 @@
 #include "SerialCard.h"
 
 SerialCard::SerialCard() {
-  this->tx = 0x00;
-  this->rx = 0x00;
-  this->cmd = 0x00;
-  this->ctrl = 0x00;
-  this->status = 0x00 | SC_STATUS_TX_REG_EMPTY;
+  this->reset();
 }
 
 uint8_t SerialCard::read(uint16_t address) {
