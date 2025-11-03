@@ -5,26 +5,32 @@ Current file: ./src/ST Info.asm
 000000r 1               .setcpu "65C02"
 000000r 1               
 000000r 1               .segment "ZEROPAGE"
-000000r 1  xx xx        CF_BUFFER_PTR:  .res 2
-000002r 1               
-000002r 1               .segment "STACK"
+000000r 1  xx xx        CF_INFO_PTR:  .res 2
+000002r 1  xx xx        CF_BUFFER_PTR:  .res 2
+000004r 1               
+000004r 1               .segment "STACK"
 000000r 1               .segment "INPUT_BUFFER"
 000000r 1               .segment "KERNAL_VARS"
 000000r 1               
 000000r 1               .segment "USER_VARS"
-000000r 1  xx xx xx xx  CF_BUFFER:      .res 512
+000000r 1  xx xx xx xx  CF_INFO:        .res 256
 000004r 1  xx xx xx xx  
 000008r 1  xx xx xx xx  
-000200r 1               
-000200r 1               .segment "CODE"
+000100r 1  xx xx xx xx  CF_BUFFER:      .res 512
+000104r 1  xx xx xx xx  
+000108r 1  xx xx xx xx  
+000300r 1               
+000300r 1               .segment "CODE"
 000000r 1               
 000000r 1               CF_DATA     = $8C00   ; Data port
+000000r 1               CF_ERR      = $8C01   ; Read: Error Code | Write: Feature
 000000r 1               CF_FEAT     = $8C01   ; Read: Error Code | Write: Feature
 000000r 1               CF_SECT     = $8C02   ; Number of sectors to transfer
 000000r 1               CF_LBA0     = $8C03   ; Sector Address LBA 0 [0:7]
 000000r 1               CF_LBA1     = $8C04   ; Sector Address LBA 1 [8:15]
 000000r 1               CF_LBA2     = $8C05   ; Sector Address LBA 2 [16:23]
 000000r 1               CF_LBA3     = $8C06   ; Sector Address LBA 3 [24:27 (LSB)]
+000000r 1               CF_STAT     = $8C07   ; Read: Status | Write: Command
 000000r 1               CF_CMD      = $8C07   ; Read: Status | Write: Command
 000000r 1               
 000000r 1               ACIA_DATA   = $9000
@@ -36,158 +42,165 @@ Current file: ./src/ST Info.asm
 000000r 1  A2 FF          ldx #$ff
 000002r 1  9A             txs
 000003r 1               
-000003r 1  A9 00          lda #$00
-000005r 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
-000008r 1               
-000008r 1  A9 1F          lda #%00011111  ; N-8-1, 19200 baud
-00000Ar 1  8D 03 90       sta ACIA_CTRL
-00000Dr 1               
-00000Dr 1  A9 0B          lda #%00001011  ; No parity, No echo, No interrupts
-00000Fr 1  8D 02 90       sta ACIA_CMD
-000012r 1               
-000012r 1  20 rr rr       jsr cf_init
-000015r 1  20 rr rr       jsr cf_err
-000018r 1  20 rr rr       jsr cf_info
-00001Br 1                 ; jsr cf_set_sector
-00001Br 1                 ; jsr cf_read_sector
-00001Br 1  20 rr rr       jsr cf_err
-00001Er 1               
-00001Er 1  A2 00          ldx #0
-000020r 1  20 rr rr       jsr print
-000023r 1               
-000023r 1               loop:
-000023r 1  4C rr rr       jmp loop
-000026r 1               
-000026r 1               cf_init:
-000026r 1  A9 rr          lda #<CF_BUFFER
-000028r 1  85 rr          sta CF_BUFFER_PTR
-00002Ar 1  A9 rr          lda #>CF_BUFFER
-00002Cr 1  85 rr          sta CF_BUFFER_PTR + 1
-00002Er 1               
-00002Er 1  A9 00          lda #$00
-000030r 1  8D 06 8C       sta CF_LBA3
-000033r 1  8D 05 8C       sta CF_LBA2
-000036r 1  8D 04 8C       sta CF_LBA1
-000039r 1  8D 03 8C       sta CF_LBA0
-00003Cr 1               
-00003Cr 1  A9 04          lda #$04        ; Reset
-00003Er 1  8D 07 8C       sta CF_CMD
-000041r 1  20 rr rr       jsr cf_wait
-000044r 1  A9 E0          lda #$E0        ; LBA3=0, Master, Mode=LBA
-000046r 1  8D 06 8C       sta CF_LBA3
-000049r 1  A9 01          lda #$01        ; 8-bit transfers
-00004Br 1  8D 01 8C       sta CF_FEAT
-00004Er 1  A9 EF          lda #$EF        ; Set feature
-000050r 1  8D 07 8C       sta CF_CMD
-000053r 1  20 rr rr       jsr cf_wait
-000056r 1  60             rts
-000057r 1               
-000057r 1               cf_info:
-000057r 1  20 rr rr       jsr cf_wait
-00005Ar 1  A9 EC          lda #$EC        ; Drive ID command
-00005Cr 1  8D 07 8C       sta CF_CMD
-00005Fr 1  20 rr rr       jsr cf_wait
-000062r 1  A0 00          ldy #0
-000064r 1               cf_info_loop:
-000064r 1  20 rr rr       jsr cf_wait
-000067r 1  AD 07 8C       lda CF_CMD
-00006Ar 1  29 08          and #%00001000  ; DRQ flag
-00006Cr 1  C9 08          cmp #%00001000
-00006Er 1  D0 09          bne cf_info_exit
-000070r 1  AD 00 8C       lda CF_DATA
-000073r 1  91 rr          sta (CF_BUFFER_PTR),y
-000075r 1  C8             iny
-000076r 1  4C rr rr       jmp cf_info_loop
-000079r 1               cf_info_exit:
-000079r 1  60             rts
-00007Ar 1               
-00007Ar 1               ; cf_set_sector:
-00007Ar 1               ;   lda #1           ; Read 1 sector
-00007Ar 1               ;   sta CF_SECT
-00007Ar 1               ;   jsr cf_wait
-00007Ar 1               ;   lda #$20         ; Read sector command
-00007Ar 1               ;   sta CF_CMD
-00007Ar 1               ;   jsr cf_wait
-00007Ar 1               ;   rts
-00007Ar 1               
-00007Ar 1               ; cf_read_sector:
-00007Ar 1               ;   phy
-00007Ar 1               ;   lda #<CF_BUFFER
-00007Ar 1               ;   sta CF_BUFFER_PTR
-00007Ar 1               ;   lda #>CF_BUFFER
-00007Ar 1               ;   sta CF_BUFFER_PTR + 1
-00007Ar 1               ;   ldy #0
-00007Ar 1               ; cf_read_1:
-00007Ar 1               ;   jsr cf_wait
-00007Ar 1               ;   lda CF_DATA
-00007Ar 1               ;   sta (CF_BUFFER_PTR),y
-00007Ar 1               ;   iny
-00007Ar 1               ;   bne cf_read_1
-00007Ar 1               ;   inc CF_BUFFER_PTR + 1
-00007Ar 1               ; cf_read_2:
-00007Ar 1               ;   jsr cf_wait
-00007Ar 1               ;   lda CF_DATA
-00007Ar 1               ;   sta (CF_BUFFER_PTR),y
-00007Ar 1               ;   iny
-00007Ar 1               ;   bne cf_read_2
-00007Ar 1               ;   dec CF_BUFFER_PTR + 1
-00007Ar 1               ; cf_read_3:
-00007Ar 1               ;   jsr cf_wait
-00007Ar 1               ;   lda CF_CMD
-00007Ar 1               ;   and #$08
-00007Ar 1               ;   beq cf_read_exit
-00007Ar 1               ;   lda CF_DATA
-00007Ar 1               ;   iny
-00007Ar 1               ;   bne cf_read_3
-00007Ar 1               ; cf_read_exit:
-00007Ar 1               ;   ply
-00007Ar 1               ;   rts
-00007Ar 1               
-00007Ar 1               cf_wait:
-00007Ar 1  AD 07 8C       lda CF_CMD
-00007Dr 1  30 FB          bmi cf_wait
+000003r 1  A9 rr          lda #<CF_BUFFER
+000005r 1  85 rr          sta CF_BUFFER_PTR
+000007r 1  A9 rr          lda #>CF_BUFFER
+000009r 1  85 rr          sta CF_BUFFER_PTR + 1
+00000Br 1               
+00000Br 1  A9 rr          lda #<CF_INFO
+00000Dr 1  85 rr          sta CF_INFO_PTR
+00000Fr 1  A9 rr          lda #>CF_INFO
+000011r 1  85 rr          sta CF_INFO_PTR + 1
+000013r 1               
+000013r 1  20 rr rr       jsr acia_init
+000016r 1               
+000016r 1  20 rr rr       jsr cf_init
+000019r 1  20 rr rr       jsr cf_info
+00001Cr 1               
+00001Cr 1  A2 00          ldx #0
+00001Er 1  20 rr rr       jsr print
+000021r 1               
+000021r 1               loop:
+000021r 1  4C rr rr       jmp loop
+000024r 1               
+000024r 1               cf_init:
+000024r 1  20 rr rr       jsr cf_wait
+000027r 1  A9 04          lda #$04        ; Reset
+000029r 1  8D 07 8C       sta CF_CMD
+00002Cr 1  20 rr rr       jsr cf_wait
+00002Fr 1  A9 00          lda #$00
+000031r 1  8D 04 8C       sta CF_LBA1
+000034r 1  8D 04 8C       sta CF_LBA1
+000037r 1  8D 05 8C       sta CF_LBA2
+00003Ar 1  A9 E0          lda #$E0        ; LBA3=0, Master, Mode=LBA
+00003Cr 1  8D 06 8C       sta CF_LBA3
+00003Fr 1  A9 01          lda #$01        ; 8-bit transfers
+000041r 1  8D 01 8C       sta CF_FEAT
+000044r 1  A9 EF          lda #$EF        ; Set feature
+000046r 1  8D 07 8C       sta CF_CMD
+000049r 1  20 rr rr       jsr cf_wait
+00004Cr 1  20 rr rr       jsr cf_err
+00004Fr 1  60             rts
+000050r 1               
+000050r 1               cf_info:
+000050r 1  A9 EC          lda #$EC        ; Drive ID command
+000052r 1  8D 07 8C       sta CF_CMD
+000055r 1  20 rr rr       jsr cf_wait
+000058r 1  20 rr rr       jsr cf_err
+00005Br 1  A0 00          ldy #0
+00005Dr 1               cf_info_loop:
+00005Dr 1  AD 07 8C       lda CF_CMD
+000060r 1  29 08          and #%00001000  ; DRQ flag
+000062r 1  C9 08          cmp #%00001000
+000064r 1  D0 0F          bne cf_info_exit
+000066r 1  AD 00 8C       lda CF_DATA
+000069r 1  91 rr          sta (CF_INFO_PTR),y
+00006Br 1  C8             iny
+00006Cr 1  20 rr rr       jsr cf_wait
+00006Fr 1  20 rr rr       jsr cf_err
+000072r 1  4C rr rr       jmp cf_info_loop
+000075r 1               cf_info_exit:
+000075r 1  60             rts
+000076r 1               
+000076r 1               cf_wait:
+000076r 1  AD 07 8C       lda CF_STAT
+000079r 1  29 C0          and #%11000000  ; Mask out BSY and RDY flags
+00007Br 1  C9 40          cmp #%01000000
+00007Dr 1  D0 F7          bne cf_wait
+00007Fr 1               cf_wait_exit:
 00007Fr 1  60             rts
 000080r 1               
 000080r 1               cf_err:
 000080r 1  20 rr rr       jsr cf_wait
-000083r 1  AD 07 8C       lda CF_CMD
-000086r 1  29 01          and #$01        ; Mask out error flag
+000083r 1  AD 07 8C       lda CF_STAT
+000086r 1  29 01          and #$01            ; Mask out error flag
 000088r 1  F0 0B          beq cf_no_err
 00008Ar 1  A9 21          lda #'!'
-00008Cr 1  20 rr rr       jsr send_char
-00008Fr 1  AD 01 8C       lda CF_FEAT     ; Error code
-000092r 1  20 rr rr       jsr send_char
+00008Cr 1  20 rr rr       jsr acia_send_char
+00008Fr 1  AD 01 8C       lda CF_ERR          ; Get error code
+000092r 1  20 rr rr       jsr acia_send_char
 000095r 1               cf_no_err:
 000095r 1  60             rts
+000096r 1               
+000096r 1               ; cf_set_sector:
+000096r 1               ;   lda #1           ; Read 1 sector
+000096r 1               ;   sta CF_SECT
+000096r 1               ;   jsr cf_wait
+000096r 1               ;   lda #$20         ; Read sector command
+000096r 1               ;   sta CF_CMD
+000096r 1               ;   jsr cf_wait
+000096r 1               ;   rts
+000096r 1               
+000096r 1               ; cf_read_sector:
+000096r 1               ;   phy
+000096r 1               ;   lda #<CF_BUFFER
+000096r 1               ;   sta CF_BUFFER_PTR
+000096r 1               ;   lda #>CF_BUFFER
+000096r 1               ;   sta CF_BUFFER_PTR + 1
+000096r 1               ;   ldy #0
+000096r 1               ; cf_read_1:
+000096r 1               ;   jsr cf_wait
+000096r 1               ;   lda CF_DATA
+000096r 1               ;   sta (CF_BUFFER_PTR),y
+000096r 1               ;   iny
+000096r 1               ;   bne cf_read_1
+000096r 1               ;   inc CF_BUFFER_PTR + 1
+000096r 1               ; cf_read_2:
+000096r 1               ;   jsr cf_wait
+000096r 1               ;   lda CF_DATA
+000096r 1               ;   sta (CF_BUFFER_PTR),y
+000096r 1               ;   iny
+000096r 1               ;   bne cf_read_2
+000096r 1               ;   dec CF_BUFFER_PTR + 1
+000096r 1               ; cf_read_3:
+000096r 1               ;   jsr cf_wait
+000096r 1               ;   lda CF_CMD
+000096r 1               ;   and #$08
+000096r 1               ;   beq cf_read_exit
+000096r 1               ;   lda CF_DATA
+000096r 1               ;   iny
+000096r 1               ;   bne cf_read_3
+000096r 1               ; cf_read_exit:
+000096r 1               ;   ply
+000096r 1               ;   rts
 000096r 1               
 000096r 1               print:
 000096r 1  BD rr rr       lda success,x
 000099r 1  F0 07          beq print_crlf
-00009Br 1  20 rr rr       jsr send_char
+00009Br 1  20 rr rr       jsr acia_send_char
 00009Er 1  E8             inx
 00009Fr 1  4C rr rr       jmp print
 0000A2r 1               print_crlf:
 0000A2r 1  A9 0D          lda #$0D        ; Carriage Return
-0000A4r 1  20 rr rr       jsr send_char
+0000A4r 1  20 rr rr       jsr acia_send_char
 0000A7r 1  A9 0A          lda #$0A        ; Line feed
-0000A9r 1  20 rr rr       jsr send_char
+0000A9r 1  20 rr rr       jsr acia_send_char
 0000ACr 1  60             rts
 0000ADr 1               
-0000ADr 1               send_char:
-0000ADr 1  8D 00 90       sta ACIA_DATA
-0000B0r 1  48             pha
-0000B1r 1               tx_wait:
-0000B1r 1  AD 01 90       lda ACIA_STATUS
-0000B4r 1  29 10          and #%00010000  ; Check if tx buffer not empty
-0000B6r 1  F0 F9          beq tx_wait     ; Loop if tx buffer not empty
-0000B8r 1  68             pla
-0000B9r 1  60             rts
-0000BAr 1               
-0000BAr 1  53 75 63 63  success:     .asciiz "Success!"
-0000BEr 1  65 73 73 21  
-0000C2r 1  00           
-0000C3r 1               
-0000C3r 1               .segment "VECTORS"
+0000ADr 1               acia_init:
+0000ADr 1  A9 00          lda #$00
+0000AFr 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
+0000B2r 1  A9 1F          lda #%00011111  ; N-8-1, 19200 baud
+0000B4r 1  8D 03 90       sta ACIA_CTRL
+0000B7r 1  A9 0B          lda #%00001011  ; No parity, No echo, No interrupts
+0000B9r 1  8D 02 90       sta ACIA_CMD
+0000BCr 1  60             rts
+0000BDr 1               
+0000BDr 1               acia_send_char:
+0000BDr 1  8D 00 90       sta ACIA_DATA
+0000C0r 1  48             pha
+0000C1r 1               acia_tx_wait:
+0000C1r 1  AD 01 90       lda ACIA_STATUS
+0000C4r 1  29 10          and #%00010000  ; Check if tx buffer not empty
+0000C6r 1  F0 F9          beq acia_tx_wait     ; Loop if tx buffer not empty
+0000C8r 1  68             pla
+0000C9r 1  60             rts
+0000CAr 1               
+0000CAr 1  53 75 63 63  success:     .asciiz "Success!"
+0000CEr 1  65 73 73 21  
+0000D2r 1  00           
+0000D3r 1               
+0000D3r 1               .segment "VECTORS"
 000000r 1               
 000000r 1  rr rr          .word reset
 000002r 1  rr rr          .word reset
