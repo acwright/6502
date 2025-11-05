@@ -48,7 +48,6 @@ reset:
 
   jsr cf_init
   jsr cf_info
-  jsr cf_init_sector
   jsr cf_read_sector
 
   ldx #0
@@ -64,17 +63,12 @@ cf_init:
   jsr cf_wait_rdy
   lda #$00
   sta CF_LBA0
-  jsr cf_wait_bsy
   sta CF_LBA1
-  jsr cf_wait_bsy
   sta CF_LBA2
-  jsr cf_wait_bsy
   lda #$E0                  ; LBA3=0, Master, Mode=LBA
   sta CF_LBA3
-  jsr cf_wait_bsy
   lda #$01                  ; 8-bit transfers
   sta CF_FEAT
-  jsr cf_wait_bsy
   lda #$EF                  ; Set feature
   sta CF_CMD
   jsr cf_wait_rdy
@@ -96,22 +90,18 @@ cf_info_loop:
 cf_info_exit:
   rts
 
-cf_init_sector:
-  jsr cf_wait_rdy
+cf_read_sector:
   lda #1                    ; Read 1 sector
   sta CF_SECT
-  jsr cf_wait_bsy
+  jsr cf_wait_rdy
   lda #$20                  ; Read sector command
   sta CF_CMD
-  jsr cf_wait_rdy
-  jsr cf_err
-  rts
-
-cf_read_sector:
-  ldy #0
-  ldx #2                    ; Read 2 pages (512 bytes)
-cf_read_sector_loop:
   jsr cf_wait_dat
+  jsr cf_err
+
+  ldy #0
+  ldx #2                    ; Read 2 pages (512 bytes) from sector 0
+cf_read_sector_loop:
   lda CF_DATA
   sta (CF_BUFFER_PTR),y
   iny
