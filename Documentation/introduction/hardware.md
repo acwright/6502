@@ -47,6 +47,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
 - **PS2 Helper**: A board that allows connection of a PS/2 keyboard.
+- **VERA Helper**: A board that hosts a VERA module with graphics, sound and SD card.
 
 **Carts**:
 

@@ -14,3 +14,4 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **SND**: Sound Card
 - **ST**: Storage Card
 - **VC**: Video Card / VGA Card
+- **VH**: Vera Helper
