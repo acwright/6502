@@ -1,6 +1,7 @@
 #ifndef _STORAGE_CARD_H
 #define _STORAGE_CARD_H
 
+#include <SD.h>
 #include "IO.h"
 #include "constants.h"
 
@@ -76,11 +77,21 @@
 #define ST_STATUS_RDY     0b01000000
 #define ST_STATUS_BSY     0b10000000
 
+#define ST_STORAGE_SIZE   0x8000000     // 128MB (134217728 bytes)
+#define ST_SECTOR_SIZE    0x200         // 512 bytes
+#define ST_SECTOR_COUNT   0x40000       // 262144 512 byte sectors
+#define ST_IDENTITY_SIZE  0x100         // 256 bytes 
+
+#define ST_STORAGE_FILE_NAME    "Storage.bin"
+#define ST_IDENTITY_FILE_NAME   "Identity.bin"
+
 class StorageCard: public IO {
   private:
     uint8_t buffer[0x200]; // 512 bytes
     uint16_t bufferIndex;
-
+    uint16_t commandDataSize;
+    uint32_t sectorOffset;
+    
     uint8_t error;
     uint8_t feature;
     uint8_t sectorCount;
@@ -90,6 +101,16 @@ class StorageCard: public IO {
     uint8_t lba3;
     uint8_t status;
     uint8_t command;
+
+    bool isIdentifying;
+    bool isTransferring;
+
+    void executeCommand();
+    uint8_t readBuffer();
+    void writeBuffer(uint8_t value);
+    File openStorage(bool isWriting);
+    uint32_t sectorIndex();
+    bool sectorValid();
 
   public:
     StorageCard();

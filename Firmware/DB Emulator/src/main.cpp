@@ -742,6 +742,11 @@ void loadROM(uint index) {
 }
 
 bool loadROMPath(String path) {
+  if (!SD.mediaPresent()) { 
+    Serial.println("SD card not detected!");
+    return false;
+  }
+  
   File file = SD.open(path.c_str());
 
   if (file) {
@@ -844,6 +849,11 @@ void loadCart(uint index) {
 }
 
 bool loadCartPath(String path) {
+  if (!SD.mediaPresent()) { 
+    Serial.println("SD card not detected!");
+    return false;
+  }
+
   File file = SD.open(path.c_str());
 
   if (file) {
