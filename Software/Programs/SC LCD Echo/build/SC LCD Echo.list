@@ -1,0 +1,106 @@
+ca65 V2.18 - N/A
+Main file   : ./src/SC LCD Echo.asm
+Current file: ./src/SC LCD Echo.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               PORTB       = $8000
+000000r 1               PORTA       = $8001
+000000r 1               DDRB        = $8002
+000000r 1               DDRA        = $8003
+000000r 1               
+000000r 1               E           = %10000000
+000000r 1               RW          = %01000000
+000000r 1               RS          = %00100000
+000000r 1               
+000000r 1               ACIA_DATA   = $9000
+000000r 1               ACIA_STATUS = $9001
+000000r 1               ACIA_CMD    = $9002
+000000r 1               ACIA_CTRL   = $9003
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1  A9 FF          lda #%11111111 ; Set all pins on port B to output
+000005r 1  8D 02 80       sta DDRB
+000008r 1  A9 E0          lda #%11100000 ; Set top 3 pins on port A to output
+00000Ar 1  8D 03 80       sta DDRA
+00000Dr 1               
+00000Dr 1  A9 38          lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
+00000Fr 1  20 rr rr       jsr lcd_instruction
+000012r 1  A9 0E          lda #%00001110 ; Display on; cursor on; blink off
+000014r 1  20 rr rr       jsr lcd_instruction
+000017r 1  A9 06          lda #%00000110 ; Increment and shift cursor; don't shift display
+000019r 1  20 rr rr       jsr lcd_instruction
+00001Cr 1  A9 01          lda #$00000001 ; Clear display
+00001Er 1  20 rr rr       jsr lcd_instruction
+000021r 1               
+000021r 1  A9 00          lda #$00
+000023r 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
+000026r 1               
+000026r 1  A9 1F          lda #%00011111  ; N-8-1, 19200 baud
+000028r 1  8D 03 90       sta ACIA_CTRL
+00002Br 1               
+00002Br 1  A9 1B          lda #%00011011  ; No parity, No echo, No interrupts
+00002Dr 1  8D 02 90       sta ACIA_CMD
+000030r 1               
+000030r 1               rx_wait:
+000030r 1  AD 01 90       lda ACIA_STATUS
+000033r 1  29 08          and #%00001000  ; Check if receiver data register full
+000035r 1  F0 F9          beq rx_wait
+000037r 1               
+000037r 1  AD 00 90       lda ACIA_DATA
+00003Ar 1  20 rr rr       jsr print_char
+00003Dr 1  4C rr rr       jmp rx_wait
+000040r 1               
+000040r 1               lcd_wait:
+000040r 1  48             pha
+000041r 1  A9 00          lda #%00000000  ; Port B is input
+000043r 1  8D 02 80       sta DDRB
+000046r 1               lcd_busy:
+000046r 1  A9 40          lda #RW
+000048r 1  8D 01 80       sta PORTA
+00004Br 1  A9 C0          lda #(RW | E)
+00004Dr 1  8D 01 80       sta PORTA
+000050r 1  AD 00 80       lda PORTB
+000053r 1  29 80          and #%10000000
+000055r 1  D0 EF          bne lcd_busy
+000057r 1               
+000057r 1  A9 40          lda #RW
+000059r 1  8D 01 80       sta PORTA
+00005Cr 1  A9 FF          lda #%11111111  ; Port B is output
+00005Er 1  8D 02 80       sta DDRB
+000061r 1  68             pla
+000062r 1  60             rts
+000063r 1               
+000063r 1               lcd_instruction:
+000063r 1  20 rr rr       jsr lcd_wait
+000066r 1  8D 00 80       sta PORTB
+000069r 1  A9 00          lda #0         ; Clear RS/RW/E bits
+00006Br 1  8D 01 80       sta PORTA
+00006Er 1  A9 80          lda #E         ; Set E bit to send instruction
+000070r 1  8D 01 80       sta PORTA
+000073r 1  A9 00          lda #0         ; Clear RS/RW/E bits
+000075r 1  8D 01 80       sta PORTA
+000078r 1  60             rts
+000079r 1               
+000079r 1               print_char:
+000079r 1  20 rr rr       jsr lcd_wait
+00007Cr 1  8D 00 80       sta PORTB
+00007Fr 1  A9 20          lda #RS         ; Set RS; Clear RW/E bits
+000081r 1  8D 01 80       sta PORTA
+000084r 1  A9 A0          lda #(RS | E)   ; Set E bit to send instruction
+000086r 1  8D 01 80       sta PORTA
+000089r 1  A9 20          lda #RS         ; Clear E bits
+00008Br 1  8D 01 80       sta PORTA
+00008Er 1  60             rts
+00008Fr 1               
+00008Fr 1               

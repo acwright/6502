@@ -1,0 +1,164 @@
+ca65 V2.18 - N/A
+Main file   : ./src/LCD Hex2Dec.asm
+Current file: ./src/LCD Hex2Dec.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               PORTB   = $8000
+000000r 1               PORTA   = $8001
+000000r 1               DDRB    = $8002
+000000r 1               DDRA    = $8003
+000000r 1               
+000000r 1               VALUE   = $0200
+000000r 1               MOD10   = $0202
+000000r 1               RESULT  = $0204
+000000r 1               
+000000r 1               E       = %10000000
+000000r 1               RW      = %01000000
+000000r 1               RS      = %00100000
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1  A9 FF          lda #%11111111 ; Set all pins on port B to output
+000005r 1  8D 02 80       sta DDRB
+000008r 1  A9 E0          lda #%11100000 ; Set top 3 pins on port A to output
+00000Ar 1  8D 03 80       sta DDRA
+00000Dr 1               
+00000Dr 1  A9 38          lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
+00000Fr 1  20 rr rr       jsr lcd_instruction
+000012r 1  A9 0E          lda #%00001110 ; Display on; cursor on; blink off
+000014r 1  20 rr rr       jsr lcd_instruction
+000017r 1  A9 06          lda #%00000110 ; Increment and shift cursor; don't shift display
+000019r 1  20 rr rr       jsr lcd_instruction
+00001Cr 1               
+00001Cr 1               clear:
+00001Cr 1  A9 01          lda #$00000001 ; Clear display
+00001Er 1  20 rr rr       jsr lcd_instruction
+000021r 1               
+000021r 1               main:
+000021r 1  A9 00          lda #0
+000023r 1  8D 04 02       sta RESULT        ; Intialize the result
+000026r 1               
+000026r 1  AD rr rr       lda number        ; Initialize the number
+000029r 1  8D 00 02       sta VALUE
+00002Cr 1  AD rr rr       lda number + 1
+00002Fr 1  8D 01 02       sta VALUE + 1
+000032r 1               
+000032r 1               divide:
+000032r 1  A9 00          lda #0            ; Initialize the remainder to zero
+000034r 1  8D 02 02       sta MOD10
+000037r 1  8D 03 02       sta MOD10 + 1
+00003Ar 1  18             clc
+00003Br 1               
+00003Br 1  A2 10          ldx #16
+00003Dr 1               loop:
+00003Dr 1  2E 00 02       rol VALUE         ; Rotate quotient and remainder
+000040r 1  2E 01 02       rol VALUE + 1
+000043r 1  2E 02 02       rol MOD10
+000046r 1  2E 03 02       rol MOD10 + 1
+000049r 1               
+000049r 1  38             sec               ; A,Y = dividend - divisor
+00004Ar 1  AD 02 02       lda MOD10
+00004Dr 1  E9 0A          sbc #10
+00004Fr 1  A8             tay               ; Save low byte in Y
+000050r 1  AD 03 02       lda MOD10 + 1
+000053r 1  E9 00          sbc #0
+000055r 1  90 06          bcc ignore_result ; Branch if dividend < divisor
+000057r 1  8C 02 02       sty MOD10
+00005Ar 1  8D 03 02       sta MOD10 + 1
+00005Dr 1               
+00005Dr 1               ignore_result:
+00005Dr 1  CA             dex
+00005Er 1  D0 DD          bne loop
+000060r 1  2E 00 02       rol VALUE
+000063r 1  2E 01 02       rol VALUE + 1
+000066r 1               
+000066r 1  AD 02 02       lda MOD10
+000069r 1  18             clc
+00006Ar 1  69 30          adc #48           ; ASCII "0"
+00006Cr 1  20 rr rr       jsr push_char
+00006Fr 1               
+00006Fr 1  AD 00 02       lda VALUE         ; If value != 0, then continue dividing
+000072r 1  0D 01 02       ora VALUE + 1
+000075r 1  D0 BB          bne divide        ; Branch if value != 0
+000077r 1               
+000077r 1  A2 00          ldx #0
+000079r 1               print:
+000079r 1  BD 04 02       lda RESULT,x
+00007Cr 1  F0 07          beq halt
+00007Er 1  20 rr rr       jsr print_char
+000081r 1  E8             inx
+000082r 1  4C rr rr       jmp print
+000085r 1               
+000085r 1               halt:
+000085r 1  4C rr rr       jmp halt
+000088r 1               
+000088r 1  C1 06        number: .word 1729
+00008Ar 1               
+00008Ar 1               push_char:
+00008Ar 1  48             pha               ; Push new first char onto stack
+00008Br 1  A0 00          ldy #0
+00008Dr 1               char_loop:
+00008Dr 1  B9 04 02       lda RESULT,y      ; Get char on string and put in X
+000090r 1  AA             tax
+000091r 1  68             pla
+000092r 1  99 04 02       sta RESULT,y      ; Pull char off stack and add it to the string
+000095r 1  C8             iny
+000096r 1  8A             txa
+000097r 1  48             pha               ; Push char from string onto stack
+000098r 1  D0 F3          bne char_loop
+00009Ar 1  68             pla
+00009Br 1  99 04 02       sta RESULT,y      ; Pull the null off the stack and add to the end of the string
+00009Er 1  60             rts
+00009Fr 1               
+00009Fr 1               lcd_wait:
+00009Fr 1  48             pha
+0000A0r 1  A9 00          lda #%00000000  ; Port B is input
+0000A2r 1  8D 02 80       sta DDRB
+0000A5r 1               lcd_busy:
+0000A5r 1  A9 40          lda #RW
+0000A7r 1  8D 01 80       sta PORTA
+0000AAr 1  A9 C0          lda #(RW | E)
+0000ACr 1  8D 01 80       sta PORTA
+0000AFr 1  AD 00 80       lda PORTB
+0000B2r 1  29 80          and #%10000000
+0000B4r 1  D0 EF          bne lcd_busy
+0000B6r 1               
+0000B6r 1  A9 40          lda #RW
+0000B8r 1  8D 01 80       sta PORTA
+0000BBr 1  A9 FF          lda #%11111111  ; Port B is output
+0000BDr 1  8D 02 80       sta DDRB
+0000C0r 1  68             pla
+0000C1r 1  60             rts
+0000C2r 1               
+0000C2r 1               lcd_instruction:
+0000C2r 1  20 rr rr       jsr lcd_wait
+0000C5r 1  8D 00 80       sta PORTB
+0000C8r 1  A9 00          lda #0         ; Clear RS/RW/E bits
+0000CAr 1  8D 01 80       sta PORTA
+0000CDr 1  A9 80          lda #E         ; Set E bit to send instruction
+0000CFr 1  8D 01 80       sta PORTA
+0000D2r 1  A9 00          lda #0         ; Clear RS/RW/E bits
+0000D4r 1  8D 01 80       sta PORTA
+0000D7r 1  60             rts
+0000D8r 1               
+0000D8r 1               print_char:
+0000D8r 1  20 rr rr       jsr lcd_wait
+0000DBr 1  8D 00 80       sta PORTB
+0000DEr 1  A9 20          lda #RS         ; Set RS; Clear RW/E bits
+0000E0r 1  8D 01 80       sta PORTA
+0000E3r 1  A9 A0          lda #(RS | E)   ; Set E bit to send instruction
+0000E5r 1  8D 01 80       sta PORTA
+0000E8r 1  A9 20          lda #RS         ; Clear E bits
+0000EAr 1  8D 01 80       sta PORTA
+0000EDr 1  60             rts
+0000EDr 1               
