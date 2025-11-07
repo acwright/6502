@@ -1,0 +1,167 @@
+ca65 V2.18 - N/A
+Main file   : ./src/IB SNES Transmit.asm
+Current file: ./src/IB SNES Transmit.asm
+
+000000r 1               ; SNES CONTROLLERS
+000000r 1               ; byte 0:      | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+000000r 1               ;              | B | Y |SEL|STA|UP |DN |LT |RT |
+000000r 1               ;
+000000r 1               ; byte 1:      | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+000000r 1               ;              | A | X | L | R | 1 | 1 | 1 | 1 |
+000000r 1               ; byte 2:
+000000r 1               ;         $00 = controller present
+000000r 1               ;         $FF = controller not present
+000000r 1               
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1  xx xx xx     SNES1:    .res 3
+000003r 1  xx xx xx     SNES2:    .res 3
+000006r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               VIA_PORTB  = $9400
+000000r 1               VIA_PORTA  = $9401
+000000r 1               VIA_DDRB   = $9402
+000000r 1               VIA_DDRA   = $9403
+000000r 1               VIA_T1L    = $9404
+000000r 1               VIA_T1H    = $9405
+000000r 1               VIA_ACR    = $940B
+000000r 1               VIA_IFR    = $940D
+000000r 1               VIA_IER    = $940E
+000000r 1               
+000000r 1               ACIA_DATA   = $9000
+000000r 1               ACIA_STATUS = $9001
+000000r 1               ACIA_CMD    = $9002
+000000r 1               ACIA_CTRL   = $9003
+000000r 1               
+000000r 1               SNES_CLOCK = %00000001  ; PB0 CLOCK (both controllers)
+000000r 1               SNES_LATCH = %00000010  ; PB1 LATCH (both controllers)
+000000r 1               SNES_DATA1 = %00000100  ; PB2 DATA  (controller #1)
+000000r 1               SNES_DATA2 = %00001000  ; PB3 DATA  (controller #2)
+000000r 1               
+000000r 1               reset:
+000000r 1  78             sei            ; Disable interrupts
+000001r 1  A2 FF          ldx #$ff
+000003r 1  9A             txs
+000004r 1               
+000004r 1  A9 00          lda #$00
+000006r 1  85 rr          sta SNES1
+000008r 1  85 rr          sta SNES1+1
+00000Ar 1  85 rr          sta SNES1+2
+00000Cr 1  85 rr          sta SNES2
+00000Er 1  85 rr          sta SNES2+1
+000010r 1  85 rr          sta SNES2+2
+000012r 1               
+000012r 1  8D 03 94       sta VIA_DDRA   ; Set VIA A as input
+000015r 1               
+000015r 1  A9 F3          lda #$FF-SNES_DATA1-SNES_DATA2
+000017r 1  8D 02 94       sta VIA_DDRB   ; Set VIA B as output with PB2 and PB3 as input
+00001Ar 1               
+00001Ar 1  A9 C0          lda #%11000000
+00001Cr 1  8D 0B 94       sta VIA_ACR    ; Enable Timer1 continuous interrupts
+00001Fr 1  8D 0E 94       sta VIA_IER    ; Enable Timer1 IRQ
+000022r 1               
+000022r 1  A9 FF          lda #$FF         ; 15.26 Hz, slowest we can go
+000024r 1  8D 05 94       sta VIA_T1H      ; Load high byte of countdown value
+000027r 1  8D 04 94       sta VIA_T1L      ; Load low byte of countdown value
+00002Ar 1               
+00002Ar 1  A9 00          lda #$00
+00002Cr 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
+00002Fr 1  A9 10          lda #%00010000  ; N-8-1, 115200 baud
+000031r 1  8D 03 90       sta ACIA_CTRL
+000034r 1  A9 0B          lda #%00001011  ; No parity, No echo, No interrupts
+000036r 1  8D 02 90       sta ACIA_CMD
+000039r 1               
+000039r 1  58             cli            ; Enable interrupts
+00003Ar 1               
+00003Ar 1               loop:
+00003Ar 1  4C rr rr       jmp loop          ; Infinite loop
+00003Dr 1               
+00003Dr 1               snes_read:
+00003Dr 1                 ; Clear VIA PORTB
+00003Dr 1  A9 00        	lda #$00
+00003Fr 1  8D 00 94     	sta VIA_PORTB
+000042r 1               
+000042r 1               	; Pulse latch
+000042r 1  A9 02        	lda #SNES_LATCH
+000044r 1  8D 00 94     	sta VIA_PORTB
+000047r 1  A9 00        	lda #$00
+000049r 1  8D 00 94     	sta VIA_PORTB
+00004Cr 1               
+00004Cr 1               	; Read 3x 8 bits
+00004Cr 1  A2 00        	ldx #$00
+00004Er 1               snes_read_l2:
+00004Er 1  A0 08          ldy #$08
+000050r 1               snes_read_l1:
+000050r 1  AD 00 94       lda VIA_PORTB
+000053r 1  C9 08        	cmp #SNES_DATA2
+000055r 1  36 rr        	rol SNES2,x
+000057r 1  29 04        	and #SNES_DATA1
+000059r 1  C9 04        	cmp #SNES_DATA1
+00005Br 1  36 rr        	rol SNES1,x
+00005Dr 1  A9 01        	lda #SNES_CLOCK
+00005Fr 1  8D 00 94     	sta VIA_PORTB
+000062r 1  A9 00        	lda #$00
+000064r 1  8D 00 94     	sta VIA_PORTB
+000067r 1  88           	dey
+000068r 1  D0 E6        	bne snes_read_l1
+00006Ar 1  E8           	inx
+00006Br 1  E0 03        	cpx #$03
+00006Dr 1  D0 DF        	bne snes_read_l2
+00006Fr 1  60           	rts
+000070r 1               
+000070r 1               snes_send:
+000070r 1                 ; Read 3x 8 bits at SNES1
+000070r 1  A2 00        	ldx #$00
+000072r 1               snes1_send:
+000072r 1  B5 rr          lda SNES1,x
+000074r 1  20 rr rr       jsr send_char
+000077r 1  E8             inx
+000078r 1  E0 03        	cpx #$03
+00007Ar 1  D0 F6        	bne snes1_send
+00007Cr 1               
+00007Cr 1                 ; Read 3x 8 bits at SNES2
+00007Cr 1  A2 00        	ldx #$00
+00007Er 1               snes2_send:
+00007Er 1  B5 rr          lda SNES2,x
+000080r 1  20 rr rr       jsr send_char
+000083r 1  E8             inx
+000084r 1  E0 03        	cpx #$03
+000086r 1  D0 F6        	bne snes2_send
+000088r 1  60             rts
+000089r 1               
+000089r 1               ; Transmit a byte using the ACIA
+000089r 1               ; Modifies: flags
+000089r 1               send_char:
+000089r 1  8D 00 90       sta ACIA_DATA
+00008Cr 1  48             pha
+00008Dr 1               tx_wait:
+00008Dr 1  AD 01 90       lda ACIA_STATUS
+000090r 1  29 10          and #%00010000  ; Check if tx buffer not empty
+000092r 1  F0 F9          beq tx_wait     ; Loop if tx buffer not empty
+000094r 1  68             pla
+000095r 1  60             rts
+000096r 1               
+000096r 1               nmi:
+000096r 1               irq:
+000096r 1  AD 0D 94       lda VIA_IFR
+000099r 1  29 40          and #%01000000    ; Check if Timer1 caused the interrupt
+00009Br 1  F0 0B          beq irq_exit      ; If not, exit
+00009Dr 1  AD 04 94       lda VIA_T1L
+0000A0r 1  78             sei               ; Disable interrupts while we read and send data
+0000A1r 1  20 rr rr       jsr snes_read
+0000A4r 1  20 rr rr       jsr snes_send
+0000A7r 1  58             cli               ; Re-enable interrupts
+0000A8r 1               irq_exit:
+0000A8r 1  40             rti
+0000A9r 1               
+0000A9r 1               .segment "VECTORS"
+000000r 1               
+000000r 1  rr rr        .word   nmi          ; NMI vector
+000002r 1  rr rr        .word   reset        ; RESET vector
+000004r 1  rr rr        .word   irq          ; IRQ vector
+000004r 1               
