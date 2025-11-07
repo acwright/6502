@@ -129,8 +129,19 @@ void StorageCard::executeCommand() {
   }
 
   switch (this->command) {
-    case 0xC0: // Erase sector
-      break;
+    case 0xC0: { // Erase sector
+        File file = SD.open(ST_STORAGE_FILE_NAME, FILE_WRITE);
+
+        if (file) {
+          file.seek(this->sectorIndex() * 512);
+          for (int i = 0; i < ST_SECTOR_SIZE; i++) {
+            file.write(0x00);
+          }
+          file.close();
+        }
+
+        break;
+      }
     case 0xEC: { // Identify drive
         File identity = SD.open(ST_IDENTITY_FILE_NAME);
 
