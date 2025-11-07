@@ -40,6 +40,8 @@
 #define CART_START      0x8000
 #define CART_CODE       0xC000
 #define CART_END        0xFFFF
+#define PROG_START      0x0800
+#define PROG_END        0x7FFF
 
 #define FREQS           (String[21])  { "1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz" }
 #define FREQ_PERIODS    (double[21])  { 1000000, 500000, 250000, 125000, 62500, 31250, 15625, 7812, 3906, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1 } // Full cycle period in microseconds
@@ -69,10 +71,12 @@
 
 #define ROM_MAX         256
 #define CART_MAX        256
+#define PROG_MAX        256
 
 #define INPUT_CTX_ROM   0
 #define INPUT_CTX_CART  1
-#define INPUT_CTX_IO    2
+#define INPUT_CTX_PROG  2
+#define INPUT_CTX_IO    3
 
 #define RC_BLOCK_SIZE   0x400
 #ifdef MEM_EXTMEM

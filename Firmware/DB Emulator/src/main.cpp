@@ -54,6 +54,10 @@ bool readCarts();
 void listCarts();
 void loadCart(uint index);
 bool loadCartPath(String path);
+bool readPrograms();
+void listPrograms();
+void loadProgram(uint index);
+bool loadProgramPath(String path);
 void listIO();
 void configureIO(uint index);
 void prevPage();
@@ -92,9 +96,11 @@ bool nmib = HIGH;
 
 String ROMs[ROM_MAX];
 uint romPage = 0;
-
 String Carts[CART_MAX];
 uint cartPage = 0;
+String Programs[PROG_MAX];
+uint programPage = 0;
+String programFile = "None";
 
 CPU cpu = CPU(read, write);
 RTC rtc = RTC();
@@ -226,41 +232,9 @@ void onCommand(char command) {
     case '7':
       onNumeric(7);
       break;
-    case 'r':
-    case 'R':
-      toggleRunStop();
-      break;
-    case 's':
-    case 'S':
-      step();
-      break;
-    case 't':
-    case 'T':
-      reset();
-      break;
-    case 'p':
-    case 'P':
-      snapshot();
-      break;
-    case 'i':
-    case 'I':
-      listIO();
-      break;
-    case 'l':
-    case 'L':
-      toggleCart();
-      break;
     case 'a':
     case 'A':
       toggleRAM();
-      break;
-    case 'o':
-    case 'O':
-      toggleROM();
-      break;
-    case 'm':
-    case 'M':
-      listROMs();
       break;
     case 'c':
     case 'C':
@@ -273,6 +247,42 @@ void onCommand(char command) {
     case 'g':
     case 'G':
       log();
+      break;
+    case 'i':
+    case 'I':
+      listIO();
+      break;
+    case 'l':
+    case 'L':
+      toggleCart();
+      break;
+    case 'm':
+    case 'M':
+      listROMs();
+      break;
+    case 'o':
+    case 'O':
+      toggleROM();
+      break;
+    case 'p':
+    case 'P':
+      snapshot();
+      break;
+    case 'r':
+    case 'R':
+      toggleRunStop();
+      break;
+    case 's':
+    case 'S':
+      step();
+      break;
+    case 't':
+    case 'T':
+      reset();
+      break;
+    case 'u':
+    case 'U':
+      listPrograms();
       break;
     case '-':
       decreaseFrequency();
@@ -297,6 +307,9 @@ void onNumeric(uint8_t num) {
       break;
     case INPUT_CTX_CART:
       loadCart(num);
+      break;
+    case INPUT_CTX_PROG:
+      loadProgram(num);
       break;
     case INPUT_CTX_IO:
       configureIO(num);
@@ -487,16 +500,19 @@ void info() {
   Serial.println("---------------------------------");
   Serial.println();
   Serial.print("RAM: ");
-  Serial.println(ram.enabled ? "Enabled" : "Disabled");
-  Serial.print("ROM: ");
-  Serial.print(rom.enabled ? "Enabled" : "Disabled");
+  Serial.print(programFile);
   Serial.print(" (");
+  Serial.print(ram.enabled ? "Enabled" : "Disabled");
+  Serial.println(")");
+  Serial.print("ROM: ");
   Serial.print(rom.file);
+  Serial.print(" (");
+  Serial.print(rom.enabled ? "Enabled" : "Disabled");
   Serial.println(")");
   Serial.print("Cart: ");
-  Serial.print(cart.enabled ? "Enabled" : "Disabled");
-  Serial.print(" (");
   Serial.print(cart.file);
+  Serial.print(" (");
+  Serial.print(cart.enabled ? "Enabled" : "Disabled");
   Serial.println(")");
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
@@ -508,7 +524,7 @@ void info() {
   Serial.println("--------------------------------------------------------------");
   Serial.println("| Toggle R(A)M          | Toggle R(O)M     | Toggle Cart (L) |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| List RO(M)s / (C)arts |                  | Configure (I)O  |");
+  Serial.println("| List RO(M)s / (C)arts / (U)ser Programs  | Configure (I)O  |");
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (+/-) Clk Frequency   | Sna(P)shot       | In(F)o / Lo(G)  |");
   Serial.println("--------------------------------------------------------------");
@@ -878,6 +894,112 @@ bool loadCartPath(String path) {
   }
 }
 
+bool readPrograms() {
+  if (!SD.mediaPresent()) { 
+    Serial.println("SD card not detected!");
+    return false;
+  }
+
+  if (!SD.exists("Programs")) {
+    SD.mkdir("Programs");
+  }
+
+  for (uint i = 0; i < PROG_MAX; i++) {
+    Programs[i] = "?";
+  }
+
+  File ProgramDirectory = SD.open("Programs");
+
+  uint index = 0;
+
+  while(true) {
+    File file = ProgramDirectory.openNextFile();
+
+    if (file) {
+      String filename = String(file.name());
+      if (!filename.startsWith(".")) {
+        Programs[index] = filename;
+        index++;
+      }
+      file.close();
+    } else {
+      ProgramDirectory.close();
+      break;
+    }
+  }
+
+  return true;
+}
+
+void listPrograms() {
+  if (!readPrograms()) { return; }
+
+  inputCtx = INPUT_CTX_PROG;
+
+  Serial.println();
+
+  for (uint j = (programPage * 8); j < ((programPage * 8) + 8); j++) {
+    Serial.print("(");
+    Serial.print(j - (programPage * 8));
+    Serial.print(")");
+    Serial.print(" - ");
+    Serial.println(Programs[j]);
+  }
+
+  Serial.println();
+  Serial.print("Page: ");
+  Serial.print(programPage);
+  Serial.println(" | ([) Prev Page | Next Page (]) |");
+  Serial.println();
+}
+
+void loadProgram(uint index) {
+  String directory = "Programs/";
+  String filename = Programs[(programPage * 8) + index];
+
+  if (!filename.length()) { 
+    Serial.println("Invalid Programs! List (U)ser Programs before loading.");
+    return;
+  }
+
+  String path = directory + filename;
+
+  if (loadProgramPath(path)) {
+    programFile = filename;
+
+    Serial.print("Loaded Program: ");
+    Serial.println(cart.file);
+  } else {
+    Serial.println("Invalid PProgram!");
+  }
+}
+
+bool loadProgramPath(String path) {
+  if (!SD.mediaPresent()) { 
+    Serial.println("SD card not detected!");
+    return false;
+  }
+
+  File file = SD.open(path.c_str());
+
+  if (file) {
+    uint i = 0;
+
+    while(file.available()) {
+      ram.load(i, file.read());
+      i++;
+    }
+
+    file.close();
+
+    return true;
+  } else {
+    file.close();
+
+    return false;
+  }
+}
+
 void listIO() {
   inputCtx = INPUT_CTX_IO;
 
@@ -984,6 +1106,14 @@ void prevPage() {
       }
       listCarts();
       break;
+    case INPUT_CTX_PROG:
+      if (programPage > 0)  {
+        programPage--;
+      } else {
+        programPage = 31;
+      }
+      listPrograms();
+      break;
     default:
       break;
   }
@@ -1006,6 +1136,14 @@ void nextPage() {
         cartPage = 0;
       }
       listCarts();
+      break;
+    case INPUT_CTX_PROG:
+      if (programPage < 31) {
+        programPage++;
+      } else {
+        programPage = 0;
+      }
+      listPrograms();
       break;
     default:
       break;

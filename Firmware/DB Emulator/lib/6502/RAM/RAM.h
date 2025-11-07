@@ -16,6 +16,7 @@ class RAM {
 
     uint8_t read(uint16_t index);
     void write(uint16_t index, uint8_t value);
+    void load(uint16_t index, uint8_t value);
 };
 
 #endif
