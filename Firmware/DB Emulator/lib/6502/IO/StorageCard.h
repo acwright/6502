@@ -108,9 +108,10 @@ class StorageCard: public IO {
     void executeCommand();
     uint8_t readBuffer();
     void writeBuffer(uint8_t value);
-    File openStorage(bool isWriting);
+    File openFile(const char *path, bool isWriting);
     uint32_t sectorIndex();
     bool sectorValid();
+    void generateIdentity(uint8_t *identity);
 
   public:
     StorageCard();

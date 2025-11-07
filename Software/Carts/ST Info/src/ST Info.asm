@@ -78,15 +78,21 @@ cf_init:
 cf_info:
   lda #$EC                  ; Drive ID command
   sta CF_CMD
-  jsr cf_wait_rdy
-  jsr cf_err
-  ldy #0
-cf_info_loop:
   jsr cf_wait_dat
+  jsr cf_err
+  
+  ldy #0
+  ldx #2                    ; Read 2 pages (512 bytes)
+cf_info_loop:
   lda CF_DATA
   sta (CF_INFO_PTR),y
   iny
   bne cf_info_loop
+  inc CF_INFO_PTR + 1       ; Increment high byte of pointer
+  dex
+  bne cf_info_loop
+  dec CF_INFO_PTR + 1       ; Restore original pointer
+  dec CF_INFO_PTR + 1
 cf_info_exit:
   rts
 
