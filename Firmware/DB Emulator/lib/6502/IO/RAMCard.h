@@ -4,6 +4,13 @@
 #include "IO.h"
 #include "constants.h"
 
+#define RC_BLOCK_SIZE   0x400
+#ifdef MEM_EXTMEM
+#define RC_BLOCK_COUNT  0x100
+#else
+#define RC_BLOCK_COUNT  0x10
+#endif
+
 class RAMCard: public IO {
   private:
     #ifdef MEM_EXTMEM

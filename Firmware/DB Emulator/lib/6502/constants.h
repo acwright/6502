@@ -78,11 +78,4 @@
 #define INPUT_CTX_PROG  2
 #define INPUT_CTX_IO    3
 
-#define RC_BLOCK_SIZE   0x400
-#ifdef MEM_EXTMEM
-#define RC_BLOCK_COUNT  0x100
-#else
-#define RC_BLOCK_COUNT  0x10
-#endif
-
 #endif
