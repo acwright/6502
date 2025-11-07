@@ -71,7 +71,7 @@ Current file: ./src/IB SNES Transmit.asm
 00002Ar 1               
 00002Ar 1  A9 00          lda #$00
 00002Cr 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
-00002Fr 1  A9 1F          lda #%00011111  ; N-8-1, 19200 baud
+00002Fr 1  A9 10          lda #%00010000  ; N-8-1, 115200 baud
 000031r 1  8D 03 90       sta ACIA_CTRL
 000034r 1  A9 0B          lda #%00001011  ; No parity, No echo, No interrupts
 000036r 1  8D 02 90       sta ACIA_CMD

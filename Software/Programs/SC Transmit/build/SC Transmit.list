@@ -23,7 +23,7 @@ Current file: ./src/SC Transmit.asm
 000003r 1  A9 00          lda #$00
 000005r 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
 000008r 1               
-000008r 1  A9 1F          lda #%00011111  ; N-8-1, 19200 baud
+000008r 1  A9 10          lda #%00010000  ; N-8-1, 115200 baud
 00000Ar 1  8D 03 90       sta ACIA_CTRL
 00000Dr 1               
 00000Dr 1  A9 0B          lda #%00001011  ; No parity, No echo, No interrupts

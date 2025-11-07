@@ -46,7 +46,7 @@ Current file: ./src/SC LCD Echo.asm
 000021r 1  A9 00          lda #$00
 000023r 1  8D 01 90       sta ACIA_STATUS ; Soft reset (value not important)
 000026r 1               
-000026r 1  A9 1F          lda #%00011111  ; N-8-1, 19200 baud
+000026r 1  A9 10          lda #%00010000  ; N-8-1, 115200 baud
 000028r 1  8D 03 90       sta ACIA_CTRL
 00002Br 1               
 00002Br 1  A9 1B          lda #%00011011  ; No parity, No echo, No interrupts

@@ -19,7 +19,7 @@ reset:
   lda #$00
   sta ACIA_STATUS ; Soft reset (value not important)
 
-  lda #%00011111  ; N-8-1, 19200 baud
+  lda #%00010000  ; N-8-1, 115200 baud
   sta ACIA_CTRL
 
   lda #%00001011  ; No parity, No echo, No interrupts
