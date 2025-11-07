@@ -3,10 +3,11 @@
 .segment "ZEROPAGE"
 READ_PTR:     .res 1
 WRITE_PTR:    .res 1
-
+.segment "STACK"
 .segment "INPUT_BUFFER"
 INPUT_BUFFER: .res $100
-
+.segment "KERNAL_VARS"
+.segment "USER_VARS"
 .segment "CODE"
 
 VIA_PORTB  = $9400

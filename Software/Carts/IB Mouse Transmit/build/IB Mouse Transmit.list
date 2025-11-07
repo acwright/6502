@@ -7,13 +7,14 @@ Current file: ./src/IB Mouse Transmit.asm
 000000r 1               .segment "ZEROPAGE"
 000000r 1  xx           READ_PTR:     .res 1
 000001r 1  xx           WRITE_PTR:    .res 1
-000002r 1               
-000002r 1               .segment "INPUT_BUFFER"
+000002r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
 000000r 1  xx xx xx xx  INPUT_BUFFER: .res $100
 000004r 1  xx xx xx xx  
 000008r 1  xx xx xx xx  
-000100r 1               
-000100r 1               .segment "CODE"
+000100r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
 000000r 1               
 000000r 1               VIA_PORTB  = $9400
 000000r 1               VIA_PORTA  = $9401

@@ -17,8 +17,11 @@ Current file: ./src/IB SNES Transmit.asm
 000000r 1               .segment "ZEROPAGE"
 000000r 1  xx xx xx     SNES1:    .res 3
 000003r 1  xx xx xx     SNES2:    .res 3
-000006r 1               
-000006r 1               .segment "CODE"
+000006r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
 000000r 1               
 000000r 1               VIA_PORTB  = $9400
 000000r 1               VIA_PORTA  = $9401

@@ -3,15 +3,12 @@
 .segment "ZEROPAGE"
 CF_INFO_PTR:  .res 2
 CF_BUFFER_PTR:  .res 2
-
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
-
 .segment "USER_VARS"
 CF_INFO:        .res 256
 CF_BUFFER:      .res 512
-
 .segment "CODE"
 
 CF_DATA     = $8C00   ; Data port

@@ -13,7 +13,10 @@
 .segment "ZEROPAGE"
 SNES1:    .res 3
 SNES2:    .res 3
-
+.segment "STACK"
+.segment "INPUT_BUFFER"
+.segment "KERNAL_VARS"
+.segment "USER_VARS"
 .segment "CODE"
 
 VIA_PORTB  = $9400
