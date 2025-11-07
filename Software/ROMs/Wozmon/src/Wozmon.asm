@@ -24,7 +24,7 @@ ACIA_CMD    = $9002
 ACIA_CTRL   = $9003
 
 RESET:
-  lda     #$1F           ; 8-N-1, 19200 baud.
+  lda     #$10           ; 8-N-1, 115200 baud.
   sta     ACIA_CTRL
   ldy     #$8B           ; No parity, no echo, no interrupts.
   sty     ACIA_CMD

@@ -28,7 +28,7 @@ Current file: ./src/Wozmon.asm
 000000r 1               ACIA_CTRL   = $9003
 000000r 1               
 000000r 1               RESET:
-000000r 1  A9 1F          lda     #$1F           ; 8-N-1, 19200 baud.
+000000r 1  A9 10          lda     #$10           ; 8-N-1, 115200 baud.
 000002r 1  8D 03 90       sta     ACIA_CTRL
 000005r 1  A0 8B          ldy     #$8B           ; No parity, no echo, no interrupts.
 000007r 1  8C 02 90       sty     ACIA_CMD
