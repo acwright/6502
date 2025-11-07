@@ -108,7 +108,6 @@ class StorageCard: public IO {
     void executeCommand();
     uint8_t readBuffer();
     void writeBuffer(uint8_t value);
-    File openFile(const char *path, bool isWriting);
     uint32_t sectorIndex();
     bool sectorValid();
     void generateIdentity(uint8_t *identity);
@@ -116,6 +115,8 @@ class StorageCard: public IO {
   public:
     StorageCard();
     ~StorageCard() {}
+
+    void begin();
 
     uint8_t id() { return IO_STORAGE_CARD; }
     String  description() override { return "Storage Card"; }

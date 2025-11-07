@@ -968,9 +968,9 @@ void loadProgram(uint index) {
     programFile = filename;
 
     Serial.print("Loaded Program: ");
-    Serial.println(cart.file);
+    Serial.println(programFile);
   } else {
-    Serial.println("Invalid PProgram!");
+    Serial.println("Invalid Program!");
   }
 }
 
@@ -1332,16 +1332,26 @@ void initButtons() {
 void initSD() {
   SD.begin(BUILTIN_SDCARD);
 
-  if (SD.exists("ROM.bin")) {
-    loadROMPath("ROM.bin");
-    rom.file = "ROM.bin";
-    autoStart = true;
-  }
-  if (SD.exists("Cart.bin")) {
-    loadCartPath("Cart.bin");
-    cart.file = "Cart.bin";
-    cart.enabled = true;
-    autoStart = true;
+  if (SD.mediaPresent()) {
+    if (SD.exists("ROM.bin")) {
+      loadROMPath("ROM.bin");
+      rom.file = "ROM.bin";
+      autoStart = true;
+    }
+    if (SD.exists("Cart.bin")) {
+      loadCartPath("Cart.bin");
+      cart.file = "Cart.bin";
+      cart.enabled = true;
+      autoStart = true;
+    }
+
+    for (int i = 0; i < 8; i++) {
+      uint8_t id = io[i]->id();
+      if (id == IO_STORAGE_CARD) {
+        StorageCard *sc = (StorageCard *)io[i];
+        sc->begin();
+      }
+    }
   }
 }
 

@@ -4,6 +4,30 @@ StorageCard::StorageCard() {
   this->reset();
 }
 
+void StorageCard::begin() {
+  if (!SD.exists(ST_STORAGE_FILE_NAME)) {
+    File file = SD.open(ST_STORAGE_FILE_NAME, FILE_WRITE);
+    
+    for (int i = 0; i < ST_STORAGE_SIZE; i++) {
+      file.write(0x00);
+    }
+
+    file.close();
+  }
+  if (!SD.exists(ST_IDENTITY_FILE_NAME)) {
+    File file = SD.open(ST_IDENTITY_FILE_NAME, FILE_WRITE);
+    uint8_t identity[ST_SECTOR_SIZE];
+
+    this->generateIdentity(identity);
+
+    for (int i = 0; i < ST_SECTOR_SIZE; i++) {
+      file.write(identity[i]);
+    }
+
+    file.close();
+  }
+}
+
 uint8_t StorageCard::read(uint16_t address) {
   switch(address & 0x0007) {
     case 0x00: // Data Register
@@ -77,29 +101,6 @@ void StorageCard::reset() {
   for (int i = 0; i < 0x200; i++) {
     this->buffer[i] = 0x00;
   }
-
-  if (!SD.exists(ST_STORAGE_FILE_NAME)) {
-    File file = SD.open(ST_STORAGE_FILE_NAME, FILE_WRITE);
-    
-    for (int i = 0; i < ST_STORAGE_SIZE; i++) {
-      file.write(0x00);
-    }
-
-    file.close();
-  }
-
-  if (!SD.exists(ST_IDENTITY_FILE_NAME)) {
-    File file = SD.open(ST_IDENTITY_FILE_NAME, FILE_WRITE);
-    uint8_t identity[ST_SECTOR_SIZE];
-
-    this->generateIdentity(identity);
-
-    for (int i = 0; i < ST_SECTOR_SIZE; i++) {
-      file.write(identity[i]);
-    }
-
-    file.close();
-  }
 }
 
 //
@@ -115,57 +116,54 @@ void StorageCard::executeCommand() {
   this->bufferIndex = 0;
   this->sectorOffset = 0;
 
+  if (!SD.mediaPresent()) {
+    // Abort with general error
+    this->status |= ST_STATUS_ERR;
+    this->error |= ST_ERR_AMNF;
+    return;
+  } else if (this->isTransferring || this->isIdentifying) {
+    // Abort with error if already executing a command
+    this->status |= ST_STATUS_ERR;
+    this->error |= ST_ERR_ABRT;
+    return;
+  }
+
   switch (this->command) {
     case 0xC0: // Erase sector
       break;
-    case 0xEC: // Identify drive
-      if (!SD.mediaPresent()) {
-        // Abort with general error
-        this->status |= ST_STATUS_ERR;
-        this->error |= ST_ERR_AMNF;
-      } else if (this->isTransferring) {
-        // Abort with error if already executing a command
-        this->status |= ST_STATUS_ERR;
-        this->error |= ST_ERR_ABRT;
-      } else {
+    case 0xEC: { // Identify drive
         File identity = SD.open(ST_IDENTITY_FILE_NAME);
 
-        for (int i = 0; i < ST_SECTOR_SIZE; i++) {
-          this->buffer[i] = identity.read();
+        if (identity) {
+          for (int i = 0; i < ST_SECTOR_SIZE; i++) {
+            this->buffer[i] = identity.read();
+          }
+          identity.close();
         }
-
-        identity.close();
 
         this->commandDataSize = 0x200; // Identify drive fills buffer with 512 bytes of identity data
         this->status |= ST_STATUS_DRQ;
         this->isIdentifying = true;
+        break;
       }
-      break;
     case 0x20: // Read sector
     case 0x21:
       // Check to see if media present if not abort with error
-      if (!SD.mediaPresent()) {
-        // Abort with general error
-        this->status |= ST_STATUS_ERR;
-        this->error |= ST_ERR_AMNF;
-      } else if (this->isTransferring || this->isIdentifying) {
-        // Abort with error if already executing a command
-        this->status |= ST_STATUS_ERR;
-        this->error |= ST_ERR_ABRT;
-      } else if (!this->sectorValid()) {
+      if (!this->sectorValid()) {
         // Not in sector range so abort with IDNF flag
         this->status |= ST_STATUS_ERR;
         this->error |= ST_ERR_ABRT | ST_ERR_IDNF;
       } else {
         // Otherwise load the buffer with first sector and set the DRQ flag and continue
-        File storage = this->openFile(ST_STORAGE_FILE_NAME, false);
-        storage.seek(this->sectorIndex() * 512);
+        File storage = SD.open(ST_STORAGE_FILE_NAME);
 
-        for(int i = 0; i < ST_SECTOR_SIZE; i++) {
-          this->buffer[i] = storage.read();
+        if (storage) {
+          storage.seek(this->sectorIndex() * 512);
+          for(int i = 0; i < ST_SECTOR_SIZE; i++) {
+            this->buffer[i] = storage.read();
+          }
+          storage.close();
         }
-
-        storage.close();
 
         this->status |= ST_STATUS_DRQ;
         this->isTransferring = true;
@@ -176,15 +174,7 @@ void StorageCard::executeCommand() {
     case 0x30: // Write sector
     case 0x31:
       // Check to see if media present if not abort with error
-      if (!SD.mediaPresent()) {
-        // Abort with general error
-        this->status |= ST_STATUS_ERR;
-        this->error |= ST_ERR_AMNF;
-      } else if (this->isTransferring || this->isIdentifying) {
-        // Abort with error if already executing a command
-        this->status |= ST_STATUS_ERR;
-        this->error |= ST_ERR_ABRT;
-      } else if (!this->sectorValid()) {
+      if (!this->sectorValid()) {
         // Not in sector range so abort with IDNF flag
         this->status |= ST_STATUS_ERR;
         this->error |= ST_ERR_ABRT | ST_ERR_IDNF;
@@ -224,14 +214,15 @@ uint8_t StorageCard::readBuffer() {
       this->sectorOffset++;
 
       if (this->sectorOffset < this->sectorCount) { // Load the next sector
-        File storage = this->openFile(ST_STORAGE_FILE_NAME, false);
-        storage.seek(this->sectorIndex() * 512 + (512 * this->sectorOffset));
+        File storage = SD.open(ST_STORAGE_FILE_NAME);
 
-        for(int i = 0; i < ST_SECTOR_SIZE; i++) {
-          this->buffer[i] = storage.read();
+        if (storage) {
+          storage.seek(this->sectorIndex() * 512 + (512 * this->sectorOffset));
+          for(int i = 0; i < ST_SECTOR_SIZE; i++) {
+            this->buffer[i] = storage.read();
+          }
+          storage.close();
         }
-
-        storage.close();
       } else {
         this->isTransferring = false;
       }
@@ -252,27 +243,20 @@ void StorageCard::writeBuffer(uint8_t value) {
     this->bufferIndex = 0;
 
     if (this->sectorOffset < this->sectorCount) { // Write the next sector
-      File file = this->openFile(ST_STORAGE_FILE_NAME, true);
-      file.seek(this->sectorIndex() * 512 + (512 * this->sectorOffset));
+      File file = SD.open(ST_STORAGE_FILE_NAME, FILE_WRITE);
 
-      for (int i = 0; i < ST_SECTOR_SIZE; i++) {
-        file.write(buffer[i]);
+      if (file) {
+        file.seek(this->sectorIndex() * 512 + (512 * this->sectorOffset));
+        for (int i = 0; i < ST_SECTOR_SIZE; i++) {
+          file.write(buffer[i]);
+        }
+        file.close();
       }
-
-      file.close();
 
       this->sectorOffset++;
     } else {
       this->isTransferring = false;
     }
-  }
-}
-
-File StorageCard::openFile(const char *path, bool isWriting) {
-  if (isWriting) {
-    return SD.open(path, FILE_WRITE);
-  } else {
-    return SD.open(path);
   }
 }
 
