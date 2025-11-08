@@ -1,7 +1,5 @@
-#ifndef _DEVBOARD_H
-#define _DEVBOARD_H
-
-#include <Arduino.h>
+#ifndef _PINS_H
+#define _PINS_H
 
 #ifdef DEVBOARD_0
 #define RESB      28  // RESET          

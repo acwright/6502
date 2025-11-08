@@ -76,7 +76,7 @@ uint8_t readData();
 void writeData(uint8_t data);
 void writeAddress(uint16_t address);
 
-uint freqIndex = 20;      // 1 MHz
+uint8_t freqIndex = 20;      // 1 MHz
 bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
@@ -119,7 +119,7 @@ IO *io[8] = {
 };
 
 //
-// MAIN LOOPS
+// MAIN
 //
 
 void setup() {
@@ -289,7 +289,6 @@ void onCommand(char command) {
       break;
     case '+':
       increaseFrequency();
-      break;
       break;
     case '[':
       prevPage();
@@ -490,10 +489,7 @@ void info() {
   Serial.println("8   8     8 8    8 8      88   8 88     8   88    88 8  8 88  8 88    88  8   88  8   8 88   8 ");
   Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88eeeee8   88eee 88 8  8 88ee8 88eee 88  8   88  8eee8 88   8");
   Serial.println();
-  Serial.print("6502 DB Emulator | Version: ");
-  #ifdef VERSION
-  Serial.print(VERSION);
-  #endif
+  Serial.print("6502 DB Emulator | Version: 1.0");
   Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
