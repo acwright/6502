@@ -1,12 +1,12 @@
 #include "Emulator.h"
 
-#ifdef DEVBOARD_0
 Emulator::Emulator() {
   this->reset();
 }
 
 uint8_t Emulator::read(uint16_t address) {
-  switch(address & 0x0003) {
+  switch(address & 0x000F) {
+    #ifdef DEVBOARD_0
     case 0x00: // Print Data
       break;
     case 0x01: // Scratch Register
@@ -19,13 +19,45 @@ uint8_t Emulator::read(uint16_t address) {
       return this->gpioData;
     case 0x03: // GPIO Data Direction Register
       return this->gpioDataDir;
+    #endif
+
+    #ifdef DEVBOARD_1
+    case 0x00: // Print Data
+      break;
+    case 0x01: // SPI Transfer Register
+      this->spiStatus &= ~EMU_SPI_STATUS_INT;
+      return this->spiTransfer;
+    case 0x02: // SPI Status Register
+      this->spiStatus &= ~EMU_SPI_STATUS_INT;
+      return this->spiStatus;
+    case 0x03: // GPIO Data Direction Register
+      return this->spiClock;
+    #endif
+
+    case 0x04:
+      return this->keyboardData;
+    case 0x05:
+      return this->mouseXData;
+    case 0x06:
+      return this->mouseYData;
+    case 0x07:
+      return this->mouseWData;
+    case 0x08:
+      return this->mouseBtnsData;
+    case 0x09:
+      return this->joystickData;
+    case 0x0A:
+      return this->joystickLData;
+    case 0x0B:
+      return this->joystickHData;
   }
 
   return 0x00;
 }
 
 void Emulator::write(uint16_t address, uint8_t value) {
-  switch(address & 0x0003) {
+  switch(address & 0x000F) {
+    #ifdef DEVBOARD_0
     case 0x00: // Print Data
       Serial.print((char)value);
       break;
@@ -46,45 +78,9 @@ void Emulator::write(uint16_t address, uint8_t value) {
       pinMode(GPIO2, (this->gpioDataDir & EMU_GPIO2) >> 2);
       pinMode(GPIO3, (this->gpioDataDir & EMU_GPIO3) >> 3);
       break;
-  }
-}
+    #endif
 
-uint8_t Emulator::tick() {
-  return 0x00;
-}
-
-void Emulator::reset() {
-  this->scratch = 0x00;
-  this->gpioData = 0x00;
-  this->gpioDataDir = 0x00;
-}
-
-#endif
-
-#if DEVBOARD_1
-Emulator::Emulator() {
-  this->reset();
-}
-
-uint8_t Emulator::read(uint16_t address) {
-  switch(address & 0x0003) {
-    case 0x00: // Print Data
-      break;
-    case 0x01: // SPI Transfer Register
-      this->spiStatus &= ~EMU_SPI_STATUS_INT;
-      return this->spiTransfer;
-    case 0x02: // SPI Status Register
-      this->spiStatus &= ~EMU_SPI_STATUS_INT;
-      return this->spiStatus;
-    case 0x03: // GPIO Data Direction Register
-      return this->spiClock;
-  }
-
-  return 0x00;
-}
-
-void Emulator::write(uint16_t address, uint8_t value) {
-  switch(address & 0x0003) {
+    #ifdef DEVBOARD_1
     case 0x00: // Print Data
       Serial.print((char)value);
       break;
@@ -98,10 +94,15 @@ void Emulator::write(uint16_t address, uint8_t value) {
     case 0x03: // GPIO Data Direction Register
       this->spiClock = value;
       break;
+    #endif
+
+    default:
+      break;
   }
 }
 
-uint8_t Emulator::tick() {
+uint8_t Emulator::tick() {  
+  #ifdef DEVBOARD_1
   if (this->spiTransferPending) {
     this->spiStatus |= EMU_SPI_STATUS_BSY;
 
@@ -126,15 +127,56 @@ uint8_t Emulator::tick() {
       return 0x80;
     }
   }
+  #endif
 
   return 0x00;
 }
 
 void Emulator::reset() {
+  #ifdef DEVBOARD_0
+  this->scratch = 0x00;
+  this->gpioData = 0x00;
+  this->gpioDataDir = 0x00;
+  #endif
+
+  #ifdef DEVBOARD_1
   this->spiTransfer = 0x00;
   this->spiControl = 0x20;  // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
   this->spiStatus = 0x20;   // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
   this->spiClock = 0x04;    // 4MHz
   this->spiTransferPending = false;
+  #endif
 }
-#endif
+
+void Emulator::updateKeyboard(uint8_t keycode, uint8_t event) {
+  // TODO: Handle keyboard data
+}
+
+void Emulator::updateMouse(int mouseX, int mouseY, int mouseWheel, uint8_t mouseButtons) {
+  this->mouseXData = mouseX;
+  this->mouseYData = mouseY;
+  this->mouseWData = mouseWheel;
+  this->mouseBtnsData = mouseButtons;
+}
+
+void Emulator::updateJoystick(uint32_t buttons) {
+  // XBOX Button Values
+  // LFUNC (View): 0x8 1000
+  // RFUNC (Menu): 0x4 0100
+  // A: 0x10 0001 0000
+  // B: 0x20 0010 0000
+  // X: 0x40 0100 0000
+  // Y: 0x80 1000 0000
+  // UP: 0x100 0001 0000 0000
+  // DOWN: 0x200 0010 0000 0000
+  // LEFT: 0x400 0100 0000 0000
+  // RIGHT: 0x800 1000 0000 0000
+  // LBTN: 0x1000 0001 0000 0000 0000
+  // RBTN: 0x2000 0010 0000 0000 0000
+  // LABTN: 0x4000 0100 0000 0000 0000
+  // RABTN: 0x8000 1000 0000 0000 0000
+
+  this->joystickLData = buttons & 0xFF;
+  this->joystickHData = (buttons >> 8) & 0xFF;
+  this->joystickData  = (this->joystickLData & 0xF0) | (this->joystickHData & 0x0F);
+}

@@ -1,40 +1,48 @@
-#include "GPIOCard.h"
+#include "GPIO.h"
 
-GPIOCard::GPIOCard(uint8_t attachment) {
+GPIO::GPIO(uint8_t attachment) {
   this->attachment = attachment;
 }
 
-uint8_t GPIOCard::id() {
+uint8_t GPIO::id() {
   switch(this->attachment) {
-    case GPIOCARD_ATTACHMENT_GPIO_HELPER:
+    case GPIO_ATTACHMENT_GPIO_HELPER:
       return IO_GPIO_CARD_GH;
-    case GPIOCARD_ATTACHMENT_KEYBOARD:
+    case GPIO_ATTACHMENT_INPUT_BOARD:
+      return IO_INPUT_BOARD;
+    case GPIO_ATTACHMENT_KEYBOARD_HELPER:
       return IO_GPIO_CARD_KB;
-    case GPIOCARD_ATTACHMENT_KEYPAD_HELPER:
+    case GPIO_ATTACHMENT_KEYPAD_HELPER:
       return IO_GPIO_CARD_KH;
+    case GPIO_ATTACHMENT_LCD_CARD:
+      return IO_LCD_CARD;
     default:
       return 0xFF; // Shouldn't happen
   }
 }
 
-String GPIOCard::description() {
+String GPIO::description() {
   switch(this->attachment) {
-    case GPIOCARD_ATTACHMENT_GPIO_HELPER:
+    case GPIO_ATTACHMENT_GPIO_HELPER:
       return "GPIO Card (GPIO Helper)";
-    case GPIOCARD_ATTACHMENT_KEYBOARD:
+    case GPIO_ATTACHMENT_INPUT_BOARD:
+      return "Input Board";
+    case GPIO_ATTACHMENT_KEYBOARD_HELPER:
       return "GPIO Card (Keyboard / PS2 Helper)";
-    case GPIOCARD_ATTACHMENT_KEYPAD_HELPER:
+    case GPIO_ATTACHMENT_KEYPAD_HELPER:
       return "GPIO Card (Keypad Helper)";
+    case GPIO_ATTACHMENT_LCD_CARD:
+      return "LCD Card";
     default:
-      return "GPIO Card"; // Shouldn't happen
+      return "GPIO"; // Shouldn't happen
   }
 }
 
-uint8_t GPIOCard::read(uint16_t address) { return 0x00; }
-void GPIOCard::write(uint16_t address, uint8_t value) {}
-void GPIOCard::reset() {}
+uint8_t GPIO::read(uint16_t address) { return 0x00; }
+void GPIO::write(uint16_t address, uint8_t value) {}
+void GPIO::reset() {}
 
-void GPIOCard::updateJoystick(uint32_t buttons) {
+void GPIO::updateJoystick(uint32_t buttons) {
   // XBOX Button Values
   // LFUNC (View): 0x8 1000
   // RFUNC (Menu): 0x4 0100

@@ -1,20 +1,22 @@
-#ifndef _GPIO_CARD_H
-#define _GPIO_CARD_H
+#ifndef _GPIO_H
+#define _GPIO_H
 
 #include "IO.h"
 #include "constants.h"
 
-#define GPIOCARD_ATTACHMENT_GPIO_HELPER   0
-#define GPIOCARD_ATTACHMENT_KEYBOARD      1
-#define GPIOCARD_ATTACHMENT_KEYPAD_HELPER 2
+#define GPIO_ATTACHMENT_GPIO_HELPER     0
+#define GPIO_ATTACHMENT_INPUT_BOARD     1
+#define GPIO_ATTACHMENT_KEYBOARD_HELPER 2
+#define GPIO_ATTACHMENT_KEYPAD_HELPER   3
+#define GPIO_ATTACHMENT_LCD_CARD        4
 
-class GPIOCard: public IO {
+class GPIO: public IO {
   private:
     uint8_t attachment;
 
   public:
-    GPIOCard(uint8_t attachment = GPIOCARD_ATTACHMENT_KEYBOARD);
-    ~GPIOCard() {}
+    GPIO(uint8_t attachment);
+    ~GPIO() {}
 
     uint8_t id() override;
     String  description() override;

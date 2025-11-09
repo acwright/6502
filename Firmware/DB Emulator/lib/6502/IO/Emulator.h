@@ -19,6 +19,22 @@
 /* ------------------------------------------------------------------ */
 /* | 3 |                 GPIO DATA DIRECTION REGISTER               | */
 /* ------------------------------------------------------------------ */
+/* | 4 |             N/A               |           KB DATA          | */
+/* ------------------------------------------------------------------ */
+/* | 5 |             N/A               |           MOUSE X          | */
+/* ------------------------------------------------------------------ */
+/* | 6 |             N/A               |           MOUSE Y          | */
+/* ------------------------------------------------------------------ */
+/* | 7 |             N/A               |           MOUSE W          | */
+/* ------------------------------------------------------------------ */
+/* | 8 |             N/A               |          MOUSE BTNS        | */
+/* ------------------------------------------------------------------ */
+/* | 9 |             N/A               |           JOY BTNS         | */
+/* ------------------------------------------------------------------ */
+/* | A |             N/A               |          JOY BTNS L        | */
+/* ------------------------------------------------------------------ */
+/* | B |             N/A               |          JOY BTNS H        | */
+/* ------------------------------------------------------------------ */
 /*                                                                    */
 /* GPIO DATA DIRECTION REGISTER                                       */
 /* | 7 | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                              */
@@ -26,6 +42,24 @@
 /* | 0 | 0 | 0 | 0 | 0  | 0  | 0  | 0  |  <- Default Values           */
 /*                                                                    */
 /* DO-7 - Data Direction (1 = OUTPUT, 0 = INPUT)                      */
+/*                                                                    */
+/* KB DATA REGISTER                                                   */
+/* | 7  | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                             */
+/* | DA |         ASCII DATA            |                             */
+/* | 0  | 0 | 0 | 0 | 0  | 0  | 0  | 0  |  <- Default Values          */
+/*                                                                    */
+/* DA   - Data Available (1 = AVAILABLE, 0 = NONE)                    */
+/* DO-6 - ASCII Data                                                  */
+/*                                                                    */
+/* JOY BTNS REGISTERS                                                 */
+/* | 7     | 6     | 5    | 4    | 3    | 2    | 1 | 0 |              */
+/* | Y     | X     | B    | A    | R    | L    | D | U |              */
+/* | Y     | X     | B    | A    | RFNC | LFNC | X | X |  <- L Byte   */
+/* | RABTN | LABTN | RBTN | LBTN | R    | L    | D | U |  <- H Byte   */
+/* | 0     | 0     | 0    | 0    | 0    | 0    | 0 | 0 |  <- Default  */
+/*                                                                    */
+/* Note: Reg 0x09 contains merged standard buttons from L and H       */
+/*       joystick registers 0x0A and 0x0B                             */
 /*                                                                    */
 
 #define EMU_GPIO0 0b00000001
@@ -47,6 +81,22 @@
 /* | 2 |    SPI CONTROL REGISTER      |      SPI STATUS REGISTER    | */
 /* ------------------------------------------------------------------ */
 /* | 3 |                       SPI CLOCK REGISTER                   | */  
+/* ------------------------------------------------------------------ */
+/* | 4 |             N/A               |           KB DATA          | */
+/* ------------------------------------------------------------------ */
+/* | 5 |             N/A               |           MOUSE X          | */
+/* ------------------------------------------------------------------ */
+/* | 6 |             N/A               |           MOUSE Y          | */
+/* ------------------------------------------------------------------ */
+/* | 7 |             N/A               |           MOUSE W          | */
+/* ------------------------------------------------------------------ */
+/* | 8 |             N/A               |          MOUSE BTNS        | */
+/* ------------------------------------------------------------------ */
+/* | 9 |             N/A               |           JOY BTNS         | */
+/* ------------------------------------------------------------------ */
+/* | A |             N/A               |          JOY BTNS L        | */
+/* ------------------------------------------------------------------ */
+/* | B |             N/A               |          JOY BTNS H        | */
 /* ------------------------------------------------------------------ */
 /*                                                                    */
 /* SPI CONTROL REGISTER                                               */
@@ -78,6 +128,25 @@
 /*                                                                    */
 /* Ref: https://www.pjrc.com/teensy/td_libs_SPI.html                  */
 /*                                                                    */
+/*                                                                    */
+/* KB DATA REGISTER                                                   */
+/* | 7  | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                             */
+/* | DA |         ASCII DATA            |                             */
+/* | 0  | 0 | 0 | 0 | 0  | 0  | 0  | 0  |  <- Default Values          */
+/*                                                                    */
+/* DA   - Data Available (1 = AVAILABLE, 0 = NONE)                    */
+/* DO-6 - ASCII Data                                                  */
+/*                                                                    */
+/* JOY BTNS REGISTERS                                                 */
+/* | 7     | 6     | 5    | 4    | 3    | 2    | 1 | 0 |              */
+/* | Y     | X     | B    | A    | R    | L    | D | U |              */
+/* | Y     | X     | B    | A    | RFNC | LFNC | X | X |  <- L Byte   */
+/* | RABTN | LABTN | RBTN | LBTN | R    | L    | D | U |  <- H Byte   */
+/* | 0     | 0     | 0    | 0    | 0    | 0    | 0 | 0 |  <- Default  */
+/*                                                                    */
+/* Note: Reg 0x09 contains merged standard buttons from L and H       */
+/*       joystick registers 0x0A and 0x0B                             */
+/*                                                                    */
 #define EMU_SPI_CTRL_CS0    0b00000001
 #define EMU_SPI_CTRL_CS1    0b00000010
 #define EMU_SPI_CTRL_CS2    0b00000100
@@ -96,6 +165,10 @@
 #define EMU_SPI_STATUS_BSY  0b01000000
 #define EMU_SPI_STATUS_INT  0b10000000
 #endif
+
+#define EMU_KEY_AVAILABLE  0b10000000
+#define EMU_KEY_PRESS   0
+#define EMU_KEY_RELEASE 1
 
 class Emulator: public IO {
   private:
@@ -116,6 +189,15 @@ class Emulator: public IO {
     bool spiTransferPending = false;
     #endif
 
+    uint8_t keyboardData;
+    uint8_t mouseXData;
+    uint8_t mouseYData;
+    uint8_t mouseWData;
+    uint8_t mouseBtnsData;
+    uint8_t joystickData;
+    uint8_t joystickLData;
+    uint8_t joystickHData;
+
   public:
     Emulator();
     ~Emulator() {}
@@ -127,6 +209,10 @@ class Emulator: public IO {
     void    write(uint16_t address, uint8_t value) override;
     uint8_t tick() override;
     void    reset() override;
+
+    void updateKeyboard(uint8_t keycode, uint8_t event);
+    void updateMouse(int mouseX, int mouseY, int mouseWheel, uint8_t mouseButtons);
+    void updateJoystick(uint32_t buttons);
 };
 
 #endif

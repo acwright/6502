@@ -113,7 +113,7 @@ IO *io[8] = {
   new RTCCard(),
   new StorageCard(),
   new SerialCard(),
-  new GPIOCard(),
+  new GPIO(GPIO_ATTACHMENT_KEYBOARD_HELPER),
   new SoundCard(),
   new VideoCard()
 };
@@ -348,6 +348,14 @@ void onKeyPress(uint8_t keycode) {
 		}
   }
 
+  for (int i = 0; i < 8; i++) {
+    uint8_t id = io[i]->id();
+    if (id == IO_EMULATOR) {
+      Emulator *emu = (Emulator *)io[i];
+      emu->updateKeyboard(keycode, EMU_KEY_PRESS);
+    }
+  }
+
   #ifdef KEYBOARD_DEBUG
   Serial.print("Key Pressed: ");
   Serial.print(keycode);
@@ -397,6 +405,14 @@ void onKeyRelease(uint8_t keycode) {
 		}
   }
 
+  for (int i = 0; i < 8; i++) {
+    uint8_t id = io[i]->id();
+    if (id == IO_EMULATOR) {
+      Emulator *emu = (Emulator *)io[i];
+      emu->updateKeyboard(keycode, EMU_KEY_RELEASE);
+    }
+  }
+
   #ifdef KEYBOARD_DEBUG
   Serial.print("Key Released: ");
   Serial.print(keycode);
@@ -422,9 +438,9 @@ void onMouse() {
 
   for (int i = 0; i < 8; i++) {
     uint8_t id = io[i]->id();
-    if (id == IO_INPUT_BOARD) {
-      InputBoard *ib = (InputBoard *)io[i];
-      ib->updateMouse(mouseX, mouseY, mouseW, mouseButtons);
+    if (id == IO_EMULATOR) {
+      Emulator *emu = (Emulator *)io[i];
+      emu->updateMouse(mouseX, mouseY, mouseW, mouseButtons);
     }
   }
 
@@ -454,8 +470,8 @@ void onJoystick() {
     for (int i = 0; i < 8; i++) {
       uint8_t id = io[i]->id();
       if (id == IO_GPIO_CARD_GH || id == IO_GPIO_CARD_KB || id == IO_GPIO_CARD_KH) {
-        GPIOCard *gpio = (GPIOCard *)io[i];
-        gpio->updateJoystick(buttons);
+        Emulator *emu = (Emulator *)io[i];
+        emu->updateJoystick(buttons);
       }
     } 
   }
@@ -463,16 +479,8 @@ void onJoystick() {
   joystick.joystickDataClear();
 
   #ifdef JOYSTICK_DEBUG
-  Serial.printf("Joystick: Buttons = %x", buttons);
-
-  uint64_t axis_mask  = joystick.axisMask();
-  
-  for (uint8_t i = 0; axis_mask != 0; i++, axis_mask >>= 1) {
-    if (axis_mask & 1) {
-      Serial.printf(" %d:%d", i, joystick.getAxis(i));
-    }
-  }
-  Serial.println();
+  Serial.print("Joystick: Buttons = ");
+  Serial.println(buttons, HEX);
   #endif
 }
 
@@ -1035,16 +1043,16 @@ void configureIO(uint index) {
       io[index] = new SoundCard();
       break;
     case IO_GPIO_CARD_GH:
-      io[index] = new GPIOCard(GPIOCARD_ATTACHMENT_GPIO_HELPER);
+      io[index] = new GPIO(GPIO_ATTACHMENT_GPIO_HELPER);
       break;
     case IO_GPIO_CARD_KB:
-      io[index] = new GPIOCard(GPIOCARD_ATTACHMENT_KEYBOARD);
+      io[index] = new GPIO(GPIO_ATTACHMENT_KEYBOARD_HELPER);
       break;
     case IO_GPIO_CARD_KH:
-      io[index] = new GPIOCard(GPIOCARD_ATTACHMENT_KEYPAD_HELPER);
+      io[index] = new GPIO(GPIO_ATTACHMENT_KEYPAD_HELPER);
       break;
     case IO_INPUT_BOARD:
-      io[index] = new InputBoard();
+      io[index] = new GPIO(GPIO_ATTACHMENT_INPUT_BOARD);
       break;
     case IO_SERIAL_CARD:
       io[index] = new SerialCard();
@@ -1059,7 +1067,7 @@ void configureIO(uint index) {
       io[index] = new Emulator();
       break;
     case IO_LCD_CARD:
-      io[index] = new LCDCard();
+      io[index] = new GPIO(GPIO_ATTACHMENT_LCD_CARD);
       break;
     case IO_RAM_CARD:
       io[index] = new RAMCard();
