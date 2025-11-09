@@ -10,6 +10,7 @@ void info();
 void reset();
 void halt();
 void resume();
+void load();
 
 void initPins();
 
@@ -18,9 +19,10 @@ void writeData(uint8_t data);
 
 bool isLoading = false;
 bool isHalted = false;
+uint16_t address = 0x0800;
 
 XModem xmodem;
-
+size_t  receivedDataSize;
 uint8_t receivedData[128];
 
 //
@@ -28,8 +30,7 @@ uint8_t receivedData[128];
 //
 
 void setup() {
-  Serial.begin(9600);
-  while (!Serial);
+  Serial.begin(115200);
 
   xmodem.begin(Serial, XModem::ProtocolType::XMODEM);
   xmodem.setRecieveBlockHandler(receiveData);
@@ -41,17 +42,7 @@ void setup() {
 
 void loop() {
   if (isLoading) {
-    //if (!isHalted) { halt(); }
-    Serial.print("Waiting for data..");
-    xmodem.receive();
-    Serial.println();
-    for (unsigned int i = 0; i < 128; i++) {
-      Serial.print(receivedData[i], HEX);
-      Serial.print("");
-    }
-    Serial.println();
-    //if (isHalted) { resume(); }
-    isLoading = false;
+    load();
   } else if (Serial.available()) {
     onCommand(Serial.read());
   }
@@ -80,6 +71,7 @@ void onCommand(char command) {
 
 bool receiveData(void *blk_id, size_t idSize, byte *data, size_t dataSize) {
   // byte id = *((byte *) blk_id);
+  receivedDataSize += dataSize;
 
   for(unsigned int i = 0; i < dataSize; ++i) {
     receivedData[i] = data[i];
@@ -164,6 +156,25 @@ void resume() {
   Serial.println("Done");
 }
 
+void load() {
+  //if (!isHalted) { halt(); }
+  Serial.print("Waiting for data..");
+  xmodem.receive();
+  Serial.println();
+  Serial.print("Received ");
+  Serial.print(receivedDataSize);
+  Serial.println(" bytes");
+  Serial.println();
+  for (unsigned int i = 0; i < receivedDataSize; i++) {
+    Serial.print(receivedData[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+  Serial.println();
+  //if (isHalted) { resume(); }
+  isLoading = false;
+}
+
 //
 // INITIALIZATION
 //
@@ -197,10 +208,5 @@ void initPins() {
 // UTILITIES
 //
 
-void writeAddress(uint16_t address) {
-
-}
-
-void writeData(uint8_t data) {
-
-}
+void writeAddress(uint16_t address) {}
+void writeData(uint8_t data) {}
