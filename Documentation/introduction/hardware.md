@@ -24,7 +24,6 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **GPIO Card**: A card that provides general-purpose input/output (GPIO) pins for interfacing with external devices.
 - **LCD Card**: A card that provides output to an LCD display.
 - **Memory Card**: A card that provides RAM or ROM memory. 
-- **Nano Card**: A card that hosts an Arduino Nano for uploading code to RAM or ROM. 
 - **Prototype Card**: A card that provides a prototyping area for custom circuits. 
 - **RAM Card**: A card that provides 512k of extra RAM. 
 - **RTC Card**: A card that provides real-time clock functionality. 

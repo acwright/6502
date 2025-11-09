@@ -7,6 +7,5 @@ Folder names are prefixed with the following to indicate specific hardware envir
 
 - **DB**: Dev Board
 - **IB**: Input Board
-- **NC**: Nano Card
 - **PS2**: PS2 Helper
 - **VGAP**: VGA Card Pro
