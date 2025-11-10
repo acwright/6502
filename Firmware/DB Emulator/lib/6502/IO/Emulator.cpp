@@ -5,6 +5,8 @@ Emulator::Emulator() {
 }
 
 uint8_t Emulator::read(uint16_t address) {
+  time_t time = now();
+
   switch(address & 0x000F) {
     #ifdef DEVBOARD_0
     case 0x00: // Print Data
@@ -35,6 +37,7 @@ uint8_t Emulator::read(uint16_t address) {
     #endif
 
     case 0x04:
+      this->keyboardData &= 0b01111111; // Reading from KB data clears key available bit
       return this->keyboardData;
     case 0x05:
       return this->mouseXData;
@@ -50,6 +53,18 @@ uint8_t Emulator::read(uint16_t address) {
       return this->joystickLData;
     case 0x0B:
       return this->joystickHData;
+    case 0x0C:
+      return second(time);
+    case 0x0D:
+      return minute(time);
+    case 0x0E:
+      return hour(time);
+    case 0x0F:
+      return day(time);
+    case 0x10:
+      return month(time);
+    case 0x11:
+      return year(time) % 100; // Get the last two digits of year
   }
 
   return 0x00;
@@ -148,8 +163,9 @@ void Emulator::reset() {
   #endif
 }
 
-void Emulator::updateKeyboard(uint8_t keycode, uint8_t event) {
-  // TODO: Handle keyboard data
+void Emulator::updateKeyboard(uint8_t ascii) {
+  this->keyboardData = ascii & 0b01111111;  // Mask out ascii value (0-127)
+  this->keyboardData |= 0b10000000;         // Set key available bit
 }
 
 void Emulator::updateMouse(int mouseX, int mouseY, int mouseWheel, uint8_t mouseButtons) {

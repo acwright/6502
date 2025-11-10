@@ -2,6 +2,7 @@
 #define _EMULATOR_H
 
 #include <Arduino.h>
+#include <TimeLib.h>
 #include "IO.h"
 #include "constants.h"
 #include "pins.h"
@@ -35,6 +36,18 @@
 /* ------------------------------------------------------------------ */
 /* | B |             N/A               |          JOY BTNS H        | */
 /* ------------------------------------------------------------------ */
+/* | C |             N/A               |        RTC SEC (0-59)      | */
+/* ------------------------------------------------------------------ */
+/* | D |             N/A               |        RTC MIN (0-59)      | */
+/* ------------------------------------------------------------------ */
+/* | E |             N/A               |         RTC HR (0-23)      | */
+/* ------------------------------------------------------------------ */
+/* | F |             N/A               |        RTC DAY (0-31)      | */
+/* ------------------------------------------------------------------ */
+/* | 10 |            N/A               |        RTC MON (1-12)      | */
+/* ------------------------------------------------------------------ */
+/* | 11 |            N/A               |         RTC YR (0-99)      | */
+/* ------------------------------------------------------------------ */
 /*                                                                    */
 /* GPIO DATA DIRECTION REGISTER                                       */
 /* | 7 | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                              */
@@ -45,10 +58,10 @@
 /*                                                                    */
 /* KB DATA REGISTER                                                   */
 /* | 7  | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                             */
-/* | DA |         ASCII DATA            |                             */
+/* | KA |         ASCII DATA            |                             */
 /* | 0  | 0 | 0 | 0 | 0  | 0  | 0  | 0  |  <- Default Values          */
 /*                                                                    */
-/* DA   - Data Available (1 = AVAILABLE, 0 = NONE)                    */
+/* KA   - Key Available (1 = AVAILABLE, 0 = NONE)                     */
 /* DO-6 - ASCII Data                                                  */
 /*                                                                    */
 /* JOY BTNS REGISTERS                                                 */
@@ -98,6 +111,18 @@
 /* ------------------------------------------------------------------ */
 /* | B |             N/A               |          JOY BTNS H        | */
 /* ------------------------------------------------------------------ */
+/* | C |             N/A               |        RTC SEC (0-59)      | */
+/* ------------------------------------------------------------------ */
+/* | D |             N/A               |        RTC MIN (0-59)      | */
+/* ------------------------------------------------------------------ */
+/* | E |             N/A               |         RTC HR (0-23)      | */
+/* ------------------------------------------------------------------ */
+/* | F |             N/A               |        RTC DAY (0-31)      | */
+/* ------------------------------------------------------------------ */
+/* | 10 |            N/A               |        RTC MON (1-12)      | */
+/* ------------------------------------------------------------------ */
+/* | 11 |            N/A               |         RTC YR (0-99)      | */
+/* ------------------------------------------------------------------ */
 /*                                                                    */
 /* SPI CONTROL REGISTER                                               */
 /* | 7   | 6 | 5  | 4  | 3  | 2   | 1   | 0   |                       */
@@ -131,10 +156,10 @@
 /*                                                                    */
 /* KB DATA REGISTER                                                   */
 /* | 7  | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                             */
-/* | DA |         ASCII DATA            |                             */
+/* | KA |         ASCII DATA            |                             */
 /* | 0  | 0 | 0 | 0 | 0  | 0  | 0  | 0  |  <- Default Values          */
 /*                                                                    */
-/* DA   - Data Available (1 = AVAILABLE, 0 = NONE)                    */
+/* KA   - Key Available (1 = AVAILABLE, 0 = NONE)                     */
 /* DO-6 - ASCII Data                                                  */
 /*                                                                    */
 /* JOY BTNS REGISTERS                                                 */
@@ -167,8 +192,6 @@
 #endif
 
 #define EMU_KEY_AVAILABLE  0b10000000
-#define EMU_KEY_PRESS   0
-#define EMU_KEY_RELEASE 1
 
 class Emulator: public IO {
   private:
@@ -210,7 +233,7 @@ class Emulator: public IO {
     uint8_t tick() override;
     void    reset() override;
 
-    void updateKeyboard(uint8_t keycode, uint8_t event);
+    void updateKeyboard(uint8_t ascii);
     void updateMouse(int mouseX, int mouseY, int mouseWheel, uint8_t mouseButtons);
     void updateJoystick(uint32_t buttons);
 };

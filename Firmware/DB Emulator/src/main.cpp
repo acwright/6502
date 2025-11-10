@@ -30,8 +30,7 @@ JoystickController  joystick(usb);
 void onTick();
 void onCommand(char command);
 void onNumeric(uint8_t num);
-void onKeyPress(uint8_t keycode);
-void onKeyRelease(uint8_t keycode);
+void onKeyboard(int unicode);
 void onMouse();
 void onJoystick();
 
@@ -76,6 +75,9 @@ uint8_t readData();
 void writeData(uint8_t data);
 void writeAddress(uint16_t address);
 
+time_t syncTime();
+String formattedDateTime();
+
 uint8_t freqIndex = 20;      // 1 MHz
 bool isRunning = false;
 bool isStepping = false;
@@ -103,19 +105,18 @@ uint programPage = 0;
 String programFile = "None";
 
 CPU cpu = CPU(read, write);
-RTC rtc = RTC();
 RAM ram = RAM();
 ROM rom = ROM();
 Cart cart = Cart();
 IO *io[8] = {
   new RAMCard(),
   new Emulator(),
-  new RTCCard(),
-  new StorageCard(),
+  new Empty(),
+  new Empty(),
   new SerialCard(),
-  new GPIO(GPIO_ATTACHMENT_KEYBOARD_HELPER),
-  new SoundCard(),
-  new VideoCard()
+  new Empty(),
+  new Empty(),
+  new Empty()
 };
 
 //
@@ -125,6 +126,8 @@ IO *io[8] = {
 void setup() {
   Serial.begin(115200);
 
+  setSyncProvider(syncTime);
+  
   initPins();
   initButtons();
   initSD();
@@ -134,8 +137,7 @@ void setup() {
   #endif
 
   usb.begin();
-  keyboard.attachRawPress(onKeyPress);
-  keyboard.attachRawRelease(onKeyRelease);
+  keyboard.attachPress(onKeyboard);
 
   info();
   reset();
@@ -316,114 +318,26 @@ void onNumeric(uint8_t num) {
   }
 }
 
-void onKeyPress(uint8_t keycode) {
-  // If it's a modifier key for some effin' reason remap it to actual USB scancode
-  if((keycode < 110) && (keycode > 102)) {
-    switch (keycode)
-		{
-			case 103:
-				keycode = 0xE0; // LEFT CTRL
-			break;
-			case 104:
-				keycode = 0xE1; // LEFT SHIFT
-			break;
-			case 105:
-				keycode = 0xE2; // LEFT ALT
-			break;
-			case 106:
-				keycode = 0xE3; // LEFT META
-			break;
-			case 107:
-				keycode = 0xE4; // RIGHT CTRL
-			break;
-			case 108:
-				keycode = 0xE5; // RIGHT SHIFT
-			break;
-			case 109:
-				keycode = 0xE6; // RIGHT ALT
-			break;
-			case 110:
-				keycode = 0xE7; // RIGHT META
-			break;
-		}
-  }
-
+void onKeyboard(int unicode) {
   for (int i = 0; i < 8; i++) {
     uint8_t id = io[i]->id();
     if (id == IO_EMULATOR) {
       Emulator *emu = (Emulator *)io[i];
-      emu->updateKeyboard(keycode, EMU_KEY_PRESS);
+      emu->updateKeyboard((uint8_t)unicode);
     }
   }
 
   #ifdef KEYBOARD_DEBUG
-  Serial.print("Key Pressed: ");
-  Serial.print(keycode);
+  Serial.print("Keyboard: ");
+  Serial.print(unicode & 0b01111111);
 
   char output[64];
 
   sprintf(
     output, 
     " | %c%c%c%c%c%c%c%c | 0x%02X",
-    BYTE_TO_BINARY(keycode),
-    keycode
-  );
-
-  Serial.println(output);
-  #endif
-}
-
-void onKeyRelease(uint8_t keycode) {
-  // If it's a modifier key for some effin' reason remap it to actual USB scancode
-  if((keycode < 110) && (keycode > 102)) {
-    switch (keycode)
-		{
-			case 103:
-				keycode = 0xE0; // LEFT CTRL
-			break;
-			case 104:
-				keycode = 0xE1; // LEFT SHIFT
-			break;
-			case 105:
-				keycode = 0xE2; // LEFT ALT
-			break;
-			case 106:
-				keycode = 0xE3; // LEFT META
-			break;
-			case 107:
-				keycode = 0xE4; // RIGHT CTRL
-			break;
-			case 108:
-				keycode = 0xE5; // RIGHT SHIFT
-			break;
-			case 109:
-				keycode = 0xE6; // RIGHT ALT
-			break;
-			case 110:
-				keycode = 0xE7; // RIGHT META
-			break;
-		}
-  }
-
-  for (int i = 0; i < 8; i++) {
-    uint8_t id = io[i]->id();
-    if (id == IO_EMULATOR) {
-      Emulator *emu = (Emulator *)io[i];
-      emu->updateKeyboard(keycode, EMU_KEY_RELEASE);
-    }
-  }
-
-  #ifdef KEYBOARD_DEBUG
-  Serial.print("Key Released: ");
-  Serial.print(keycode);
-  
-  char output[64];
-
-  sprintf(
-    output, 
-    " | %c%c%c%c%c%c%c%c | 0x%02X",
-    BYTE_TO_BINARY(keycode),
-    keycode
+    BYTE_TO_BINARY(unicode & 0b01111111),
+    unicode & 0b01111111
   );
 
   Serial.println(output);
@@ -469,7 +383,7 @@ void onJoystick() {
   {
     for (int i = 0; i < 8; i++) {
       uint8_t id = io[i]->id();
-      if (id == IO_GPIO_CARD_GH || id == IO_GPIO_CARD_KB || id == IO_GPIO_CARD_KH) {
+      if (id == IO_EMULATOR) {
         Emulator *emu = (Emulator *)io[i];
         emu->updateJoystick(buttons);
       }
@@ -521,7 +435,7 @@ void info() {
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
   Serial.print("Date / Time: ");
-  Serial.println(RTC::formattedDateTime());
+  Serial.println(formattedDateTime());
   Serial.println();
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (R)un / Stop          | (S)tep           | Rese(T)         |");
@@ -1027,7 +941,7 @@ void configureIO(uint index) {
   uint8_t currentID = io[index]->id();
   uint8_t nextID;
 
-  if (currentID < 15) {
+  if (currentID < 4) {
     nextID = currentID + 1;
   } else {
     nextID = 0;
@@ -1036,23 +950,8 @@ void configureIO(uint index) {
   delete io[index];
 
   switch (nextID) {
-    case IO_VIDEO_CARD:
-      io[index] = new VideoCard();
-      break;
-    case IO_SOUND_CARD:
-      io[index] = new SoundCard();
-      break;
-    case IO_GPIO_CARD_GH:
-      io[index] = new GPIO(GPIO_ATTACHMENT_GPIO_HELPER);
-      break;
-    case IO_GPIO_CARD_KB:
-      io[index] = new GPIO(GPIO_ATTACHMENT_KEYBOARD_HELPER);
-      break;
-    case IO_GPIO_CARD_KH:
-      io[index] = new GPIO(GPIO_ATTACHMENT_KEYPAD_HELPER);
-      break;
-    case IO_INPUT_BOARD:
-      io[index] = new GPIO(GPIO_ATTACHMENT_INPUT_BOARD);
+    case IO_EMPTY:
+      io[index] = new Empty();
       break;
     case IO_SERIAL_CARD:
       io[index] = new SerialCard();
@@ -1060,23 +959,11 @@ void configureIO(uint index) {
     case IO_STORAGE_CARD:
       io[index] = new StorageCard();
       break;
-    case IO_RTC_CARD:
-      io[index] = new RTCCard();
-      break;
-    case IO_EMULATOR:
-      io[index] = new Emulator();
-      break;
-    case IO_LCD_CARD:
-      io[index] = new GPIO(GPIO_ATTACHMENT_LCD_CARD);
-      break;
     case IO_RAM_CARD:
       io[index] = new RAMCard();
       break;
-    case IO_NYI_1:
-    case IO_NYI_2:
-    case IO_NYI_3:
-    case IO_EMPTY:
-      io[index] = new Empty();
+    case IO_EMULATOR:
+      io[index] = new Emulator();
       break;
     default:
       break;
@@ -1457,4 +1344,32 @@ void writeData(uint8_t data) {
   digitalWriteFast(D6, data & 1);
   data = data >> 1;
   digitalWriteFast(D7, data & 1);
+}
+
+//
+// TIME
+//
+
+time_t syncTime() {
+  return Teensy3Clock.get();
+}
+
+String formattedDateTime() {
+  String time;
+
+  time.append(month());
+  time.append("/");
+  time.append(day());
+  time.append("/");
+  time.append(year());
+  time.append(" ");
+  time.append(hour());
+  time.append(":");
+  time.append(minute() < 10 ? "0": "");
+  time.append(minute());
+  time.append(":");
+  time.append(second() < 10 ? "0": "");
+  time.append(second());
+
+  return time;
 }
