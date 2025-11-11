@@ -1,0 +1,43 @@
+ca65 V2.18 - N/A
+Main file   : ./src/DB Joystick Info.asm
+Current file: ./src/DB Joystick Info.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               DB_DATA           = $8400
+000000r 1               DB_JOYSTICK_BTNS  = $8409
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1               loop:
+000003r 1  A2 0F          ldx #$0F
+000005r 1               loop_inner:
+000005r 1  20 rr rr       jsr delay
+000008r 1  CA             dex
+000009r 1  D0 FA          bne loop_inner
+00000Br 1  20 rr rr       jsr print
+00000Er 1  4C rr rr       jmp loop
+000011r 1               
+000011r 1               print:
+000011r 1  AD 09 84       lda DB_JOYSTICK_BTNS
+000014r 1  8D 00 84       sta DB_DATA
+000017r 1  60             rts
+000018r 1               
+000018r 1               delay:
+000018r 1  DA             phx
+000019r 1  A2 FF          ldx #$ff
+00001Br 1               delay_loop:
+00001Br 1  CA             dex
+00001Cr 1  D0 FD          bne delay_loop
+00001Er 1  FA             plx
+00001Fr 1  60             rts
+00001Fr 1               

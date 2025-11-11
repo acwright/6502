@@ -1,0 +1,52 @@
+ca65 V2.18 - N/A
+Main file   : ./src/DB Mouse Info.asm
+Current file: ./src/DB Mouse Info.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               DB_DATA         = $8400
+000000r 1               DB_MOUSE_X      = $8405
+000000r 1               DB_MOUSE_Y      = $8406
+000000r 1               DB_MOUSE_W      = $8407
+000000r 1               DB_MOUSE_BTNS   = $8408
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1               loop:
+000003r 1  A2 0F          ldx #$0F
+000005r 1               loop_inner:
+000005r 1  20 rr rr       jsr delay
+000008r 1  CA             dex
+000009r 1  D0 FA          bne loop_inner
+00000Br 1  20 rr rr       jsr print
+00000Er 1  4C rr rr       jmp loop
+000011r 1               
+000011r 1               print:
+000011r 1  AD 05 84       lda DB_MOUSE_X
+000014r 1  8D 00 84       sta DB_DATA
+000017r 1  AD 06 84       lda DB_MOUSE_Y
+00001Ar 1  8D 00 84       sta DB_DATA
+00001Dr 1  AD 07 84       lda DB_MOUSE_W
+000020r 1  8D 00 84       sta DB_DATA
+000023r 1  AD 08 84       lda DB_MOUSE_BTNS
+000026r 1  8D 00 84       sta DB_DATA
+000029r 1  60             rts
+00002Ar 1               
+00002Ar 1               delay:
+00002Ar 1  DA             phx
+00002Br 1  A2 FF          ldx #$ff
+00002Dr 1               delay_loop:
+00002Dr 1  CA             dex
+00002Er 1  D0 FD          bne delay_loop
+000030r 1  FA             plx
+000031r 1  60             rts
+000031r 1               

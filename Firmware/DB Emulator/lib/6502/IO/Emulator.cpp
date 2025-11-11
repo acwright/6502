@@ -36,9 +36,11 @@ uint8_t Emulator::read(uint16_t address) {
       return this->spiClock;
     #endif
 
-    case 0x04:
-      this->keyboardData &= 0b01111111; // Reading from KB data clears key available bit
-      return this->keyboardData;
+    case 0x04: {
+      uint8_t data = this->keyboardData; 
+      this->keyboardData&= 0b01111111; // Reading from KB data clears key available bit
+      return data;
+    }
     case 0x05:
       return this->mouseXData;
     case 0x06:
@@ -161,6 +163,15 @@ void Emulator::reset() {
   this->spiClock = 0x04;    // 4MHz
   this->spiTransferPending = false;
   #endif
+
+  this->keyboardData = 0x00;
+  this->mouseXData = 0x00;
+  this->mouseYData = 0x00;
+  this->mouseWData = 0x00;
+  this->mouseBtnsData = 0x00;
+  this->joystickData = 0x00;
+  this->joystickLData = 0x00;
+  this->joystickHData = 0x00;
 }
 
 void Emulator::updateKeyboard(uint8_t ascii) {
