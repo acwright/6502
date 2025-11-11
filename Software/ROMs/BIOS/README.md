@@ -1,5 +1,5 @@
-Wozmon
-======
+SC Wozmon
+=========
 
 Wozmon for the Serial Card.
 
