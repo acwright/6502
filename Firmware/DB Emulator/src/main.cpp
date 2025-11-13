@@ -30,7 +30,7 @@ JoystickController  joystick(usb);
 void onTick();
 void onCommand(char command);
 void onNumeric(uint8_t num);
-void onKeyboard(int unicode);
+void onKeyboard(int key);
 void onMouse();
 void onJoystick();
 
@@ -318,26 +318,66 @@ void onNumeric(uint8_t num) {
   }
 }
 
-void onKeyboard(int unicode) {
+void onKeyboard(int key) {
+  // Fix some quirks in the USBHost_t36 lib and add our own
+  // Rewrites are equivalent to CoolTerm TX
+  switch (key) {
+    case 0x7F: // BACKSPACE
+      key = 0x08;
+      break;
+    // 0xC2 - 0xCD = F1-F12 (Not handled)
+    case 0xD1: // INSERT
+      key = 0x1A;
+      break;
+    case 0xD2: // HOME
+      key = 0x01;
+      break;
+    case 0xD3: // PG UP (Not handled)
+      break;
+    case 0xD4: // DELETE
+      key = 0x7F;
+      break;
+    case 0xD5: // END
+      key = 0x04;
+      break;
+    case 0xD6: // PG DOWN (Not handled)
+      break;
+    case 0xD7: // RIGHT ARROW
+      key = 0x1D;
+      break;
+    case 0xD8: // LEFT ARROW
+      key = 0x1C;
+      break;
+    case 0xD9: // DOWN ARROW
+      key = 0x1F;
+      break;
+    case 0xDA: // UP ARROW
+      key = 0x1E;
+      break;
+  }
+
+  if (key > 0x7F) { return; } // No extended ASCII
+
   for (int i = 0; i < 8; i++) {
     uint8_t id = io[i]->id();
     if (id == IO_EMULATOR) {
       Emulator *emu = (Emulator *)io[i];
-      emu->updateKeyboard((uint8_t)unicode);
+      emu->updateKeyboard((uint8_t)key);
     }
   }
+  
 
   #ifdef KEYBOARD_DEBUG
   Serial.print("Keyboard: ");
-  Serial.print(unicode & 0b01111111);
+  Serial.print(key);
 
   char output[64];
 
   sprintf(
     output, 
     " | %c%c%c%c%c%c%c%c | 0x%02X",
-    BYTE_TO_BINARY(unicode & 0b01111111),
-    unicode & 0b01111111
+    BYTE_TO_BINARY(key /*& 0b01111111*/),
+    key /*& 0b01111111*/
   );
 
   Serial.println(output);

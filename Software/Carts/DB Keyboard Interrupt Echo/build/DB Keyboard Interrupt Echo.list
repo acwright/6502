@@ -1,0 +1,93 @@
+ca65 V2.18 - N/A
+Main file   : ./src/DB Keyboard Interrupt Echo.asm
+Current file: ./src/DB Keyboard Interrupt Echo.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1  xx           READ_PTR:     .res 1
+000001r 1  xx           WRITE_PTR:    .res 1
+000002r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1  xx xx xx xx  INPUT_BUFFER: .res $100
+000004r 1  xx xx xx xx  
+000008r 1  xx xx xx xx  
+000100r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               DB_DATA     = $8400
+000000r 1               DB_KB_CMD   = $8404
+000000r 1               DB_KB_DATA  = $8404
+000000r 1               
+000000r 1               reset:
+000000r 1  78             sei            ; Disable interrupts
+000001r 1  A2 FF          ldx #$ff
+000003r 1  9A             txs
+000004r 1               
+000004r 1  A9 00          lda #$00
+000006r 1  85 rr          sta READ_PTR    ; Initialize the read pointer
+000008r 1  85 rr          sta WRITE_PTR   ; Initilize the write pointer
+00000Ar 1               
+00000Ar 1  A9 80          lda #%10000000  ; Enable KB interrupts
+00000Cr 1  8D 04 84       sta DB_KB_CMD
+00000Fr 1               
+00000Fr 1  58             cli             ; Enable interrupts
+000010r 1               
+000010r 1               loop:
+000010r 1  20 rr rr       jsr buffer_size   ; Is there a new input?
+000013r 1  F0 FB          beq loop
+000015r 1  20 rr rr       jsr read_buffer
+000018r 1  20 rr rr       jsr send_char
+00001Br 1  4C rr rr       jmp loop          ; Infinite loop
+00001Er 1               
+00001Er 1               ; Write a byte from the A register to the input buffer
+00001Er 1               ; Modifies: flags, X
+00001Er 1               write_buffer:
+00001Er 1  A6 rr          ldx WRITE_PTR
+000020r 1  9D rr rr       sta INPUT_BUFFER,x
+000023r 1  E6 rr          inc WRITE_PTR
+000025r 1  60             rts
+000026r 1               
+000026r 1               ; Read a byte from the input buffer and load into A register
+000026r 1               ; Modifies: flags, X, A
+000026r 1               read_buffer:
+000026r 1  A6 rr          ldx READ_PTR
+000028r 1  BD rr rr       lda INPUT_BUFFER,x
+00002Br 1  E6 rr          inc READ_PTR
+00002Dr 1  60             rts
+00002Er 1               
+00002Er 1               ; Return (in A) the number of bytes in the input buffer
+00002Er 1               ; Modifies: flags, A
+00002Er 1               buffer_size:
+00002Er 1  A5 rr          lda WRITE_PTR
+000030r 1  38             sec
+000031r 1  E5 rr          sbc READ_PTR
+000033r 1  60             rts
+000034r 1               
+000034r 1               ; Transmit a byte using the DB print data register
+000034r 1               ; Modifies: None
+000034r 1               send_char:
+000034r 1  8D 00 84       sta DB_DATA
+000037r 1  60             rts
+000038r 1               
+000038r 1               nmi:
+000038r 1               irq:
+000038r 1  48             pha
+000039r 1  DA             phx
+00003Ar 1  AD 04 84       lda DB_KB_DATA
+00003Dr 1  29 80          and #%10000000    ; Check if DB keyboard caused the interrupt
+00003Fr 1  F0 06          beq irq_exit      ; If not, exit
+000041r 1  AD 04 84       lda DB_KB_DATA    ; Read the data from DB keyboard data register
+000044r 1  20 rr rr       jsr write_buffer  ; Store to the input buffer
+000047r 1               irq_exit:
+000047r 1  FA             plx
+000048r 1  68             pla
+000049r 1  40             rti
+00004Ar 1               
+00004Ar 1               .segment "VECTORS"
+000000r 1               
+000000r 1  rr rr        .word   nmi          ; NMI vector
+000002r 1  rr rr        .word   reset        ; RESET vector
+000004r 1  rr rr        .word   irq          ; IRQ vector
+000004r 1               

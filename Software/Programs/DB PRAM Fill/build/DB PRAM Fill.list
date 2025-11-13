@@ -1,0 +1,30 @@
+ca65 V2.18 - N/A
+Main file   : ./src/DB PRAM Fill.asm
+Current file: ./src/DB PRAM Fill.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               DB_PRAM_DATA   = $8412
+000000r 1               DB_PRAM_ADDR   = $8413
+000000r 1               
+000000r 1               reset:
+000000r 1  A2 FF          ldx #$ff
+000002r 1  9A             txs
+000003r 1               
+000003r 1  A9 00          lda #$00
+000005r 1               loop:
+000005r 1  8D 13 84       sta DB_PRAM_ADDR
+000008r 1  8D 12 84       sta DB_PRAM_DATA
+00000Br 1  1A             inc
+00000Cr 1  D0 F7          bne loop
+00000Er 1               
+00000Er 1               halt:
+00000Er 1  4C rr rr       jmp halt
+00000Er 1               

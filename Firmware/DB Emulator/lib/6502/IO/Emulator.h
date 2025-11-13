@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <TimeLib.h>
+#include <SD.h>
 #include "IO.h"
 #include "constants.h"
 #include "pins.h"
@@ -20,7 +21,7 @@
 /* ------------------------------------------------------------------ */
 /* | 3 |                 GPIO DATA DIRECTION REGISTER               | */
 /* ------------------------------------------------------------------ */
-/* | 4 |             N/A               |           KB DATA          | */
+/* | 4 |           KB CMD              |           KB DATA          | */
 /* ------------------------------------------------------------------ */
 /* | 5 |             N/A               |           MOUSE X          | */
 /* ------------------------------------------------------------------ */
@@ -48,6 +49,10 @@
 /* ------------------------------------------------------------------ */
 /* | 11 |            N/A               |         RTC YR (0-99)      | */
 /* ------------------------------------------------------------------ */
+/* | 12 |                          PRAM DATA                        | */
+/* ------------------------------------------------------------------ */
+/* | 13 |                         PRAM ADDRESS                      | */
+/* ------------------------------------------------------------------ */
 /*                                                                    */
 /* GPIO DATA DIRECTION REGISTER                                       */
 /* | 7 | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                              */
@@ -56,10 +61,17 @@
 /*                                                                    */
 /* DO-7 - Data Direction (1 = OUTPUT, 0 = INPUT)                      */
 /*                                                                    */
+/* KB CMD REGISTER                                                    */
+/* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
+/* | IE | X | X | X | X | X | X | X |                                 */
+/* | 0  | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  <- Default Values              */
+/*                                                                    */
+/* IE   - Keyboard Interrupt Enable (1 = ENABLED, 0 = DISABLED)       */
+/*                                                                    */
 /* KB DATA REGISTER                                                   */
-/* | 7  | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                             */
-/* | KA |         ASCII DATA            |                             */
-/* | 0  | 0 | 0 | 0 | 0  | 0  | 0  | 0  |  <- Default Values          */
+/* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
+/* | KA |         ASCII DATA        |                                 */
+/* | 0  | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  <- Default Values              */
 /*                                                                    */
 /* KA   - Key Available (1 = AVAILABLE, 0 = NONE)                     */
 /* DO-6 - ASCII Data                                                  */
@@ -95,7 +107,7 @@
 /* ------------------------------------------------------------------ */
 /* | 3 |                       SPI CLOCK REGISTER                   | */  
 /* ------------------------------------------------------------------ */
-/* | 4 |             N/A               |           KB DATA          | */
+/* | 4 |           KB CMD              |           KB DATA          | */
 /* ------------------------------------------------------------------ */
 /* | 5 |             N/A               |           MOUSE X          | */
 /* ------------------------------------------------------------------ */
@@ -122,6 +134,10 @@
 /* | 10 |            N/A               |        RTC MON (1-12)      | */
 /* ------------------------------------------------------------------ */
 /* | 11 |            N/A               |         RTC YR (0-99)      | */
+/* ------------------------------------------------------------------ */
+/* | 12 |                          PRAM DATA                        | */
+/* ------------------------------------------------------------------ */
+/* | 13 |                         PRAM ADDRESS                      | */
 /* ------------------------------------------------------------------ */
 /*                                                                    */
 /* SPI CONTROL REGISTER                                               */
@@ -153,6 +169,12 @@
 /*                                                                    */
 /* Ref: https://www.pjrc.com/teensy/td_libs_SPI.html                  */
 /*                                                                    */
+/* KB CMD REGISTER                                                    */
+/* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
+/* | IE | X | X | X | X | X | X | X |                                 */
+/* | 0  | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  <- Default Values              */
+/*                                                                    */
+/* IE   - Keyboard Interrupt Enable (1 = ENABLED, 0 = DISABLED)       */
 /*                                                                    */
 /* KB DATA REGISTER                                                   */
 /* | 7  | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                             */
@@ -191,7 +213,11 @@
 #define EMU_SPI_STATUS_INT  0b10000000
 #endif
 
-#define EMU_KEY_AVAILABLE  0b10000000
+#define EMU_KEY_INT         0b10000000
+#define EMU_KEY_AVAILABLE   0b10000000
+
+#define EMU_PRAM_FILE_NAME  "PRAM.bin"
+#define EMU_PRAM_SIZE       0x100 // 256 bytes
 
 class Emulator: public IO {
   private:
@@ -212,6 +238,7 @@ class Emulator: public IO {
     bool spiTransferPending = false;
     #endif
 
+    uint8_t keyboardCmd;
     uint8_t keyboardData;
     uint8_t mouseXData;
     uint8_t mouseYData;
@@ -221,9 +248,12 @@ class Emulator: public IO {
     uint8_t joystickLData;
     uint8_t joystickHData;
 
+    uint8_t *pramData;
+    uint8_t pramAddress;
+
   public:
     Emulator();
-    ~Emulator() {}
+    ~Emulator();
 
     uint8_t id() { return IO_EMULATOR; }
     String  description() override { return "Emulator"; }

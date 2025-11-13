@@ -4,10 +4,14 @@ Emulator::Emulator() {
   this->reset();
 }
 
+Emulator::~Emulator() {
+  delete[] this->pramData;
+}
+
 uint8_t Emulator::read(uint16_t address) {
   time_t time = now();
 
-  switch(address & 0x000F) {
+  switch(address & 0x001F) {
     #ifdef DEVBOARD_0
     case 0x00: // Print Data
       break;
@@ -67,13 +71,17 @@ uint8_t Emulator::read(uint16_t address) {
       return month(time);
     case 0x11:
       return year(time) % 100; // Get the last two digits of year
+    case 0x12: 
+      return this->pramData[this->pramAddress];
+    case 0x13:
+      return this->pramAddress;
   }
 
   return 0x00;
 }
 
 void Emulator::write(uint16_t address, uint8_t value) {
-  switch(address & 0x000F) {
+  switch(address & 0x001F) {
     #ifdef DEVBOARD_0
     case 0x00: // Print Data
       Serial.print((char)value);
@@ -113,12 +121,32 @@ void Emulator::write(uint16_t address, uint8_t value) {
       break;
     #endif
 
+    case 0x04:
+      this->keyboardCmd = value;
+      break;
+
+    case 0x12: { // PRAM Data
+      this->pramData[this->pramAddress] = value;
+      
+      File file = SD.open(EMU_PRAM_FILE_NAME, FILE_WRITE);
+      file.seek(this->pramAddress);
+      file.write(this->pramData[this->pramAddress]);
+      file.close();
+
+      break;
+    }
+    case 0x13: // PRAM Address
+      this->pramAddress = value;
+      break;
+
     default:
       break;
   }
 }
 
-uint8_t Emulator::tick() {  
+uint8_t Emulator::tick() {
+  uint8_t result = 0x00;
+
   #ifdef DEVBOARD_1
   if (this->spiTransferPending) {
     this->spiStatus |= EMU_SPI_STATUS_BSY;
@@ -141,12 +169,15 @@ uint8_t Emulator::tick() {
 
     if ((this->spiControl & EMU_SPI_CTRL_IE) > 0) {
       this->spiStatus |= EMU_SPI_STATUS_INT;
-      return 0x80;
+      result |= 0x80;
     }
   }
   #endif
 
-  return 0x00;
+  // Keyboard Interrupt
+  result |= (this->keyboardCmd & EMU_KEY_INT) & (this->keyboardData & EMU_KEY_AVAILABLE);
+
+  return result;
 }
 
 void Emulator::reset() {
@@ -164,6 +195,7 @@ void Emulator::reset() {
   this->spiTransferPending = false;
   #endif
 
+  this->keyboardCmd = 0x00;
   this->keyboardData = 0x00;
   this->mouseXData = 0x00;
   this->mouseYData = 0x00;
@@ -172,6 +204,23 @@ void Emulator::reset() {
   this->joystickData = 0x00;
   this->joystickLData = 0x00;
   this->joystickHData = 0x00;
+  
+  this->pramData = new uint8_t[EMU_PRAM_SIZE];
+  this->pramAddress = 0x00;
+
+  if (!SD.exists(EMU_PRAM_FILE_NAME)) {
+    File file = SD.open(EMU_PRAM_FILE_NAME, FILE_WRITE);
+    for (int i = 0; i < EMU_PRAM_SIZE; i++) {
+      file.write(0x00);
+    }
+    file.close();
+  }
+
+  File file = SD.open(EMU_PRAM_FILE_NAME);
+  for (int i = 0; i < EMU_PRAM_SIZE; i++) {
+    this->pramData[i] = file.read();
+  }
+  file.close();
 }
 
 void Emulator::updateKeyboard(uint8_t ascii) {
