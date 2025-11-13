@@ -1,7 +1,7 @@
-SC Wozmon
-=========
+DB BIOS
+=======
 
-Wozmon for the Serial Card.
+BIOS ROM for the Dev Board
 
 Install:
 
