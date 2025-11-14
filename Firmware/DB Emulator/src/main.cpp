@@ -198,6 +198,14 @@ void onTick() {
     interrupt |= io[i]->tick();
   }
 
+  // Check for external interrupt
+  if (digitalReadFast(IRQB) == LOW) {
+    interrupt |= 0x80;
+  }
+  if (digitalReadFast(NMIB) == LOW) {
+    interrupt |= 0x40;
+  }
+
   if ((interrupt & 0x40) != 0x00) {
     cpu.nmiTrigger();
   }
