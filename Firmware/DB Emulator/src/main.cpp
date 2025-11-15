@@ -493,6 +493,8 @@ void info() {
   Serial.println(")");
   Serial.print("Frequency: ");
   Serial.println(FREQS[freqIndex]);
+  Serial.print("IP address: ");
+  Serial.println(Ethernet.localIP());
   Serial.print("Date / Time: ");
   Serial.println(formattedDateTime());
   Serial.println();
