@@ -5,13 +5,11 @@
 #include "constants.h"
 
 class RAM {
-  private:
-    uint8_t *data;
-
   public:
     RAM();
     ~RAM();
 
+    uint8_t *data;
     bool enabled = true;
 
     uint8_t read(uint16_t index);

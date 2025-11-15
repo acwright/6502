@@ -67,4 +67,8 @@
 #define INPUT_CTX_PROG  2
 #define INPUT_CTX_IO    3
 
+#define BLOCK_SIZE      256
+#define RAM_BLOCKS      128
+#define ROM_BLOCKS      128
+
 #endif

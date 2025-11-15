@@ -5,14 +5,12 @@
 #include "constants.h"
 
 class ROM {
-  private:
-    uint8_t *data;
-    
   public:
     ROM();
     ~ROM();
 
     bool enabled = true;
+    uint8_t *data;
     String file = "None";
     
     uint8_t read(uint16_t index);

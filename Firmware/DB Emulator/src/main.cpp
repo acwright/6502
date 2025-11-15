@@ -1,14 +1,19 @@
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <TimeLib.h>
 #include <Bounce2.h>
 #include <SD.h>
 #include <EEPROM.h>
 #include <USBHost_t36.h>
+#include <QNEthernet.h>
+#include <AsyncWebServer_Teensy41.h>
 #include <6502.h>
 
 #ifdef DEVBOARD_1
 #include <SPI.h>
 #endif
+
+using namespace qindesign::network;
 
 Button intButton      = Button();
 Button stepButton     = Button();
@@ -26,6 +31,9 @@ USBHIDParser        hid3(usb);
 KeyboardController  keyboard(usb);
 MouseController     mouse(usb);
 JoystickController  joystick(usb);
+
+EthernetClient ethClient;
+AsyncWebServer    server(80);
 
 void onTick();
 void onCommand(char command);
@@ -68,6 +76,9 @@ void write(uint16_t addr, uint8_t val);
 void initPins();
 void initButtons();
 void initSD();
+void initUSB();
+void initEthernet();
+void initServer();
 
 void setDataDirIn();
 void setDataDirOut();
@@ -77,6 +88,12 @@ void writeAddress(uint16_t address);
 
 time_t syncTime();
 String formattedDateTime();
+
+void onServerRoot(AsyncWebServerRequest *request);
+void onServerStatus(AsyncWebServerRequest *request);
+void onServerMemory(AsyncWebServerRequest *request);
+void onServerControl(AsyncWebServerRequest *request);
+void onServerNotFound(AsyncWebServerRequest *request);
 
 uint8_t freqIndex = 20;      // 1 MHz
 bool isRunning = false;
@@ -89,12 +106,6 @@ uint8_t IOBank = 2;                  // By default, debugger IO bank is $8800
 uint16_t address = 0;
 uint8_t data = 0;
 bool readWrite = HIGH;
-bool be = HIGH;
-bool rdy = HIGH;
-bool sync = HIGH;
-bool resb = HIGH;
-bool irqb = HIGH;
-bool nmib = HIGH;
 
 String ROMs[ROM_MAX];
 uint romPage = 0;
@@ -131,13 +142,13 @@ void setup() {
   initPins();
   initButtons();
   initSD();
+  initUSB();
+  initEthernet();
+  initServer();
 
   #ifdef DEVBOARD_1
   SPI1.begin();
   #endif
-
-  usb.begin();
-  keyboard.attachPress(onKeyboard);
 
   info();
   reset();
@@ -1294,6 +1305,28 @@ void initSD() {
   }
 }
 
+void initUSB() {
+  usb.begin();
+  keyboard.attachPress(onKeyboard);
+}
+
+void initEthernet() {
+  Ethernet.begin();
+  Ethernet.waitForLocalIP(5000);
+
+  MDNS.begin("6502");
+  MDNS.addService("_http", "_tcp", 80);
+}
+
+void initServer() {
+  server.on("/", onServerRoot);
+  server.on("/status", onServerStatus);
+  server.on("/memory", onServerMemory);
+  server.on("/control", onServerControl);
+  server.onNotFound(onServerNotFound);
+  server.begin();
+}
+
 //
 // UTILITIES
 //
@@ -1420,4 +1453,195 @@ String formattedDateTime() {
   time.append(second());
 
   return time;
+}
+
+//
+// WEB SERVER
+//
+
+void onServerRoot(AsyncWebServerRequest *request) {
+  request->send(
+    "text/html",
+    sizeof(HTML) / sizeof(char), 
+    [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t 
+  {
+    size_t length = min(maxLen, (sizeof(HTML) / sizeof(char)) - index);
+
+    memcpy(buffer, HTML + index, length);
+
+    return length;
+  });
+}
+
+void onServerStatus(AsyncWebServerRequest *request) {
+  String response;
+  JsonDocument doc;
+
+  doc["frequency"]          = FREQS[freqIndex];
+  doc["ioBank"]             = IO_BANKS[IOBank];
+  doc["ipAddress"]          = Ethernet.localIP();
+  doc["isRunning"]          = isRunning;
+  doc["ramEnabled"]         = ram.enabled;
+  doc["ramBlocks"]          = RAM_BLOCKS;
+  doc["romEnabled"]         = rom.enabled;
+  doc["romFile"]            = rom.file;
+  doc["romPage"]            = romPage;
+  doc["romMax"]             = ROM_MAX;
+  doc["romBlocks"]          = ROM_BLOCKS;
+  doc["cartEnabled"]        = cart.enabled;
+  doc["cartFile"]           = cart.file;
+  doc["cartPage"]           = cartPage;
+  doc["cartMax"]            = CART_MAX;
+  doc["programPage"]        = programPage;
+  doc["programFile"]        = programFile;
+  doc["programMax"]         = PROG_MAX;
+  doc["blockSize"]          = BLOCK_SIZE;
+  doc["inputCtx"]           = inputCtx;
+  doc["version"]            = "1.0";
+
+  for (size_t i = (romPage * 8); i < ((romPage * 8) + 8); i++) {
+    if (ROMs[i] != "?") {
+      doc["romFiles"][i - (romPage * 8)] = ROMs[i];
+    }
+  }
+  for (size_t i = (cartPage * 8); i < ((cartPage * 8) + 8); i++) {
+    if (Carts[i] != "?") {
+      doc["cartFiles"][i - (cartPage * 8)] = Carts[i];
+    }
+  }
+  for (size_t i = (programPage * 8); i < ((programPage * 8) + 8); i++) {
+    if (Programs[i] != "?") {
+      doc["programFiles"][i - (programPage * 8)] = Programs[i];
+    }
+  }
+  for (size_t i = 0; i < 8; i++) {
+    doc["io"][i] = io[i]->description();
+  }
+
+  doc["rtc"]        = now();
+  
+  serializeJson(doc, response);
+
+  request->send(200, "application/json", response);
+}
+
+/* Notes: We are paginating RAM/ROM responses due to limitations in the AsyncWebServer_Teensy41 lib.              */
+/* There is a bug in the implementation of beginChunkedResponse() (improper formatting) and all other response    */
+/* types besides beginResponseStream() will corrupt or add garbage to the data. So we are limited to 1024 byte    */
+/* blocks.                                                                                                        */
+/* All 32 blocks of ROM can be inspected but only top 24k is valid ROM space.                                     */
+
+void onServerMemory(AsyncWebServerRequest *request) {
+  String block;
+  size_t page;
+  bool formatted = false;
+
+  size_t maxBlocks;
+
+  if (request->hasParam("block")) {
+    block = request->getParam("block")->value();
+
+    if (block == "ram") {
+      maxBlocks = RAM_BLOCKS;
+    } else if (block == "rom") {
+      maxBlocks = ROM_BLOCKS;
+    } else {
+      request->send(400);
+      return;
+    }
+  } else {
+    request->send(400);
+    return;
+  }
+  if (request->hasParam("page")) {
+    page = size_t(request->getParam("page")->value().toInt());
+    page = min(size_t(maxBlocks - 1), page); // Clamp page index
+  } else {
+    request->send(400);
+    return;
+  }
+  if (request->hasParam("formatted")) {
+    formatted = true;
+  }
+
+  AsyncResponseStream *response = request->beginResponseStream(
+    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
+    BLOCK_SIZE
+  );
+
+  for (size_t i = 0; i < BLOCK_SIZE; i++) {
+    if (formatted) {
+      if (block == "ram") {
+        response->printf("%02X ", ram.data[i + (page * BLOCK_SIZE)]);
+      } else if (block == "rom") {
+        response->printf("%02X ", rom.data[i + (page * BLOCK_SIZE)]);
+      }
+    } else {
+      if (block == "ram") {
+        response->write(ram.data[i + (page * BLOCK_SIZE)]);
+      } else if (block == "rom") {
+        response->write(rom.data[i + (page * BLOCK_SIZE)]);
+      }
+    }
+  }
+  
+  request->send(response);
+}
+
+void onServerControl(AsyncWebServerRequest *request) {
+  String command;
+
+  if (request->hasParam("command")) {
+    command = request->getParam("command")->value();
+  } else {
+    request->send(400);
+    return;
+  }
+
+  if (command == "a" || command == "A") {
+    toggleRAM();
+  } else if (command == "c" || command == "C") {
+    listCarts();
+  } else if (command == "f" || command == "F") {
+    info();
+  } else if (command == "g" || command == "G") {
+    log();
+  } else if (command == "i" || command == "I") {
+    listIO();
+  } else if (command == "l" || command == "L") {
+    toggleCart();
+  } else if (command == "m" || command == "M") {
+    listROMs();
+  } else if (command == "o" || command == "O") {
+    toggleROM();
+  } else if (command == "p" || command == "P") {
+    snapshot();
+  } else if (command == "r" || command == "R") {
+    toggleRunStop();
+  } else if (command == "s" || command == "S") {
+    step();
+  } else if (command == "t" || command == "T") {
+    reset();
+  } else if (command == "u" || command == "U") {
+    listPrograms();
+  } else if (command == "-") {
+    decreaseFrequency();
+  } else if (command == "+") {
+    increaseFrequency();
+  } else if (command == "[") {
+    prevPage();
+  } else if (command == "]") {
+    nextPage();
+  } else if (request->getParam("command")->value().toInt() >= 0 && request->getParam("command")->value().toInt() < 8) {
+    onNumeric(request->getParam("command")->value().toInt());
+  } else {
+    request->send(400);
+    return;
+  }
+
+  request->send(200);
+}
+
+void onServerNotFound(AsyncWebServerRequest *request) {
+  request->send(404);
 }
