@@ -53,6 +53,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 **Helpers**:
 
 - **Breadboard Helper**: A board that allows easy connection to a breadboard for prototyping.
+- **Clock Helper**: A board that allows for running and stopping the clock along with single cycle or instruction stepping.
 - **DB25 Helper**: A board that allows easy connection of GPIO ports to a DB25 connector.
 - **GPIO Helper**: A board that provides eight buttons and eight LEDs for user input and output.
 - **GPIO Breadboard Helper**: A board that allows easy connection of GPIO ports to a breadboard for prototyping.
