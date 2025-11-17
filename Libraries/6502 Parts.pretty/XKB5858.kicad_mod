@@ -1,0 +1,126 @@
+(footprint "XKB5858"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 0.15 -4 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "b02af862-6c0c-4f3c-ab11-cc397220e973")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "XKB5858"
+		(at 0 1 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "3d7658ec-27f5-439c-bd83-4981194c601d")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "9b809a9a-f6f3-445e-9cba-2ce78c2bf846")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "478fc2a8-7a1b-4490-8745-6fe4d58b6a95")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_rect
+		(start -2.9 -2.9)
+		(end 2.9 2.9)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "c35fbee8-24e0-462f-a14a-d599c9e090c9")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "770c1394-ada3-413b-9677-c413dd8eb837")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -3.375 -2)
+		(size 2.55 1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "168ddebe-a560-4c7c-9c09-2df17c07fc7d")
+	)
+	(pad "2" smd rect
+		(at -3.375 0)
+		(size 2.55 1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "48017d8f-0de9-47db-acfd-4d4d17e650e5")
+	)
+	(pad "3" smd rect
+		(at -3.375 2)
+		(size 2.55 1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "d692fd8e-a257-4813-852a-7f8e7341fee5")
+	)
+	(pad "4" smd rect
+		(at 3.375 -2)
+		(size 2.55 1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "fed23493-1e27-4c1d-9be7-84b08c58e465")
+	)
+	(pad "5" smd rect
+		(at 3.375 0)
+		(size 2.55 1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "90e7ac0a-6d8b-4fd4-866e-f60029de58ae")
+	)
+	(pad "6" smd rect
+		(at 3.375 2)
+		(size 2.55 1)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "399797d1-3c80-466f-9dae-dfb31b2beacc")
+	)
+	(embedded_fonts no)
+	(model "${KIPRJMOD}/../../../Libraries/Models/XKB5858.step"
+		(offset
+			(xyz 0 0 0.4)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz -90 -0 -90)
+		)
+	)
+)
