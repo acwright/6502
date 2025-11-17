@@ -90,7 +90,7 @@ time_t syncTime();
 String formattedDateTime();
 
 void onServerRoot(AsyncWebServerRequest *request);
-void onServerStatus(AsyncWebServerRequest *request);
+void onServerInfo(AsyncWebServerRequest *request);
 void onServerMemory(AsyncWebServerRequest *request);
 void onServerControl(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
@@ -100,8 +100,7 @@ bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
 
-uint8_t inputCtx = INPUT_CTX_ROM;
-uint8_t IOBank = 2;                  // By default, debugger IO bank is $8800
+uint8_t inputCtx = INPUT_CTX_ROM;                // By default, debugger IO bank is $8800
 
 uint16_t address = 0;
 uint8_t data = 0;
@@ -150,10 +149,14 @@ void setup() {
   SPI1.begin();
   #endif
 
+  readROMs();
+  readCarts();
+  readPrograms();
+
   info();
-  reset();
 
   if (autoStart) {
+    reset();
     toggleRunStop();
   }
 }
@@ -697,6 +700,8 @@ void listROMs() {
   inputCtx = INPUT_CTX_ROM;
 
   Serial.println();
+  Serial.println("ROMs:");
+  Serial.println();
 
   for (uint j = (romPage * 8); j < ((romPage * 8) + 8); j++) {
     Serial.print("(");
@@ -804,6 +809,8 @@ void listCarts() {
 
   inputCtx = INPUT_CTX_CART;
 
+  Serial.println();
+  Serial.println("Carts:");
   Serial.println();
 
   for (uint j = (cartPage * 8); j < ((cartPage * 8) + 8); j++) {
@@ -915,6 +922,8 @@ void listPrograms() {
 
   inputCtx = INPUT_CTX_PROG;
 
+  Serial.println();
+  Serial.println("Programs:");
   Serial.println();
 
   for (uint j = (programPage * 8); j < ((programPage * 8) + 8); j++) {
@@ -1322,7 +1331,7 @@ void initEthernet() {
 
 void initServer() {
   server.on("/", onServerRoot);
-  server.on("/status", onServerStatus);
+  server.on("/info", onServerInfo);
   server.on("/memory", onServerMemory);
   server.on("/control", onServerControl);
   server.onNotFound(onServerNotFound);
@@ -1461,7 +1470,7 @@ String formattedDateTime() {
 // WEB SERVER
 //
 
-void onServerRoot(AsyncWebServerRequest *request) {
+FASTRUN void onServerRoot(AsyncWebServerRequest *request) {
   request->send(
     "text/html",
     sizeof(HTML) / sizeof(char), 
@@ -1475,12 +1484,11 @@ void onServerRoot(AsyncWebServerRequest *request) {
   });
 }
 
-void onServerStatus(AsyncWebServerRequest *request) {
+FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   String response;
   JsonDocument doc;
 
   doc["frequency"]          = FREQS[freqIndex];
-  doc["ioBank"]             = IO_BANKS[IOBank];
   doc["ipAddress"]          = Ethernet.localIP();
   doc["isRunning"]          = isRunning;
   doc["ramEnabled"]         = ram.enabled;
@@ -1499,28 +1507,21 @@ void onServerStatus(AsyncWebServerRequest *request) {
   doc["programMax"]         = PROG_MAX;
   doc["blockSize"]          = BLOCK_SIZE;
   doc["inputCtx"]           = inputCtx;
+  doc["rtc"]                = now();
   doc["version"]            = "1.0";
 
   for (size_t i = (romPage * 8); i < ((romPage * 8) + 8); i++) {
-    if (ROMs[i] != "?") {
-      doc["romFiles"][i - (romPage * 8)] = ROMs[i];
-    }
+    doc["romFiles"][i - (romPage * 8)] = ROMs[i];
   }
   for (size_t i = (cartPage * 8); i < ((cartPage * 8) + 8); i++) {
-    if (Carts[i] != "?") {
-      doc["cartFiles"][i - (cartPage * 8)] = Carts[i];
-    }
+    doc["cartFiles"][i - (cartPage * 8)] = Carts[i];
   }
   for (size_t i = (programPage * 8); i < ((programPage * 8) + 8); i++) {
-    if (Programs[i] != "?") {
-      doc["programFiles"][i - (programPage * 8)] = Programs[i];
-    }
+    doc["programFiles"][i - (programPage * 8)] = Programs[i];
   }
   for (size_t i = 0; i < 8; i++) {
     doc["io"][i] = io[i]->description();
   }
-
-  doc["rtc"]        = now();
   
   serializeJson(doc, response);
 
@@ -1533,7 +1534,7 @@ void onServerStatus(AsyncWebServerRequest *request) {
 /* blocks.                                                                                                        */
 /* All 32 blocks of ROM can be inspected but only top 24k is valid ROM space.                                     */
 
-void onServerMemory(AsyncWebServerRequest *request) {
+FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
   String block;
   size_t page;
   bool formatted = false;
@@ -1567,8 +1568,7 @@ void onServerMemory(AsyncWebServerRequest *request) {
   }
 
   AsyncResponseStream *response = request->beginResponseStream(
-    formatted ? "text/plain" : "application/octet-stream; charset=binary", 
-    BLOCK_SIZE
+    formatted ? "text/plain" : "application/octet-stream; charset=binary"
   );
 
   for (size_t i = 0; i < BLOCK_SIZE; i++) {
@@ -1590,7 +1590,7 @@ void onServerMemory(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
-void onServerControl(AsyncWebServerRequest *request) {
+FASTRUN void onServerControl(AsyncWebServerRequest *request) {
   String command;
 
   if (request->hasParam("command")) {
@@ -1600,43 +1600,46 @@ void onServerControl(AsyncWebServerRequest *request) {
     return;
   }
 
-  if (command == "a" || command == "A") {
+  if (command == "a" || command == "A") {         // Toggle RAM
     toggleRAM();
-  } else if (command == "c" || command == "C") {
+  } else if (command == "c" || command == "C") {  // List Carts
     listCarts();
-  } else if (command == "f" || command == "F") {
+  } else if (command == "f" || command == "F") {  // Info
     info();
-  } else if (command == "g" || command == "G") {
+  } else if (command == "g" || command == "G") {  // Log
     log();
-  } else if (command == "i" || command == "I") {
+  } else if (command == "i" || command == "I") {  // List IO
     listIO();
-  } else if (command == "l" || command == "L") {
+  } else if (command == "l" || command == "L") {  // Toggle Cart
     toggleCart();
-  } else if (command == "m" || command == "M") {
+  } else if (command == "m" || command == "M") {  // List ROMs
     listROMs();
-  } else if (command == "o" || command == "O") {
+  } else if (command == "o" || command == "O") {  // Toggle ROM
     toggleROM();
-  } else if (command == "p" || command == "P") {
+  } else if (command == "p" || command == "P") {  // Snapshot
     snapshot();
-  } else if (command == "r" || command == "R") {
+  } else if (command == "r" || command == "R") {  // Run / Stop
     toggleRunStop();
-  } else if (command == "s" || command == "S") {
+  } else if (command == "s" || command == "S") {  // Step
     step();
-  } else if (command == "t" || command == "T") {
+  } else if (command == "t" || command == "T") {  // Reset
     reset();
-  } else if (command == "u" || command == "U") {
+  } else if (command == "u" || command == "U") {  // List Programs
     listPrograms();
-  } else if (command == "-") {
+  } else if (command == "-") {                    // Decrease Frequency
     decreaseFrequency();
-  } else if (command == "+") {
+  } else if (command == "+") {                    // Increase Frequency
     increaseFrequency();
-  } else if (command == "[") {
+  } else if (command == "prev") {                 // Prev Page
     prevPage();
-  } else if (command == "]") {
+  } else if (command == "next") {                 // Next Page
     nextPage();
-  } else if (request->getParam("command")->value().toInt() >= 0 && request->getParam("command")->value().toInt() < 8) {
+  } else if (                                     // Load #
+      request->getParam("command")->value().toInt() >= 0 && 
+      request->getParam("command")->value().toInt() < 8
+  ) {
     onNumeric(request->getParam("command")->value().toInt());
-  } else {
+  } else {                                        // Bad Request
     request->send(400);
     return;
   }
@@ -1644,6 +1647,6 @@ void onServerControl(AsyncWebServerRequest *request) {
   request->send(200);
 }
 
-void onServerNotFound(AsyncWebServerRequest *request) {
+FASTRUN void onServerNotFound(AsyncWebServerRequest *request) {
   request->send(404);
 }
