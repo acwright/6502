@@ -35,7 +35,6 @@ JoystickController  joystick(usb);
 EthernetClient ethClient;
 AsyncWebServer    server(80);
 
-void onTick();
 void onCommand(char command);
 void onNumeric(uint8_t num);
 void onKeyboard(int key);
@@ -45,6 +44,7 @@ void onJoystick();
 void info();
 void log();
 void reset();
+void tick();
 void step();
 void snapshot();
 void decreaseFrequency();
@@ -53,20 +53,22 @@ void toggleRunStop();
 void toggleRAM();
 void toggleROM();
 void toggleCart();
-bool readROMs();
+void readROMs();
 void listROMs();
 void loadROM(uint index);
-bool loadROMPath(String path);
-bool readCarts();
+void loadROMPath(String path);
+void readCarts();
 void listCarts();
 void loadCart(uint index);
-bool loadCartPath(String path);
-bool readPrograms();
+void loadCartPath(String path);
+void readPrograms();
 void listPrograms();
 void loadProgram(uint index);
-bool loadProgramPath(String path);
+void loadProgramPath(String path);
+void readIO();
 void listIO();
 void configureIO(uint index);
+void listFiles();
 void prevPage();
 void nextPage();
 
@@ -88,6 +90,7 @@ void writeAddress(uint16_t address);
 
 time_t syncTime();
 String formattedDateTime();
+time_t lastSnapshot;
 
 void onServerRoot(AsyncWebServerRequest *request);
 void onServerInfo(AsyncWebServerRequest *request);
@@ -95,10 +98,13 @@ void onServerMemory(AsyncWebServerRequest *request);
 void onServerControl(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
 
-uint8_t freqIndex = 20;      // 1 MHz
+uint8_t freqIndex = FREQ_SIZE - 1;              // Max speed
 bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
+#ifdef DEVBOARD_0
+bool busEnabled = true;
+#endif
 
 uint8_t inputCtx = INPUT_CTX_ROM;                // By default, debugger IO bank is $8800
 
@@ -106,19 +112,18 @@ uint16_t address = 0;
 uint8_t data = 0;
 bool readWrite = HIGH;
 
-String ROMs[ROM_MAX];
-uint romPage = 0;
-String Carts[CART_MAX];
-uint cartPage = 0;
-String Programs[PROG_MAX];
-uint programPage = 0;
-String programFile = "None";
+String ROMs[FILE_MAX];
+uint romFilePage = 0;
+String Carts[FILE_MAX];
+uint cartFilePage = 0;
+String Programs[FILE_MAX];
+uint programFilePage = 0;
 
 CPU cpu = CPU(read, write);
 RAM ram = RAM();
 ROM rom = ROM();
 Cart cart = Cart();
-IO *io[8] = {
+IO *io[IO_SLOTS] = {
   new RAMCard(),
   new Emulator(),
   new Empty(),
@@ -196,9 +201,21 @@ void loop() {
     onCommand(Serial.read());
   }
 
-  if (isRunning) {
-    cpu.tick();
-    onTick();
+  #ifdef DEVBOARD_0
+  if (digitalReadFast(BE) == LOW && busEnabled) {
+    busEnabled = false;
+    digitalWriteFast(OE1, LOW);
+    digitalWriteFast(OE2, LOW);
+    pinMode(RWB, INPUT);
+  } else if (digitalReadFast(BE) == HIGH && !busEnabled) {
+    digitalWriteFast(OE1, HIGH);
+    digitalWriteFast(OE2, HIGH);
+    pinMode(RWB, OUTPUT);
+  }
+  #endif
+
+  if (digitalReadFast(RDY) == HIGH && isRunning) {
+    tick();
   }
 }
 
@@ -206,62 +223,57 @@ void loop() {
 // EVENTS
 //
 
-void onTick() {
-  uint8_t interrupt = 0x00;
-  for(uint i = 0; i < 8; i++) {
-    interrupt |= io[i]->tick();
-  }
-
-  // Check for external interrupt
-  if (digitalReadFast(IRQB) == LOW) {
-    interrupt |= 0x80;
-  }
-  if (digitalReadFast(NMIB) == LOW) {
-    interrupt |= 0x40;
-  }
-
-  if ((interrupt & 0x40) != 0x00) {
-    cpu.nmiTrigger();
-  }
-  if ((interrupt & 0x80) != 0x00) {
-    cpu.irqTrigger();
-  } else {
-    cpu.irqClear();
-  }
-}
-
 void onCommand(char command) {
   switch (command) {
-    case '0': 
-      onNumeric(0);
-      break;
+    case '0':
     case '1':
-      onNumeric(1);
-      break;
     case '2':
-      onNumeric(2);
-      break;
     case '3':
-      onNumeric(3);
-      break;
     case '4':
-      onNumeric(4);
-      break;
     case '5':
-      onNumeric(5);
-      break;
     case '6':
-      onNumeric(6);
+    case '7': {
+      if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
+      uint8_t index = String(command).toInt();
+      onNumeric(index);
+      switch(inputCtx) {
+        case INPUT_CTX_ROM:
+          Serial.print("Loaded ROM: ");
+          Serial.println(rom.file);
+          break;
+        case INPUT_CTX_CART:
+          Serial.print("Loaded Cart: ");
+          Serial.println(cart.file);
+          break;
+        case INPUT_CTX_PROG:
+          Serial.print("Loaded Program: ");
+          Serial.println(ram.file);
+          break;
+        case INPUT_CTX_IO:
+          Serial.print("(");
+          Serial.print(index);
+          Serial.print(") IO");
+          Serial.print(index + 1);
+          Serial.print(" $");
+          Serial.print(IO_START + (IO_SLOT_SIZE * index), HEX);
+          Serial.print(" - ");
+          Serial.println(io[index]->description());
+          break;
+        default:
+          break;
+      }
       break;
-    case '7':
-      onNumeric(7);
-      break;
+    }
     case 'a':
     case 'A':
       toggleRAM();
+      Serial.print("RAM: ");
+      Serial.println(ram.enabled ? "Enabled" : "Disabled");
       break;
     case 'c':
     case 'C':
+      if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
+      readCarts();
       listCarts();
       break;
     case 'f':
@@ -274,51 +286,84 @@ void onCommand(char command) {
       break;
     case 'i':
     case 'I':
+      readIO();
       listIO();
+      break;
+    case 'k':
+    case 'K':
+      tick();
+      log();
       break;
     case 'l':
     case 'L':
       toggleCart();
+      Serial.print("Cart: ");
+      Serial.println(cart.enabled ? "Enabled" : "Disabled");
       break;
     case 'm':
     case 'M':
+      if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
+      readROMs();
       listROMs();
       break;
     case 'o':
     case 'O':
       toggleROM();
+      Serial.print("ROM: ");
+      Serial.println(rom.enabled ? "Enabled" : "Disabled");
       break;
     case 'p':
     case 'P':
+      if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
+      Serial.print("Creating snapshot... ");
       snapshot();
+      Serial.print("Success! (");
+      Serial.print(lastSnapshot);
+      Serial.println(")");
       break;
     case 'r':
     case 'R':
       toggleRunStop();
+      Serial.println(isRunning ? "Running…" : "Stopped");
       break;
     case 's':
     case 'S':
-      step();
+      if (!isRunning) {
+        step();
+        log();
+      } else {
+        Serial.println("Clock must be stopped before stepping!");
+      }
       break;
     case 't':
     case 'T':
+      Serial.print("Resetting... ");
       reset();
+      Serial.println("Done");
       break;
     case 'u':
     case 'U':
+      if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
+      readPrograms();
       listPrograms();
       break;
     case '-':
       decreaseFrequency();
+      Serial.print("Frequency: ");
+      Serial.println(FREQ_LABELS[freqIndex]);
       break;
     case '+':
       increaseFrequency();
+      Serial.print("Frequency: ");
+      Serial.println(FREQ_LABELS[freqIndex]);
       break;
     case '[':
       prevPage();
+      listFiles();
       break;
     case ']':
       nextPage();
+      listFiles();
       break;
   }
 }
@@ -480,7 +525,7 @@ void info() {
   Serial.println("---------------------------------");
   Serial.println();
   Serial.print("RAM: ");
-  Serial.print(programFile);
+  Serial.print(ram.file);
   Serial.print(" (");
   Serial.print(ram.enabled ? "Enabled" : "Disabled");
   Serial.println(")");
@@ -495,14 +540,14 @@ void info() {
   Serial.print(cart.enabled ? "Enabled" : "Disabled");
   Serial.println(")");
   Serial.print("Frequency: ");
-  Serial.println(FREQS[freqIndex]);
+  Serial.println(FREQ_LABELS[freqIndex]);
   Serial.print("IP address: ");
   Serial.println(Ethernet.localIP());
   Serial.print("Date / Time: ");
   Serial.println(formattedDateTime());
   Serial.println();
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| (R)un / Stop          | (S)tep           | Rese(T)         |");
+  Serial.println("| (R)un / Stop          | (S)tep / Tic(K)  | Rese(T)         |");
   Serial.println("--------------------------------------------------------------");
   Serial.println("| Toggle R(A)M          | Toggle R(O)M     | Toggle Cart (L) |");
   Serial.println("--------------------------------------------------------------");
@@ -537,8 +582,6 @@ void reset() {
     toggleRunStop();
   }
 
-  Serial.print("Resetting... ");
-
   cpu.reset();
   
   for(uint i = 0; i < 8; i++) {
@@ -550,48 +593,90 @@ void reset() {
   digitalWriteFast(RESB, HIGH);
   delay(100);
 
-  Serial.println("Done");
-
   if (isCurrentlyRunning) {
     toggleRunStop();
   }
 }
 
+void tick() {
+  if (cpu.opcodeCycle() == 0) {
+    digitalWriteFast(SYNC, HIGH);
+  } else {
+    digitalWriteFast(SYNC, LOW);
+  }
+
+  cpu.tick();
+  
+  uint8_t interrupt = 0x00;
+
+  // Check for external interrupt
+  if (digitalReadFast(IRQB) == LOW) {
+    interrupt |= 0x80;
+  }
+  if (digitalReadFast(NMIB) == LOW) {
+    interrupt |= 0x40;
+  }
+
+  // Tick IO and check for emulated interrupt
+  for(uint i = 0; i < IO_SLOTS; i++) {
+    interrupt |= io[i]->tick();
+  }
+  
+  if ((interrupt & 0x40) != 0x00) {
+    cpu.nmiTrigger();
+  }
+  if ((interrupt & 0x80) != 0x00) {
+    cpu.irqTrigger();
+  } else {
+    cpu.irqClear();
+  }
+}
+
 void step() {
-  if (isStepping) { return; }
+  uint8_t ticks = cpu.step();
 
-  if (!isRunning) {
-    isStepping = true;
+  if (cpu.opcodeCycle() == 0) {
+    digitalWriteFast(SYNC, HIGH);
+  } else {
+    digitalWriteFast(SYNC, LOW);
+  }
 
-    uint8_t ticks = cpu.step();
-    for(uint i = 0; i < ticks; i++) {
-      onTick();
+  for(uint i = 0; i < ticks; i++) {
+    uint8_t interrupt = 0x00;
+
+    // Check for external interrupt
+    if (digitalReadFast(IRQB) == LOW) {
+      interrupt |= 0x80;
+    }
+    if (digitalReadFast(NMIB) == LOW) {
+      interrupt |= 0x40;
     }
 
-    log();
-    isStepping = false;
-  } else {
-    Serial.println("Clock must be stopped before stepping!");
+    // Tick IO and check for emulated interrupt
+    for(uint i = 0; i < IO_SLOTS; i++) {
+      interrupt |= io[i]->tick();
+    }
+
+    if ((interrupt & 0x40) != 0x00) {
+      cpu.nmiTrigger();
+    }
+    if ((interrupt & 0x80) != 0x00) {
+      cpu.irqTrigger();
+    } else {
+      cpu.irqClear();
+    }
   }
 }
 
 void snapshot() {
-  Serial.print("Creating snapshot... ");
+  if (!SD.mediaPresent()) { return; }
+  if (!SD.exists("Snapshots")) { SD.mkdir("Snapshots"); }
 
-  if (!SD.mediaPresent()) {
-    Serial.print("No Card Detected!");
-    return;
-  }
-
-  if (!SD.exists("Snapshots")) {
-    SD.mkdir("Snapshots");
-  }
-
-  time_t time = now();
+  lastSnapshot = now();
   String path = "Snapshots/";
   String IOpath = "Snapshots/";
 
-  path.append(time);
+  path.append(lastSnapshot);
   path.append(".bin");
 
   File snapshot = SD.open(path.c_str(), FILE_WRITE);
@@ -602,72 +687,47 @@ void snapshot() {
     }
     snapshot.close();
   }
-
-  Serial.print("Success! (");
-  Serial.print(time);
-  Serial.println(")");
 }
 
 void decreaseFrequency() {
   if (freqIndex > 0) {
     freqIndex--;
   } else {
-    freqIndex = 20;
+    freqIndex = FREQ_SIZE - 1;
   }
-
-  Serial.print("Frequency: ");
-  Serial.println(FREQS[freqIndex]);
 }
 
 void increaseFrequency() {
-  if (freqIndex < 20) {
+  if (freqIndex < (FREQ_SIZE - 1)) {
     freqIndex++;
   } else {
     freqIndex = 0;
   }
-
-  Serial.print("Frequency: ");
-  Serial.println(FREQS[freqIndex]);
 }
 
 void toggleRunStop() {
   isRunning = !isRunning;
-
-  Serial.println(isRunning ? "Running…" : "Stopped");
 }
 
 void toggleRAM() {
   ram.enabled = !ram.enabled;
-
-  Serial.print("RAM: ");
-  Serial.println(ram.enabled ? "Enabled" : "Disabled");
 }
 
 void toggleROM() {
   rom.enabled = !rom.enabled;
-
-  Serial.print("ROM: ");
-  Serial.println(rom.enabled ? "Enabled" : "Disabled");
 }
 
 void toggleCart() {
   cart.enabled = !cart.enabled;
-
-  Serial.print("Cart: ");
-  Serial.println(cart.enabled ? "Enabled" : "Disabled");
 }
 
-bool readROMs() {
-  if (!SD.mediaPresent()) { 
-    Serial.println("SD card not detected!");
-    return false;
-  }
+void readROMs() {
+  if (!SD.mediaPresent()) { return; }
+  if (!SD.exists("ROMs")) { SD.mkdir("ROMs"); }
 
-  if (!SD.exists("ROMs")) {
-    SD.mkdir("ROMs");
-  }
+  inputCtx = INPUT_CTX_ROM;
 
-  for (uint i = 0; i < ROM_MAX; i++) {
+  for (uint i = 0; i < FILE_MAX; i++) {
     ROMs[i] = "?";
   }
 
@@ -676,6 +736,11 @@ bool readROMs() {
   uint index = 0;
 
   while(true) {
+    if (index >= FILE_MAX) {
+      ROMDirectory.close();
+      break;
+    }
+
     File file = ROMDirectory.openNextFile();
 
     if (file) {
@@ -690,22 +755,16 @@ bool readROMs() {
       break;
     }
   }
-
-  return true;
 }
 
 void listROMs() {
-  if (!readROMs()) { return; }
-
-  inputCtx = INPUT_CTX_ROM;
-
   Serial.println();
   Serial.println("ROMs:");
   Serial.println();
 
-  for (uint j = (romPage * 8); j < ((romPage * 8) + 8); j++) {
+  for (uint j = (romFilePage * FILE_PER_PAGE); j < ((romFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); j++) {
     Serial.print("(");
-    Serial.print(j - (romPage * 8));
+    Serial.print(j - (romFilePage * FILE_PER_PAGE));
     Serial.print(")");
     Serial.print(" - ");
     Serial.println(ROMs[j]);
@@ -713,39 +772,26 @@ void listROMs() {
 
   Serial.println();
   Serial.print("Page: ");
-  Serial.print(romPage);
+  Serial.print(romFilePage);
   Serial.println(" | ([) Prev Page | Next Page (]) |");
   Serial.println();
 }
 
 void loadROM(uint index) {
   String directory = "ROMs/";
-  String filename = ROMs[(romPage * 8) + index];
+  String filename = ROMs[(romFilePage * FILE_PER_PAGE) + index];
   
-  if (!filename.length()) {
-    Serial.println("Invalid ROM! List RO(M)s before loading.");
-    return;
-  }
+  if (!filename.length()) { return; }
 
-  String path = directory + filename;
+  loadROMPath(directory + filename);
 
-  if (loadROMPath(path)) {
-    rom.file = filename;
-    rom.enabled = true;
-    cart.enabled = false;
-    
-    Serial.print("Loaded ROM: ");
-    Serial.println(rom.file);
-  } else {
-    Serial.println("Invalid ROM!");
-  }
+  rom.file = filename;
+  rom.enabled = true;
+  cart.enabled = false;
 }
 
-bool loadROMPath(String path) {
-  if (!SD.mediaPresent()) { 
-    Serial.println("SD card not detected!");
-    return false;
-  }
+void loadROMPath(String path) {
+  if (!SD.mediaPresent()) { return; }
   
   File file = SD.open(path.c_str());
 
@@ -753,31 +799,21 @@ bool loadROMPath(String path) {
     uint i = 0;
 
     while(file.available()) {
-      rom.load(i, file.read());
+      rom.write(i, file.read());
       i++;
     }
-
-    file.close();
-
-    return true;
-  } else {
-    file.close();
-
-    return false;
   }
+
+  file.close();
 }
 
-bool readCarts() {
-  if (!SD.mediaPresent()) { 
-    Serial.println("SD card not detected!");
-    return false;
-  }
+void readCarts() {
+  if (!SD.mediaPresent()) { return; }
+  if (!SD.exists("Carts")) { SD.mkdir("Carts"); }
 
-  if (!SD.exists("Carts")) {
-    SD.mkdir("Carts");
-  }
+  inputCtx = INPUT_CTX_CART;
 
-  for (uint i = 0; i < CART_MAX; i++) {
+  for (uint i = 0; i < FILE_MAX; i++) {
     Carts[i] = "?";
   }
 
@@ -786,6 +822,11 @@ bool readCarts() {
   uint index = 0;
 
   while(true) {
+    if (index >= FILE_MAX) {
+      CartDirectory.close();
+      break;
+    }
+
     File file = CartDirectory.openNextFile();
 
     if (file) {
@@ -800,22 +841,16 @@ bool readCarts() {
       break;
     }
   }
-
-  return true;
 }
 
 void listCarts() {
-  if (!readCarts()) { return; }
-
-  inputCtx = INPUT_CTX_CART;
-
   Serial.println();
   Serial.println("Carts:");
   Serial.println();
 
-  for (uint j = (cartPage * 8); j < ((cartPage * 8) + 8); j++) {
+  for (uint j = (cartFilePage * FILE_PER_PAGE); j < ((cartFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); j++) {
     Serial.print("(");
-    Serial.print(j - (cartPage * 8));
+    Serial.print(j - (cartFilePage * FILE_PER_PAGE));
     Serial.print(")");
     Serial.print(" - ");
     Serial.println(Carts[j]);
@@ -823,38 +858,27 @@ void listCarts() {
 
   Serial.println();
   Serial.print("Page: ");
-  Serial.print(cartPage);
+  Serial.print(cartFilePage);
   Serial.println(" | ([) Prev Page | Next Page (]) |");
   Serial.println();
 }
 
 void loadCart(uint index) {
   String directory = "Carts/";
-  String filename = Carts[(cartPage * 8) + index];
+  String filename = Carts[(cartFilePage * FILE_PER_PAGE) + index];
 
-  if (!filename.length()) { 
-    Serial.println("Invalid Cart! List (C)arts before loading.");
-    return;
-  }
+  if (!filename.length()) { return; }
 
   String path = directory + filename;
 
-  if (loadCartPath(path)) {
-    cart.file = filename;
-    cart.enabled = true;
+  loadCartPath(path);
 
-    Serial.print("Loaded Cart: ");
-    Serial.println(cart.file);
-  } else {
-    Serial.println("Invalid Cart!");
-  }
+  cart.file = filename;
+  cart.enabled = true;
 }
 
-bool loadCartPath(String path) {
-  if (!SD.mediaPresent()) { 
-    Serial.println("SD card not detected!");
-    return false;
-  }
+void loadCartPath(String path) {
+  if (!SD.mediaPresent()) { return; }
 
   File file = SD.open(path.c_str());
 
@@ -869,28 +893,18 @@ bool loadCartPath(String path) {
       }
       i++;
     }
-
-    file.close();
-
-    return true;
-  } else {
-    file.close();
-
-    return false;
   }
+
+  file.close();
 }
 
-bool readPrograms() {
-  if (!SD.mediaPresent()) { 
-    Serial.println("SD card not detected!");
-    return false;
-  }
+void readPrograms() {
+  if (!SD.mediaPresent()) { return; }
+  if (!SD.exists("Programs")) { SD.mkdir("Programs"); }
 
-  if (!SD.exists("Programs")) {
-    SD.mkdir("Programs");
-  }
+  inputCtx = INPUT_CTX_PROG;
 
-  for (uint i = 0; i < PROG_MAX; i++) {
+  for (uint i = 0; i < FILE_MAX; i++) {
     Programs[i] = "?";
   }
 
@@ -899,6 +913,11 @@ bool readPrograms() {
   uint index = 0;
 
   while(true) {
+    if (index >= FILE_MAX) {
+      ProgramDirectory.close();
+      break;
+    }
+
     File file = ProgramDirectory.openNextFile();
 
     if (file) {
@@ -913,22 +932,16 @@ bool readPrograms() {
       break;
     }
   }
-
-  return true;
 }
 
 void listPrograms() {
-  if (!readPrograms()) { return; }
-
-  inputCtx = INPUT_CTX_PROG;
-
   Serial.println();
   Serial.println("Programs:");
   Serial.println();
 
-  for (uint j = (programPage * 8); j < ((programPage * 8) + 8); j++) {
+  for (uint j = (programFilePage * FILE_PER_PAGE); j < ((programFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); j++) {
     Serial.print("(");
-    Serial.print(j - (programPage * 8));
+    Serial.print(j - (programFilePage * FILE_PER_PAGE));
     Serial.print(")");
     Serial.print(" - ");
     Serial.println(Programs[j]);
@@ -936,70 +949,54 @@ void listPrograms() {
 
   Serial.println();
   Serial.print("Page: ");
-  Serial.print(programPage);
+  Serial.print(programFilePage);
   Serial.println(" | ([) Prev Page | Next Page (]) |");
   Serial.println();
 }
 
 void loadProgram(uint index) {
   String directory = "Programs/";
-  String filename = Programs[(programPage * 8) + index];
+  String filename = Programs[(programFilePage * FILE_PER_PAGE) + index];
 
-  if (!filename.length()) { 
-    Serial.println("Invalid Programs! List (U)ser Programs before loading.");
-    return;
-  }
+  if (!filename.length()) { return; }
 
   String path = directory + filename;
 
-  if (loadProgramPath(path)) {
-    programFile = filename;
-
-    Serial.print("Loaded Program: ");
-    Serial.println(programFile);
-  } else {
-    Serial.println("Invalid Program!");
-  }
+  loadProgramPath(path);
+  ram.file = filename;
 }
 
-bool loadProgramPath(String path) {
-  if (!SD.mediaPresent()) { 
-    Serial.println("SD card not detected!");
-    return false;
-  }
+void loadProgramPath(String path) {
+  if (!SD.mediaPresent()) { return; }
 
   File file = SD.open(path.c_str());
 
   if (file) {
-    uint i = 0;
+    uint i = 0x0800; // Load programs into user space at 0x0800
 
     while(file.available()) {
-      ram.load(i, file.read());
+      ram.write(i, file.read());
       i++;
     }
-
-    file.close();
-
-    return true;
-  } else {
-    file.close();
-
-    return false;
   }
+
+  file.close();
+}
+
+void readIO() {
+  inputCtx = INPUT_CTX_IO;
 }
 
 void listIO() {
-  inputCtx = INPUT_CTX_IO;
-
   Serial.println();
 
-  for (uint i = 0; i < 8; i++) {
+  for (uint i = 0; i < IO_SLOTS; i++) {
     Serial.print("(");
     Serial.print(i);
     Serial.print(") IO ");
     Serial.print(i + 1);
     Serial.print(" $");
-    Serial.print(IO_BANKS[i], HEX);
+    Serial.print(IO_START + (IO_SLOT_SIZE * i), HEX);
     Serial.print(" - ");
     Serial.println(io[i]->description());
   }
@@ -1038,42 +1035,46 @@ void configureIO(uint index) {
     default:
       break;
   }
+}
 
-  Serial.print("(");
-  Serial.print(index);
-  Serial.print(") IO");
-  Serial.print(index + 1);
-  Serial.print(" $");
-  Serial.print(IO_BANKS[index], HEX);
-  Serial.print(" - ");
-  Serial.println(io[index]->description());
+void listFiles() {
+  switch(inputCtx) {
+    case INPUT_CTX_ROM:
+      listROMs();
+      break;
+    case INPUT_CTX_CART:
+      listCarts();
+      break;
+    case INPUT_CTX_PROG:
+      listPrograms();
+      break;
+    default:
+      break;
+  }
 }
 
 void prevPage() {
   switch(inputCtx) {
     case INPUT_CTX_ROM:
-      if (romPage > 0)  {
-        romPage--;
+      if (romFilePage > 0)  {
+        romFilePage--;
       } else {
-        romPage = 31;
+        romFilePage = ((FILE_MAX / FILE_PER_PAGE) - 1);
       }
-      listROMs();
       break;
     case INPUT_CTX_CART:
-      if (cartPage > 0)  {
-        cartPage--;
+      if (cartFilePage > 0)  {
+        cartFilePage--;
       } else {
-        cartPage = 31;
+        cartFilePage = ((FILE_MAX / FILE_PER_PAGE) - 1);
       }
-      listCarts();
       break;
     case INPUT_CTX_PROG:
-      if (programPage > 0)  {
-        programPage--;
+      if (programFilePage > 0)  {
+        programFilePage--;
       } else {
-        programPage = 31;
+        programFilePage = ((FILE_MAX / FILE_PER_PAGE) - 1);
       }
-      listPrograms();
       break;
     default:
       break;
@@ -1083,28 +1084,25 @@ void prevPage() {
 void nextPage() {
   switch(inputCtx) {
     case INPUT_CTX_ROM:
-      if (romPage < 31) {
-        romPage++;
+      if (romFilePage < ((FILE_MAX / FILE_PER_PAGE) - 1)) {
+        romFilePage++;
       } else {
-        romPage = 0;
+        romFilePage = 0;
       }
-      listROMs();
       break;
     case INPUT_CTX_CART:
-      if (cartPage < 31) {
-        cartPage++;
+      if (cartFilePage < ((FILE_MAX / FILE_PER_PAGE) - 1)) {
+        cartFilePage++;
       } else {
-        cartPage = 0;
+        cartFilePage = 0;
       }
-      listCarts();
       break;
     case INPUT_CTX_PROG:
-      if (programPage < 31) {
-        programPage++;
+      if (programFilePage < ((FILE_MAX / FILE_PER_PAGE) - 1)) {
+        programFilePage++;
       } else {
-        programPage = 0;
+        programFilePage = 0;
       }
-      listPrograms();
       break;
     default:
       break;
@@ -1146,10 +1144,9 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   } else if ((addr >= RAM_START) && (addr <= RAM_END) && ram.enabled) { // RAM
     data = ram.read(addr - RAM_START);
   } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
-    for (int i = 0; i < 8; i++) {
-      if ((addr >= IO_BANKS[i]) && (addr <= (IO_BANKS[i] + IO_BANK_SIZE - 1)) && !io[i]->passthrough()) {
-        data = io[i]->read(addr - IO_BANKS[i]);
-      }
+    uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
+    if (!io[ioSlot]->passthrough()) {
+      data = io[ioSlot]->read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
     }
   }
 
@@ -1187,10 +1184,9 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   } else if ((addr >= RAM_START) && (addr <= RAM_END) && ram.enabled) { // RAM
     ram.write(addr - RAM_START, data);
   } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
-    for (int i = 0; i < 8; i++) {
-      if ((addr >= IO_BANKS[i]) && (addr <= (IO_BANKS[i] + IO_BANK_SIZE - 1)) && !io[i]->passthrough()) {
-        io[i]->write(addr - IO_BANKS[i], data);
-      }
+    uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
+    if (!io[ioSlot]->passthrough()) {
+      io[ioSlot]->write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
     }
   }
 }
@@ -1488,38 +1484,57 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   String response;
   JsonDocument doc;
 
-  doc["frequency"]          = FREQS[freqIndex];
+  doc["freqLabel"]          = FREQ_LABELS[freqIndex];
+  doc["freqPeriod"]         = FREQ_PERIODS[freqIndex];
+  doc["cpuPC"]              = cpu.programCounter();
+  doc["cpuAccumulator"]     = cpu.accumulator();
+  doc["cpuX"]               = cpu.x();
+  doc["cpuY"]               = cpu.y();
+  doc["cpuStatus"]          = cpu.status();
+  doc["cpuStackPointer"]    = cpu.stackPointer();
+  doc["cpuOpcodeCycle"]     = cpu.opcodeCycle();
+  doc["address"]            = address;
+  doc["data"]               = data;
+  doc["rw"]                 = readWrite ? 1 : 0;
   doc["ipAddress"]          = Ethernet.localIP();
   doc["isRunning"]          = isRunning;
   doc["ramEnabled"]         = ram.enabled;
-  doc["ramBlocks"]          = RAM_BLOCKS;
+  doc["ramStart"]           = RAM_START;
+  doc["ramEnd"]             = RAM_END;
+  doc["ramCode"]            = RAM_CODE;
+  doc["programFile"]        = ram.file;
+  doc["programFilePage"]    = programFilePage;
   doc["romEnabled"]         = rom.enabled;
+  doc["romStart"]           = ROM_START;
+  doc["romEnd"]             = ROM_END;
   doc["romFile"]            = rom.file;
-  doc["romPage"]            = romPage;
-  doc["romMax"]             = ROM_MAX;
-  doc["romBlocks"]          = ROM_BLOCKS;
+  doc["romFilePage"]        = romFilePage;
   doc["cartEnabled"]        = cart.enabled;
+  doc["cartStart"]          = CART_START;
+  doc["cartEnd"]            = CART_END;
+  doc["cartCode"]           = CART_CODE;
   doc["cartFile"]           = cart.file;
-  doc["cartPage"]           = cartPage;
-  doc["cartMax"]            = CART_MAX;
-  doc["programPage"]        = programPage;
-  doc["programFile"]        = programFile;
-  doc["programMax"]         = PROG_MAX;
-  doc["blockSize"]          = BLOCK_SIZE;
+  doc["cartFilePage"]       = cartFilePage;
   doc["inputCtx"]           = inputCtx;
+  doc["ioStart"]            = IO_START;
+  doc["ioEnd"]              = IO_END;
+  doc["ioSlots"]            = IO_SLOTS;
+  doc["ioSlotSize"]         = IO_SLOT_SIZE;
+  doc["fileMax"]            = FILE_MAX;
+  doc["lastSnapshot"]       = lastSnapshot;
   doc["rtc"]                = now();
   doc["version"]            = "1.0";
 
-  for (size_t i = (romPage * 8); i < ((romPage * 8) + 8); i++) {
-    doc["romFiles"][i - (romPage * 8)] = ROMs[i];
+  for (size_t i = (programFilePage * FILE_PER_PAGE); i < ((programFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
+    doc["ramFiles"][i - (programFilePage * FILE_PER_PAGE)] = Programs[i];
   }
-  for (size_t i = (cartPage * 8); i < ((cartPage * 8) + 8); i++) {
-    doc["cartFiles"][i - (cartPage * 8)] = Carts[i];
+  for (size_t i = (romFilePage * FILE_PER_PAGE); i < ((romFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
+    doc["romFiles"][i - (romFilePage * FILE_PER_PAGE)] = ROMs[i];
   }
-  for (size_t i = (programPage * 8); i < ((programPage * 8) + 8); i++) {
-    doc["programFiles"][i - (programPage * 8)] = Programs[i];
+  for (size_t i = (cartFilePage * FILE_PER_PAGE); i < ((cartFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
+    doc["cartFiles"][i - (cartFilePage * FILE_PER_PAGE)] = Carts[i];
   }
-  for (size_t i = 0; i < 8; i++) {
+  for (size_t i = 0; i < IO_SLOTS; i++) {
     doc["io"][i] = io[i]->description();
   }
   
@@ -1535,20 +1550,14 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
 /* All 32 blocks of ROM can be inspected but only top 24k is valid ROM space.                                     */
 
 FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
-  String block;
+  String type;
   size_t page;
   bool formatted = false;
 
-  size_t maxBlocks;
+  if (request->hasParam("type")) {
+    type = request->getParam("type")->value();
 
-  if (request->hasParam("block")) {
-    block = request->getParam("block")->value();
-
-    if (block == "ram") {
-      maxBlocks = RAM_BLOCKS;
-    } else if (block == "rom") {
-      maxBlocks = ROM_BLOCKS;
-    } else {
+    if (type != "ram" && type != "rom") {
       request->send(400);
       return;
     }
@@ -1558,7 +1567,15 @@ FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
   }
   if (request->hasParam("page")) {
     page = size_t(request->getParam("page")->value().toInt());
-    page = min(size_t(maxBlocks - 1), page); // Clamp page index
+
+    if (type == "ram" && page >= ((RAM_END - RAM_START + 1) / PAGE_SIZE)) {
+      request->send(400);
+      return;
+    }
+    if (type == "rom" && page >= ((ROM_END - ROM_START + 1) / PAGE_SIZE)) {
+      request->send(400);
+      return;
+    }
   } else {
     request->send(400);
     return;
@@ -1571,20 +1588,12 @@ FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
     formatted ? "text/plain" : "application/octet-stream; charset=binary"
   );
 
-  for (size_t i = 0; i < BLOCK_SIZE; i++) {
-    if (formatted) {
-      if (block == "ram") {
-        response->printf("%02X ", ram.data[i + (page * BLOCK_SIZE)]);
-      } else if (block == "rom") {
-        response->printf("%02X ", rom.data[i + (page * BLOCK_SIZE)]);
+  for (size_t i = 0; i < PAGE_SIZE; i++) {
+    if (type == "ram") {
+        formatted ? response->printf("%02X ", ram.data[i + (page * PAGE_SIZE)]) : response->write(ram.data[i + (page * PAGE_SIZE)]);
+      } else if (type == "rom") {
+        formatted ? response->printf("%02X ", rom.data[i + (page * PAGE_SIZE)]) : response->write(rom.data[i + (page * PAGE_SIZE)]);
       }
-    } else {
-      if (block == "ram") {
-        response->write(ram.data[i + (page * BLOCK_SIZE)]);
-      } else if (block == "rom") {
-        response->write(rom.data[i + (page * BLOCK_SIZE)]);
-      }
-    }
   }
   
   request->send(response);
@@ -1602,18 +1611,16 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
 
   if (command == "a" || command == "A") {         // Toggle RAM
     toggleRAM();
-  } else if (command == "c" || command == "C") {  // List Carts
-    listCarts();
-  } else if (command == "f" || command == "F") {  // Info
-    info();
-  } else if (command == "g" || command == "G") {  // Log
-    log();
-  } else if (command == "i" || command == "I") {  // List IO
-    listIO();
+  } else if (command == "c" || command == "C") {  // Read Carts
+    readCarts();
+  } else if (command == "i" || command == "I") {  // Read IO
+    readIO();
+  } else if (command == "k" || command == "K") {  // Tick
+    tick();
   } else if (command == "l" || command == "L") {  // Toggle Cart
     toggleCart();
-  } else if (command == "m" || command == "M") {  // List ROMs
-    listROMs();
+  } else if (command == "m" || command == "M") {  // Read ROMs
+    readROMs();
   } else if (command == "o" || command == "O") {  // Toggle ROM
     toggleROM();
   } else if (command == "p" || command == "P") {  // Snapshot
@@ -1624,8 +1631,8 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
     step();
   } else if (command == "t" || command == "T") {  // Reset
     reset();
-  } else if (command == "u" || command == "U") {  // List Programs
-    listPrograms();
+  } else if (command == "u" || command == "U") {  // Read Programs
+    readPrograms();
   } else if (command == "-") {                    // Decrease Frequency
     decreaseFrequency();
   } else if (command == "+") {                    // Increase Frequency
@@ -1635,10 +1642,10 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
   } else if (command == "next") {                 // Next Page
     nextPage();
   } else if (                                     // Load #
-      request->getParam("command")->value().toInt() >= 0 && 
-      request->getParam("command")->value().toInt() < 8
+      command >= '0' && 
+      command < '8'
   ) {
-    onNumeric(request->getParam("command")->value().toInt());
+    onNumeric(command.toInt());
   } else {                                        // Bad Request
     request->send(400);
     return;

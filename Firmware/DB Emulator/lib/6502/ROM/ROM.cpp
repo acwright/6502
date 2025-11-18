@@ -15,11 +15,15 @@ ROM::~ROM() {
 }
 
 uint8_t ROM::read(uint16_t index) {
-  return this->data[index];
+  if (index <= (ROM_END - ROM_START)) {
+    return this->data[index];
+  } else {
+    return 0x00;
+  }
 }
 
-void ROM::write(uint16_t index, uint8_t value) { /* Do nothing */ }
-
-void ROM::load(uint16_t index, uint8_t value) {
-  this->data[index] = value;
+void ROM::write(uint16_t index, uint8_t value) {
+  if (index <= (ROM_END - ROM_START)) {
+    this->data[index] = value;
+  }
 }

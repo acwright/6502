@@ -33,3 +33,11 @@ void CPU::irqClear() {
 void CPU::nmiTrigger() {
   *nmi = IntRequested;
 }
+
+uint16_t CPU::programCounter() { return vrEmu6502GetPC(this->cpu); }
+uint8_t CPU::accumulator() { return vrEmu6502GetAcc(this->cpu); }
+uint8_t CPU::x() { return vrEmu6502GetX(this->cpu); }
+uint8_t CPU::y() { return vrEmu6502GetY(this->cpu); }
+uint8_t CPU::status() { return vrEmu6502GetStatus(this->cpu); }
+uint8_t CPU::stackPointer() { return vrEmu6502GetStackPointer(this->cpu); }
+uint8_t CPU::opcodeCycle() { return vrEmu6502GetOpcodeCycle(this->cpu); }

@@ -19,6 +19,14 @@ class CPU {
     void irqTrigger();
     void irqClear();
     void nmiTrigger();
+
+    uint16_t programCounter();
+    uint8_t accumulator();
+    uint8_t x();
+    uint8_t y();
+    uint8_t status();
+    uint8_t stackPointer();
+    uint8_t opcodeCycle();
 };
 
 #endif
