@@ -94,6 +94,7 @@ time_t lastSnapshot;
 
 void onServerRoot(AsyncWebServerRequest *request);
 void onServerInfo(AsyncWebServerRequest *request);
+void onServerUpload(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
 void onServerMemory(AsyncWebServerRequest *request);
 void onServerControl(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
@@ -1326,10 +1327,17 @@ void initEthernet() {
 }
 
 void initServer() {
-  server.on("/", onServerRoot);
-  server.on("/info", onServerInfo);
-  server.on("/memory", onServerMemory);
-  server.on("/control", onServerControl);
+  server.on("/", HTTP_GET, onServerRoot);
+  server.on("/info", HTTP_GET, onServerInfo);
+  server.on(
+    "/upload",
+    HTTP_POST,
+    [&](AsyncWebServerRequest *request) {},
+    [&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {},
+    onServerUpload
+  );
+  server.on("/memory", HTTP_GET, onServerMemory);
+  server.on("/control", HTTP_GET, onServerControl);
   server.onNotFound(onServerNotFound);
   server.begin();
 }
@@ -1543,6 +1551,49 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   request->send(200, "application/json", response);
 }
 
+void onServerUpload(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
+  String target;
+
+  if (request->hasParam("target")) {
+    target = request->getParam("target")->value();
+
+    if (target != "ram" && target != "rom") {
+      request->send(400);
+      return;
+    }
+  } else {
+    request->send(400);
+    return;
+  }
+
+  if (target == "rom") {
+    if (total != ROM_END - ROM_START + 1) { // Upload size must equal ROM size (0x8000 bytes by default)
+      request->send(400);
+      return;
+    }
+
+    for (size_t i = 0; i < len; i++) {
+      rom.write(i + index, data[i]);
+    }
+  }
+  if (target == "ram") {
+    if (total > RAM_END - RAM_CODE + 1) { // Upload size must be less than RAM code space size (0x7800 bytes by default)
+      request->send(400);
+      return;
+    }
+
+    for (size_t i = 0; i < len; i++) {
+      ram.write(i + index + RAM_CODE, data[i]);
+    }
+  }
+
+  if ((index + len) == total) {
+    request->send(200);
+  }
+
+  return;
+}
+
 /* Notes: We are paginating RAM/ROM responses due to limitations in the AsyncWebServer_Teensy41 lib.              */
 /* There is a bug in the implementation of beginChunkedResponse() (improper formatting) and all other response    */
 /* types besides beginResponseStream() will corrupt or add garbage to the data. So we are limited to 1024 byte    */
@@ -1550,14 +1601,14 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
 /* All 32 blocks of ROM can be inspected but only top 24k is valid ROM space.                                     */
 
 FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
-  String type;
+  String target;
   size_t page;
   bool formatted = false;
 
-  if (request->hasParam("type")) {
-    type = request->getParam("type")->value();
+  if (request->hasParam("target")) {
+    target = request->getParam("target")->value();
 
-    if (type != "ram" && type != "rom") {
+    if (target != "ram" && target != "rom") {
       request->send(400);
       return;
     }
@@ -1568,11 +1619,11 @@ FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
   if (request->hasParam("page")) {
     page = size_t(request->getParam("page")->value().toInt());
 
-    if (type == "ram" && page >= ((RAM_END - RAM_START + 1) / PAGE_SIZE)) {
+    if (target == "ram" && page >= ((RAM_END - RAM_START + 1) / PAGE_SIZE)) {
       request->send(400);
       return;
     }
-    if (type == "rom" && page >= ((ROM_END - ROM_START + 1) / PAGE_SIZE)) {
+    if (target == "rom" && page >= ((ROM_END - ROM_START + 1) / PAGE_SIZE)) {
       request->send(400);
       return;
     }
@@ -1589,9 +1640,9 @@ FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
   );
 
   for (size_t i = 0; i < PAGE_SIZE; i++) {
-    if (type == "ram") {
+    if (target == "ram") {
         formatted ? response->printf("%02X ", ram.data[i + (page * PAGE_SIZE)]) : response->write(ram.data[i + (page * PAGE_SIZE)]);
-      } else if (type == "rom") {
+      } else if (target == "rom") {
         formatted ? response->printf("%02X ", rom.data[i + (page * PAGE_SIZE)]) : response->write(rom.data[i + (page * PAGE_SIZE)]);
       }
   }
