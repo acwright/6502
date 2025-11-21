@@ -1,4 +1,7 @@
+#define CIRCULAR_BUFFER_INT_SAFE
+
 #include <Arduino.h>
+#include <CircularBuffer.hpp>
 
 #define AX0 14
 #define AX1 15
@@ -13,6 +16,10 @@
 #define RESET 13
 #define PS2DATA 3
 #define PS2CLK  2
+
+#define BUFFER_SIZE 16
+
+CircularBuffer<uint8_t, BUFFER_SIZE> buffer;
 
 bool release = false;
 
@@ -45,7 +52,11 @@ void setup() {
   attachInterrupt(digitalPinToInterrupt(PS2CLK), onInterrupt, FALLING);
 }
 
-void loop() {}
+void loop() {
+  if (buffer.isEmpty()) { return; }
+
+  ps2ToMatrix(buffer.shift());
+}
 
 void onInterrupt() {
   static uint8_t bitcount = 0;
@@ -89,7 +100,7 @@ void onInterrupt() {
       break;
     case 11: // Stop bit
       if (parity < 0xFD) {               // Good so save byte in buffer, otherwise discard
-        ps2ToMatrix(incoming);           // Output if valid scancode
+        buffer.push(incoming);           // Add to circular buffer if valid scancode (if full, oldest data lost)
       }
       bitcount = 0;
       break;
