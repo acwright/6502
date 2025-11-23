@@ -12,16 +12,16 @@ Current file: ./src/DB Keyboard Echo.asm
 000000r 1               .segment "CODE"
 000000r 1               
 000000r 1               DB_DATA     = $8400
-000000r 1               DB_KB_DATA  = $8404
+000000r 1               DB_KB_DATA  = $8402
 000000r 1               
 000000r 1               reset:
 000000r 1  A2 FF          ldx #$ff
 000002r 1  9A             txs
 000003r 1               
 000003r 1               loop:
-000003r 1  2C 04 84       bit DB_KB_DATA
+000003r 1  2C 02 84       bit DB_KB_DATA
 000006r 1  10 FB          bpl loop        ; Bit 7 is not set
-000008r 1  AD 04 84       lda DB_KB_DATA
+000008r 1  AD 02 84       lda DB_KB_DATA
 00000Br 1  29 7F          and #%01111111  ; Mask out the ASCII value
 00000Dr 1  8D 00 84       sta DB_DATA
 000010r 1  4C rr rr       jmp loop

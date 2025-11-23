@@ -11,8 +11,8 @@ INPUT_BUFFER: .res $100
 .segment "CODE"
 
 DB_DATA     = $8400
-DB_KB_CMD   = $8404
-DB_KB_DATA  = $8404
+DB_KB_CMD   = $8402
+DB_KB_DATA  = $8402
 
 reset:
   sei            ; Disable interrupts

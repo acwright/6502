@@ -9,16 +9,15 @@
 #include <AsyncWebServer_Teensy41.h>
 #include <6502.h>
 
-#ifdef DEVBOARD_1
-#include <SPI.h>
-#endif
-
 using namespace qindesign::network;
 
 Button intButton      = Button();
 Button stepButton     = Button();
 Button runStopButton  = Button();
 #ifdef DEVBOARD_1
+Button resetButton    = Button();
+#endif
+#ifdef DEVBOARD_1_1
 Button resetButton    = Button();
 #endif
 
@@ -151,10 +150,6 @@ void setup() {
   initEthernet();
   initServer();
 
-  #ifdef DEVBOARD_1
-  SPI1.begin();
-  #endif
-
   readROMs();
   readCarts();
   readPrograms();
@@ -176,6 +171,9 @@ void loop() {
   #ifdef DEVBOARD_1
   resetButton.update();
   #endif
+  #ifdef DEVBOARD_1_1
+  resetButton.update();
+  #endif
 
   if (intButton.pressed()) {
     increaseFrequency();
@@ -187,6 +185,11 @@ void loop() {
     toggleRunStop();
   }
   #ifdef DEVBOARD_1
+  if (resetButton.pressed()) {
+    reset();
+  }
+  #endif
+  #ifdef DEVBOARD_1_1
   if (resetButton.pressed()) {
     reset();
   }
@@ -1230,13 +1233,14 @@ void initPins() {
   pinMode(IRQB, INPUT_PULLUP);
   pinMode(NMIB, INPUT_PULLUP);
   pinMode(RDY, INPUT_PULLUP);
-  pinMode(BE, INPUT_PULLUP);
 
   pinMode(CLK_SWB, INPUT_PULLUP);
   pinMode(STEP_SWB, INPUT_PULLUP);
   pinMode(RS_SWB, INPUT_PULLUP);
 
   #ifdef DEVBOARD_0
+  pinMode(BE, INPUT_PULLUP);
+
   pinMode(OE1, OUTPUT);
   pinMode(OE2, OUTPUT);
   pinMode(OE3, OUTPUT);
@@ -1252,6 +1256,7 @@ void initPins() {
   #endif
 
   #ifdef DEVBOARD_1
+  pinMode(BE, INPUT_PULLUP);
   pinMode(RESET_SWB, INPUT_PULLUP);
 
   pinMode(MOSI1, OUTPUT);
@@ -1264,6 +1269,23 @@ void initPins() {
   digitalWriteFast(CS0, HIGH);
   digitalWriteFast(CS1, HIGH);
   digitalWriteFast(CS2, HIGH);
+  #endif
+
+  #ifdef DEVBOARD_1_1
+  pinMode(RESET_SWB, INPUT_PULLUP);
+
+  pinMode(MOSI1, OUTPUT);
+  pinMode(MISO1, INPUT_PULLUP);
+  pinMode(SCK1, OUTPUT);
+  pinMode(CS0, OUTPUT);
+  pinMode(CS1, OUTPUT);
+  pinMode(CS2, OUTPUT);
+  pinMode(CE, OUTPUT);
+
+  digitalWriteFast(CS0, HIGH);
+  digitalWriteFast(CS1, HIGH);
+  digitalWriteFast(CS2, HIGH);
+  digitalWriteFast(CE, HIGH);
   #endif
 }
 
@@ -1281,6 +1303,12 @@ void initButtons() {
   runStopButton.setPressedState(LOW);
 
   #ifdef DEVBOARD_1
+  resetButton.attach(RESET_SWB, INPUT_PULLUP);
+  resetButton.interval(DEBOUNCE);
+  resetButton.setPressedState(LOW);
+  #endif
+
+  #ifdef DEVBOARD_1_1
   resetButton.attach(RESET_SWB, INPUT_PULLUP);
   resetButton.interval(DEBOUNCE);
   resetButton.setPressedState(LOW);

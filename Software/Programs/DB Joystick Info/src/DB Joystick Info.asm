@@ -8,7 +8,7 @@
 .segment "CODE"
 
 DB_DATA           = $8400
-DB_JOYSTICK_BTNS  = $8409
+DB_JOYSTICK_BTNS  = $8407
 
 reset:
   ldx #$ff

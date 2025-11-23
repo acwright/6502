@@ -11,8 +11,8 @@ Current file: ./src/DB PRAM Fill.asm
 000000r 1               .segment "USER_VARS"
 000000r 1               .segment "CODE"
 000000r 1               
-000000r 1               DB_PRAM_DATA   = $8412
-000000r 1               DB_PRAM_ADDR   = $8413
+000000r 1               DB_PRAM_DATA   = $840E
+000000r 1               DB_PRAM_ADDR   = $840F
 000000r 1               
 000000r 1               reset:
 000000r 1  A2 FF          ldx #$ff
@@ -20,8 +20,8 @@ Current file: ./src/DB PRAM Fill.asm
 000003r 1               
 000003r 1  A9 00          lda #$00
 000005r 1               loop:
-000005r 1  8D 13 84       sta DB_PRAM_ADDR
-000008r 1  8D 12 84       sta DB_PRAM_DATA
+000005r 1  8D 0F 84       sta DB_PRAM_ADDR
+000008r 1  8D 0E 84       sta DB_PRAM_DATA
 00000Br 1  1A             inc
 00000Cr 1  D0 F7          bne loop
 00000Er 1               

@@ -8,10 +8,10 @@
 .segment "CODE"
 
 DB_DATA         = $8400
-DB_MOUSE_X      = $8405
-DB_MOUSE_Y      = $8406
-DB_MOUSE_W      = $8407
-DB_MOUSE_BTNS   = $8408
+DB_MOUSE_X      = $8403
+DB_MOUSE_Y      = $8404
+DB_MOUSE_W      = $8405
+DB_MOUSE_BTNS   = $8406
 
 reset:
   ldx #$ff

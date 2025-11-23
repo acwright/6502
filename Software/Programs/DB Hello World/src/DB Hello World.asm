@@ -17,7 +17,7 @@ reset:
 print:
   lda message,x
   beq end
-  sta DB_DATA     ; Write char to DB print data register
+  sta DB_DATA     ; Write char to DB serial data register
   inx
   jmp print
 

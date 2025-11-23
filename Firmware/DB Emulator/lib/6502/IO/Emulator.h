@@ -9,165 +9,81 @@
 #include "pins.h"
 
 #ifdef DEVBOARD_0
-/*                                REGISTERS                           */
-/* ------------------------------------------------------------------ */
-/* | # |            WRITE             |             READ            | */
-/* ------------------------------------------------------------------ */
-/* | 0 |    PRINT DATA (SERIAL)       |              N/A            | */
-/* ------------------------------------------------------------------ */
-/* | 1 |                       SCRATCH REGISTER                     | */
-/* ------------------------------------------------------------------ */
-/* | 2 |                      GPIO DATA REGISTER                    | */
-/* ------------------------------------------------------------------ */
-/* | 3 |                 GPIO DATA DIRECTION REGISTER               | */
-/* ------------------------------------------------------------------ */
-/* | 4 |           KB CMD              |           KB DATA          | */
-/* ------------------------------------------------------------------ */
-/* | 5 |             N/A               |           MOUSE X          | */
-/* ------------------------------------------------------------------ */
-/* | 6 |             N/A               |           MOUSE Y          | */
-/* ------------------------------------------------------------------ */
-/* | 7 |             N/A               |           MOUSE W          | */
-/* ------------------------------------------------------------------ */
-/* | 8 |             N/A               |          MOUSE BTNS        | */
-/* ------------------------------------------------------------------ */
-/* | 9 |             N/A               |           JOY BTNS         | */
-/* ------------------------------------------------------------------ */
-/* | A |             N/A               |          JOY BTNS L        | */
-/* ------------------------------------------------------------------ */
-/* | B |             N/A               |          JOY BTNS H        | */
-/* ------------------------------------------------------------------ */
-/* | C |             N/A               |        RTC SEC (0-59)      | */
-/* ------------------------------------------------------------------ */
-/* | D |             N/A               |        RTC MIN (0-59)      | */
-/* ------------------------------------------------------------------ */
-/* | E |             N/A               |         RTC HR (0-23)      | */
-/* ------------------------------------------------------------------ */
-/* | F |             N/A               |        RTC DAY (0-31)      | */
-/* ------------------------------------------------------------------ */
-/* | 10 |            N/A               |        RTC MON (1-12)      | */
-/* ------------------------------------------------------------------ */
-/* | 11 |            N/A               |         RTC YR (0-99)      | */
-/* ------------------------------------------------------------------ */
-/* | 12 |                          PRAM DATA                        | */
-/* ------------------------------------------------------------------ */
-/* | 13 |                         PRAM ADDRESS                      | */
-/* ------------------------------------------------------------------ */
-/*                                                                    */
-/* GPIO DATA DIRECTION REGISTER                                       */
-/* | 7 | 6 | 5 | 4 | 3  | 2  | 1  | 0  |                              */
-/* | X | X | X | X | D3 | D2 | D1 | D0 |                              */
-/* | 0 | 0 | 0 | 0 | 0  | 0  | 0  | 0  |  <- Default Values           */
-/*                                                                    */
-/* DO-7 - Data Direction (1 = OUTPUT, 0 = INPUT)                      */
-/*                                                                    */
-/* KB CMD REGISTER                                                    */
-/* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
-/* | IE | X | X | X | X | X | X | X |                                 */
-/* | 0  | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  <- Default Values              */
-/*                                                                    */
-/* IE   - Keyboard Interrupt Enable (1 = ENABLED, 0 = DISABLED)       */
-/*                                                                    */
-/* KB DATA REGISTER                                                   */
-/* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
-/* | KA |         ASCII DATA        |                                 */
-/* | 0  | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  <- Default Values              */
-/*                                                                    */
-/* KA   - Key Available (1 = AVAILABLE, 0 = NONE)                     */
-/* DO-6 - ASCII Data                                                  */
-/*                                                                    */
-/* JOY BTNS REGISTERS                                                 */
-/* | 7     | 6     | 5    | 4    | 3    | 2    | 1 | 0 |              */
-/* | Y     | X     | B    | A    | R    | L    | D | U |              */
-/* | Y     | X     | B    | A    | RFNC | LFNC | X | X |  <- L Byte   */
-/* | RABTN | LABTN | RBTN | LBTN | R    | L    | D | U |  <- H Byte   */
-/* | 0     | 0     | 0    | 0    | 0    | 0    | 0 | 0 |  <- Default  */
-/*                                                                    */
-/* Note: Reg 0x09 contains merged standard buttons from L and H       */
-/*       joystick registers 0x0A and 0x0B                             */
-/*                                                                    */
-
-#define EMU_GPIO0 0b00000001
-#define EMU_GPIO1 0b00000010
-#define EMU_GPIO2 0b00000100
-#define EMU_GPIO3 0b00001000
+#include <Wire.h>
 #endif
 
 #ifdef DEVBOARD_1
 #include <SPI.h>
+#endif
+
+#ifdef DEVBOARD_1_1
+#include <Wire.h>
+#include <SPI.h>
+#endif
+
+/* ------------------------------------------------------------------ */
 /*                                REGISTERS                           */
 /* ------------------------------------------------------------------ */
 /* | # |            WRITE             |             READ            | */
 /* ------------------------------------------------------------------ */
-/* | 0 |    PRINT DATA (SERIAL)       |              N/A            | */
+/* | 0 |                     SERIAL DATA REGISTER                   | */
 /* ------------------------------------------------------------------ */
-/* | 1 |                     SPI TRANSFER REGISTER                  | */
+/* | 1 |   SERIAL CONTROL REGISTER    |   SERIAL STATUS REGISTER    | */
 /* ------------------------------------------------------------------ */
-/* | 2 |    SPI CONTROL REGISTER      |      SPI STATUS REGISTER    | */
+/* | 2 |           KB CMD              |           KB DATA          | */
 /* ------------------------------------------------------------------ */
-/* | 3 |                       SPI CLOCK REGISTER                   | */  
+/* | 3 |             N/A               |           MOUSE X          | */
 /* ------------------------------------------------------------------ */
-/* | 4 |           KB CMD              |           KB DATA          | */
+/* | 4 |             N/A               |           MOUSE Y          | */
 /* ------------------------------------------------------------------ */
-/* | 5 |             N/A               |           MOUSE X          | */
+/* | 5 |             N/A               |           MOUSE W          | */
 /* ------------------------------------------------------------------ */
-/* | 6 |             N/A               |           MOUSE Y          | */
+/* | 6 |             N/A               |          MOUSE BTNS        | */
 /* ------------------------------------------------------------------ */
-/* | 7 |             N/A               |           MOUSE W          | */
+/* | 7 |             N/A               |           JOY BTNS         | */
 /* ------------------------------------------------------------------ */
-/* | 8 |             N/A               |          MOUSE BTNS        | */
+/* | 8 |             N/A               |        RTC SEC (0-59)      | */
 /* ------------------------------------------------------------------ */
-/* | 9 |             N/A               |           JOY BTNS         | */
+/* | 9 |             N/A               |        RTC MIN (0-59)      | */
 /* ------------------------------------------------------------------ */
-/* | A |             N/A               |          JOY BTNS L        | */
+/* | A |             N/A               |         RTC HR (0-23)      | */
 /* ------------------------------------------------------------------ */
-/* | B |             N/A               |          JOY BTNS H        | */
+/* | B |             N/A               |        RTC DAY (0-31)      | */
 /* ------------------------------------------------------------------ */
-/* | C |             N/A               |        RTC SEC (0-59)      | */
+/* | C |            N/A                |        RTC MON (1-12)      | */
 /* ------------------------------------------------------------------ */
-/* | D |             N/A               |        RTC MIN (0-59)      | */
+/* | D |            N/A                |         RTC YR (0-99)      | */
 /* ------------------------------------------------------------------ */
-/* | E |             N/A               |         RTC HR (0-23)      | */
+/* | E |                          PRAM DATA                         | */
 /* ------------------------------------------------------------------ */
-/* | F |             N/A               |        RTC DAY (0-31)      | */
-/* ------------------------------------------------------------------ */
-/* | 10 |            N/A               |        RTC MON (1-12)      | */
-/* ------------------------------------------------------------------ */
-/* | 11 |            N/A               |         RTC YR (0-99)      | */
-/* ------------------------------------------------------------------ */
-/* | 12 |                          PRAM DATA                        | */
-/* ------------------------------------------------------------------ */
-/* | 13 |                         PRAM ADDRESS                      | */
+/* | F |                         PRAM ADDRESS                       | */
 /* ------------------------------------------------------------------ */
 /*                                                                    */
-/* SPI CONTROL REGISTER                                               */
-/* | 7   | 6 | 5  | 4  | 3  | 2   | 1   | 0   |                       */
-/* | IE  | X | DO | M1 | M0 | CS2 | CS1 | CS0 |                       */
-/* | 0   | 0 | 1  | 0  | 0  |  0  |  0  |  0  |  <- Default Values    */
+/* SERIAL CONTROL REGISTER                                            */
+/* | 7   | 6  | 5  | 4  | 3  | 2  | 1  | 0  |                         */
+/* | IE  | CE | TO | T0 | M3 | M2 | M1 | M0 |                         */
+/* | 0   | 0  | 0  | 0  | 0  |  0 |  0 |  0 |  <- Default Values      */
 /*                                                                    */
 /* IE    - Interrupt Enable (1 = ENABLED, 0 = DISABLED)               */
-/* DO    - Data Order (1 = MSBFIRST, 0 = LSBFIRST)                    */
-/* M0-1  - SPI MODE (0-3)                                             */
-/* CS0-2 - Chip Selected for next transfer                            */
+/* CE    - Chip Enable Pin (1 = LOW, 0 = HIGH) (Dev Board 1.1 ONLY)   */
+/* T0-1  - Target Select                                              */
+/* M0-3  - Mode Select                                                */
 /*                                                                    */
-/* SPI STATUS REGISTER                                                */
-/* | 7   | 6   | 5  | 4  | 3  | 2   | 1   | 0   |                     */
-/* | INT | BSY | DO | M1 | M0 | CS2 | CS1 | CS0 |                     */
-/* | 0   | 0   | 1  | 0  | 0  |  0  |  0  |  0  |  <- Default Values  */
+/* TARGET:                                                            */
+/* | T1 | T0 |     TARGET     |                                       */
+/* | 0  | 0  |     SERIAL     |  USB Serial                           */
+/* | 0  | 1  |      SPI       |  Dev Board 1.0 and 1.1 ONLY           */
+/* | 1  | 0  |      I2C       |  Dev Board 0.0 and 1.1 ONLY           */
+/* | 1  | 1  |     TX/RX      |  Hardware Serial                      */
 /*                                                                    */
-/* INT   - Interrupt Flag (1 = INT OCCURRED, 0 = NONE)                */
-/* BSY   - Busy Flag (1 = TRANSFERRING, 0 = DONE)                     */
-/* DO    - Data Order (1 = LSBFIRST, 0 = MSBFIRST)                    */
-/* M0-1  - SPI MODE (0-3)                                             */
-/* CS0-2 - Chip Selected for next transfer                            */
+/* SERIAL STATUS REGISTER                                             */
+/* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
+/* | DA | X | X | X | X | X | X | X |                                 */
+/* | 0  | 0 | 0 | 0 | 0 | 0 | 0 | 0 |  <- Default Values              */
 /*                                                                    */
-/* SPI CLOCK REGISTER                                                 */
-/* | 7   | 6  | 5  | 4  | 3 | 2 | 1 | 0 |                             */
-/* | 128 | 64 | 32 | 16 | 8 | 4 | 2 | 1 |                             */
-/* | 0   | 0  | 0  | 0  | 0 | 1 | 0 | 0 |  <- Default Values          */
-/* Speed in MHz (Default 4MHz)                                        */
+/* DA    - Data Available / Interrupt (1 = AVAILABLE/INT, 0 = NONE)   */
+/*         Note: Reading from serial data register clears DA/INT      */
 /*                                                                    */
-/* Ref: https://www.pjrc.com/teensy/td_libs_SPI.html                  */
 /*                                                                    */
 /* KB CMD REGISTER                                                    */
 /* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
@@ -187,31 +103,18 @@
 /* JOY BTNS REGISTERS                                                 */
 /* | 7     | 6     | 5    | 4    | 3    | 2    | 1 | 0 |              */
 /* | Y     | X     | B    | A    | R    | L    | D | U |              */
-/* | Y     | X     | B    | A    | RFNC | LFNC | X | X |  <- L Byte   */
-/* | RABTN | LABTN | RBTN | LBTN | R    | L    | D | U |  <- H Byte   */
 /* | 0     | 0     | 0    | 0    | 0    | 0    | 0 | 0 |  <- Default  */
 /*                                                                    */
-/* Note: Reg 0x09 contains merged standard buttons from L and H       */
-/*       joystick registers 0x0A and 0x0B                             */
-/*                                                                    */
-#define EMU_SPI_CTRL_CS0    0b00000001
-#define EMU_SPI_CTRL_CS1    0b00000010
-#define EMU_SPI_CTRL_CS2    0b00000100
-#define EMU_SPI_CTRL_M0     0b00001000
-#define EMU_SPI_CTRL_M1     0b00010000
-#define EMU_SPI_CTRL_DO     0b00100000
-#define EMU_SPI_CTRL_X      0b01000000
-#define EMU_SPI_CTRL_IE     0b10000000
+#define EMU_SER_CTRL_M0     0b00000001
+#define EMU_SER_CTRL_M1     0b00000010
+#define EMU_SER_CTRL_M2     0b00000100
+#define EMU_SER_CTRL_M3     0b00001000
+#define EMU_SER_CTRL_T0     0b00010000
+#define EMU_SER_CTRL_T1     0b00100000
+#define EMU_SER_CTRL_CE     0b01000000
+#define EMU_SER_CTRL_IE     0b10000000
 
-#define EMU_SPI_STATUS_CS0  0b00000001
-#define EMU_SPI_STATUS_CS1  0b00000010
-#define EMU_SPI_STATUS_CS2  0b00000100
-#define EMU_SPI_STATUS_M0   0b00001000
-#define EMU_SPI_STATUS_M1   0b00010000
-#define EMU_SPI_STATUS_DO   0b00100000
-#define EMU_SPI_STATUS_BSY  0b01000000
-#define EMU_SPI_STATUS_INT  0b10000000
-#endif
+#define EMU_SER_STATUS_DA   0b10000000
 
 #define EMU_KEY_INT         0b10000000
 #define EMU_KEY_AVAILABLE   0b10000000
@@ -219,25 +122,16 @@
 #define EMU_PRAM_FILE_NAME  "PRAM.bin"
 #define EMU_PRAM_SIZE       0x100 // 256 bytes
 
+#define EMU_TARGET_SERIAL   0
+#define EMU_TARGET_SPI      1
+#define EMU_TARGET_I2C      2
+#define EMU_TARGET_TXRX     3
+
 class Emulator: public IO {
   private:
-    uint8_t data;
-
-    #ifdef DEVBOARD_0
-    uint8_t scratch;
-    uint8_t gpioData;
-    uint8_t gpioDataDir;
-    #endif
-
-    #ifdef DEVBOARD_1
-    uint8_t spiTransfer;
-    uint8_t spiControl;
-    uint8_t spiStatus;
-    uint8_t spiClock;
-
-    bool spiTransferPending = false;
-    #endif
-
+    uint8_t serialData;
+    uint8_t serialControl;
+    uint8_t serialStatus;
     uint8_t keyboardCmd;
     uint8_t keyboardData;
     uint8_t mouseXData;
@@ -245,11 +139,19 @@ class Emulator: public IO {
     uint8_t mouseWData;
     uint8_t mouseBtnsData;
     uint8_t joystickData;
-    uint8_t joystickLData;
-    uint8_t joystickHData;
 
     uint8_t *pramData;
     uint8_t pramAddress;
+
+    uint8_t target;
+
+    void configureSerial(uint8_t value);
+    void transmitSerial(uint8_t value);
+
+    void modeToSPIChipSelect(uint8_t mode);
+    uint32_t modeToSPISpeed(uint8_t mode);
+    uint32_t modeToI2CSpeed(uint8_t mode);
+    uint32_t modeToBaudRate(uint8_t mode);
 
   public:
     Emulator();

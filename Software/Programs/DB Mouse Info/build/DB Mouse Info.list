@@ -12,10 +12,10 @@ Current file: ./src/DB Mouse Info.asm
 000000r 1               .segment "CODE"
 000000r 1               
 000000r 1               DB_DATA         = $8400
-000000r 1               DB_MOUSE_X      = $8405
-000000r 1               DB_MOUSE_Y      = $8406
-000000r 1               DB_MOUSE_W      = $8407
-000000r 1               DB_MOUSE_BTNS   = $8408
+000000r 1               DB_MOUSE_X      = $8403
+000000r 1               DB_MOUSE_Y      = $8404
+000000r 1               DB_MOUSE_W      = $8405
+000000r 1               DB_MOUSE_BTNS   = $8406
 000000r 1               
 000000r 1               reset:
 000000r 1  A2 FF          ldx #$ff
@@ -31,13 +31,13 @@ Current file: ./src/DB Mouse Info.asm
 00000Er 1  4C rr rr       jmp loop
 000011r 1               
 000011r 1               print:
-000011r 1  AD 05 84       lda DB_MOUSE_X
+000011r 1  AD 03 84       lda DB_MOUSE_X
 000014r 1  8D 00 84       sta DB_DATA
-000017r 1  AD 06 84       lda DB_MOUSE_Y
+000017r 1  AD 04 84       lda DB_MOUSE_Y
 00001Ar 1  8D 00 84       sta DB_DATA
-00001Dr 1  AD 07 84       lda DB_MOUSE_W
+00001Dr 1  AD 05 84       lda DB_MOUSE_W
 000020r 1  8D 00 84       sta DB_DATA
-000023r 1  AD 08 84       lda DB_MOUSE_BTNS
+000023r 1  AD 06 84       lda DB_MOUSE_BTNS
 000026r 1  8D 00 84       sta DB_DATA
 000029r 1  60             rts
 00002Ar 1               

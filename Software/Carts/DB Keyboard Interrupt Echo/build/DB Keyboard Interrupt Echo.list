@@ -17,8 +17,8 @@ Current file: ./src/DB Keyboard Interrupt Echo.asm
 000000r 1               .segment "CODE"
 000000r 1               
 000000r 1               DB_DATA     = $8400
-000000r 1               DB_KB_CMD   = $8404
-000000r 1               DB_KB_DATA  = $8404
+000000r 1               DB_KB_CMD   = $8402
+000000r 1               DB_KB_DATA  = $8402
 000000r 1               
 000000r 1               reset:
 000000r 1  78             sei            ; Disable interrupts
@@ -30,7 +30,7 @@ Current file: ./src/DB Keyboard Interrupt Echo.asm
 000008r 1  85 rr          sta WRITE_PTR   ; Initilize the write pointer
 00000Ar 1               
 00000Ar 1  A9 80          lda #%10000000  ; Enable KB interrupts
-00000Cr 1  8D 04 84       sta DB_KB_CMD
+00000Cr 1  8D 02 84       sta DB_KB_CMD
 00000Fr 1               
 00000Fr 1  58             cli             ; Enable interrupts
 000010r 1               
@@ -75,10 +75,10 @@ Current file: ./src/DB Keyboard Interrupt Echo.asm
 000038r 1               irq:
 000038r 1  48             pha
 000039r 1  DA             phx
-00003Ar 1  AD 04 84       lda DB_KB_DATA
+00003Ar 1  AD 02 84       lda DB_KB_DATA
 00003Dr 1  29 80          and #%10000000    ; Check if DB keyboard caused the interrupt
 00003Fr 1  F0 06          beq irq_exit      ; If not, exit
-000041r 1  AD 04 84       lda DB_KB_DATA    ; Read the data from DB keyboard data register
+000041r 1  AD 02 84       lda DB_KB_DATA    ; Read the data from DB keyboard data register
 000044r 1  20 rr rr       jsr write_buffer  ; Store to the input buffer
 000047r 1               irq_exit:
 000047r 1  FA             plx

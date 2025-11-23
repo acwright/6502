@@ -7,8 +7,8 @@
 .segment "USER_VARS"
 .segment "CODE"
 
-DB_PRAM_DATA   = $8412
-DB_PRAM_ADDR   = $8413
+DB_PRAM_DATA   = $840E
+DB_PRAM_ADDR   = $840F
 
 reset:
   ldx #$ff

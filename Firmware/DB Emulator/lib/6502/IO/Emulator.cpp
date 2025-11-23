@@ -11,69 +11,44 @@ Emulator::~Emulator() {
 uint8_t Emulator::read(uint16_t address) {
   time_t time = now();
 
-  switch(address & 0x001F) {
-    #ifdef DEVBOARD_0
-    case 0x00: // Print Data
-      break;
-    case 0x01: // Scratch Register
-      return this->scratch;
-    case 0x02: // GPIO Data Register
-      this->gpioData &= ~EMU_GPIO0 | (digitalReadFast(GPIO0) << 0);
-      this->gpioData &= ~EMU_GPIO1 | (digitalReadFast(GPIO1) << 1);
-      this->gpioData &= ~EMU_GPIO2 | (digitalReadFast(GPIO2) << 2);
-      this->gpioData &= ~EMU_GPIO3 | (digitalReadFast(GPIO3) << 3);
-      return this->gpioData;
-    case 0x03: // GPIO Data Direction Register
-      return this->gpioDataDir;
-    #endif
-
-    #ifdef DEVBOARD_1
-    case 0x00: // Print Data
-      break;
-    case 0x01: // SPI Transfer Register
-      this->spiStatus &= ~EMU_SPI_STATUS_INT;
-      return this->spiTransfer;
-    case 0x02: // SPI Status Register
-      this->spiStatus &= ~EMU_SPI_STATUS_INT;
-      return this->spiStatus;
-    case 0x03: // GPIO Data Direction Register
-      return this->spiClock;
-    #endif
-
-    case 0x04: {
-      uint8_t data = this->keyboardData; 
-      this->keyboardData&= 0b01111111; // Reading from KB data clears key available bit
+  switch(address & 0x0F) {
+    case 0x00: {
+      uint8_t data = this->serialData;
+      this->serialStatus &= ~EMU_SER_STATUS_DA; // Reading from serial data clears data available bit
       return data;
     }
-    case 0x05:
+    case 0x01:
+      return this->serialStatus;
+    case 0x02: {
+      uint8_t data = this->keyboardData; 
+      this->keyboardData &= ~EMU_KEY_AVAILABLE; // Reading from KB data clears key available bit
+      return data;
+    }
+    case 0x03:
       return this->mouseXData;
-    case 0x06:
+    case 0x04:
       return this->mouseYData;
-    case 0x07:
+    case 0x05:
       return this->mouseWData;
-    case 0x08:
+    case 0x06:
       return this->mouseBtnsData;
-    case 0x09:
+    case 0x07:
       return this->joystickData;
-    case 0x0A:
-      return this->joystickLData;
-    case 0x0B:
-      return this->joystickHData;
-    case 0x0C:
+    case 0x08:
       return second(time);
-    case 0x0D:
+    case 0x09:
       return minute(time);
-    case 0x0E:
+    case 0x0A:
       return hour(time);
-    case 0x0F:
+    case 0x0B:
       return day(time);
-    case 0x10:
+    case 0x0C:
       return month(time);
-    case 0x11:
+    case 0x0D:
       return year(time) % 100; // Get the last two digits of year
-    case 0x12: 
+    case 0x0E: 
       return this->pramData[this->pramAddress];
-    case 0x13:
+    case 0x0F:
       return this->pramAddress;
   }
 
@@ -81,51 +56,17 @@ uint8_t Emulator::read(uint16_t address) {
 }
 
 void Emulator::write(uint16_t address, uint8_t value) {
-  switch(address & 0x001F) {
-    #ifdef DEVBOARD_0
-    case 0x00: // Print Data
-      Serial.print((char)value);
+  switch(address & 0x0F) {
+    case 0x00:
+      transmitSerial(value);
       break;
-    case 0x01: // Scratch Register
-      this->scratch = value;
+    case 0x01:
+      configureSerial(value);
       break;
-    case 0x02: // GPIO Data Register
-      this->gpioData = 0x0F & value;
-      digitalWriteFast(GPIO0, (this->gpioData & EMU_GPIO0) >> 0);
-      digitalWriteFast(GPIO1, (this->gpioData & EMU_GPIO1) >> 1);
-      digitalWriteFast(GPIO2, (this->gpioData & EMU_GPIO2) >> 2);
-      digitalWriteFast(GPIO3, (this->gpioData & EMU_GPIO3) >> 3);
-      break;
-    case 0x03: // GPIO Data Direction Register
-      this->gpioDataDir = 0x0F & value;
-      pinMode(GPIO0, (this->gpioDataDir & EMU_GPIO0) >> 0);
-      pinMode(GPIO1, (this->gpioDataDir & EMU_GPIO1) >> 1);
-      pinMode(GPIO2, (this->gpioDataDir & EMU_GPIO2) >> 2);
-      pinMode(GPIO3, (this->gpioDataDir & EMU_GPIO3) >> 3);
-      break;
-    #endif
-
-    #ifdef DEVBOARD_1
-    case 0x00: // Print Data
-      Serial.print((char)value);
-      break;
-    case 0x01: // SPI Transfer Register
-      this->spiTransfer = value;
-      this->spiTransferPending = true;
-      break;
-    case 0x02: // SPI Control Register
-      this->spiControl = value & ~EMU_SPI_CTRL_X;
-      break;
-    case 0x03: // GPIO Data Direction Register
-      this->spiClock = value;
-      break;
-    #endif
-
-    case 0x04:
+    case 0x02:
       this->keyboardCmd = value;
       break;
-
-    case 0x12: { // PRAM Data
+    case 0x0E: {
       this->pramData[this->pramAddress] = value;
       
       File file = SD.open(EMU_PRAM_FILE_NAME, FILE_WRITE);
@@ -135,10 +76,9 @@ void Emulator::write(uint16_t address, uint8_t value) {
 
       break;
     }
-    case 0x13: // PRAM Address
+    case 0x0F:
       this->pramAddress = value;
       break;
-
     default:
       break;
   }
@@ -147,54 +87,54 @@ void Emulator::write(uint16_t address, uint8_t value) {
 uint8_t Emulator::tick() {
   uint8_t result = 0x00;
 
-  #ifdef DEVBOARD_1
-  if (this->spiTransferPending) {
-    this->spiStatus |= EMU_SPI_STATUS_BSY;
-
-    uint8_t bitOrder = (this->spiControl & EMU_SPI_CTRL_DO) >> 5;
-    uint8_t mode = ((this->spiControl & EMU_SPI_CTRL_M0) >> 3) | ((this->spiControl & EMU_SPI_CTRL_M1) >> 3);
-
-    SPI1.beginTransaction(SPISettings(this->spiClock * 1000000, bitOrder, mode));
-    digitalWriteFast(CS0, !((this->spiControl & EMU_SPI_CTRL_CS0) >> 0));
-    digitalWriteFast(CS1, !((this->spiControl & EMU_SPI_CTRL_CS1) >> 1));
-    digitalWriteFast(CS2, !((this->spiControl & EMU_SPI_CTRL_CS2) >> 2));
-    this->spiTransfer = SPI1.transfer(this->spiTransfer);
-    digitalWriteFast(CS0, (this->spiControl & EMU_SPI_CTRL_CS0) >> 0);
-    digitalWriteFast(CS1, (this->spiControl & EMU_SPI_CTRL_CS1) >> 1);
-    digitalWriteFast(CS2, (this->spiControl & EMU_SPI_CTRL_CS2) >> 2);
-    SPI1.endTransaction();
-
-    this->spiTransferPending = false;
-    this->spiStatus &= ~EMU_SPI_STATUS_BSY;
-
-    if ((this->spiControl & EMU_SPI_CTRL_IE) > 0) {
-      this->spiStatus |= EMU_SPI_STATUS_INT;
-      result |= 0x80;
-    }
+  // TODO: Check for incoming data depending on serial target
+  switch (this->target) {
+    case EMU_TARGET_SERIAL:
+      break; // Do Nothing
+    case EMU_TARGET_SPI:
+      break; // Do Nothing
+    case EMU_TARGET_I2C:
+      // TODO
+      break;
+    case EMU_TARGET_TXRX:
+      #ifdef DEVBOARD_0
+      if (Serial4.available() && (this->serialStatus & EMU_SER_STATUS_DA) == 0) {
+        this->serialData = Serial4.read();
+        this->serialStatus |= EMU_SER_STATUS_DA;
+      }
+      #endif
+      #ifdef DEVBOARD_1
+      if (Serial7.available() && (this->serialStatus & EMU_SER_STATUS_DA) == 0) {
+        this->serialData = Serial7.read();
+        this->serialStatus |= EMU_SER_STATUS_DA;
+      }
+      #endif
+      #ifdef DEVBOARD_1_1
+      if (Serial6.available() && (this->serialStatus & EMU_SER_STATUS_DA) == 0) {
+        this->serialData = Serial6.read();
+        this->serialStatus |= EMU_SER_STATUS_DA;
+      }
+      #endif
+      break;
+    default:
+      break;
   }
-  #endif
 
   // Keyboard Interrupt
   result |= (this->keyboardCmd & EMU_KEY_INT) & (this->keyboardData & EMU_KEY_AVAILABLE);
+
+  // Serial Interrupt
+  if ((this->serialControl & EMU_SER_CTRL_IE) > 0 && (this->serialStatus & EMU_SER_STATUS_DA) > 0) {
+    result |= 0x80;
+  }
 
   return result;
 }
 
 void Emulator::reset() {
-  #ifdef DEVBOARD_0
-  this->scratch = 0x00;
-  this->gpioData = 0x00;
-  this->gpioDataDir = 0x00;
-  #endif
-
-  #ifdef DEVBOARD_1
-  this->spiTransfer = 0x00;
-  this->spiControl = 0x20;  // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
-  this->spiStatus = 0x20;   // IE = DISABLED, DO = MSBFIRST, M = MODE0, CS0-2 = LOW
-  this->spiClock = 0x04;    // 4MHz
-  this->spiTransferPending = false;
-  #endif
-
+  this->serialData = 0x00;
+  this->serialControl = 0x00;
+  this->serialStatus = 0x00;
   this->keyboardCmd = 0x00;
   this->keyboardData = 0x00;
   this->mouseXData = 0x00;
@@ -202,11 +142,11 @@ void Emulator::reset() {
   this->mouseWData = 0x00;
   this->mouseBtnsData = 0x00;
   this->joystickData = 0x00;
-  this->joystickLData = 0x00;
-  this->joystickHData = 0x00;
   
   this->pramData = new uint8_t[EMU_PRAM_SIZE];
   this->pramAddress = 0x00;
+
+  this->target = EMU_TARGET_SERIAL;
 
   if (!SD.exists(EMU_PRAM_FILE_NAME)) {
     File file = SD.open(EMU_PRAM_FILE_NAME, FILE_WRITE);
@@ -224,8 +164,8 @@ void Emulator::reset() {
 }
 
 void Emulator::updateKeyboard(uint8_t ascii) {
-  this->keyboardData = ascii & 0b01111111;  // Mask out ascii value (0-127)
-  this->keyboardData |= 0b10000000;         // Set key available bit
+  this->keyboardData = ascii & ~EMU_KEY_AVAILABLE;  // Mask out ascii value (0-127)
+  this->keyboardData |= EMU_KEY_AVAILABLE;         // Set key available bit
 }
 
 void Emulator::updateMouse(int mouseX, int mouseY, int mouseWheel, uint8_t mouseButtons) {
@@ -252,7 +192,169 @@ void Emulator::updateJoystick(uint32_t buttons) {
   // LABTN: 0x4000 0100 0000 0000 0000
   // RABTN: 0x8000 1000 0000 0000 0000
 
-  this->joystickLData = buttons & 0xFF;
-  this->joystickHData = (buttons >> 8) & 0xFF;
-  this->joystickData  = (this->joystickLData & 0xF0) | (this->joystickHData & 0x0F);
+  uint8_t joystickLData = buttons & 0xFF;
+  uint8_t joystickHData = (buttons >> 8) & 0xFF;
+  this->joystickData  = (joystickLData & 0xF0) | (joystickHData & 0x0F);
+}
+
+// 
+// PRIVATE METHODS
+//
+
+void Emulator::configureSerial(uint8_t value) {
+  this->serialControl = value;
+  
+  uint8_t mode = value & 0b00001111; // Mask out the mode
+  uint8_t target = (value & (EMU_SER_CTRL_T0 | EMU_SER_CTRL_T1)) >> 4; // Mask out the target
+
+  if (target != this->target) { // New target selected...
+    switch (this->target) { // So... End old target
+      case EMU_TARGET_SERIAL:
+        break;
+      case EMU_TARGET_SPI:
+        #ifdef DEVBOARD_1
+        SPI1.endTransaction();
+        SPI1.end();
+        digitalWriteFast(CS0, HIGH);
+        digitalWriteFast(CS1, HIGH);
+        digitalWriteFast(CS2, HIGH);
+        #endif
+        #ifdef DEVBOARD_1_1
+        SPI1.endTransaction();
+        SPI1.end();
+        digitalWriteFast(CS0, HIGH);
+        digitalWriteFast(CS1, HIGH);
+        digitalWriteFast(CS2, HIGH);
+        #endif
+        break;
+      case EMU_TARGET_I2C:
+        #ifdef DEVBOARD_0
+        Wire1.endTransmission();
+        Wire1.end();
+        #endif
+        #ifdef DEVBOARD_1_1
+        Wire2.endTransmission();
+        Wire2.end();
+        #endif
+        break;
+      case EMU_TARGET_TXRX:
+        #ifdef DEVBOARD_0
+        Serial4.clear();
+        Serial4.end();
+        #endif
+        #ifdef DEVBOARD_1
+        Serial7.clear();
+        Serial7.end();
+        #endif
+        #ifdef DEVBOARD_1_1
+        Serial6.clear();
+        Serial6.end();
+        #endif
+        break;
+      default:
+        break;
+    }
+
+    this->target = target;
+
+    switch (this->target) { // And... Start new target
+      case EMU_TARGET_SERIAL:
+        break;
+      case EMU_TARGET_SPI:
+        #ifdef DEVBOARD_1
+        modeToSPIChipSelect(mode);
+        SPI1.begin();
+        SPI1.beginTransaction(SPISettings(modeToSPISpeed(mode), MSBFIRST, SPI_MODE0));
+        #endif
+        #ifdef DEVBOARD_1_1
+        modeToSPIChipSelect(mode);
+        SPI1.begin();
+        SPI1.beginTransaction(SPISettings(modeToSPISpeed(mode), MSBFIRST, SPI_MODE0));
+        #endif
+        break;
+      case EMU_TARGET_I2C:
+        #ifdef DEVBOARD_0
+        Wire1.begin();
+        Wire1.setClock(modeToI2CSpeed(mode));
+        //Wire1.beginTransmission(/* TODO: Address */);
+        #endif
+        #ifdef DEVBOARD_1_1
+        Wire2.begin();
+        Wire2.setClock(modeToI2CSpeed(mode));
+        //Wire2.beginTransmission(/* TODO: Address */);
+        #endif
+        break;
+      case EMU_TARGET_TXRX:
+        #ifdef DEVBOARD_0
+        Serial4.begin(modeToBaudRate(mode));
+        #endif
+        #ifdef DEVBOARD_1
+        Serial7.begin(modeToBaudRate(mode));
+        #endif
+        #ifdef DEVBOARD_1_1
+        Serial6.begin(modeToBaudRate(mode));;
+        #endif
+        break;
+      default:
+        break;
+    }
+  }
+
+  #ifdef DEVBOARD_1_1
+  digitalWriteFast(CE, (value & EMU_SER_CTRL_CE) >> 6 ? LOW : HIGH);
+  #endif
+}
+
+void Emulator::transmitSerial(uint8_t value) {
+  this->serialData = value;
+
+  switch (this->target) {
+    case EMU_TARGET_SERIAL:
+      Serial.print((char)value);
+      break;
+    case EMU_TARGET_SPI:
+      this->serialData = SPI1.transfer(value);
+      this->serialStatus |= EMU_SER_STATUS_DA;
+      break;
+    case EMU_TARGET_I2C:
+      #ifdef DEVBOARD_0
+        Wire1.write(value); // TODO: Or maybe read?
+        #endif
+        #ifdef DEVBOARD_1_1
+        Wire2.write(value); // TODO: Or maybe read?
+        #endif
+      break;
+    case EMU_TARGET_TXRX:
+      Serial6.write(value);
+      break;
+    default:
+      break;
+  }
+}
+
+void Emulator::modeToSPIChipSelect(uint8_t mode) {
+  #ifdef DEVBOARD_1
+  pinMode(CS0, OUTPUT);
+  pinMode(CS1, OUTPUT);
+  pinMode(CS2, OUTPUT);
+  #endif
+  #ifdef DEVBOARD_1_1
+  pinMode(CS0, OUTPUT);
+  pinMode(CS1, OUTPUT);
+  pinMode(CS2, OUTPUT);
+  #endif
+  
+  // TODO: SPI chip select
+}
+
+uint32_t Emulator::modeToSPISpeed(uint8_t mode) {
+  return 2000000; // TODO: SPI speed
+}
+
+uint32_t Emulator::modeToI2CSpeed(uint8_t mode) {
+  return 100000; // TODO: I2C speed
+}
+
+uint32_t Emulator::modeToBaudRate(uint8_t mode) {
+  return 9600; // TODO: Baud Rate
 }

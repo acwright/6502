@@ -8,7 +8,7 @@
 .segment "CODE"
 
 DB_DATA     = $8400
-DB_KB_DATA  = $8404
+DB_KB_DATA  = $8402
 
 reset:
   ldx #$ff

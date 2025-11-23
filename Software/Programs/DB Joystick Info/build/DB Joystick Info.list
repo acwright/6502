@@ -12,7 +12,7 @@ Current file: ./src/DB Joystick Info.asm
 000000r 1               .segment "CODE"
 000000r 1               
 000000r 1               DB_DATA           = $8400
-000000r 1               DB_JOYSTICK_BTNS  = $8409
+000000r 1               DB_JOYSTICK_BTNS  = $8407
 000000r 1               
 000000r 1               reset:
 000000r 1  A2 FF          ldx #$ff
@@ -28,7 +28,7 @@ Current file: ./src/DB Joystick Info.asm
 00000Er 1  4C rr rr       jmp loop
 000011r 1               
 000011r 1               print:
-000011r 1  AD 09 84       lda DB_JOYSTICK_BTNS
+000011r 1  AD 07 84       lda DB_JOYSTICK_BTNS
 000014r 1  8D 00 84       sta DB_DATA
 000017r 1  60             rts
 000018r 1               
