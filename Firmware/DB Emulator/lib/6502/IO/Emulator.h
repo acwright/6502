@@ -67,11 +67,11 @@
 /* IE    - Interrupt Enable (1 = ENABLED, 0 = DISABLED)               */
 /* CE    - Chip Enable Pin (1 = LOW, 0 = HIGH) (Dev Board 1.1 ONLY)   */
 /* T0-1  - Target Select                                              */
-/* M0-3  - Mode Select                                                */
+/* M0-3  - Mode Select (Target dependent; See docs)                   */
 /*                                                                    */
 /* TARGET:                                                            */
 /* | T1 | T0 |     TARGET     |                                       */
-/* | 0  | 0  |     SERIAL     |  USB Serial                           */
+/* | 0  | 0  |     SERIAL     |  USB Serial (TX ONLY)                 */
 /* | 0  | 1  |      SPI       |  Dev Board 1.0 and 1.1 ONLY           */
 /* | 1  | 0  |      I2C       |  Dev Board 0.0 and 1.1 ONLY           */
 /* | 1  | 1  |     TX/RX      |  Hardware Serial                      */
@@ -127,6 +127,9 @@
 #define EMU_TARGET_I2C      2
 #define EMU_TARGET_TXRX     3
 
+#define EMU_I2C_READ        1
+#define EMU_I2C_WRITE       0
+
 class Emulator: public IO {
   private:
     uint8_t serialData;
@@ -145,9 +148,12 @@ class Emulator: public IO {
 
     uint8_t target;
 
+    uint8_t i2cAddress;
+    bool i2cRead;
+
     void configureSerial(uint8_t value);
     void transmitSerial(uint8_t value);
-
+  
     void modeToSPIChipSelect(uint8_t mode);
     uint32_t modeToSPISpeed(uint8_t mode);
     uint32_t modeToI2CSpeed(uint8_t mode);

@@ -94,7 +94,20 @@ uint8_t Emulator::tick() {
     case EMU_TARGET_SPI:
       break; // Do Nothing
     case EMU_TARGET_I2C:
-      // TODO
+      if (this->i2cRead) {
+        #ifdef DEVBOARD_0
+        if (Wire1.available() && (this->serialStatus & EMU_SER_STATUS_DA) == 0) {
+          this->serialData = Wire1.read();
+          this->serialStatus |= EMU_SER_STATUS_DA;
+        }
+        #endif
+        #ifdef DEVBOARD_1_1
+        if (Wire2.available() && (this->serialStatus & EMU_SER_STATUS_DA) == 0) {
+          this->serialData = Wire2.read();
+          this->serialStatus |= EMU_SER_STATUS_DA;
+        }
+        #endif
+      }
       break;
     case EMU_TARGET_TXRX:
       #ifdef DEVBOARD_0
@@ -124,9 +137,7 @@ uint8_t Emulator::tick() {
   result |= (this->keyboardCmd & EMU_KEY_INT) & (this->keyboardData & EMU_KEY_AVAILABLE);
 
   // Serial Interrupt
-  if ((this->serialControl & EMU_SER_CTRL_IE) > 0 && (this->serialStatus & EMU_SER_STATUS_DA) > 0) {
-    result |= 0x80;
-  }
+  result |= (this->serialControl & EMU_SER_CTRL_IE) & (this->serialStatus & EMU_SER_STATUS_DA);
 
   return result;
 }
@@ -148,6 +159,9 @@ void Emulator::reset() {
 
   this->target = EMU_TARGET_SERIAL;
 
+  this->i2cAddress = 0x00;
+  this->i2cRead = false;
+  
   if (!SD.exists(EMU_PRAM_FILE_NAME)) {
     File file = SD.open(EMU_PRAM_FILE_NAME, FILE_WRITE);
     for (int i = 0; i < EMU_PRAM_SIZE; i++) {
@@ -213,28 +227,32 @@ void Emulator::configureSerial(uint8_t value) {
         break;
       case EMU_TARGET_SPI:
         #ifdef DEVBOARD_1
+        modeToSPIChipSelect(mode);
         SPI1.endTransaction();
         SPI1.end();
-        digitalWriteFast(CS0, HIGH);
-        digitalWriteFast(CS1, HIGH);
-        digitalWriteFast(CS2, HIGH);
         #endif
         #ifdef DEVBOARD_1_1
+        modeToSPIChipSelect(mode);
         SPI1.endTransaction();
         SPI1.end();
-        digitalWriteFast(CS0, HIGH);
-        digitalWriteFast(CS1, HIGH);
-        digitalWriteFast(CS2, HIGH);
         #endif
         break;
       case EMU_TARGET_I2C:
         #ifdef DEVBOARD_0
-        Wire1.endTransmission();
+        if (!this->i2cRead) {
+          Wire1.endTransmission();
+        }
         Wire1.end();
+        this->i2cAddress = 0x00;
+        this->i2cRead = false;
         #endif
         #ifdef DEVBOARD_1_1
-        Wire2.endTransmission();
+        if (this->i2cReadWrite == EMU_I2C_WRITE) {
+          Wire2.endTransmission();
+        }
         Wire2.end();
+        this->i2cAddress = 0x00;
+        this->i2cRead = false;
         #endif
         break;
       case EMU_TARGET_TXRX:
@@ -262,26 +280,24 @@ void Emulator::configureSerial(uint8_t value) {
         break;
       case EMU_TARGET_SPI:
         #ifdef DEVBOARD_1
-        modeToSPIChipSelect(mode);
         SPI1.begin();
         SPI1.beginTransaction(SPISettings(modeToSPISpeed(mode), MSBFIRST, SPI_MODE0));
+        modeToSPIChipSelect(mode);
         #endif
         #ifdef DEVBOARD_1_1
-        modeToSPIChipSelect(mode);
         SPI1.begin();
         SPI1.beginTransaction(SPISettings(modeToSPISpeed(mode), MSBFIRST, SPI_MODE0));
+        modeToSPIChipSelect(mode);
         #endif
         break;
       case EMU_TARGET_I2C:
         #ifdef DEVBOARD_0
         Wire1.begin();
         Wire1.setClock(modeToI2CSpeed(mode));
-        //Wire1.beginTransmission(/* TODO: Address */);
         #endif
         #ifdef DEVBOARD_1_1
         Wire2.begin();
         Wire2.setClock(modeToI2CSpeed(mode));
-        //Wire2.beginTransmission(/* TODO: Address */);
         #endif
         break;
       case EMU_TARGET_TXRX:
@@ -317,12 +333,37 @@ void Emulator::transmitSerial(uint8_t value) {
       this->serialStatus |= EMU_SER_STATUS_DA;
       break;
     case EMU_TARGET_I2C:
-      #ifdef DEVBOARD_0
-        Wire1.write(value); // TODO: Or maybe read?
+      // First byte written to serial data register after I2C configured sets address and R/W 
+      if (this->i2cAddress == 0x00) {
+        this->i2cAddress = (value & 0b11111110) >> 1;
+        this->i2cRead = value & 0b00000001;
+        #ifdef DEVBOARD_0
+        if (!this->i2cRead) {
+          Wire1.beginTransmission(this->i2cAddress);
+        }
         #endif
         #ifdef DEVBOARD_1_1
-        Wire2.write(value); // TODO: Or maybe read?
+        if (!this->i2cRead) {
+          Wire2.beginTransmission(this->i2cAddress);
+        }
         #endif
+      // Subsequent bytes are written if writing to I2C or sets number of bytes to read
+      } else {
+        #ifdef DEVBOARD_0
+        if (this->i2cRead) {
+          Wire1.requestFrom(this->i2cAddress, value);
+        } else {
+          Wire1.write(value);
+        }
+        #endif
+        #ifdef DEVBOARD_1_1
+        if (this->i2cRead) {
+          Wire2.requestFrom(this->i2cAddress, value);
+        } else {
+          Wire2.write(value);
+        }
+        #endif
+      }
       break;
     case EMU_TARGET_TXRX:
       Serial6.write(value);
@@ -334,27 +375,128 @@ void Emulator::transmitSerial(uint8_t value) {
 
 void Emulator::modeToSPIChipSelect(uint8_t mode) {
   #ifdef DEVBOARD_1
+  uint8_t chipSelect = mode & 0b00000011;
+  
   pinMode(CS0, OUTPUT);
   pinMode(CS1, OUTPUT);
   pinMode(CS2, OUTPUT);
+
+  switch (chipSelect) {
+    case 0x00:
+      digitalWriteFast(CS0, HIGH);
+      digitalWriteFast(CS1, HIGH);
+      digitalWriteFast(CS2, HIGH);
+      break;
+    case 0x01:
+      digitalWriteFast(CS0, LOW);
+      break;
+    case 0x02:
+      digitalWriteFast(CS1, LOW);
+      break;
+    case 0x03:
+      digitalWriteFast(CS2, LOW);
+      break;
+    default:
+      break; 
+  }
   #endif
   #ifdef DEVBOARD_1_1
+  uint8_t chipSelect = mode & 0b00000011;
+
   pinMode(CS0, OUTPUT);
   pinMode(CS1, OUTPUT);
   pinMode(CS2, OUTPUT);
+
+  switch (chipSelect) {
+    case 0x00:
+      digitalWriteFast(CS0, HIGH);
+      digitalWriteFast(CS1, HIGH);
+      digitalWriteFast(CS2, HIGH);
+      break;
+    case 0x01:
+      digitalWriteFast(CS0, LOW);
+      break;
+    case 0x02:
+      digitalWriteFast(CS1, LOW);
+      break;
+    case 0x03:
+      digitalWriteFast(CS2, LOW);
+      break;
+    default:
+      break; 
+  }
   #endif
-  
-  // TODO: SPI chip select
 }
 
 uint32_t Emulator::modeToSPISpeed(uint8_t mode) {
-  return 2000000; // TODO: SPI speed
+  uint8_t speed = (mode & 0b00001100) >> 2;
+
+  switch (speed) {
+    case 0x00:
+      return 2000000;   // 2MHz
+    case 0x01:
+      return 4000000;   // 4MHz
+    case 0x02:
+      return 10000000;  // 10MHz
+    case 0x03:
+      return 25000000;  // 25MHz
+    default:
+      return 2000000;   // 2MHz 
+  }
 }
 
 uint32_t Emulator::modeToI2CSpeed(uint8_t mode) {
-  return 100000; // TODO: I2C speed
+  switch (mode) {
+    case 0x00:
+      return 100000; // Normal Mode
+    case 0x01:
+      return 400000; // Fast Mode
+    case 0x02:
+      return 1000000; // Fast Mode Plus
+    case 0x03:
+      return 3400000; // High Speed Mode
+    case 0x04:
+      return 10000; // Low Speed Mode
+    default:
+      return 100000; // Normal Mode
+  }
 }
 
 uint32_t Emulator::modeToBaudRate(uint8_t mode) {
-  return 9600; // TODO: Baud Rate
+  switch (mode) {
+    case 0x00:
+      return 115200;
+    case 0x01:
+      return 50;
+    case 0x02:
+      return 75;
+    case 0x03:
+      return 110;
+    case 0x04:
+      return 135;
+    case 0x05:
+      return 150;
+    case 0x06:
+      return 300;
+    case 0x07:
+      return 600;
+    case 0x08:
+      return 1200;
+    case 0x09:
+      return 1800;
+    case 0x0A:
+      return 2400;
+    case 0x0B:
+      return 3600;
+    case 0x0C:
+      return 4800;
+    case 0x0D:
+      return 7200;
+    case 0x0E:
+      return 9600;
+    case 0x0F:
+      return 19200;
+    default:
+      return 115200;
+  }
 }
