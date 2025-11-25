@@ -1,0 +1,141 @@
+ca65 V2.18 - N/A
+Main file   : ./src/VH Bricks.asm
+Current file: ./src/VH Bricks.asm
+
+000000r 1               .setcpu "65C02"
+000000r 1               
+000000r 1               .segment "ZEROPAGE"
+000000r 1               .segment "STACK"
+000000r 1               .segment "INPUT_BUFFER"
+000000r 1               .segment "KERNAL_VARS"
+000000r 1               .segment "USER_VARS"
+000000r 1               .segment "CODE"
+000000r 1               
+000000r 1               ; VERA
+000000r 1               VERA_ADDR_LOW     = $9C00
+000000r 1               VERA_ADDR_MID     = $9C01
+000000r 1               VERA_ADDR_HIGH    = $9C02
+000000r 1               VERA_DATA0        = $9C03
+000000r 1               VERA_DATA1        = $9C04
+000000r 1               VERA_CTRL         = $9C05
+000000r 1               VERA_DC_VIDEO     = $9C09
+000000r 1               VERA_DC_HSCALE    = $9C0A
+000000r 1               VERA_DC_VSCALE    = $9C0B
+000000r 1               VERA_DC_BORDER    = $9C0B
+000000r 1               VERA_L0_CONFIG    = $9C0D
+000000r 1               VERA_L0_MAPBASE   = $9C0E
+000000r 1               VERA_L0_TILEBASE  = $9C0F
+000000r 1               
+000000r 1               ;*******************************************************************************
+000000r 1               ; Build a 16x16 256 color tile in VRAM location $12000
+000000r 1               ;*******************************************************************************
+000000r 1  9C 05 9C         stz VERA_CTRL                       ; Use Data Register 0
+000003r 1  A9 11            lda #$11
+000005r 1  8D 02 9C         sta VERA_ADDR_HIGH                  ; Set Increment to 1, High Byte to 1
+000008r 1  A9 20            lda #$20
+00000Ar 1  8D 01 9C         sta VERA_ADDR_MID                   ; Set Middle Byte to $20
+00000Dr 1  9C 00 9C         stz VERA_ADDR_LOW                   ; Set Low Byte to $00
+000010r 1               
+000010r 1  A2 00            ldx #0
+000012r 1  BD rr rr     :   lda brick,x                         ; read from Brick Data
+000015r 1  8D 03 9C         sta VERA_DATA0                      ; Write to VRAM with +1 Autoincrement
+000018r 1  E8               inx
+000019r 1  D0 F7            bne :-
+00001Br 1               
+00001Br 1               ;*******************************************************************************
+00001Br 1               ; Configure Layer 0
+00001Br 1               ;*******************************************************************************
+00001Br 1  A9 03            lda #%00000011                      ; 32 x 32 tiles, 8 bits per pixel
+00001Dr 1  8D 0D 9C         sta VERA_L0_CONFIG
+000020r 1  A9 20            lda #$20                            ; $20 points to $4000 in VRAM
+000022r 1  8D 0E 9C         sta VERA_L0_MAPBASE                  ; Store to Map Base Pointer
+000025r 1               
+000025r 1  A9 93            lda #$93                            ; $93 points to $12000, Width and Height 16 pixel
+000027r 1  8D 0F 9C         sta VERA_L0_TILEBASE                ; Store to Tile Base Pointer
+00002Ar 1               
+00002Ar 1               ;*******************************************************************************
+00002Ar 1               ; Fill the Layer 0 with all bricks
+00002Ar 1               ;*******************************************************************************
+00002Ar 1  9C 05 9C         stz VERA_CTRL                       ; Use Data Register 0
+00002Dr 1  A9 10            lda #$10
+00002Fr 1  8D 02 9C         sta VERA_ADDR_HIGH                  ; Set Increment to 1, High Byte to 0
+000032r 1  A9 40            lda #$40
+000034r 1  8D 01 9C         sta VERA_ADDR_MID                   ; Set Middle Byte to $40
+000037r 1  9C 00 9C         stz VERA_ADDR_LOW                   ; Set Low Byte to $00
+00003Ar 1               
+00003Ar 1  A0 20            ldy #32
+00003Cr 1  A9 00            lda #0
+00003Er 1  A2 20        :   ldx #32
+000040r 1  8D 03 9C     :   sta VERA_DATA0                      ; Write to VRAM with +1 Autoincrement
+000043r 1  8D 03 9C         sta VERA_DATA0                      ; Write Attribute
+000046r 1  CA               dex
+000047r 1  D0 F7            bne :-
+000049r 1  88               dey
+00004Ar 1  D0 F2            bne :--
+00004Cr 1               
+00004Cr 1               ;*******************************************************************************
+00004Cr 1               ; Turn on Layer 0
+00004Cr 1               ;*******************************************************************************
+00004Cr 1  A9 11            lda #%00010001                      ; Turn on layer 0, VGA Mode
+00004Er 1  8D 09 9C         sta VERA_DC_VIDEO
+000051r 1               
+000051r 1               ;*******************************************************************************
+000051r 1               ; Scale Display x2 for resolution of 320 x 240 pixels
+000051r 1               ;*******************************************************************************
+000051r 1  A9 40            lda #$40
+000053r 1  8D 0A 9C         sta VERA_DC_HSCALE
+000056r 1  8D 0B 9C         sta VERA_DC_VSCALE
+000059r 1               
+000059r 1               halt:
+000059r 1  4C 00 A0       jmp $A000                             ; Jump back to Wozmon
+00005Cr 1               
+00005Cr 1               brick:
+00005Cr 1  08 08 08 08      .byte $08,$08,$08,$08,$08,$08,$08,$E5,$08,$08,$08,$08,$08,$08,$08,$08
+000060r 1  08 08 08 E5  
+000064r 1  08 08 08 08  
+00006Cr 1  2A 2A 2A 2A      .byte $2A,$2A,$2A,$2A,$2A,$2A,$29,$E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A
+000070r 1  2A 2A 29 E5  
+000074r 1  08 2A 2A 2A  
+00007Cr 1  2A 2A 2A 2A      .byte $2A,$2A,$2A,$2A,$2A,$2A,$29,$E5,$08,$2A,$2C,$2A,$2A,$2A,$2A,$2A
+000080r 1  2A 2A 29 E5  
+000084r 1  08 2A 2C 2A  
+00008Cr 1  2A 2A 2C 2C      .byte $2A,$2A,$2C,$2C,$2A,$2A,$29,$E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A
+000090r 1  2A 2A 29 E5  
+000094r 1  08 2A 2A 2A  
+00009Cr 1  2A 2A 2A 2A      .byte $2A,$2A,$2A,$2A,$2A,$2A,$29,$E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A
+0000A0r 1  2A 2A 29 E5  
+0000A4r 1  08 2A 2A 2A  
+0000ACr 1  2A 2A 2A 2A      .byte $2A,$2A,$2A,$2A,$2A,$2A,$29,$E5,$08,$2A,$2A,$2A,$2A,$29,$29,$2A
+0000B0r 1  2A 2A 29 E5  
+0000B4r 1  08 2A 2A 2A  
+0000BCr 1  29 29 29 29      .byte $29,$29,$29,$29,$29,$29,$29,$E5,$08,$29,$29,$29,$29,$29,$29,$29
+0000C0r 1  29 29 29 E5  
+0000C4r 1  08 29 29 29  
+0000CCr 1  E5 E5 E5 E5      .byte $E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5
+0000D0r 1  E5 E5 E5 E5  
+0000D4r 1  E5 E5 E5 E5  
+0000DCr 1  E5 08 08 08      .byte $E5,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08,$08
+0000E0r 1  08 08 08 08  
+0000E4r 1  08 08 08 08  
+0000ECr 1  E5 08 08 2A      .byte $E5,$08,$08,$2A,$2C,$2C,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$29
+0000F0r 1  2C 2C 2A 2A  
+0000F4r 1  2A 2A 2A 2A  
+0000FCr 1  E5 08 2A 2A      .byte $E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$29
+000100r 1  2A 2A 2A 2A  
+000104r 1  2A 2A 2A 2A  
+00010Cr 1  E5 08 2A 2A      .byte $E5,$08,$2A,$2A,$2A,$2A,$29,$29,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$29
+000110r 1  2A 2A 29 29  
+000114r 1  2A 2A 2A 2A  
+00011Cr 1  E5 08 2A 2A      .byte $E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$29,$2A,$29
+000120r 1  2A 2A 2A 2A  
+000124r 1  2A 2A 2A 2A  
+00012Cr 1  E5 08 2A 2A      .byte $E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$29
+000130r 1  2A 2A 2A 2A  
+000134r 1  2A 2A 2A 2A  
+00013Cr 1  E5 08 29 29      .byte $E5,$08,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29
+000140r 1  29 29 29 29  
+000144r 1  29 29 29 29  
+00014Cr 1  E5 E5 E5 E5      .byte $E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5
+000150r 1  E5 E5 E5 E5  
+000154r 1  E5 E5 E5 E5  
+00015Br 1               
