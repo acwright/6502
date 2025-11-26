@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/LCD\ Hello\ World.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/LCD\ Hello\ World.prg | awk '{print toupper($0)}' > ./build/LCD\ Hello\ World.woz
+	bin2woz -a 0x0800 ./build/LCD\ Hello\ World.prg > ./build/LCD\ Hello\ World.woz

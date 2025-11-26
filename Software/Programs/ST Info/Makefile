@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/ST\ Info.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/ST\ Info.prg | awk '{print toupper($0)}' > ./build/ST\ Info.woz
+	bin2woz -a 0x0800 ./build/ST\ Info.prg > ./build/ST\ Info.woz

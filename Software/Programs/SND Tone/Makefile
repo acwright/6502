@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/SND\ Tone.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/SND\ Tone.prg | awk '{print toupper($0)}' > ./build/SND\ Tone.woz
+	bin2woz -a 0x0800 ./build/SND\ Tone.prg > ./build/SND\ Tone.woz

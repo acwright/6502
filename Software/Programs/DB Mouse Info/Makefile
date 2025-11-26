@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/DB\ Mouse\ Info.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/DB\ Mouse\ Info.prg | awk '{print toupper($0)}' > ./build//DB\ Mouse\ Info.woz
+	bin2woz -a 0x0800 ./build/DB\ Mouse\ Info.prg > ./build//DB\ Mouse\ Info.woz

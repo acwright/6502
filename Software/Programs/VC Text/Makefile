@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/VC\ Text.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/VC\ Text.prg | awk '{print toupper($0)}' > ./build/VC\ Text.woz
+	bin2woz -a 0x0800 ./build/VC\ Text.prg > ./build/VC\ Text.woz

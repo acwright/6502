@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/PS2\ Keyboard\ Transmit.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/PS2\ Keyboard\ Transmit.prg | awk '{print toupper($0)}' > ./build/PS2\ Keyboard\ Transmit.woz
+	bin2woz -a 0x0800 ./build/PS2\ Keyboard\ Transmit.prg > ./build/PS2\ Keyboard\ Transmit.woz

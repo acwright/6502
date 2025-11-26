@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/VH\ Bricks.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/VH\ Bricks.prg | awk '{print toupper($0)}' > ./build/VH\ Bricks.woz
+	bin2woz -a 0x0800 ./build/VH\ Bricks.prg > ./build/VH\ Bricks.woz

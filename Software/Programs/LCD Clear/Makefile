@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/LCD\ Clear.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/LCD\ Clear.prg | awk '{print toupper($0)}' > ./build/LCD\ Clear.woz
+	bin2woz -a 0x0800 ./build/LCD\ Clear.prg > ./build/LCD\ Clear.woz

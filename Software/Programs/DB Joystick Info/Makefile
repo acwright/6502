@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/DB\ Joystick\ Info.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/DB\ Joystick\ Info.prg | awk '{print toupper($0)}' > ./build//DB\ Joystick\ Info.woz
+	bin2woz -a 0x0800 ./build/DB\ Joystick\ Info.prg > ./build//DB\ Joystick\ Info.woz

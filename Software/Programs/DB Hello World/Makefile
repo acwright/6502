@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/DB\ Hello\ World.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/DB\ Hello\ World.prg | awk '{print toupper($0)}' > ./build//DB\ Hello\ World.woz
+	bin2woz -a 0x0800 ./build/DB\ Hello\ World.prg > ./build//DB\ Hello\ World.woz

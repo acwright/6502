@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/GPIO\ Input.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/GPIO\ Input.prg | awk '{print toupper($0)}' > ./build/GPIO\ Input.woz
+	bin2woz -a 0x0800 ./build/GPIO\ Input.prg > ./build/GPIO\ Input.woz

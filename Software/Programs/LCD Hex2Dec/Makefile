@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/LCD\ Hex2Dec.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/LCD\ Hex2Dec.prg | awk '{print toupper($0)}' > ./build/LCD\ Hex2Dec.woz
+	bin2woz -a 0x0800 ./build/LCD\ Hex2Dec.prg > ./build/LCD\ Hex2Dec.woz

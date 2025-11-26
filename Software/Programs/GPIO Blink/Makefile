@@ -6,4 +6,4 @@ view:
 	hexdump -C ./build/GPIO\ Blink.prg
 
 woz:
-	hexdump -e '"08%02_ax: " 16/1 "%02X " "\n"' ./build/GPIO\ Blink.prg | awk '{print toupper($0)}' > ./build/GPIO\ Blink.woz
+	bin2woz -a 0x0800 ./build/GPIO\ Blink.prg > ./build/GPIO\ Blink.woz
