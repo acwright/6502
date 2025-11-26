@@ -1,12 +1,10 @@
 #include "RAMCard.h"
 
-RAMCard::RAMCard() {
-  uint16_t size = RC_BLOCK_SIZE * RC_BLOCK_COUNT;
-
-  this->data = new uint8_t[size]; // 0x40000 (256K) if EXTMEM | 0x4000 (16K) if not
+RAMCard::RAMCard(uint8_t *data) {
+  this->data = data;
 	this->bank = 0x00;
 
-  for (int i = 0; i < size; i++) {
+  for (size_t i = 0; i < RC_BLOCK_SIZE * RC_BLOCK_COUNT; i++) {
     this->data[i] = 0x00;
   }
 }

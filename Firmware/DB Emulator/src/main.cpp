@@ -119,12 +119,19 @@ uint cartFilePage = 0;
 String Programs[FILE_MAX];
 uint programFilePage = 0;
 
+#ifdef MEM_EXTMEM
+EXTMEM uint8_t ramData[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
+#else
+uint8_t ramData[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
+#endif
+
 CPU cpu = CPU(read, write);
 RAM ram = RAM();
 ROM rom = ROM();
 Cart cart = Cart();
+
 IO *io[IO_SLOTS] = {
-  new RAMCard(),
+  new RAMCard(ramData),
   new Emulator(),
   new Empty(),
   new Empty(),
@@ -1031,7 +1038,7 @@ void configureIO(uint index) {
       io[index] = new StorageCard();
       break;
     case IO_RAM_CARD:
-      io[index] = new RAMCard();
+      io[index] = new RAMCard(ramData);
       break;
     case IO_EMULATOR:
       io[index] = new Emulator();

@@ -13,16 +13,11 @@
 
 class RAMCard: public IO {
   private:
-    #ifdef MEM_EXTMEM
-    EXTMEM uint8_t *data;
-    #else
     uint8_t *data;
-    #endif
-    
     uint8_t bank;
 
   public:
-    RAMCard();
+    RAMCard(uint8_t *data);
     ~RAMCard();
 
     uint8_t id() { return IO_RAM_CARD; }
