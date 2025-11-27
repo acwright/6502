@@ -82,8 +82,8 @@ VERA_L0_TILEBASE  = $9C0F
     sta VERA_DC_HSCALE
     sta VERA_DC_VSCALE
 
-halt:
-  jmp $A000                             ; Jump back to Wozmon
+loop:
+  jmp loop                             ; Halt
 
 brick:
     .byte $08,$08,$08,$08,$08,$08,$08,$E5,$08,$08,$08,$08,$08,$08,$08,$08

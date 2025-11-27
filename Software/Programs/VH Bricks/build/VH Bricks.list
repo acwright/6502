@@ -86,8 +86,8 @@ Current file: ./src/VH Bricks.asm
 000053r 1  8D 0A 9C         sta VERA_DC_HSCALE
 000056r 1  8D 0B 9C         sta VERA_DC_VSCALE
 000059r 1               
-000059r 1               halt:
-000059r 1  4C 00 A0       jmp $A000                             ; Jump back to Wozmon
+000059r 1               loop:
+000059r 1  4C rr rr       jmp loop                             ; Halt
 00005Cr 1               
 00005Cr 1               brick:
 00005Cr 1  08 08 08 08      .byte $08,$08,$08,$08,$08,$08,$08,$E5,$08,$08,$08,$08,$08,$08,$08,$08

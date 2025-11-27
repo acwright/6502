@@ -1129,23 +1129,16 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   data = 0x00;
   readWrite = HIGH;
 
-  bool useNanoseconds = FREQ_PERIODS[freqIndex] <= 1;
-  uint32_t delay = 0;
-
-  if (useNanoseconds) {
-    delay = (FREQ_PERIODS[freqIndex] * 1000) / 2;
-  } else {
-    delay = FREQ_PERIODS[freqIndex] / 2;
-  }
+  uint32_t delay = FREQ_PERIODS[freqIndex] <= 1 ? (FREQ_PERIODS[freqIndex] * 1000) / 2 : FREQ_PERIODS[freqIndex] / 2;
   
   digitalWriteFast(PHI2, LOW);
   delayNanoseconds(20);
   writeAddress(address);
   digitalWriteFast(RWB, readWrite);
   setDataDirIn();
-  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
   digitalWriteFast(PHI2, HIGH);
-  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
   data = readData();
 
   if ((addr >= CART_CODE) && (addr <= CART_END) && cart.enabled) { // Cart
@@ -1169,24 +1162,17 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   data = val;
   readWrite = LOW;
 
-  bool useNanoseconds = FREQ_PERIODS[freqIndex] <= 1;
-  uint32_t delay = 0;
-
-  if (useNanoseconds) {
-    delay = (FREQ_PERIODS[freqIndex] * 1000) / 2;
-  } else {
-    delay = FREQ_PERIODS[freqIndex] / 2;
-  }
+  uint32_t delay = FREQ_PERIODS[freqIndex] <= 1 ? (FREQ_PERIODS[freqIndex] * 1000) / 2 : FREQ_PERIODS[freqIndex] / 2;
 
   digitalWriteFast(PHI2, LOW);
   delayNanoseconds(20);
   writeAddress(address);
   digitalWriteFast(RWB, readWrite);
-  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
   digitalWriteFast(PHI2, HIGH);
   setDataDirOut();
   writeData(data);
-  useNanoseconds ? delayNanoseconds(delay) : delayMicroseconds(delay);
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
 
   if ((addr >= CART_CODE) && (addr <= CART_END) && cart.enabled) { // Cart
     cart.write(addr - CART_START, data);
@@ -1404,77 +1390,46 @@ void setDataDirOut() {
 }
 
 void writeAddress(uint16_t address) {
-  digitalWriteFast(A0, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A1, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A2, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A3, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A4, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A5, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A6, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A7, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A8, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A9, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A10, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A11, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A12, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A13, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A14, address & 1);
-  address = address >> 1;
-  digitalWriteFast(A15, address & 1);
+  digitalWriteFast(A0,  (address >> 0)  & 1);
+  digitalWriteFast(A1,  (address >> 1)  & 1);
+  digitalWriteFast(A2,  (address >> 2)  & 1);
+  digitalWriteFast(A3,  (address >> 3)  & 1);
+  digitalWriteFast(A4,  (address >> 4)  & 1);
+  digitalWriteFast(A5,  (address >> 5)  & 1);
+  digitalWriteFast(A6,  (address >> 6)  & 1);
+  digitalWriteFast(A7,  (address >> 7)  & 1);
+  digitalWriteFast(A8,  (address >> 8)  & 1);
+  digitalWriteFast(A9,  (address >> 9)  & 1);
+  digitalWriteFast(A10, (address >> 10) & 1);
+  digitalWriteFast(A11, (address >> 11) & 1);
+  digitalWriteFast(A12, (address >> 12) & 1);
+  digitalWriteFast(A13, (address >> 13) & 1);
+  digitalWriteFast(A14, (address >> 14) & 1);
+  digitalWriteFast(A15, (address >> 15) & 1);
 }
 
 uint8_t readData() {
   uint8_t data = 0;
-
-  data = data | digitalReadFast(D7);
-  data = data << 1;
-  data = data | digitalReadFast(D6);
-  data = data << 1;
-  data = data | digitalReadFast(D5);
-  data = data << 1;
-  data = data | digitalReadFast(D4);
-  data = data << 1;
-  data = data | digitalReadFast(D3);
-  data = data << 1;
-  data = data | digitalReadFast(D2);
-  data = data << 1;
-  data = data | digitalReadFast(D1);
-  data = data << 1;
-  data = data | digitalReadFast(D0);
-
+  data |= digitalReadFast(D0) << 0;
+  data |= digitalReadFast(D1) << 1;
+  data |= digitalReadFast(D2) << 2;
+  data |= digitalReadFast(D3) << 3;
+  data |= digitalReadFast(D4) << 4;
+  data |= digitalReadFast(D5) << 5;
+  data |= digitalReadFast(D6) << 6;
+  data |= digitalReadFast(D7) << 7;
   return data;
 }
 
 void writeData(uint8_t data) {
-  digitalWriteFast(D0, data & 1);
-  data = data >> 1;
-  digitalWriteFast(D1, data & 1);
-  data = data >> 1;
-  digitalWriteFast(D2, data & 1);
-  data = data >> 1;
-  digitalWriteFast(D3, data & 1);
-  data = data >> 1;
-  digitalWriteFast(D4, data & 1);
-  data = data >> 1;
-  digitalWriteFast(D5, data & 1);
-  data = data >> 1;
-  digitalWriteFast(D6, data & 1);
-  data = data >> 1;
-  digitalWriteFast(D7, data & 1);
+  digitalWriteFast(D0, (data >> 0) & 1);
+  digitalWriteFast(D1, (data >> 1) & 1);
+  digitalWriteFast(D2, (data >> 2) & 1);
+  digitalWriteFast(D3, (data >> 3) & 1);
+  digitalWriteFast(D4, (data >> 4) & 1);
+  digitalWriteFast(D5, (data >> 5) & 1);
+  digitalWriteFast(D6, (data >> 6) & 1);
+  digitalWriteFast(D7, (data >> 7) & 1);
 }
 
 //
