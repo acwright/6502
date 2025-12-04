@@ -34,9 +34,11 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **VGA Card**: A card that provides VGA output capabilities.
 - **VGA Card Pro**: An enhanced version of the VGA Card with additional features.
 - **Video Card**: A card that provides composite video output capabilities using the TMS9918A.
+- **Video Card Pro**: A card that provides composite video output capabilities using the Atmega1284p.
 
 **Helpers**:
 
+- **Backplane Helper**: A backplane board that adds two additional slots for cards.
 - **Breadboard Helper**: A board that allows easy connection to a breadboard for prototyping.
 - **Clock Helper**: A board that allows for running and stopping the clock along with single cycle or instruction stepping.
 - **DB25 Helper**: A board that allows easy connection of GPIO ports to a DB25 connector.

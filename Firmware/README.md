@@ -10,3 +10,4 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **KEH**: Keyboard Encoder Helper
 - **PS2**: PS2 Helper
 - **VGAP**: VGA Card Pro
+- **VCP**: Video Card Pro
