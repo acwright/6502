@@ -64,6 +64,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Keyboard Encoder Helper**: A board that translates keyboard scan data and PS/2 keyboard data to ASCII.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
+- **Output Helper**: A recreation of Grant Searle's Video interface for outputting video signals.
 - **PS2 Helper**: A board that allows connection of a PS/2 keyboard.
 - **VERA Helper**: A board that hosts a VERA module with graphics, sound and SD card.
 
