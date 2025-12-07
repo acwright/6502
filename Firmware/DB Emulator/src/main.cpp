@@ -522,14 +522,14 @@ void onJoystick() {
 
 void info() {
   Serial.println();
-  Serial.println("eeee  eeeee eeeeee eeee   888888 888888     88888                                              ");                        
-  Serial.println("8  8  8     8    8    8   8    8 8    8     8     eeeeeee e   e e     eeeee eeeee eeeee eeeee  ");
-  Serial.println("8     8eeee 8    8    8   8e   8 8eeee8ee   8eeee 8  8  8 8   8 8     8   8   8   8  88 8   8  ");
-  Serial.println("8eeee     8 8    8 eee8   88   8 88     8   88    8e 8  8 8e  8 8e    8eee8   8e  8   8 8eee8e ");
-  Serial.println("8   8     8 8    8 8      88   8 88     8   88    88 8  8 88  8 88    88  8   88  8   8 88   8 ");
-  Serial.println("8eee8 eeee8 8eeee8 8eee   88eee8 88eeeee8   88eee 88 8  8 88ee8 88eee 88  8   88  8eee8 88   8");
+  Serial.println("888888 888888     88888                                              ");                        
+  Serial.println("8    8 8    8     8     eeeeeee e   e e     eeeee eeeee eeeee eeeee  ");
+  Serial.println("8e   8 8eeee8ee   8eeee 8  8  8 8   8 8     8   8   8   8  88 8   8  ");
+  Serial.println("88   8 88     8   88    8e 8  8 8e  8 8e    8eee8   8e  8   8 8eee8e ");
+  Serial.println("88   8 88     8   88    88 8  8 88  8 88    88  8   88  8   8 88   8 ");
+  Serial.println("88eee8 88eeeee8   88eee 88 8  8 88ee8 88eee 88  8   88  8eee8 88   8");
   Serial.println();
-  Serial.print("6502 DB Emulator | Version: 1.0");
+  Serial.print("DB Emulator | Version: 1.0");
   Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
