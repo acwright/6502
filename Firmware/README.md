@@ -9,5 +9,6 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **IB**: Input Board
 - **KEH**: Keyboard Encoder Helper
 - **PS2**: PS2 Helper
+- **SCP**: Storage Card Pro
 - **VGAP**: VGA Card Pro
 - **VCP**: Video Card Pro

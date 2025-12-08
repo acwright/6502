@@ -47,6 +47,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Serial Card Pro**: An enhanced version of the Serial Card with additional features. 
 - **Sound Card**: A card that provides audio output capabilities.
 - **Storage Card**: A card that provides storage capabilities using a CompactFlash card.
+- **Storage Card Pro**: A card that provides storage capabilities with an SD Card, 16MB Flash and SPI.
 - **VGA Card**: A card that provides VGA output capabilities.
 - **VGA Card Pro**: An enhanced version of the VGA Card with additional features.
 - **Video Card**: A card that provides composite video output capabilities using the TMS9918A.
