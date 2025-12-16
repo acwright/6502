@@ -1,67 +1,58 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-PORTB   = $9800
-PORTA   = $9801
-DDRB    = $9802
-DDRA    = $9803
-PCR     = $980C
-
-AY_BC1H  = %11100000       ; VIA PCR CA2
-AY_BC1L  = %11000000       ; VIA PCR CA2
-AY_BDIRH = %00001110       ; VIA PCR CB2
-AY_BDIRL = %00001100       ; VIA PCR CB2
+.segment "PROGRAM"
 
 reset:
   lda #%11111111          ; Set all pins on port A and B to outputs
-  sta DDRA
-  sta DDRB
+  sta SND_DDRA
+  sta SND_DDRB
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   
   jsr ay_inactive
 
   jsr ay_latch
   lda #$07
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #%00111110
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$08
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #%00001111
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
 loop:
   jsr ay_latch
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #223
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$01
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #1
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr delay
@@ -71,20 +62,20 @@ loop:
 
   jsr ay_latch
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #170
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$01
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #1
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr delay
@@ -94,20 +85,20 @@ loop:
 
   jsr ay_latch
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #123
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$01
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #1
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr delay
@@ -117,20 +108,20 @@ loop:
 
   jsr ay_latch
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #102
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$01
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #1
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr delay
@@ -140,20 +131,20 @@ loop:
 
   jsr ay_latch
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #63
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$01
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #1
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr delay
@@ -163,20 +154,20 @@ loop:
 
   jsr ay_latch
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #28
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$01
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #1
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr delay
@@ -186,20 +177,20 @@ loop:
 
   jsr ay_latch
   lda #$00
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #253
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr ay_latch
   lda #$01
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
   jsr ay_write
   lda #0
-  sta PORTA
+  sta SND_PORTA
   jsr ay_inactive
 
   jsr delay
@@ -220,22 +211,26 @@ delay_loop:
 
 ay_inactive:
   phx
-  ldx #(AY_BDIRL | AY_BC1L)   ; BDIR LOW, BC1 LOW
-  stx PCR
+  ldx #(SND_BDIRL | SND_BC1L)   ; BDIR LOW, BC1 LOW
+  stx SND_PCR
   plx
   rts
 
 ay_latch:
   phx
-  ldx #(AY_BDIRH | AY_BC1H)   ; BDIR HIGH, BC1 HIGH
-  stx PCR
+  ldx #(SND_BDIRH | SND_BC1H)   ; BDIR HIGH, BC1 HIGH
+  stx SND_PCR
   plx
   rts
 
 ay_write:
   phx
-  ldx #(AY_BDIRH | AY_BC1L)   ; BDIR HIGH, BC1 LOW
-  stx PCR
+  ldx #(SND_BDIRH | SND_BC1L)   ; BDIR HIGH, BC1 LOW
+  stx SND_PCR
   plx
   rts
   
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

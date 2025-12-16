@@ -1,48 +1,34 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-RTC_SECS    = $8800
-RTC_MINS    = $8801
-RTC_HRS     = $8802
-RTC_DAYS    = $8803
-RTC_DATE    = $8804
-RTC_MON     = $8805
-RTC_YR      = $8806
-RTC_CEN     = $8807
-RTC_CTRLA   = $880E
-RTC_CTRLB   = $880F
-
-ACIA_DATA   = $9000
-ACIA_STATUS = $9001
-ACIA_CMD    = $9002
-ACIA_CTRL   = $9003
+.segment "PROGRAM"
 
 reset:
   ldx #$ff
   txs
 
   lda #$00
-  sta ACIA_STATUS ; Soft reset (value not important)
+  sta SC_STATUS ; Soft reset (value not important)
 
   lda #%00010000  ; N-8-1, 115200 baud
-  sta ACIA_CTRL
+  sta SC_CTRL
 
   lda #%00001011  ; No parity, No echo, No interrupts
-  sta ACIA_CMD
+  sta SC_CMD
 
-  lda RTC_SECS
+  lda RTC_SEC
   jsr send_char
-  lda RTC_MINS
+  lda RTC_MIN
   jsr send_char
-  lda RTC_HRS
+  lda RTC_HR
   jsr send_char
-  lda RTC_DAYS
+  lda RTC_DAY
   jsr send_char
   lda RTC_DATE
   jsr send_char
@@ -50,25 +36,30 @@ reset:
   jsr send_char
   lda RTC_YR
   jsr send_char
-  lda RTC_CEN
+  lda RTC_CENT
   jsr send_char
-  lda RTC_CTRLA
+  lda RTC_CTRL_A
   jsr send_char
-  lda RTC_CTRLB
+  lda RTC_CTRL_B
   jsr send_char
 
   lda #%10000000  ; Set transfer enable bit (start the clock)
-  sta RTC_CTRLB
+  sta RTC_CTRL_B
 
 loop:
   jmp loop
 
 send_char:
-  sta ACIA_DATA 
+  sta SC_DATA 
   pha
 tx_wait:
-  lda ACIA_STATUS
+  lda SC_STATUS
   and #%00010000  ; Check if tx buffer not empty
   beq tx_wait     ; Loop if tx buffer not empty
   pla
   rts
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

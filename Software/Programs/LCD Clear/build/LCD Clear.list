@@ -4,73 +4,217 @@ Current file: ./src/LCD Clear.asm
 
 000000r 1               .setcpu "65C02"
 000000r 1               
+000000r 1               .include "../../../6502.inc"
+000000r 2               ; ***                     ***
+000000r 2               ; ***   6502 INCLUDES     ***
+000000r 2               ; ***                     ***
+000000r 2               
+000000r 2               ; LCD Card | IO 1 | $8000-$800F
+000000r 2               LCD_PORTB       = $8000
+000000r 2               LCD_PORTA       = $8001
+000000r 2               LCD_DDRB        = $8002
+000000r 2               LCD_DDRA        = $8003
+000000r 2               LCD_T1CL        = $8004
+000000r 2               LCD_T1CH        = $8005
+000000r 2               LCD_T1LL        = $8006
+000000r 2               LCD_T1LH        = $8007
+000000r 2               LCD_T2CL        = $8008
+000000r 2               LCD_T2CH        = $8009
+000000r 2               LCD_SR          = $800A
+000000r 2               LCD_ACR         = $800B
+000000r 2               LCD_PCR         = $800C
+000000r 2               LCD_IFR         = $800D
+000000r 2               LCD_IER         = $800E
+000000r 2               LCD_ORA         = $800F
+000000r 2               LCD_E           = %10000000
+000000r 2               LCD_RW          = %01000000
+000000r 2               LCD_RS          = %00100000
+000000r 2               
+000000r 2               ; RAM Card | IO 1 & 2 | $8000-$87FF
+000000r 2               RAM_DATA        = $8000     ; R/W ($8000-$83FE)
+000000r 2               RAM_DATA_H      = $8400     ; R/W ($8400-$87FE)
+000000r 2               RAM_BANK        = $83FF     ; All three RAM_BANK addresses address the same bank switching
+000000r 2               RAM_BANK_L      = $83FF     ; latch and can be univerally interchanged
+000000r 2               RAM_BANK_H      = $87FF     ; RAM bank latch value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
+000000r 2               
+000000r 2               ; Emulator | IO 2 | $8400-$840F
+000000r 2               EMU_SER_DATA    = $8400     ; Write
+000000r 2               EMU_SER_CTRL    = $8401     ; Write
+000000r 2               EMU_SER_STATUS  = $8401     ; Read
+000000r 2               EMU_KB_CMD      = $8402     ; Write
+000000r 2               EMU_KB_DATA     = $8402     ; Read
+000000r 2               EMU_MOUSE_X     = $8403     ; Read
+000000r 2               EMU_MOUSE_Y     = $8404     ; Read
+000000r 2               EMU_MOUSE_W     = $8405     ; Read
+000000r 2               EMU_MOUSE_BTNS  = $8406     ; Read
+000000r 2               EMU_JOY_BTNS    = $8407     ; Read
+000000r 2               EMU_RTC_SEC     = $8408     ; Read
+000000r 2               EMU_RTC_MIN     = $8409     ; Read
+000000r 2               EMU_RTC_HR      = $840A     ; Read
+000000r 2               EMU_RTC_DAY     = $840B     ; Read
+000000r 2               EMU_RTC_MON     = $840C     ; Read
+000000r 2               EMU_RTC_YR      = $840D     ; Read
+000000r 2               EMU_PRAM_DATA   = $840E     ; R/W
+000000r 2               EMU_PRAM_ADDR   = $840F     ; R/W
+000000r 2               
+000000r 2               ; RTC Card | IO 3 | $8800-$881F
+000000r 2               RTC_SEC         = $8800
+000000r 2               RTC_MIN         = $8801
+000000r 2               RTC_HR          = $8802
+000000r 2               RTC_DAY         = $8803
+000000r 2               RTC_DATE        = $8804
+000000r 2               RTC_MON         = $8805
+000000r 2               RTC_YR          = $8806
+000000r 2               RTC_CENT        = $8807
+000000r 2               RTC_ALARM_SEC   = $8808
+000000r 2               RTC_ALARM_MIN   = $8809
+000000r 2               RTC_ALARM_HR    = $880A
+000000r 2               RTC_ALARM_DATE  = $880B
+000000r 2               RTC_WD_L        = $880C
+000000r 2               RTC_WD_H        = $880D
+000000r 2               RTC_CTRL_A      = $880E
+000000r 2               RTC_CRTL_B      = $880F
+000000r 2               RTC_RAM_ADDR    = $8810
+000000r 2               RTC_RAM_DATA    = $8813
+000000r 2               
+000000r 2               ; Storage Card | IO 4 | $8C00-$8C07
+000000r 2               ST_DATA         = $8C00     ; R/W
+000000r 2               ST_ERROR        = $8C01     ; Read
+000000r 2               ST_FEATURE      = $8C01     ; Write
+000000r 2               ST_SECT_CNT     = $8C02     ; R/W
+000000r 2               ST_LBA_0        = $8C03     ; R/W
+000000r 2               ST_LBA_1        = $8C04     ; R/W
+000000r 2               ST_LBA_2        = $8C05     ; R/W
+000000r 2               ST_LBA_3        = $8C06     ; R/W
+000000r 2               ST_STATUS       = $8C07     ; Read
+000000r 2               ST_CMD          = $8C07     ; Write
+000000r 2               ST_ERR_AMNF     = %00000001
+000000r 2               ST_ERR_ABRT     = %00000100
+000000r 2               ST_ERR_IDNF     = %00010000
+000000r 2               ST_ERR_UNC      = %01000000
+000000r 2               ST_ERR_BBK      = %10000000
+000000r 2               ST_STATUS_ERR   = %00000001
+000000r 2               ST_STATUS_IDX   = %00000010
+000000r 2               ST_STATUS_CORR  = %00000100
+000000r 2               ST_STATUS_DRQ   = %00001000
+000000r 2               ST_STATUS_DSC   = %00010000
+000000r 2               ST_STATUS_DWF   = %00100000
+000000r 2               ST_STATUS_RDY   = %01000000
+000000r 2               ST_STATUS_BSY   = %10000000
+000000r 2               
+000000r 2               ; Serial Card | IO 5 | $9000-$9003
+000000r 2               SC_DATA         = $9000     ; R/W
+000000r 2               SC_RESET        = $9001     ; Write
+000000r 2               SC_STATUS       = $9001     ; Read
+000000r 2               SC_CMD          = $9002     ; R/W
+000000r 2               SC_CTRL         = $9003     ; R/W
+000000r 2               
+000000r 2               ; GPIO Card / Input Board | IO 6 | $9400-$940F
+000000r 2               GPIO_PORTB      = $9400
+000000r 2               GPIO_PORTA      = $9401
+000000r 2               GPIO_DDRB       = $9402
+000000r 2               GPIO_DDRA       = $9403
+000000r 2               GPIO_T1CL       = $9404
+000000r 2               GPIO_T1CH       = $9405
+000000r 2               GPIO_T1LL       = $9406
+000000r 2               GPIO_T1LH       = $9407
+000000r 2               GPIO_T2CL       = $9408
+000000r 2               GPIO_T2CH       = $9409
+000000r 2               GPIO_SR         = $940A
+000000r 2               GPIO_ACR        = $940B
+000000r 2               GPIO_PCR        = $940C
+000000r 2               GPIO_IFR        = $940D
+000000r 2               GPIO_IER        = $940E
+000000r 2               GPIO_ORA        = $940F
+000000r 2               
+000000r 2               ; Sound Card | IO 7 | $9800-$980F
+000000r 2               SND_PORTB       = $9400
+000000r 2               SND_PORTA       = $9401
+000000r 2               SND_DDRB        = $9402
+000000r 2               SND_DDRA        = $9403
+000000r 2               SND_T1CL        = $9404
+000000r 2               SND_T1CH        = $9405
+000000r 2               SND_T1LL        = $9406
+000000r 2               SND_T1LH        = $9407
+000000r 2               SND_T2CL        = $9408
+000000r 2               SND_T2CH        = $9409
+000000r 2               SND_SR          = $940A
+000000r 2               SND_ACR         = $940B
+000000r 2               SND_PCR         = $940C
+000000r 2               SND_IFR         = $940D
+000000r 2               SND_IER         = $940E
+000000r 2               SND_ORA         = $940F
+000000r 2               SND_BC1H        = %11100000   ; SND_PCR CA2
+000000r 2               SND_BC1L        = %11000000   ; SND_PCR CA2
+000000r 2               SND_BDIRH       = %00001110   ; SND_PCR CB2
+000000r 2               SND_BDIRL       = %00001100   ; SND_PCR CB2
+000000r 2               
+000000r 2               ; Video Card / VGA Card | IO 8 | $9C00-$9C01
+000000r 2               VC_DATA         = $9C00       ; R/W
+000000r 2               VC_REG          = $9C01       ; Write
+000000r 2               VC_STATUS       = $9C01       ; Read
+000000r 2               
+000000r 1               
 000000r 1               .segment "ZEROPAGE"
 000000r 1               .segment "STACK"
 000000r 1               .segment "INPUT_BUFFER"
 000000r 1               .segment "KERNAL_VARS"
 000000r 1               .segment "USER_VARS"
-000000r 1               .segment "CODE"
-000000r 1               
-000000r 1               PORTB   = $8000
-000000r 1               PORTA   = $8001
-000000r 1               DDRB    = $8002
-000000r 1               DDRA    = $8003
-000000r 1               
-000000r 1               E       = %10000000
-000000r 1               RW      = %01000000
-000000r 1               RS      = %00100000
+000000r 1               .segment "PROGRAM"
 000000r 1               
 000000r 1               reset:
-000000r 1  A2 FF          ldx #$ff
-000002r 1  9A             txs
-000003r 1               
-000003r 1  A9 FF          lda #%11111111 ; Set all pins on port B to output
-000005r 1  8D 02 80       sta DDRB
-000008r 1  A9 E0          lda #%11100000 ; Set top 3 pins on port A to output
-00000Ar 1  8D 03 80       sta DDRA
-00000Dr 1               
-00000Dr 1  A9 38          lda #%00111000 ; Set 8-bit mode; 2-line display; 5x8 font
-00000Fr 1  20 rr rr       jsr lcd_instruction
-000012r 1  A9 0C          lda #%00001100 ; Display on; cursor off; blink off
-000014r 1  20 rr rr       jsr lcd_instruction
-000017r 1  A9 06          lda #%00000110 ; Increment and shift cursor; don't shift display
-000019r 1  20 rr rr       jsr lcd_instruction
-00001Cr 1               
-00001Cr 1               clear:
-00001Cr 1  A9 01          lda #$00000001 ; Clear display
-00001Er 1  20 rr rr       jsr lcd_instruction
-000021r 1               
-000021r 1               halt:
-000021r 1  4C rr rr       jmp halt
-000024r 1               
-000024r 1               lcd_wait:
-000024r 1  48             pha
-000025r 1  A9 00          lda #%00000000  ; Port B is input
-000027r 1  8D 02 80       sta DDRB
-00002Ar 1               lcd_busy:
-00002Ar 1  A9 40          lda #RW
-00002Cr 1  8D 01 80       sta PORTA
-00002Fr 1  A9 C0          lda #(RW | E)
-000031r 1  8D 01 80       sta PORTA
-000034r 1  AD 00 80       lda PORTB
-000037r 1  29 80          and #%10000000
-000039r 1  D0 EF          bne lcd_busy
-00003Br 1               
-00003Br 1  A9 40          lda #RW
-00003Dr 1  8D 01 80       sta PORTA
-000040r 1  A9 FF          lda #%11111111  ; Port B is output
-000042r 1  8D 02 80       sta DDRB
-000045r 1  68             pla
-000046r 1  60             rts
-000047r 1               
-000047r 1               lcd_instruction:
-000047r 1  20 rr rr       jsr lcd_wait
-00004Ar 1  8D 00 80       sta PORTB
-00004Dr 1  A9 00          lda #0         ; Clear RS/RW/E bits
-00004Fr 1  8D 01 80       sta PORTA
-000052r 1  A9 80          lda #E         ; Set E bit to send instruction
-000054r 1  8D 01 80       sta PORTA
-000057r 1  A9 00          lda #0         ; Clear RS/RW/E bits
-000059r 1  8D 01 80       sta PORTA
-00005Cr 1  60             rts
-00005Cr 1               
+000000r 1  A9 FF          lda #%11111111            ; Set all pins on port B to output
+000002r 1  8D 02 80       sta LCD_DDRB
+000005r 1  A9 E0          lda #%11100000            ; Set top 3 pins on port A to output
+000007r 1  8D 03 80       sta LCD_DDRA
+00000Ar 1               
+00000Ar 1  A9 38          lda #%00111000            ; Set 8-bit mode; 2-line display; 5x8 font
+00000Cr 1  20 rr rr       jsr lcd_instruction
+00000Fr 1  A9 0C          lda #%00001100            ; Display on; cursor off; blink off
+000011r 1  20 rr rr       jsr lcd_instruction
+000014r 1  A9 06          lda #%00000110            ; Increment and shift cursor; don't shift display
+000016r 1  20 rr rr       jsr lcd_instruction
+000019r 1               
+000019r 1               clear:
+000019r 1  A9 01          lda #$00000001            ; Clear display
+00001Br 1  20 rr rr       jsr lcd_instruction
+00001Er 1               
+00001Er 1               halt:
+00001Er 1  60             rts
+00001Fr 1               
+00001Fr 1               lcd_wait:
+00001Fr 1  48             pha
+000020r 1  A9 00          lda #%00000000            ; Port B is input
+000022r 1  8D 02 80       sta LCD_DDRB
+000025r 1               lcd_busy:
+000025r 1  A9 40          lda #LCD_RW
+000027r 1  8D 01 80       sta LCD_PORTA
+00002Ar 1  A9 C0          lda #(LCD_RW | LCD_E)
+00002Cr 1  8D 01 80       sta LCD_PORTA
+00002Fr 1  AD 00 80       lda LCD_PORTB
+000032r 1  29 80          and #%10000000
+000034r 1  D0 EF          bne lcd_busy
+000036r 1               
+000036r 1  A9 40          lda #LCD_RW
+000038r 1  8D 01 80       sta LCD_PORTA
+00003Br 1  A9 FF          lda #%11111111            ; Port B is output
+00003Dr 1  8D 02 80       sta LCD_DDRB
+000040r 1  68             pla
+000041r 1  60             rts
+000042r 1               
+000042r 1               lcd_instruction:
+000042r 1  20 rr rr       jsr lcd_wait
+000045r 1  8D 00 80       sta LCD_PORTB
+000048r 1  A9 00          lda #0                    ; Clear RS/RW/E bits
+00004Ar 1  8D 01 80       sta LCD_PORTA
+00004Dr 1  A9 80          lda #LCD_E                ; Set E bit to send instruction
+00004Fr 1  8D 01 80       sta LCD_PORTA
+000052r 1  A9 00          lda #0                    ; Clear RS/RW/E bits
+000054r 1  8D 01 80       sta LCD_PORTA
+000057r 1  60             rts
+000058r 1               
+000058r 1               .segment "KERNAL"
+000000r 1               .segment "CART"
+000000r 1               .segment "WOZMON"
+000000r 1               .segment "VECTORS"
+000000r 1               

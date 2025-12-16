@@ -1,25 +1,27 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-PORTB   = $9400
-PORTA   = $9401
-DDRB    = $9402
-DDRA    = $9403
+.segment "PROGRAM"
 
 reset:
   lda #%11111111         ; Set all pins on port B to outputs
-  sta DDRB
+  sta GPIO_DDRB
   lda #%00000000         ; Set all pins on port A to inputs
-  sta DDRA
+  sta GPIO_DDRA
 
 loop:
-  lda PORTA              ; Read buttons on port A
+  lda GPIO_PORTA              ; Read buttons on port A
   eor #$FF
-  sta PORTB              ; Write button state to port B
+  sta GPIO_PORTB              ; Write button state to port B
   jmp loop
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

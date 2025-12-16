@@ -1,26 +1,13 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-; VERA
-VERA_ADDR_LOW     = $9C00
-VERA_ADDR_MID     = $9C01
-VERA_ADDR_HIGH    = $9C02
-VERA_DATA0        = $9C03
-VERA_DATA1        = $9C04
-VERA_CTRL         = $9C05
-VERA_DC_VIDEO     = $9C09
-VERA_DC_HSCALE    = $9C0A
-VERA_DC_VSCALE    = $9C0B
-VERA_DC_BORDER    = $9C0B
-VERA_L0_CONFIG    = $9C0D
-VERA_L0_MAPBASE   = $9C0E
-VERA_L0_TILEBASE  = $9C0F
+.segment "PROGRAM"
 
 ;*******************************************************************************
 ; Build a 16x16 256 color tile in VRAM location $12000
@@ -102,3 +89,8 @@ brick:
     .byte $E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$29
     .byte $E5,$08,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29
     .byte $E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

@@ -1,7 +1,8 @@
 make:
 	ca65 -v -l ./build/SC\ LCD\ Echo.list -o ./build/SC\ LCD\ Echo.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/SC\ LCD\ Echo.prg ./build/SC\ LCD\ Echo.o
-
+	cl65 -v -C ../../6502.cfg -o ./build/SC\ LCD\ Echo ./build/SC\ LCD\ Echo.o
+	rm ./build/SC\ LCD\ Echo.bin
+	
 view:
 	hexdump -C ./build/SC\ LCD\ Echo.prg
 

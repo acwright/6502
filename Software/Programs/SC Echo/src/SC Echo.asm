@@ -1,45 +1,44 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-ACIA_DATA   = $9000
-ACIA_STATUS = $9001
-ACIA_CMD    = $9002
-ACIA_CTRL   = $9003
+.segment "PROGRAM"
 
 reset:
-  ldx #$ff
-  txs
-
   lda #$00
-  sta ACIA_STATUS ; Soft reset (value not important)
+  sta SC_STATUS ; Soft reset (value not important)
 
   lda #%00010000  ; N-8-1, 115200 baud
-  sta ACIA_CTRL
+  sta SC_CTRL
 
   lda #%00001011  ; No parity, No echo, No interrupts
-  sta ACIA_CMD
+  sta SC_CMD
   
 rx_wait:
-  lda ACIA_STATUS
+  lda SC_STATUS
   and #%00001000  ; Check if rx buffer empty
   beq rx_wait     ; Loop if rx buffer empty
 
-  lda ACIA_DATA   ; Otherwise load the received char
+  lda SC_DATA   ; Otherwise load the received char
   jsr send_char   ; Echo char
   jmp rx_wait
 
 send_char:
-  sta ACIA_DATA 
+  sta SC_DATA 
   pha
 tx_wait:
-  lda ACIA_STATUS
+  lda SC_STATUS
   and #%00010000  ; Check if tx buffer not empty
   beq tx_wait     ; Loop if tx buffer not empty
   pla
   rts
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

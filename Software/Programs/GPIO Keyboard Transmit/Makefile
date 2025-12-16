@@ -1,9 +1,10 @@
 make:
-	ca65 -v -l ./build/PS2\ Keyboard\ Transmit.list -o ./build/PS2\ Keyboard\ Transmit.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/PS2\ Keyboard\ Transmit.prg ./build/PS2\ Keyboard\ Transmit.o
-
+	ca65 -v -l ./build/GPIO\ Keyboard\ Transmit.list -o ./build/GPIO\ Keyboard\ Transmit.o ./src/*.asm
+	cl65 -v -C ../../6502.cfg -o ./build/GPIO\ Keyboard\ Transmit ./build/GPIO\ Keyboard\ Transmit.o
+	rm ./build/GPIO\ Keyboard\ Transmit.bin
+	
 view:
-	hexdump -C ./build/PS2\ Keyboard\ Transmit.prg
+	hexdump -C ./build/GPIO\ Keyboard\ Transmit.prg
 
 woz:
-	bin2woz -a 0x0800 ./build/PS2\ Keyboard\ Transmit.prg > ./build/PS2\ Keyboard\ Transmit.woz
+	bin2woz -a 0x0800 ./build/GPIO\ Keyboard\ Transmit.prg > ./build/GPIO\ Keyboard\ Transmit.woz

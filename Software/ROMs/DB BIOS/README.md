@@ -1,7 +1,7 @@
 DB BIOS
 =======
 
-BIOS ROM for the Dev Board
+This is the source code for the DB BIOS, a custom BIOS for the 6502 Dev Board.
 
 Install:
 

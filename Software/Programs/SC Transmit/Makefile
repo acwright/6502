@@ -1,7 +1,8 @@
 make:
 	ca65 -v -l ./build/SC\ Transmit.list -o ./build/SC\ Transmit.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/SC\ Transmit.prg ./build/SC\ Transmit.o
-
+	cl65 -v -C ../../6502.cfg -o ./build/SC\ Transmit ./build/SC\ Transmit.o
+	rm ./build/SC\ Transmit.bin
+	
 view:
 	hexdump -C ./build/SC\ Transmit.prg
 

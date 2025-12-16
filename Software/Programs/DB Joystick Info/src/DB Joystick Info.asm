@@ -1,18 +1,17 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-DB_DATA           = $8400
-DB_JOYSTICK_BTNS  = $8407
+.segment "PROGRAM"
 
 reset:
-  ldx #$ff
-  txs
+  lda #$00
+  sta EMU_SER_CTRL    ; Use DB USB Serial output
 
 loop:
   ldx #$0F
@@ -24,8 +23,8 @@ loop_inner:
   jmp loop
 
 print:
-  lda DB_JOYSTICK_BTNS
-  sta DB_DATA
+  lda EMU_JOY_BTNS
+  sta EMU_SER_DATA
   rts
 
 delay:
@@ -36,3 +35,8 @@ delay_loop:
   bne delay_loop
   plx
   rts
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

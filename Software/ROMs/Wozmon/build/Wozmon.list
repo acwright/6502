@@ -4,207 +4,358 @@ Current file: ./src/Wozmon.asm
 
 000000r 1               .setcpu "65C02"
 000000r 1               
+000000r 1               .include "../../../6502.inc"
+000000r 2               ; ***                     ***
+000000r 2               ; ***   6502 INCLUDES     ***
+000000r 2               ; ***                     ***
+000000r 2               
+000000r 2               ; LCD Card | IO 1 | $8000-$800F
+000000r 2               LCD_PORTB       = $8000
+000000r 2               LCD_PORTA       = $8001
+000000r 2               LCD_DDRB        = $8002
+000000r 2               LCD_DDRA        = $8003
+000000r 2               LCD_T1CL        = $8004
+000000r 2               LCD_T1CH        = $8005
+000000r 2               LCD_T1LL        = $8006
+000000r 2               LCD_T1LH        = $8007
+000000r 2               LCD_T2CL        = $8008
+000000r 2               LCD_T2CH        = $8009
+000000r 2               LCD_SR          = $800A
+000000r 2               LCD_ACR         = $800B
+000000r 2               LCD_PCR         = $800C
+000000r 2               LCD_IFR         = $800D
+000000r 2               LCD_IER         = $800E
+000000r 2               LCD_ORA         = $800F
+000000r 2               LCD_E           = %10000000
+000000r 2               LCD_RW          = %01000000
+000000r 2               LCD_RS          = %00100000
+000000r 2               
+000000r 2               ; RAM Card | IO 1 & 2 | $8000-$87FF
+000000r 2               RAM_DATA        = $8000     ; R/W ($8000-$83FE)
+000000r 2               RAM_DATA_H      = $8400     ; R/W ($8400-$87FE)
+000000r 2               RAM_BANK        = $83FF     ; All three RAM_BANK addresses address the same bank switching
+000000r 2               RAM_BANK_L      = $83FF     ; latch and can be univerally interchanged
+000000r 2               RAM_BANK_H      = $87FF     ; RAM bank latch value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
+000000r 2               
+000000r 2               ; Emulator | IO 2 | $8400-$840F
+000000r 2               EMU_SER_DATA    = $8400     ; Write
+000000r 2               EMU_SER_CTRL    = $8401     ; Write
+000000r 2               EMU_SER_STATUS  = $8401     ; Read
+000000r 2               EMU_KB_CMD      = $8402     ; Write
+000000r 2               EMU_KB_DATA     = $8402     ; Read
+000000r 2               EMU_MOUSE_X     = $8403     ; Read
+000000r 2               EMU_MOUSE_Y     = $8404     ; Read
+000000r 2               EMU_MOUSE_W     = $8405     ; Read
+000000r 2               EMU_MOUSE_BTNS  = $8406     ; Read
+000000r 2               EMU_JOY_BTNS    = $8407     ; Read
+000000r 2               EMU_RTC_SEC     = $8408     ; Read
+000000r 2               EMU_RTC_MIN     = $8409     ; Read
+000000r 2               EMU_RTC_HR      = $840A     ; Read
+000000r 2               EMU_RTC_DAY     = $840B     ; Read
+000000r 2               EMU_RTC_MON     = $840C     ; Read
+000000r 2               EMU_RTC_YR      = $840D     ; Read
+000000r 2               EMU_PRAM_DATA   = $840E     ; R/W
+000000r 2               EMU_PRAM_ADDR   = $840F     ; R/W
+000000r 2               
+000000r 2               ; RTC Card | IO 3 | $8800-$881F
+000000r 2               RTC_SEC         = $8800
+000000r 2               RTC_MIN         = $8801
+000000r 2               RTC_HR          = $8802
+000000r 2               RTC_DAY         = $8803
+000000r 2               RTC_DATE        = $8804
+000000r 2               RTC_MON         = $8805
+000000r 2               RTC_YR          = $8806
+000000r 2               RTC_CENT        = $8807
+000000r 2               RTC_ALARM_SEC   = $8808
+000000r 2               RTC_ALARM_MIN   = $8809
+000000r 2               RTC_ALARM_HR    = $880A
+000000r 2               RTC_ALARM_DATE  = $880B
+000000r 2               RTC_WD_L        = $880C
+000000r 2               RTC_WD_H        = $880D
+000000r 2               RTC_CTRL_A      = $880E
+000000r 2               RTC_CRTL_B      = $880F
+000000r 2               RTC_RAM_ADDR    = $8810
+000000r 2               RTC_RAM_DATA    = $8813
+000000r 2               
+000000r 2               ; Storage Card | IO 4 | $8C00-$8C07
+000000r 2               ST_DATA         = $8C00     ; R/W
+000000r 2               ST_ERROR        = $8C01     ; Read
+000000r 2               ST_FEATURE      = $8C01     ; Write
+000000r 2               ST_SECT_CNT     = $8C02     ; R/W
+000000r 2               ST_LBA_0        = $8C03     ; R/W
+000000r 2               ST_LBA_1        = $8C04     ; R/W
+000000r 2               ST_LBA_2        = $8C05     ; R/W
+000000r 2               ST_LBA_3        = $8C06     ; R/W
+000000r 2               ST_STATUS       = $8C07     ; Read
+000000r 2               ST_CMD          = $8C07     ; Write
+000000r 2               ST_ERR_AMNF     = %00000001
+000000r 2               ST_ERR_ABRT     = %00000100
+000000r 2               ST_ERR_IDNF     = %00010000
+000000r 2               ST_ERR_UNC      = %01000000
+000000r 2               ST_ERR_BBK      = %10000000
+000000r 2               ST_STATUS_ERR   = %00000001
+000000r 2               ST_STATUS_IDX   = %00000010
+000000r 2               ST_STATUS_CORR  = %00000100
+000000r 2               ST_STATUS_DRQ   = %00001000
+000000r 2               ST_STATUS_DSC   = %00010000
+000000r 2               ST_STATUS_DWF   = %00100000
+000000r 2               ST_STATUS_RDY   = %01000000
+000000r 2               ST_STATUS_BSY   = %10000000
+000000r 2               
+000000r 2               ; Serial Card | IO 5 | $9000-$9003
+000000r 2               SC_DATA         = $9000     ; R/W
+000000r 2               SC_RESET        = $9001     ; Write
+000000r 2               SC_STATUS       = $9001     ; Read
+000000r 2               SC_CMD          = $9002     ; R/W
+000000r 2               SC_CTRL         = $9003     ; R/W
+000000r 2               
+000000r 2               ; GPIO Card / Input Board | IO 6 | $9400-$940F
+000000r 2               GPIO_PORTB      = $9400
+000000r 2               GPIO_PORTA      = $9401
+000000r 2               GPIO_DDRB       = $9402
+000000r 2               GPIO_DDRA       = $9403
+000000r 2               GPIO_T1CL       = $9404
+000000r 2               GPIO_T1CH       = $9405
+000000r 2               GPIO_T1LL       = $9406
+000000r 2               GPIO_T1LH       = $9407
+000000r 2               GPIO_T2CL       = $9408
+000000r 2               GPIO_T2CH       = $9409
+000000r 2               GPIO_SR         = $940A
+000000r 2               GPIO_ACR        = $940B
+000000r 2               GPIO_PCR        = $940C
+000000r 2               GPIO_IFR        = $940D
+000000r 2               GPIO_IER        = $940E
+000000r 2               GPIO_ORA        = $940F
+000000r 2               
+000000r 2               ; Sound Card | IO 7 | $9800-$980F
+000000r 2               SND_PORTB       = $9400
+000000r 2               SND_PORTA       = $9401
+000000r 2               SND_DDRB        = $9402
+000000r 2               SND_DDRA        = $9403
+000000r 2               SND_T1CL        = $9404
+000000r 2               SND_T1CH        = $9405
+000000r 2               SND_T1LL        = $9406
+000000r 2               SND_T1LH        = $9407
+000000r 2               SND_T2CL        = $9408
+000000r 2               SND_T2CH        = $9409
+000000r 2               SND_SR          = $940A
+000000r 2               SND_ACR         = $940B
+000000r 2               SND_PCR         = $940C
+000000r 2               SND_IFR         = $940D
+000000r 2               SND_IER         = $940E
+000000r 2               SND_ORA         = $940F
+000000r 2               SND_BC1H        = %11100000   ; SND_PCR CA2
+000000r 2               SND_BC1L        = %11000000   ; SND_PCR CA2
+000000r 2               SND_BDIRH       = %00001110   ; SND_PCR CB2
+000000r 2               SND_BDIRL       = %00001100   ; SND_PCR CB2
+000000r 2               
+000000r 2               ; Video Card / VGA Card | IO 8 | $9C00-$9C01
+000000r 2               VC_DATA         = $9C00       ; R/W
+000000r 2               VC_REG          = $9C01       ; Write
+000000r 2               VC_STATUS       = $9C01       ; Read
+000000r 2               
+000000r 1               
 000000r 1               .segment "ZEROPAGE"
 000000r 1               .segment "STACK"
 000000r 1               .segment "INPUT_BUFFER"
-000000r 1               .segment "KERNAL_VARS"
+000000r 1  xx xx xx xx  INPUT_BUFFER: .res $100
+000004r 1  xx xx xx xx  
+000008r 1  xx xx xx xx  
+000100r 1               .segment "KERNAL_VARS"
 000000r 1               .segment "USER_VARS"
-000000r 1               .segment "CODE"
+000000r 1               .segment "PROGRAM"
+000000r 1               .segment "KERNAL"
+000000r 1               .segment "CART"
+000000r 1               .segment "WOZMON"
 000000r 1               
-000000r 1               XAML  = $24                            ; Last "opened" location Low
-000000r 1               XAMH  = $25                            ; Last "opened" location High
-000000r 1               STL   = $26                            ; Store address Low
-000000r 1               STH   = $27                            ; Store address High
-000000r 1               L     = $28                            ; Hex value parsing Low
-000000r 1               H     = $29                            ; Hex value parsing High
-000000r 1               YSAV  = $2A                            ; Used to see if hex value is given
-000000r 1               MODE  = $2B                            ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
+000000r 1               XAML  = $24                 ; Last "opened" location Low
+000000r 1               XAMH  = $25                 ; Last "opened" location High
+000000r 1               STL   = $26                 ; Store address Low
+000000r 1               STH   = $27                 ; Store address High
+000000r 1               L     = $28                 ; Hex value parsing Low
+000000r 1               H     = $29                 ; Hex value parsing High
+000000r 1               YSAV  = $2A                 ; Used to see if hex value is given
+000000r 1               MODE  = $2B                 ; $00=XAM, $7F=STOR, $AE=BLOCK XAM
 000000r 1               
-000000r 1               IN    = $0200                          ; Input buffer
-000000r 1               
-000000r 1               ACIA_DATA   = $9000
-000000r 1               ACIA_STATUS = $9001
-000000r 1               ACIA_CMD    = $9002
-000000r 1               ACIA_CTRL   = $9003
+000000r 1               IN    = INPUT_BUFFER        ; Input buffer
 000000r 1               
 000000r 1               RESET:
-000000r 1  A9 10          lda     #$10           ; 8-N-1, 115200 baud.
-000002r 1  8D 03 90       sta     ACIA_CTRL
-000005r 1  A0 8B          ldy     #$8B           ; No parity, no echo, no interrupts.
-000007r 1  8C 02 90       sty     ACIA_CMD
-00000Ar 1  A9 1B          lda     #$1B           ; Begin with escape.
-00000Cr 1               
-00000Cr 1               NOTCR:
-00000Cr 1  C9 08          cmp     #$08           ; Backspace key?
-00000Er 1  F0 13          beq     BACKSPACE      ; Yes.
-000010r 1  C9 1B          cmp     #$1B           ; ESC?
-000012r 1  F0 03          beq     ESCAPE         ; Yes.
-000014r 1  C8             iny                    ; Advance text index.
-000015r 1  10 0F          bpl     NEXTCHAR       ; Auto ESC if line longer than 127.
-000017r 1               
-000017r 1               ESCAPE:
-000017r 1  A9 5C          lda     #$5C           ; "\".
-000019r 1  20 rr rr       jsr     ECHO           ; Output it.
-00001Cr 1               
-00001Cr 1               GETLINE:
-00001Cr 1  A9 0D          lda     #$0D           ; Send CR
-00001Er 1  20 rr rr       jsr     ECHO
-000021r 1               
-000021r 1  A0 01          ldy     #$01           ; Initialize text index.
-000023r 1               BACKSPACE:
-000023r 1  88             dey                    ; Back up text index.
-000024r 1  30 F6          bmi     GETLINE        ; Beyond start of line, reinitialize.
-000026r 1               
-000026r 1               NEXTCHAR:
-000026r 1  AD 01 90       lda     ACIA_STATUS    ; Check status.
-000029r 1  29 08          and     #$08           ; Key ready?
-00002Br 1  F0 F9          beq     NEXTCHAR       ; Loop until ready.
-00002Dr 1  AD 00 90       lda     ACIA_DATA      ; Load character. B7 will be '0'.
-000030r 1  99 00 02       sta     IN,Y           ; Add to text buffer.
-000033r 1  20 rr rr       jsr     ECHO           ; Display character.
-000036r 1  C9 0D          cmp     #$0D           ; CR?
-000038r 1  D0 D2          bne     NOTCR          ; No.
-00003Ar 1               
-00003Ar 1  A0 FF          ldy     #$FF           ; Reset text index.
-00003Cr 1  A9 00          lda     #$00           ; For XAM mode.
-00003Er 1  AA             tax                    ; X=0.
-00003Fr 1               SETBLOCK:
-00003Fr 1  0A             asl
-000040r 1               SETSTOR:
-000040r 1  0A             asl                    ; Leaves $7B if setting STOR mode.
-000041r 1  85 2B          sta     MODE           ; $00 = XAM, $74 = STOR, $B8 = BLOK XAM.
-000043r 1               BLSKIP:
-000043r 1  C8             iny                    ; Advance text index.
-000044r 1               NEXTITEM:
-000044r 1  B9 00 02       lda     IN,Y           ; Get character.
-000047r 1  C9 0D          cmp     #$0D           ; CR?
-000049r 1  F0 D1          beq     GETLINE        ; Yes, done this line.
-00004Br 1  C9 2E          cmp     #$2E           ; "."?
-00004Dr 1  90 F4          bcc     BLSKIP         ; Skip delimiter.
-00004Fr 1  F0 EE          beq     SETBLOCK       ; Set BLOCK XAM mode.
-000051r 1  C9 3A          cmp     #$3A           ; ":"?
-000053r 1  F0 EB          beq     SETSTOR        ; Yes, set STOR mode.
-000055r 1  C9 52          cmp     #$52           ; "R"?
-000057r 1  F0 3B          beq     RUN            ; Yes, run user program.
-000059r 1  86 28          stx     L              ; $00 -> L.
-00005Br 1  86 29          stx     H              ;    and H.
-00005Dr 1  84 2A          sty     YSAV           ; Save Y for comparison
-00005Fr 1               
-00005Fr 1               NEXTHEX:
-00005Fr 1  B9 00 02       lda     IN,Y           ; Get character for hex test.
-000062r 1  49 30          eor     #$30           ; Map digits to $0-9.
-000064r 1  C9 0A          cmp     #$0A           ; Digit?
-000066r 1  90 06          bcc     DIG            ; Yes.
-000068r 1  69 88          ADC     #$88           ; Map letter "A"-"F" to $FA-FF.
-00006Ar 1  C9 FA          cmp     #$FA           ; Hex letter?
-00006Cr 1  90 11          bcc     NOTHEX         ; No, character not hex.
-00006Er 1               DIG:
+000000r 1  A9 10          lda     #$10              ; 8-N-1, 115200 baud
+000002r 1  8D 03 90       sta     SC_CTRL
+000005r 1  A0 8B          ldy     #$8B              ; No parity, no echo, no interrupts
+000007r 1  8C 02 90       sty     SC_CMD
+00000Ar 1               
+00000Ar 1               NOTCR:
+00000Ar 1  C9 08          cmp     #$08              ; Backspace key?
+00000Cr 1  F0 13          beq     BACKSPACE         ; Yes
+00000Er 1  C9 1B          cmp     #$1B              ; ESC?
+000010r 1  F0 03          beq     ESCAPE            ; Yes
+000012r 1  C8             iny                       ; Advance text index
+000013r 1  10 0F          bpl     NEXTCHAR          ; Auto ESC if line longer than 127
+000015r 1               
+000015r 1               ESCAPE:
+000015r 1  A9 5C          lda     #$5C              ; "\"
+000017r 1  20 rr rr       jsr     ECHO              ; Output it
+00001Ar 1               
+00001Ar 1               GETLINE:
+00001Ar 1  A9 0D          lda     #$0D              ; Send CR
+00001Cr 1  20 rr rr       jsr     ECHO
+00001Fr 1               
+00001Fr 1  A0 01          ldy     #$01              ; Initialize text index
+000021r 1               BACKSPACE:
+000021r 1  88             dey                       ; Back up text index
+000022r 1  30 F6          bmi     GETLINE           ; Beyond start of line, reinitialize
+000024r 1               
+000024r 1               NEXTCHAR:
+000024r 1  AD 01 90       lda     SC_STATUS         ; Check status
+000027r 1  29 08          and     #$08              ; Key ready?
+000029r 1  F0 F9          beq     NEXTCHAR          ; Loop until ready
+00002Br 1  AD 00 90       lda     SC_DATA           ; Load character. B7 will be '0'
+00002Er 1  99 rr rr       sta     IN,Y              ; Add to text buffer
+000031r 1  20 rr rr       jsr     ECHO              ; Display character
+000034r 1  C9 0D          cmp     #$0D              ; CR?
+000036r 1  D0 D2          bne     NOTCR             ; No
+000038r 1               
+000038r 1  A0 FF          ldy     #$FF              ; Reset text index
+00003Ar 1  A9 00          lda     #$00              ; For XAM mode
+00003Cr 1  AA             tax                       ; X=0
+00003Dr 1               SETBLOCK:
+00003Dr 1  0A             asl
+00003Er 1               SETSTOR:
+00003Er 1  0A             asl                       ; Leaves $7B if setting STOR mode
+00003Fr 1  85 2B          sta     MODE              ; $00 = XAM, $74 = STOR, $B8 = BLOK XAM
+000041r 1               BLSKIP:
+000041r 1  C8             iny                       ; Advance text index
+000042r 1               NEXTITEM:
+000042r 1  B9 rr rr       lda     IN,Y              ; Get character
+000045r 1  C9 0D          cmp     #$0D              ; CR?
+000047r 1  F0 D1          beq     GETLINE           ; Yes, done this line
+000049r 1  C9 2E          cmp     #$2E              ; "."?
+00004Br 1  90 F4          bcc     BLSKIP            ; Skip delimiter
+00004Dr 1  F0 EE          beq     SETBLOCK          ; Set BLOCK XAM mode
+00004Fr 1  C9 3A          cmp     #$3A              ; ":"?
+000051r 1  F0 EB          beq     SETSTOR           ; Yes, set STOR mode
+000053r 1  C9 52          cmp     #$52              ; "R"?
+000055r 1  F0 3B          beq     RUN               ; Yes, run user program
+000057r 1  86 28          stx     L                 ; $00 -> L
+000059r 1  86 29          stx     H                 ;    and H
+00005Br 1  84 2A          sty     YSAV              ; Save Y for comparison
+00005Dr 1               
+00005Dr 1               NEXTHEX:
+00005Dr 1  B9 rr rr       lda     IN,Y              ; Get character for hex test
+000060r 1  49 30          eor     #$30              ; Map digits to $0-9
+000062r 1  C9 0A          cmp     #$0A              ; Digit?
+000064r 1  90 06          bcc     DIG               ; Yes
+000066r 1  69 88          adc     #$88              ; Map letter "A"-"F" to $FA-FF
+000068r 1  C9 FA          cmp     #$FA              ; Hex letter?
+00006Ar 1  90 11          bcc     NOTHEX            ; No, character not hex
+00006Cr 1               DIG:
+00006Cr 1  0A             asl
+00006Dr 1  0A             asl                       ; Hex digit to MSD of A
 00006Er 1  0A             asl
-00006Fr 1  0A             asl                    ; Hex digit to MSD of A.
-000070r 1  0A             asl
-000071r 1  0A             asl
-000072r 1               
-000072r 1  A2 04          ldx     #$04           ; Shift count.
-000074r 1               HEXSHIFT:
-000074r 1  0A             asl                    ; Hex digit left, MSB to carry.
-000075r 1  26 28          rol     L              ; Rotate into LSD.
-000077r 1  26 29          rol     H              ; Rotate into MSD's.
-000079r 1  CA             dex                    ; Done 4 shifts?
-00007Ar 1  D0 F8          bne     HEXSHIFT       ; No, loop.
-00007Cr 1  C8             iny                    ; Advance text index.
-00007Dr 1  D0 E0          bne     NEXTHEX        ; Always taken. Check next character for hex.
-00007Fr 1               
-00007Fr 1               NOTHEX:
-00007Fr 1  C4 2A          cpy     YSAV           ; Check if L, H empty (no hex digits).
-000081r 1  F0 94          beq     ESCAPE         ; Yes, generate ESC sequence.
-000083r 1               
-000083r 1  24 2B          bit     MODE           ; Test MODE byte.
-000085r 1  50 10          bvc     NOTSTOR        ; B6=0 is STOR, 1 is XAM and BLOCK XAM.
-000087r 1               
-000087r 1  A5 28          lda     L              ; LSD's of hex data.
-000089r 1  81 26          sta     (STL,X)        ; Store current 'store index'.
-00008Br 1  E6 26          inc     STL            ; Increment store index.
-00008Dr 1  D0 B5          bne     NEXTITEM       ; Get next item (no carry).
-00008Fr 1  E6 27          inc     STH            ; Add carry to 'store index' high order.
-000091r 1               TONEXTITEM:
-000091r 1  4C rr rr       jmp     NEXTITEM       ; Get next command item.
-000094r 1               
-000094r 1               RUN:
-000094r 1  6C 24 00       jmp     (XAML)         ; Run at current XAM index.
+00006Fr 1  0A             asl
+000070r 1               
+000070r 1  A2 04          ldx     #$04              ; Shift count
+000072r 1               HEXSHIFT:
+000072r 1  0A             asl                       ; Hex digit left, MSB to carry
+000073r 1  26 28          rol     L                 ; Rotate into LSD
+000075r 1  26 29          rol     H                 ; Rotate into MSD's
+000077r 1  CA             dex                       ; Done 4 shifts?
+000078r 1  D0 F8          bne     HEXSHIFT          ; No, loop
+00007Ar 1  C8             iny                       ; Advance text index
+00007Br 1  D0 E0          bne     NEXTHEX           ; Always taken. Check next character for hex
+00007Dr 1               
+00007Dr 1               NOTHEX:
+00007Dr 1  C4 2A          cpy     YSAV              ; Check if L, H empty (no hex digits)
+00007Fr 1  F0 94          beq     ESCAPE            ; Yes, generate ESC sequence
+000081r 1               
+000081r 1  24 2B          bit     MODE              ; Test MODE byte
+000083r 1  50 10          bvc     NOTSTOR           ; B6=0 is STOR, 1 is XAM and BLOCK XAM
+000085r 1               
+000085r 1  A5 28          lda     L                 ; LSD's of hex data
+000087r 1  81 26          sta     (STL,X)           ; Store current 'store index'
+000089r 1  E6 26          inc     STL               ; Increment store index
+00008Br 1  D0 B5          bne     NEXTITEM          ; Get next item (no carry)
+00008Dr 1  E6 27          inc     STH               ; Add carry to 'store index' high order
+00008Fr 1               TONEXTITEM:
+00008Fr 1  4C rr rr       jmp     NEXTITEM          ; Get next command item
+000092r 1               
+000092r 1               RUN:
+000092r 1  6C 24 00       jmp     (XAML)            ; Run at current XAM index
+000095r 1               
+000095r 1               NOTSTOR:
+000095r 1  30 2B          bmi     XAMNEXT           ; B7 = 0 for XAM, 1 for BLOCK XAM
 000097r 1               
-000097r 1               NOTSTOR:
-000097r 1  30 2B          bmi     XAMNEXT        ; B7 = 0 for XAM, 1 for BLOCK XAM.
-000099r 1               
-000099r 1  A2 02          ldx     #$02           ; Byte count.
-00009Br 1               SETADR:
-00009Br 1  B5 27          lda     L-1,X          ; Copy hex data to
-00009Dr 1  95 25          sta     STL-1,X        ;  'store index'.
-00009Fr 1  95 23          sta     XAML-1,X       ; And to 'XAM index'.
-0000A1r 1  CA             dex                    ; Next of 2 bytes.
-0000A2r 1  D0 F7          bne     SETADR         ; Loop unless X = 0.
-0000A4r 1               
-0000A4r 1               NXTPRNT:
-0000A4r 1  D0 14          bne     PRDATA         ; NE means no address to print.
-0000A6r 1  A9 0D          lda     #$0D           ; CR.
-0000A8r 1  20 rr rr       jsr     ECHO           ; Output it.
-0000ABr 1  A5 25          lda     XAMH           ; 'Examine index' high-order byte.
-0000ADr 1  20 rr rr       jsr     PRBYTE         ; Output it in hex format.
-0000B0r 1  A5 24          lda     XAML           ; Low-order 'examine index' byte.
-0000B2r 1  20 rr rr       jsr     PRBYTE         ; Output it in hex format.
-0000B5r 1  A9 3A          lda     #$3A           ; ":".
-0000B7r 1  20 rr rr       jsr     ECHO           ; Output it.
-0000BAr 1               
-0000BAr 1               PRDATA:
-0000BAr 1  A9 20          lda     #$20           ; Blank.
-0000BCr 1  20 rr rr       jsr     ECHO           ; Output it.
-0000BFr 1  A1 24          lda     (XAML,X)       ; Get data byte at 'examine index'.
-0000C1r 1  20 rr rr       jsr     PRBYTE         ; Output it in hex format.
-0000C4r 1               XAMNEXT:
-0000C4r 1  86 2B          stx     MODE           ; 0 -> MODE (XAM mode).
-0000C6r 1  A5 24          lda     XAML
-0000C8r 1  C5 28          cmp     L              ; Compare 'examine index' to hex data.
-0000CAr 1  A5 25          lda     XAMH
-0000CCr 1  E5 29          sbc     H
-0000CEr 1  B0 C1          bcs     TONEXTITEM     ; Not less, so no more data to output.
-0000D0r 1               
-0000D0r 1  E6 24          inc     XAML
-0000D2r 1  D0 02          bne     MOD8CHK        ; Increment 'examine index'.
-0000D4r 1  E6 25          inc     XAMH
-0000D6r 1               
-0000D6r 1               MOD8CHK:
-0000D6r 1  A5 24          lda     XAML           ; Check low-order 'examine index' byte
-0000D8r 1  29 07          and     #$07           ; For MOD 8 = 0
-0000DAr 1  10 C8          bpl     NXTPRNT        ; Always taken.
-0000DCr 1               
-0000DCr 1               PRBYTE:
-0000DCr 1  48             pha                    ; Save A for LSD.
-0000DDr 1  4A             lsr
+000097r 1  A2 02          ldx     #$02              ; Byte count
+000099r 1               SETADR:
+000099r 1  B5 27          lda     L-1,X             ; Copy hex data to
+00009Br 1  95 25          sta     STL-1,X           ;  'store index'
+00009Dr 1  95 23          sta     XAML-1,X          ; And to 'XAM index'
+00009Fr 1  CA             dex                       ; Next of 2 bytes
+0000A0r 1  D0 F7          bne     SETADR            ; Loop unless X = 0
+0000A2r 1               
+0000A2r 1               NXTPRNT:
+0000A2r 1  D0 14          bne     PRDATA            ; NE means no address to print
+0000A4r 1  A9 0D          lda     #$0D              ; CR
+0000A6r 1  20 rr rr       jsr     ECHO              ; Output it
+0000A9r 1  A5 25          lda     XAMH              ; 'Examine index' high-order byte
+0000ABr 1  20 rr rr       jsr     PRBYTE            ; Output it in hex format
+0000AEr 1  A5 24          lda     XAML              ; Low-order 'examine index' byte
+0000B0r 1  20 rr rr       jsr     PRBYTE            ; Output it in hex format
+0000B3r 1  A9 3A          lda     #$3A              ; ":"
+0000B5r 1  20 rr rr       jsr     ECHO              ; Output it
+0000B8r 1               
+0000B8r 1               PRDATA:
+0000B8r 1  A9 20          lda     #$20              ; Blank
+0000BAr 1  20 rr rr       jsr     ECHO              ; Output it
+0000BDr 1  A1 24          lda     (XAML,X)          ; Get data byte at 'examine index'
+0000BFr 1  20 rr rr       jsr     PRBYTE            ; Output it in hex format
+0000C2r 1               XAMNEXT:
+0000C2r 1  86 2B          stx     MODE              ; 0 -> MODE (XAM mode)
+0000C4r 1  A5 24          lda     XAML
+0000C6r 1  C5 28          cmp     L                 ; Compare 'examine index' to hex data
+0000C8r 1  A5 25          lda     XAMH
+0000CAr 1  E5 29          sbc     H
+0000CCr 1  B0 C1          bcs     TONEXTITEM        ; Not less, so no more data to output
+0000CEr 1               
+0000CEr 1  E6 24          inc     XAML
+0000D0r 1  D0 02          bne     MOD8CHK           ; Increment 'examine index'
+0000D2r 1  E6 25          inc     XAMH
+0000D4r 1               
+0000D4r 1               MOD8CHK:
+0000D4r 1  A5 24          lda     XAML              ; Check low-order 'examine index' byte
+0000D6r 1  29 07          and     #$07              ; For MOD 8 = 0
+0000D8r 1  10 C8          bpl     NXTPRNT           ; Always taken
+0000DAr 1               
+0000DAr 1               PRBYTE:
+0000DAr 1  48             pha                       ; Save A for LSD
+0000DBr 1  4A             lsr
+0000DCr 1  4A             lsr
+0000DDr 1  4A             lsr                       ; MSD to LSD position
 0000DEr 1  4A             lsr
-0000DFr 1  4A             lsr                    ; MSD to LSD position.
-0000E0r 1  4A             lsr
-0000E1r 1  20 rr rr       jsr     PRHEX          ; Output hex digit.
-0000E4r 1  68             pla                    ; Restore A.
-0000E5r 1               
-0000E5r 1               PRHEX:
-0000E5r 1  29 0F          and     #$0F           ; Mask LSD for hex print.
-0000E7r 1  09 30          ora     #$30           ; Add "0".
-0000E9r 1  C9 3A          cmp     #$3A           ; Digit?
-0000EBr 1  90 02          bcc     ECHO           ; Yes, output it.
-0000EDr 1  69 06          adc     #$06           ; Add offset for letter.
-0000EFr 1               
-0000EFr 1               ECHO:
-0000EFr 1  48             pha
-0000F0r 1  8D 00 90       sta     ACIA_DATA      ; Output character.
-0000F3r 1  A9 FF          lda     #$FF           ; Wait for transmit to complete.
-0000F5r 1               TXDELAY:
-0000F5r 1  3A             DEC                    ; Decrement A.
-0000F6r 1  D0 FD          bne     TXDELAY        ; Until A gets to 0.
-0000F8r 1  68             pla                    ; Restore A.
-0000F9r 1  60             rts                    ; Return.
+0000DFr 1  20 rr rr       jsr     PRHEX             ; Output hex digit
+0000E2r 1  68             pla                       ; Restore A
+0000E3r 1               
+0000E3r 1               PRHEX:
+0000E3r 1  29 0F          and     #$0F              ; Mask LSD for hex print
+0000E5r 1  09 30          ora     #$30              ; Add "0"
+0000E7r 1  C9 3A          cmp     #$3A              ; Digit?
+0000E9r 1  90 02          bcc     ECHO              ; Yes, output it
+0000EBr 1  69 06          adc     #$06              ; Add offset for letter
+0000EDr 1               
+0000EDr 1               ECHO:
+0000EDr 1  8D 00 90       sta SC_DATA               ; Echo character to Serial Card
+0000F0r 1  48             pha
+0000F1r 1               ECHO_WAIT:
+0000F1r 1  AD 01 90       lda SC_STATUS
+0000F4r 1  29 10          and #%00010000            ; Check if tx buffer not empty
+0000F6r 1  F0 F9          beq ECHO_WAIT             ; Loop if tx buffer not empty
+0000F8r 1  68             pla
+0000F9r 1  60             rts
 0000FAr 1               
 0000FAr 1               .segment "VECTORS"
 000000r 1               
-000000r 1  00 0F          .word   $0F00          ; NMI vector
-000002r 1  rr rr          .word   RESET          ; RESET vector
-000004r 1  00 00          .word   $0000          ; IRQ vector
+000000r 1  rr rr          .word   RESET             ; NMI vector
+000002r 1  rr rr          .word   RESET             ; RESET vector
+000004r 1  rr rr          .word   RESET             ; IRQ vector
 000004r 1               

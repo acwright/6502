@@ -1,25 +1,27 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-DB_PRAM_DATA   = $840E
-DB_PRAM_ADDR   = $840F
+.segment "PROGRAM"
 
 reset:
-  ldx #$ff
-  txs
-
   lda #$00
+
 loop:
-  sta DB_PRAM_ADDR
-  sta DB_PRAM_DATA
+  sta EMU_PRAM_ADDR
+  sta EMU_PRAM_DATA
   inc
   bne loop
 
 halt:
-  jmp halt
+  rts
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

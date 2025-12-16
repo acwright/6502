@@ -1,7 +1,8 @@
 make:
 	ca65 -v -l ./build/VC\ Init.list -o ./build/VC\ Init.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/VC\ Init.prg ./build/VC\ Init.o
-
+	cl65 -v -C ../../6502.cfg -o ./build/VC\ Init ./build/VC\ Init.o
+	rm ./build/VC\ Init.bin
+	
 view:
 	hexdump -C ./build/VC\ Init.prg
 

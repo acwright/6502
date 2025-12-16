@@ -1,23 +1,27 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-DB_DATA     = $8400
-DB_KB_DATA  = $8402
+.segment "PROGRAM"
 
 reset:
-  ldx #$ff
-  txs
+  lda #$00
+  sta EMU_SER_CTRL    ; Use DB USB Serial output
 
 loop:
-  bit DB_KB_DATA
-  bpl loop        ; Bit 7 is not set
-  lda DB_KB_DATA
+  bit EMU_KB_DATA
+  bpl loop        ; No data availabe if bit 7 is not set
+  lda EMU_KB_DATA
   and #%01111111  ; Mask out the ASCII value
-  sta DB_DATA
+  sta EMU_SER_DATA
   jmp loop
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

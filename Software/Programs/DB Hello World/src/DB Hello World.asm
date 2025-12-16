@@ -1,33 +1,38 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-.segment "CODE"
-
-DB_DATA   = $8400
+.segment "PROGRAM"
 
 reset:
-  ldx #$ff
-  txs
+  lda #$00
+  sta EMU_SER_CTRL  ; Use DB USB Serial output
 
   ldx #0
 print:
   lda message,x
   beq end
-  sta DB_DATA     ; Write char to DB serial data register
+  sta EMU_SER_DATA  ; Write char to DB serial data register
   inx
   jmp print
 
 end:
-  lda #$0D        ; Carriage Return
-  sta DB_DATA
-  lda #$0A        ; Line feed
-  sta DB_DATA
+  lda #$0D          ; Carriage Return
+  sta EMU_SER_DATA
+  lda #$0A          ; Line feed
+  sta EMU_SER_DATA
 
 halt:
-  jmp halt
+  rts
 
 message: .asciiz "Hello, World!"
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"

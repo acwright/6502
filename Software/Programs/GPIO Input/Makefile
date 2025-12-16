@@ -1,7 +1,8 @@
 make:
 	ca65 -v -l ./build/GPIO\ Input.list -o ./build/GPIO\ Input.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/GPIO\ Input.prg ./build/GPIO\ Input.o
-
+	cl65 -v -C ../../6502.cfg -o ./build/GPIO\ Input ./build/GPIO\ Input.o
+	rm ./build/GPIO\ Input.bin
+	
 view:
 	hexdump -C ./build/GPIO\ Input.prg
 

@@ -1,45 +1,31 @@
 .setcpu "65C02"
 
+.include "../../../6502.inc"
+
 .segment "ZEROPAGE"
-CF_INFO_PTR:  .res 2
-CF_BUFFER_PTR:  .res 2
+ST_INFO_PTR:  .res 2
+ST_BUFFER_PTR:  .res 2
 .segment "STACK"
 .segment "INPUT_BUFFER"
 .segment "KERNAL_VARS"
 .segment "USER_VARS"
-CF_INFO:        .res 256
-CF_BUFFER:      .res 512
-.segment "CODE"
-
-CF_DATA     = $8C00   ; Data port
-CF_ERR      = $8C01   ; Read: Error Code | Write: Feature
-CF_FEAT     = $8C01   ; Read: Error Code | Write: Feature
-CF_SECT     = $8C02   ; Number of sectors to transfer
-CF_LBA0     = $8C03   ; Sector Address LBA 0 [0:7]
-CF_LBA1     = $8C04   ; Sector Address LBA 1 [8:15]
-CF_LBA2     = $8C05   ; Sector Address LBA 2 [16:23]
-CF_LBA3     = $8C06   ; Sector Address LBA 3 [24:27 (LSB)]
-CF_STAT     = $8C07   ; Read: Status | Write: Command
-CF_CMD      = $8C07   ; Read: Status | Write: Command
-
-ACIA_DATA   = $9000
-ACIA_STATUS = $9001
-ACIA_CMD    = $9002
-ACIA_CTRL   = $9003
+ST_INFO:        .res 256
+ST_BUFFER:      .res 512
+.segment "PROGRAM"
 
 reset:
   ldx #$ff
   txs
 
-  lda #<CF_BUFFER
-  sta CF_BUFFER_PTR
-  lda #>CF_BUFFER
-  sta CF_BUFFER_PTR + 1
+  lda #<ST_BUFFER
+  sta ST_BUFFER_PTR
+  lda #>ST_BUFFER
+  sta ST_BUFFER_PTR + 1
 
-  lda #<CF_INFO
-  sta CF_INFO_PTR
-  lda #>CF_INFO
-  sta CF_INFO_PTR + 1
+  lda #<ST_INFO
+  sta ST_INFO_PTR
+  lda #>ST_INFO
+  sta ST_INFO_PTR + 1
 
   jsr acia_init
 
@@ -56,76 +42,76 @@ loop:
 cf_init:
   jsr cf_wait_rdy
   lda #$04                  ; Reset command
-  sta CF_CMD
+  sta ST_CMD
   jsr cf_wait_rdy
   lda #$00
-  sta CF_LBA0
-  sta CF_LBA1
-  sta CF_LBA2
+  sta ST_LBA_0
+  sta ST_LBA_1
+  sta ST_LBA_2
   lda #$E0                  ; LBA3=0, Master, Mode=LBA
-  sta CF_LBA3
+  sta ST_LBA_3
   lda #$01                  ; 8-bit transfers
-  sta CF_FEAT
+  sta ST_FEATURE
   lda #$EF                  ; Set feature
-  sta CF_CMD
+  sta ST_CMD
   jsr cf_wait_rdy
   jsr cf_err
   rts
 
 cf_info:
   lda #$EC                  ; Drive ID command
-  sta CF_CMD
+  sta ST_CMD
   jsr cf_wait_dat
   jsr cf_err
   
   ldy #0
   ldx #2                    ; Read 2 pages (512 bytes)
 cf_info_loop:
-  lda CF_DATA
-  sta (CF_INFO_PTR),y
+  lda ST_DATA
+  sta (ST_INFO_PTR),y
   iny
   bne cf_info_loop
-  inc CF_INFO_PTR + 1       ; Increment high byte of pointer
+  inc ST_INFO_PTR + 1       ; Increment high byte of pointer
   dex
   bne cf_info_loop
-  dec CF_INFO_PTR + 1       ; Restore original pointer
-  dec CF_INFO_PTR + 1
+  dec ST_INFO_PTR + 1       ; Restore original pointer
+  dec ST_INFO_PTR + 1
 cf_info_exit:
   rts
 
 cf_read_sector:
   lda #1                    ; Read 1 sector
-  sta CF_SECT
+  sta ST_SECT_CNT
   jsr cf_wait_rdy
   lda #$20                  ; Read sector command
-  sta CF_CMD
+  sta ST_CMD
   jsr cf_wait_dat
   jsr cf_err
 
   ldy #0
   ldx #2                    ; Read 2 pages (512 bytes) from sector 0
 cf_read_sector_loop:
-  lda CF_DATA
-  sta (CF_BUFFER_PTR),y
+  lda ST_DATA
+  sta (ST_BUFFER_PTR),y
   iny
   bne cf_read_sector_loop
-  inc CF_BUFFER_PTR + 1     ; Increment high byte of pointer
+  inc ST_BUFFER_PTR + 1     ; Increment high byte of pointer
   dex
   bne cf_read_sector_loop
-  dec CF_BUFFER_PTR + 1     ; Restore original pointer
-  dec CF_BUFFER_PTR + 1
+  dec ST_BUFFER_PTR + 1     ; Restore original pointer
+  dec ST_BUFFER_PTR + 1
 cf_read_sector_exit:
   rts
 
 cf_wait_bsy:
-  lda CF_STAT
+  lda ST_STATUS
   and #%10000000
   bne cf_wait_bsy
 cf_wait_bsy_exit:
   rts
 
 cf_wait_rdy:
-  lda CF_STAT
+  lda ST_STATUS
   and #%11000000            ; Mask out BSY and RDY flags
   cmp #%01000000
   bne cf_wait_rdy
@@ -133,7 +119,7 @@ cf_wait_rdy_exit:
   rts
 
 cf_wait_dat:
-  lda CF_STAT
+  lda ST_STATUS
   and #%11001000            ; Mask out BSY, RDY and DRQ flags
   cmp #%01001000
   bne cf_wait_dat
@@ -141,12 +127,12 @@ cf_wait_dat_exit:
   rts
 
 cf_err:
-  lda CF_STAT
+  lda ST_STATUS
   and #%00000001            ; Mask out error flag
   beq cf_no_err
   lda #'!'
   jsr acia_send_char
-  lda CF_ERR                ; Get error code
+  lda ST_ERROR                ; Get error code
   jsr acia_send_char
 cf_no_err:
   rts
@@ -166,21 +152,26 @@ print_crlf:
 
 acia_init:
   lda #$00
-  sta ACIA_STATUS             ; Soft reset (value not important)
+  sta SC_STATUS             ; Soft reset (value not important)
   lda #%00010000              ; N-8-1, 115200 baud
-  sta ACIA_CTRL
+  sta SC_CTRL
   lda #%00001011              ; No parity, No echo, No interrupts
-  sta ACIA_CMD
+  sta SC_CMD
   rts
 
 acia_send_char:
-  sta ACIA_DATA
+  sta SC_DATA
   pha
 acia_tx_wait:
-  lda ACIA_STATUS
+  lda SC_STATUS
   and #%00010000              ; Check if tx buffer not empty
   beq acia_tx_wait            ; Loop if tx buffer not empty
   pla
   rts
 
 success:     .asciiz "Success!"
+
+.segment "KERNAL"
+.segment "CART"
+.segment "WOZMON"
+.segment "VECTORS"
