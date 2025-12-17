@@ -95,3 +95,9 @@ The [Production](./Production) folder contains the JLCPCB ready production files
 The documentation for this project can be found at: [https://6502.acwrightdesign.com](https://6502.acwrightdesign.com)
 
 See the README file in the Documentation folder for more details.
+
+## Licensing
+
+Hardware for this project is licensed under the CERN Open Hardware Licence Version 2 - Permissive License. See the [LICENSE](./LICENSE) file for more details.
+Software for this project is licensed under the MIT License. See the [LICENSE](./Software/LICENSE) file for more details.
+Firmware for this project is licensed under the MIT License. See the [LICENSE](./Firmware/LICENSE) file for more details.
