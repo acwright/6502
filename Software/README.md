@@ -16,4 +16,3 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **VGA**: VGA Card
 - **VC**: Video Card
 - **VCP**: Video Card Pro
-- **VH**: Vera Helper

@@ -1,7 +1,7 @@
-VH Bricks
+OB Bricks
 =========
 
-Displays brick pattern on VERA Layer 0 using the VERA Helper.
+Displays brick pattern on VERA Layer 0 using the Output Board.
 
 Inspired By / Modifed From: [https://www.8bitcoding.com/p/tiles-in-assembly-i-basics.html](https://www.8bitcoding.com/p/tiles-in-assembly-i-basics.html)
 
