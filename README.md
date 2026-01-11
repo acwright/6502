@@ -44,10 +44,10 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **RTC Card**: A card that provides real-time clock functionality. 
 - **Serial Card**: A card that provides serial communication capabilities. 
 - **Serial Card Pro**: An enhanced version of the Serial Card with additional features. 
-- **Sound Card**: A card that provides audio output capabilities.
+- **Sound Card**: A card that provides audio output capabilities using the AY-3-8912.
 - **Storage Card**: A card that provides storage capabilities using a CompactFlash card.
 - **Storage Card Pro**: A card that provides storage capabilities with an SD Card, 16MB Flash and SPI.
-- **VGA Card**: A card that provides VGA output capabilities.
+- **VGA Card**: A card that provides VGA output capabilities using the [Pico9918](https://github.com/visrealm/pico9918).
 - **VGA Card Pro**: An enhanced version of the VGA Card with additional features.
 - **Video Card**: A card that provides composite video output capabilities using the TMS9918A.
 - **Video Card Pro**: A card that provides composite video output capabilities using the Atmega1284p.
