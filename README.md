@@ -65,6 +65,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **Keyboard Encoder Helper**: A board that translates keyboard scan data and PS/2 keyboard data to ASCII.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
+- **Mega Helper**: A board that interfaces the Arduino Mega 2560 R3 with 6502 bus.
 - **PS2 Helper**: A board that allows connection of a PS/2 keyboard.
 
 **Carts**:

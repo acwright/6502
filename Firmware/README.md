@@ -8,6 +8,7 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **DB**: Dev Board
 - **IB**: Input Board
 - **KEH**: Keyboard Encoder Helper
+- **MH**: Mega Helper
 - **PS2**: PS2 Helper
 - **SCP**: Storage Card Pro
 - **VGAP**: VGA Card Pro
