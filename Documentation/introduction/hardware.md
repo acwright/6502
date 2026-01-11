@@ -29,7 +29,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **RTC Card**: A card that provides real-time clock functionality. 
 - **Serial Card**: A card that provides serial communication capabilities. 
 - **Serial Card Pro**: An enhanced version of the Serial Card with additional features. 
-- **Sound Card**: A card that provides audio output capabilities using the AY-3-8912.
+- **Sound Card**: A card that provides audio output capabilities using the ARMSID.
 - **Storage Card**: A card that provides storage capabilities using a CompactFlash card.
 - **Storage Card Pro**: A card that provides storage capabilities with an SD Card, 16MB Flash and SPI.
 - **VGA Card**: A card that provides VGA output capabilities using the [Pico9918](https://github.com/visrealm/pico9918).
