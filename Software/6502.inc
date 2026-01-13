@@ -2,27 +2,6 @@
 ; ***   6502 INCLUDES     ***
 ; ***                     ***
 
-; LCD Card | IO 1 | $8000-$800F
-LCD_PORTB           = $8000
-LCD_PORTA           = $8001
-LCD_DDRB            = $8002
-LCD_DDRA            = $8003
-LCD_T1CL            = $8004
-LCD_T1CH            = $8005
-LCD_T1LL            = $8006
-LCD_T1LH            = $8007
-LCD_T2CL            = $8008
-LCD_T2CH            = $8009
-LCD_SR              = $800A
-LCD_ACR             = $800B
-LCD_PCR             = $800C
-LCD_IFR             = $800D
-LCD_IER             = $800E
-LCD_ORA             = $800F
-LCD_E               = %10000000
-LCD_RW              = %01000000
-LCD_RS              = %00100000
-
 ; RAM Card | IO 1 & 2 | $8000-$87FF
 RAM_DATA            = $8000     ; R/W ($8000-$83FE)
 RAM_DATA_H          = $8400     ; R/W ($8400-$87FE)
@@ -161,3 +140,24 @@ VERA_DC_BORDER      = $9C0B
 VERA_L0_CONFIG      = $9C0D
 VERA_L0_MAPBASE     = $9C0E
 VERA_L0_TILEBASE    = $9C0F
+
+; LCD Card | IO 1 | $9C00-$9C0F
+LCD_PORTB           = $9C00
+LCD_PORTA           = $9C01
+LCD_DDRB            = $9C02
+LCD_DDRA            = $9C03
+LCD_T1CL            = $9C04
+LCD_T1CH            = $9C05
+LCD_T1LL            = $9C06
+LCD_T1LH            = $9C07
+LCD_T2CL            = $9C08
+LCD_T2CH            = $9C09
+LCD_SR              = $9C0A
+LCD_ACR             = $9C0B
+LCD_PCR             = $9C0C
+LCD_IFR             = $9C0D
+LCD_IER             = $9C0E
+LCD_ORA             = $9C0F
+LCD_E               = %10000000
+LCD_RW              = %01000000
+LCD_RS              = %00100000
