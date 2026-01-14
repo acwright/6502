@@ -34,7 +34,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **Storage Card**: A card that provides storage capabilities using a CompactFlash card.
 - **Storage Card Pro**: A card that provides storage capabilities with an SD Card, 16MB Flash and SPI. **UNTESTED**
 - **VGA Card**: A card that provides VGA output capabilities using the [Pico9918](https://github.com/visrealm/pico9918).
-- **VGA Card Pro**: An enhanced version of the VGA Card with additional features. **UNTESTED**
+- **VGA Card Pro**: A custom programmable VGA Card using the Pi Pico. **UNTESTED**
 - **Video Card**: A card that provides composite video output capabilities using the TMS9918A.
 - **Video Card Pro**: A card that provides composite video output capabilities using the Atmega1284p. **UNTESTED**
 
