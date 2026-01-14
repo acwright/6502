@@ -37,9 +37,9 @@
         "other_text_thickness": 0.15,
         "other_text_upright": false,
         "pads": {
-          "drill": 0.0,
-          "height": 2.2,
-          "width": 1.8
+          "drill": 3.2,
+          "height": 3.2,
+          "width": 3.2
         },
         "silk_line_width": 0.12,
         "silk_text_italic": false,
@@ -58,7 +58,12 @@
           "width": 0.0
         }
       ],
-      "drc_exclusions": [],
+      "drc_exclusions": [
+        [
+          "courtyards_overlap|134067500|134569688|90f6ade9-468c-4ea4-bcd7-525dbdca3943|f0aba0aa-fdd8-4855-a439-0c525baf10b5",
+          ""
+        ]
+      ],
       "meta": {
         "filename": "board_design_settings.json",
         "version": 2
@@ -714,7 +719,7 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "../../Assets/PCB Models/Input Board/Rev 1.0/Input Board.step",
+      "step": "../../../Assets/PCB Models/Output Board/Rev 1.0/Output Board.step",
       "svg": "",
       "vrml": ""
     },
