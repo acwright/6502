@@ -4438,178 +4438,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Oscillator:OCXO-14"
-			(pin_names
-				(offset 0.254)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(property "Reference" "Y"
-				(at -5.08 6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Value" "OCXO-14"
-				(at 1.27 -6.35 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Footprint" "Oscillator:Oscillator_DIP-14"
-				(at 11.43 -8.89 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Datasheet" "http://www.petermann-technik.de/fileadmin/petermann/pdf/crystal-oscillators/OCXO-14_PETERMANN-TECHNIK.pdf"
-				(at -7.62 2.54 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Voltage-Controlled Crystal Clock Oscillator, DIP14-style metal package"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_keywords" "Crystal Clock Oscillator"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "ki_fp_filters" "Oscillator*DIP*14*"
-				(at 0 0 0)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(symbol "OCXO-14_0_1"
-				(rectangle
-					(start -10.16 5.08)
-					(end 5.08 -5.08)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(polyline
-					(pts
-						(xy -6.985 1.905) (xy -6.35 1.905) (xy -6.35 3.175) (xy -5.715 3.175) (xy -5.715 1.905) (xy -5.08 1.905)
-						(xy -5.08 3.175) (xy -4.445 3.175) (xy -4.445 1.905)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "OCXO-14_1_1"
-				(pin input line
-					(at -12.7 0 0)
-					(length 2.54)
-					(name "Vcontrol"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 7.62 270)
-					(length 2.54)
-					(name "Vcc"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "14"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 -7.62 90)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin output line
-					(at 7.62 0 180)
-					(length 2.54)
-					(name "OUT"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "power:GND"
 			(power)
 			(pin_numbers
@@ -4868,12 +4696,6 @@
 		(uuid "54eb36d4-2a99-4db1-85b3-6c261f2e0a82")
 	)
 	(junction
-		(at 50.8 171.45)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "569f967d-e6be-486d-a95a-1c808eac1670")
-	)
-	(junction
 		(at 229.87 119.38)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -4978,10 +4800,6 @@
 	(no_connect
 		(at 237.49 149.86)
 		(uuid "a889c7e9-3a37-445d-9507-437d4877ccd8")
-	)
-	(no_connect
-		(at 24.13 171.45)
-		(uuid "e13d957d-bab3-41e9-9ea5-d2d0d948f4fd")
 	)
 	(wire
 		(pts
@@ -5165,16 +4983,6 @@
 	)
 	(wire
 		(pts
-			(xy 36.83 161.29) (xy 36.83 163.83)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "230fc3c9-c57b-4e8f-afc1-a5815c825670")
-	)
-	(wire
-		(pts
 			(xy 97.79 45.72) (xy 100.33 45.72)
 		)
 		(stroke
@@ -5322,16 +5130,6 @@
 			(type default)
 		)
 		(uuid "3ce0c9a8-2cd3-471a-aa64-49b2f8b8316f")
-	)
-	(wire
-		(pts
-			(xy 36.83 179.07) (xy 36.83 181.61)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "40f87a30-0e82-490f-8d44-0167d6c16ad2")
 	)
 	(wire
 		(pts
@@ -5805,16 +5603,6 @@
 	)
 	(wire
 		(pts
-			(xy 50.8 171.45) (xy 59.69 171.45)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7406b6ed-9762-4a18-8cc6-9c11bf48259c")
-	)
-	(wire
-		(pts
 			(xy 91.44 128.27) (xy 102.87 128.27)
 		)
 		(stroke
@@ -5872,16 +5660,6 @@
 			(type default)
 		)
 		(uuid "7a10d7be-bfdb-41d2-8b2a-1b3144e04e66")
-	)
-	(wire
-		(pts
-			(xy 44.45 171.45) (xy 50.8 171.45)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "7a31a69a-3c02-4ba7-9d8c-a3eec9b96922")
 	)
 	(wire
 		(pts
@@ -6525,7 +6303,7 @@
 	)
 	(wire
 		(pts
-			(xy 50.8 161.29) (xy 50.8 171.45)
+			(xy 52.07 171.45) (xy 59.69 171.45)
 		)
 		(stroke
 			(width 0)
@@ -8135,28 +7913,6 @@
 			)
 		)
 	)
-	(global_label "VCC"
-		(shape input)
-		(at 36.83 161.29 90)
-		(fields_autoplaced yes)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "637b6e78-13f3-41b4-9fef-fc4fd2913801")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 36.83 155.3304 90)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "ABORTB"
 		(shape input)
 		(at 97.79 40.64 180)
@@ -8260,23 +8016,23 @@
 		)
 	)
 	(global_label "PHI2"
-		(shape output)
-		(at 50.8 161.29 90)
+		(shape input)
+		(at 52.07 171.45 180)
 		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
-			(justify left)
+			(justify right)
 		)
 		(uuid "6e41b993-d476-4ec4-91d2-d6e232895312")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 50.8 154.5442 90)
+			(at 45.3242 171.45 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
+				(justify right)
 				(hide yes)
 			)
 		)
@@ -11472,80 +11228,6 @@
 		)
 	)
 	(symbol
-		(lib_id "Oscillator:OCXO-14")
-		(at 36.83 171.45 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom no)
-		(on_board yes)
-		(dnp no)
-		(uuid "4d3f958f-c597-4162-9029-b5bb632eddc4")
-		(property "Reference" "X1"
-			(at 28.194 164.084 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Value" "OCXO-14"
-			(at 48.26 167.6714 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Footprint" "Oscillator:Oscillator_DIP-14"
-			(at 48.26 180.34 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" "http://www.petermann-technik.de/fileadmin/petermann/pdf/crystal-oscillators/OCXO-14_PETERMANN-TECHNIK.pdf"
-			(at 29.21 168.91 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Voltage-Controlled Crystal Clock Oscillator, DIP14-style metal package"
-			(at 36.83 171.45 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "14"
-			(uuid "180d2fc9-1bdc-4059-bc6b-f87f98372ba0")
-		)
-		(pin "1"
-			(uuid "37f8512d-aa09-4abd-aefb-47044cc96015")
-		)
-		(pin "7"
-			(uuid "e767ee8d-08cb-4b21-87dc-bdcf5ef6cd1a")
-		)
-		(pin "8"
-			(uuid "a7d1b9f2-c011-42ef-a109-454049fff8f5")
-		)
-		(instances
-			(project "CPU Card"
-				(path "/b93a1794-fe4c-46dd-b3af-a8a2c2dc45ce"
-					(reference "X1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
 		(lib_id "power:GND")
 		(at 177.8 127 0)
 		(unit 1)
@@ -11827,71 +11509,6 @@
 			(project "CPU Card"
 				(path "/b93a1794-fe4c-46dd-b3af-a8a2c2dc45ce"
 					(reference "#FLG01")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(symbol
-		(lib_id "power:GND")
-		(at 36.83 181.61 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "984d625b-ae28-4ad8-a269-66f0deb08c7e")
-		(property "Reference" "#PWR08"
-			(at 36.83 187.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Value" "GND"
-			(at 36.957 186.0042 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-			)
-		)
-		(property "Footprint" ""
-			(at 36.83 181.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Datasheet" ""
-			(at 36.83 181.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 36.83 181.61 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-		(pin "1"
-			(uuid "0f745363-c63b-463e-ba96-7e0a805c372e")
-		)
-		(instances
-			(project "CPU Card"
-				(path "/b93a1794-fe4c-46dd-b3af-a8a2c2dc45ce"
-					(reference "#PWR08")
 					(unit 1)
 				)
 			)
