@@ -2,21 +2,38 @@
 ; ***   KERNAL    ***
 ; ***             ***
 
-; Initialization main entry point
-; Modifies: Flags, A
-INIT:
+; Main entry point
+RESET:
   cld                           ; Clear decimal mode
-  rts
+  sei                           ; Disable interrupts
+
+  ldx #$ff                      
+  txs                           ; Reset the stack pointer
+
+  lda #<IRQ                     ; Initialize the IRQ pointer
+  sta IRQ_PTR
+  lda #>IRQ
+  sta IRQ_PTR + 1
+
+  lda #<NMI                     ; Initialize the NMI pointer
+  sta NMI_PTR
+  lda #>NMI
+  sta NMI_PTR + 1
+
+  jsr INIT_BUFFER               ; Initialize the input buffer
+  jsr INIT_SC                   ; Initialize the Serial Card
+
+  cli                           ; Enable interrupts
+
+  jmp WOZ_MON                   ; Jump to Wozmon
 
 ; Initialize the Serial Card
 ; Modifies: Flags, A
 INIT_SC:
-  sei                           ; Disable interrupts
-  lda #$10                      ; 8-N-1, 115200 baud.
+  lda #%00010000                ; 8-N-1, 115200 baud.
   sta SC_CTRL
-  lda #$09                      ; No parity, no echo, interrupts enabled.
+  lda #%00001001                ; No parity, no echo, interrupts enabled.
   sta SC_CMD
-  cli                           ; Enable interrupts
   rts
 
 ; Initialize the INPUT_BUFFER
@@ -81,13 +98,6 @@ CHROUT:
   pla
   rts
 
-; Reset Handler
-RESET:
-  jsr INIT                      ; Initialize the system
-  jsr INIT_BUFFER               ; Initialize the INPUT_BUFFER
-  jsr INIT_SC                   ; Initialize the Serial Card
-  jmp WOZ_MON                   ; Jump to Wozmon
-
 ; NMI Handler
 NMI:
   rti
@@ -105,3 +115,15 @@ IRQ:
   plx
   pla
   rti
+
+; NMI Vector
+NMI_VEC:
+  jmp (NMI_PTR)                 ; Indirect jump through NMI pointer to the NMI handler
+
+; Reset Vector
+RESET_VEC:
+  jmp RESET                     ; Initialize the system
+
+; IRQ Vector
+IRQ_VEC:
+  jmp (IRQ_PTR)                 ; Indirect jump through IRQ pointer to the IRQ handler

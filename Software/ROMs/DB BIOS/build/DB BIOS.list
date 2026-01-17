@@ -13,291 +13,327 @@ Current file: ./src/DB BIOS.asm
 000000r 2               ; ***   6502 INCLUDES     ***
 000000r 2               ; ***                     ***
 000000r 2               
-000000r 2               ; LCD Card | IO 1 | $8000-$800F
-000000r 2               LCD_PORTB       = $8000
-000000r 2               LCD_PORTA       = $8001
-000000r 2               LCD_DDRB        = $8002
-000000r 2               LCD_DDRA        = $8003
-000000r 2               LCD_T1CL        = $8004
-000000r 2               LCD_T1CH        = $8005
-000000r 2               LCD_T1LL        = $8006
-000000r 2               LCD_T1LH        = $8007
-000000r 2               LCD_T2CL        = $8008
-000000r 2               LCD_T2CH        = $8009
-000000r 2               LCD_SR          = $800A
-000000r 2               LCD_ACR         = $800B
-000000r 2               LCD_PCR         = $800C
-000000r 2               LCD_IFR         = $800D
-000000r 2               LCD_IER         = $800E
-000000r 2               LCD_ORA         = $800F
-000000r 2               LCD_E           = %10000000
-000000r 2               LCD_RW          = %01000000
-000000r 2               LCD_RS          = %00100000
+000000r 2               READ_PTR            = ZP
+000000r 2               WRITE_PTR           = ZP + 1
+000000r 2               
+000000r 2               IRQ_PTR             = KERNAL_VARS       ; $0300
+000000r 2               NMI_PTR             = KERNAL_VARS + 2   ; $0302
 000000r 2               
 000000r 2               ; RAM Card | IO 1 & 2 | $8000-$87FF
-000000r 2               RAM_DATA        = $8000     ; R/W ($8000-$83FE)
-000000r 2               RAM_DATA_H      = $8400     ; R/W ($8400-$87FE)
-000000r 2               RAM_BANK        = $83FF     ; All three RAM_BANK addresses address the same bank switching
-000000r 2               RAM_BANK_L      = $83FF     ; latch and can be univerally interchanged
-000000r 2               RAM_BANK_H      = $87FF     ; RAM bank latch value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
+000000r 2               RAM_DATA            = $8000             ; R/W ($8000-$83FE)
+000000r 2               RAM_DATA_H          = $8400             ; R/W ($8400-$87FE)
+000000r 2               RAM_BANK            = $83FF             ; All three RAM_BANK addresses address the same bank switching
+000000r 2               RAM_BANK_L          = $83FF             ; latch and can be univerally interchanged
+000000r 2               RAM_BANK_H          = $87FF             ; RAM bank latch value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
 000000r 2               
 000000r 2               ; Emulator | IO 2 | $8400-$840F
-000000r 2               EMU_SER_DATA    = $8400     ; Write
-000000r 2               EMU_SER_CTRL    = $8401     ; Write
-000000r 2               EMU_SER_STATUS  = $8401     ; Read
-000000r 2               EMU_KB_CMD      = $8402     ; Write
-000000r 2               EMU_KB_DATA     = $8402     ; Read
-000000r 2               EMU_MOUSE_X     = $8403     ; Read
-000000r 2               EMU_MOUSE_Y     = $8404     ; Read
-000000r 2               EMU_MOUSE_W     = $8405     ; Read
-000000r 2               EMU_MOUSE_BTNS  = $8406     ; Read
-000000r 2               EMU_JOY_BTNS    = $8407     ; Read
-000000r 2               EMU_RTC_SEC     = $8408     ; Read
-000000r 2               EMU_RTC_MIN     = $8409     ; Read
-000000r 2               EMU_RTC_HR      = $840A     ; Read
-000000r 2               EMU_RTC_DAY     = $840B     ; Read
-000000r 2               EMU_RTC_MON     = $840C     ; Read
-000000r 2               EMU_RTC_YR      = $840D     ; Read
-000000r 2               EMU_PRAM_DATA   = $840E     ; R/W
-000000r 2               EMU_PRAM_ADDR   = $840F     ; R/W
+000000r 2               EMU_SER_DATA        = $8400             ; Write
+000000r 2               EMU_SER_CTRL        = $8401             ; Write
+000000r 2               EMU_SER_STATUS      = $8401             ; Read
+000000r 2               EMU_KB_CMD          = $8402             ; Write
+000000r 2               EMU_KB_DATA         = $8402             ; Read
+000000r 2               EMU_MOUSE_X         = $8403             ; Read
+000000r 2               EMU_MOUSE_Y         = $8404             ; Read
+000000r 2               EMU_MOUSE_W         = $8405             ; Read
+000000r 2               EMU_MOUSE_BTNS      = $8406             ; Read
+000000r 2               EMU_JOY_BTNS        = $8407             ; Read
+000000r 2               EMU_RTC_SEC         = $8408             ; Read
+000000r 2               EMU_RTC_MIN         = $8409             ; Read
+000000r 2               EMU_RTC_HR          = $840A             ; Read
+000000r 2               EMU_RTC_DAY         = $840B             ; Read
+000000r 2               EMU_RTC_MON         = $840C             ; Read
+000000r 2               EMU_RTC_YR          = $840D             ; Read
+000000r 2               EMU_PRAM_DATA       = $840E             ; R/W
+000000r 2               EMU_PRAM_ADDR       = $840F             ; R/W
 000000r 2               
 000000r 2               ; RTC Card | IO 3 | $8800-$881F
-000000r 2               RTC_SEC         = $8800
-000000r 2               RTC_MIN         = $8801
-000000r 2               RTC_HR          = $8802
-000000r 2               RTC_DAY         = $8803
-000000r 2               RTC_DATE        = $8804
-000000r 2               RTC_MON         = $8805
-000000r 2               RTC_YR          = $8806
-000000r 2               RTC_CENT        = $8807
-000000r 2               RTC_ALARM_SEC   = $8808
-000000r 2               RTC_ALARM_MIN   = $8809
-000000r 2               RTC_ALARM_HR    = $880A
-000000r 2               RTC_ALARM_DATE  = $880B
-000000r 2               RTC_WD_L        = $880C
-000000r 2               RTC_WD_H        = $880D
-000000r 2               RTC_CTRL_A      = $880E
-000000r 2               RTC_CRTL_B      = $880F
-000000r 2               RTC_RAM_ADDR    = $8810
-000000r 2               RTC_RAM_DATA    = $8813
+000000r 2               RTC_SEC             = $8800
+000000r 2               RTC_MIN             = $8801
+000000r 2               RTC_HR              = $8802
+000000r 2               RTC_DAY             = $8803
+000000r 2               RTC_DATE            = $8804
+000000r 2               RTC_MON             = $8805
+000000r 2               RTC_YR              = $8806
+000000r 2               RTC_CENT            = $8807
+000000r 2               RTC_ALARM_SEC       = $8808
+000000r 2               RTC_ALARM_MIN       = $8809
+000000r 2               RTC_ALARM_HR        = $880A
+000000r 2               RTC_ALARM_DATE      = $880B
+000000r 2               RTC_WD_L            = $880C
+000000r 2               RTC_WD_H            = $880D
+000000r 2               RTC_CTRL_A          = $880E
+000000r 2               RTC_CTRL_B          = $880F
+000000r 2               RTC_RAM_ADDR        = $8810
+000000r 2               RTC_RAM_DATA        = $8813
 000000r 2               
 000000r 2               ; Storage Card | IO 4 | $8C00-$8C07
-000000r 2               ST_DATA         = $8C00     ; R/W
-000000r 2               ST_ERROR        = $8C01     ; Read
-000000r 2               ST_FEATURE      = $8C01     ; Write
-000000r 2               ST_SECT_CNT     = $8C02     ; R/W
-000000r 2               ST_LBA_0        = $8C03     ; R/W
-000000r 2               ST_LBA_1        = $8C04     ; R/W
-000000r 2               ST_LBA_2        = $8C05     ; R/W
-000000r 2               ST_LBA_3        = $8C06     ; R/W
-000000r 2               ST_STATUS       = $8C07     ; Read
-000000r 2               ST_CMD          = $8C07     ; Write
-000000r 2               ST_ERR_AMNF     = %00000001
-000000r 2               ST_ERR_ABRT     = %00000100
-000000r 2               ST_ERR_IDNF     = %00010000
-000000r 2               ST_ERR_UNC      = %01000000
-000000r 2               ST_ERR_BBK      = %10000000
-000000r 2               ST_STATUS_ERR   = %00000001
-000000r 2               ST_STATUS_IDX   = %00000010
-000000r 2               ST_STATUS_CORR  = %00000100
-000000r 2               ST_STATUS_DRQ   = %00001000
-000000r 2               ST_STATUS_DSC   = %00010000
-000000r 2               ST_STATUS_DWF   = %00100000
-000000r 2               ST_STATUS_RDY   = %01000000
-000000r 2               ST_STATUS_BSY   = %10000000
+000000r 2               ST_DATA             = $8C00             ; R/W
+000000r 2               ST_ERROR            = $8C01             ; Read
+000000r 2               ST_FEATURE          = $8C01             ; Write
+000000r 2               ST_SECT_CNT         = $8C02             ; R/W
+000000r 2               ST_LBA_0            = $8C03             ; R/W
+000000r 2               ST_LBA_1            = $8C04             ; R/W
+000000r 2               ST_LBA_2            = $8C05             ; R/W
+000000r 2               ST_LBA_3            = $8C06             ; R/W
+000000r 2               ST_STATUS           = $8C07             ; Read
+000000r 2               ST_CMD              = $8C07             ; Write
+000000r 2               ST_ERR_AMNF         = %00000001
+000000r 2               ST_ERR_ABRT         = %00000100
+000000r 2               ST_ERR_IDNF         = %00010000
+000000r 2               ST_ERR_UNC          = %01000000
+000000r 2               ST_ERR_BBK          = %10000000
+000000r 2               ST_STATUS_ERR       = %00000001
+000000r 2               ST_STATUS_IDX       = %00000010
+000000r 2               ST_STATUS_CORR      = %00000100
+000000r 2               ST_STATUS_DRQ       = %00001000
+000000r 2               ST_STATUS_DSC       = %00010000
+000000r 2               ST_STATUS_DWF       = %00100000
+000000r 2               ST_STATUS_RDY       = %01000000
+000000r 2               ST_STATUS_BSY       = %10000000
 000000r 2               
 000000r 2               ; Serial Card | IO 5 | $9000-$9003
-000000r 2               SC_DATA         = $9000     ; R/W
-000000r 2               SC_RESET        = $9001     ; Write
-000000r 2               SC_STATUS       = $9001     ; Read
-000000r 2               SC_CMD          = $9002     ; R/W
-000000r 2               SC_CTRL         = $9003     ; R/W
+000000r 2               SC_DATA             = $9000             ; R/W
+000000r 2               SC_RESET            = $9001             ; Write
+000000r 2               SC_STATUS           = $9001             ; Read
+000000r 2               SC_CMD              = $9002             ; R/W
+000000r 2               SC_CTRL             = $9003             ; R/W
 000000r 2               
 000000r 2               ; GPIO Card / Input Board | IO 6 | $9400-$940F
-000000r 2               GPIO_PORTB      = $9400
-000000r 2               GPIO_PORTA      = $9401
-000000r 2               GPIO_DDRB       = $9402
-000000r 2               GPIO_DDRA       = $9403
-000000r 2               GPIO_T1CL       = $9404
-000000r 2               GPIO_T1CH       = $9405
-000000r 2               GPIO_T1LL       = $9406
-000000r 2               GPIO_T1LH       = $9407
-000000r 2               GPIO_T2CL       = $9408
-000000r 2               GPIO_T2CH       = $9409
-000000r 2               GPIO_SR         = $940A
-000000r 2               GPIO_ACR        = $940B
-000000r 2               GPIO_PCR        = $940C
-000000r 2               GPIO_IFR        = $940D
-000000r 2               GPIO_IER        = $940E
-000000r 2               GPIO_ORA        = $940F
+000000r 2               GPIO_PORTB          = $9400
+000000r 2               GPIO_PORTA          = $9401
+000000r 2               GPIO_DDRB           = $9402
+000000r 2               GPIO_DDRA           = $9403
+000000r 2               GPIO_T1CL           = $9404
+000000r 2               GPIO_T1CH           = $9405
+000000r 2               GPIO_T1LL           = $9406
+000000r 2               GPIO_T1LH           = $9407
+000000r 2               GPIO_T2CL           = $9408
+000000r 2               GPIO_T2CH           = $9409
+000000r 2               GPIO_SR             = $940A
+000000r 2               GPIO_ACR            = $940B
+000000r 2               GPIO_PCR            = $940C
+000000r 2               GPIO_IFR            = $940D
+000000r 2               GPIO_IER            = $940E
+000000r 2               GPIO_ORA            = $940F
 000000r 2               
-000000r 2               ; Sound Card | IO 7 | $9800-$980F
-000000r 2               SND_PORTB       = $9400
-000000r 2               SND_PORTA       = $9401
-000000r 2               SND_DDRB        = $9402
-000000r 2               SND_DDRA        = $9403
-000000r 2               SND_T1CL        = $9404
-000000r 2               SND_T1CH        = $9405
-000000r 2               SND_T1LL        = $9406
-000000r 2               SND_T1LH        = $9407
-000000r 2               SND_T2CL        = $9408
-000000r 2               SND_T2CH        = $9409
-000000r 2               SND_SR          = $940A
-000000r 2               SND_ACR         = $940B
-000000r 2               SND_PCR         = $940C
-000000r 2               SND_IFR         = $940D
-000000r 2               SND_IER         = $940E
-000000r 2               SND_ORA         = $940F
-000000r 2               SND_BC1H        = %11100000   ; SND_PCR CA2
-000000r 2               SND_BC1L        = %11000000   ; SND_PCR CA2
-000000r 2               SND_BDIRH       = %00001110   ; SND_PCR CB2
-000000r 2               SND_BDIRL       = %00001100   ; SND_PCR CB2
+000000r 2               ; Sound Card (AY-3-8912) | IO 7 | $9800-$980F
+000000r 2               SND_AY_PORTB           = $9800
+000000r 2               SND_AY_PORTA           = $9801
+000000r 2               SND_AY_DDRB            = $9802
+000000r 2               SND_AY_DDRA            = $9803
+000000r 2               SND_AY_T1CL            = $9804
+000000r 2               SND_AY_T1CH            = $9805
+000000r 2               SND_AY_T1LL            = $9806
+000000r 2               SND_AY_T1LH            = $9807
+000000r 2               SND_AY_T2CL            = $9808
+000000r 2               SND_AY_T2CH            = $9809
+000000r 2               SND_AY_SR              = $980A
+000000r 2               SND_AY_ACR             = $980B
+000000r 2               SND_AY_PCR             = $980C
+000000r 2               SND_AY_IFR             = $980D
+000000r 2               SND_AY_IER             = $980E
+000000r 2               SND_AY_ORA             = $980F
+000000r 2               SND_AY_BC1H            = %11100000      ; SND_PCR CA2
+000000r 2               SND_AY_BC1L            = %11000000      ; SND_PCR CA2
+000000r 2               SND_AY_BDIRH           = %00001110      ; SND_PCR CB2
+000000r 2               SND_AY_BDIRL           = %00001100      ; SND_PCR CB2
 000000r 2               
 000000r 2               ; Video Card / VGA Card | IO 8 | $9C00-$9C01
-000000r 2               VC_DATA         = $9C00       ; R/W
-000000r 2               VC_REG          = $9C01       ; Write
-000000r 2               VC_STATUS       = $9C01       ; Read
+000000r 2               VC_DATA             = $9C00             ; R/W
+000000r 2               VC_REG              = $9C01             ; Write
+000000r 2               VC_STATUS           = $9C01             ; Read
+000000r 2               
+000000r 2               ; VERA | IO 8 | $9C00-$9C0F
+000000r 2               VERA_ADDR_LOW       = $9C00
+000000r 2               VERA_ADDR_MID       = $9C01
+000000r 2               VERA_ADDR_HIGH      = $9C02
+000000r 2               VERA_DATA0          = $9C03
+000000r 2               VERA_DATA1          = $9C04
+000000r 2               VERA_CTRL           = $9C05
+000000r 2               VERA_DC_VIDEO       = $9C09
+000000r 2               VERA_DC_HSCALE      = $9C0A
+000000r 2               VERA_DC_VSCALE      = $9C0B
+000000r 2               VERA_DC_BORDER      = $9C0B
+000000r 2               VERA_L0_CONFIG      = $9C0D
+000000r 2               VERA_L0_MAPBASE     = $9C0E
+000000r 2               VERA_L0_TILEBASE    = $9C0F
+000000r 2               
+000000r 2               ; LCD Card | IO 1 | $9C00-$9C0F
+000000r 2               LCD_PORTB           = $9C00
+000000r 2               LCD_PORTA           = $9C01
+000000r 2               LCD_DDRB            = $9C02
+000000r 2               LCD_DDRA            = $9C03
+000000r 2               LCD_T1CL            = $9C04
+000000r 2               LCD_T1CH            = $9C05
+000000r 2               LCD_T1LL            = $9C06
+000000r 2               LCD_T1LH            = $9C07
+000000r 2               LCD_T2CL            = $9C08
+000000r 2               LCD_T2CH            = $9C09
+000000r 2               LCD_SR              = $9C0A
+000000r 2               LCD_ACR             = $9C0B
+000000r 2               LCD_PCR             = $9C0C
+000000r 2               LCD_IFR             = $9C0D
+000000r 2               LCD_IER             = $9C0E
+000000r 2               LCD_ORA             = $9C0F
+000000r 2               LCD_E               = %10000000
+000000r 2               LCD_RW              = %01000000
+000000r 2               LCD_RS              = %00100000
 000000r 2               
 000000r 1               
 000000r 1               .segment "ZEROPAGE"
-000000r 1  xx           READ_PTR:     .res 1
-000001r 1  xx           WRITE_PTR:    .res 1
-000002r 1               
-000002r 1               .segment "STACK"
+000000r 1  xx xx xx xx  ZP:     .res $100
+000004r 1  xx xx xx xx  
+000008r 1  xx xx xx xx  
+000100r 1               .segment "STACK"
 000000r 1  xx xx xx xx  STACK: .res $100
 000004r 1  xx xx xx xx  
 000008r 1  xx xx xx xx  
-000100r 1               
 000100r 1               .segment "INPUT_BUFFER"
 000000r 1  xx xx xx xx  INPUT_BUFFER: .res $100
 000004r 1  xx xx xx xx  
 000008r 1  xx xx xx xx  
-000100r 1               
 000100r 1               .segment "KERNAL_VARS"
 000000r 1  xx xx xx xx  KERNAL_VARS: .res $100
 000004r 1  xx xx xx xx  
 000008r 1  xx xx xx xx  
-000100r 1               
 000100r 1               .segment "USER_VARS"
 000000r 1  xx xx xx xx  USER_VARS: .res $400
 000004r 1  xx xx xx xx  
 000008r 1  xx xx xx xx  
-000400r 1               
 000400r 1               .segment "PROGRAM"
-000000r 1               
 000000r 1               .segment "KERNAL"
 000000r 1               .include "Kernal.asm"
 000000r 2               ; ***             ***
 000000r 2               ; ***   KERNAL    ***
 000000r 2               ; ***             ***
 000000r 2               
-000000r 2               ; Initialization main entry point
-000000r 2               ; Modifies: Flags, A
-000000r 2               INIT:
+000000r 2               ; Main entry point
+000000r 2               RESET:
 000000r 2  D8             cld                           ; Clear decimal mode
-000001r 2  60             rts
+000001r 2  78             sei                           ; Disable interrupts
 000002r 2               
-000002r 2               ; Initialize the Serial Card
-000002r 2               ; Modifies: Flags, A
-000002r 2               INIT_SC:
-000002r 2  78             sei                           ; Disable interrupts
-000003r 2  A9 10          lda #$10                      ; 8-N-1, 115200 baud.
-000005r 2  8D 03 90       sta SC_CTRL
-000008r 2  A9 09          lda #$09                      ; No parity, no echo, interrupts enabled.
-00000Ar 2  8D 02 90       sta SC_CMD
-00000Dr 2  58             cli                           ; Enable interrupts
-00000Er 2  60             rts
+000002r 2  A2 FF          ldx #$ff
+000004r 2  9A             txs                           ; Reset the stack pointer
+000005r 2               
+000005r 2  A9 rr          lda #<IRQ                     ; Initialize the IRQ pointer
+000007r 2  8D rr rr       sta IRQ_PTR
+00000Ar 2  A9 rr          lda #>IRQ
+00000Cr 2  8D rr rr       sta IRQ_PTR + 1
 00000Fr 2               
-00000Fr 2               ; Initialize the INPUT_BUFFER
-00000Fr 2               ; Modifies: Flags, A
-00000Fr 2               INIT_BUFFER:
-00000Fr 2  A9 00          lda #$00
-000011r 2  85 rr          sta READ_PTR                  ; Init read and write pointers
-000013r 2  85 rr          sta WRITE_PTR
-000015r 2  60             rts
-000016r 2               
-000016r 2               ; Write a character from the A register to the INPUT_BUFFER
-000016r 2               ; Modifies: Flags, X
-000016r 2               WRITE_BUFFER:
-000016r 2  A6 rr          ldx WRITE_PTR
-000018r 2  9D rr rr       sta INPUT_BUFFER,x
-00001Br 2  E6 rr          inc WRITE_PTR
-00001Dr 2  60             rts
-00001Er 2               
-00001Er 2               ; Read a character from the INPUT_BUFFER and store it in A register
-00001Er 2               ; Modifies: Flags, X, A
-00001Er 2               READ_BUFFER:
-00001Er 2  A6 rr          ldx READ_PTR
-000020r 2  BD rr rr       lda INPUT_BUFFER,x
-000023r 2  E6 rr          inc READ_PTR
-000025r 2  60             rts
-000026r 2               
-000026r 2               ; Return in A register the number of unread bytes in the INPUT_BUFFER
-000026r 2               ; Modifies: Flags, A
-000026r 2               BUFFER_SIZE:
-000026r 2  A5 rr          lda WRITE_PTR
-000028r 2  38             sec
-000029r 2  E5 rr          sbc READ_PTR
-00002Br 2  60             rts
-00002Cr 2               
-00002Cr 2               ; Get a character from the INPUT_BUFFER if available
-00002Cr 2               ; On return, carry flag indicates whether a character was available
-00002Cr 2               ; If character available the character will be in the A regsiter
-00002Cr 2               ; Modifies: Flags, A
-00002Cr 2               CHRIN:
-00002Cr 2  DA             phx
-00002Dr 2  20 rr rr       jsr BUFFER_SIZE               ; Check for character available
-000030r 2  F0 09          beq @CHRIN_NO_CHAR            ; Branch if no character available
-000032r 2  20 rr rr       jsr READ_BUFFER               ; Read the character from the buffer
-000035r 2  20 rr rr       jsr CHROUT                    ; Echo
-000038r 2  FA             plx
-000039r 2  38             sec
-00003Ar 2  60             rts
-00003Br 2               @CHRIN_NO_CHAR:
-00003Br 2  FA             plx
-00003Cr 2  18             clc
-00003Dr 2  60             rts
-00003Er 2               
-00003Er 2               ; Output a character from the A register to the Serial Card
-00003Er 2               ; Modifies: Flags
-00003Er 2               CHROUT:
-00003Er 2  8D 00 90       sta SC_DATA
-000041r 2  48             pha
-000042r 2               @CHROUT_WAIT:
-000042r 2  AD 01 90       lda SC_STATUS
-000045r 2  29 10          and #%00010000                ; Check if tx buffer not empty
-000047r 2  F0 F9          beq @CHROUT_WAIT              ; Loop if tx buffer not empty
-000049r 2  68             pla
+00000Fr 2  A9 rr          lda #<NMI                     ; Initialize the NMI pointer
+000011r 2  8D rr rr       sta NMI_PTR
+000014r 2  A9 rr          lda #>NMI
+000016r 2  8D rr rr       sta NMI_PTR + 1
+000019r 2               
+000019r 2  20 rr rr       jsr INIT_BUFFER               ; Initialize the input buffer
+00001Cr 2  20 rr rr       jsr INIT_SC                   ; Initialize the Serial Card
+00001Fr 2               
+00001Fr 2  58             cli                           ; Enable interrupts
+000020r 2               
+000020r 2  4C rr rr       jmp WOZ_MON                   ; Jump to Wozmon
+000023r 2               
+000023r 2               ; Initialize the Serial Card
+000023r 2               ; Modifies: Flags, A
+000023r 2               INIT_SC:
+000023r 2  A9 10          lda #%00010000                ; 8-N-1, 115200 baud.
+000025r 2  8D 03 90       sta SC_CTRL
+000028r 2  A9 09          lda #%00001001                ; No parity, no echo, interrupts enabled.
+00002Ar 2  8D 02 90       sta SC_CMD
+00002Dr 2  60             rts
+00002Er 2               
+00002Er 2               ; Initialize the INPUT_BUFFER
+00002Er 2               ; Modifies: Flags, A
+00002Er 2               INIT_BUFFER:
+00002Er 2  A9 00          lda #$00
+000030r 2  85 rr          sta READ_PTR                  ; Init read and write pointers
+000032r 2  85 rr          sta WRITE_PTR
+000034r 2  60             rts
+000035r 2               
+000035r 2               ; Write a character from the A register to the INPUT_BUFFER
+000035r 2               ; Modifies: Flags, X
+000035r 2               WRITE_BUFFER:
+000035r 2  A6 rr          ldx WRITE_PTR
+000037r 2  9D rr rr       sta INPUT_BUFFER,x
+00003Ar 2  E6 rr          inc WRITE_PTR
+00003Cr 2  60             rts
+00003Dr 2               
+00003Dr 2               ; Read a character from the INPUT_BUFFER and store it in A register
+00003Dr 2               ; Modifies: Flags, X, A
+00003Dr 2               READ_BUFFER:
+00003Dr 2  A6 rr          ldx READ_PTR
+00003Fr 2  BD rr rr       lda INPUT_BUFFER,x
+000042r 2  E6 rr          inc READ_PTR
+000044r 2  60             rts
+000045r 2               
+000045r 2               ; Return in A register the number of unread bytes in the INPUT_BUFFER
+000045r 2               ; Modifies: Flags, A
+000045r 2               BUFFER_SIZE:
+000045r 2  A5 rr          lda WRITE_PTR
+000047r 2  38             sec
+000048r 2  E5 rr          sbc READ_PTR
 00004Ar 2  60             rts
 00004Br 2               
-00004Br 2               ; Reset Handler
-00004Br 2               RESET:
-00004Br 2  20 rr rr       jsr INIT                      ; Initialize the system
-00004Er 2  20 rr rr       jsr INIT_BUFFER               ; Initialize the INPUT_BUFFER
-000051r 2  20 rr rr       jsr INIT_SC                   ; Initialize the Serial Card
-000054r 2  4C rr rr       jmp WOZ_MON                   ; Jump to Wozmon
-000057r 2               
-000057r 2               ; NMI Handler
-000057r 2               NMI:
-000057r 2  40             rti
-000058r 2               
-000058r 2               ; IRQ Handler
-000058r 2               IRQ:
-000058r 2  48             pha
-000059r 2  DA             phx
-00005Ar 2  AD 01 90       lda SC_STATUS
-00005Dr 2  29 80          and #%10000000                ; Check if Serial Card caused the interrupt
-00005Fr 2  F0 06          beq @IRQ_EXIT                 ; If not, exit
-000061r 2  AD 00 90       lda SC_DATA                   ; Read the data from ACIA
-000064r 2  20 rr rr       jsr WRITE_BUFFER              ; Store to the input buffer
-000067r 2               @IRQ_EXIT:
-000067r 2  FA             plx
+00004Br 2               ; Get a character from the INPUT_BUFFER if available
+00004Br 2               ; On return, carry flag indicates whether a character was available
+00004Br 2               ; If character available the character will be in the A regsiter
+00004Br 2               ; Modifies: Flags, A
+00004Br 2               CHRIN:
+00004Br 2  DA             phx
+00004Cr 2  20 rr rr       jsr BUFFER_SIZE               ; Check for character available
+00004Fr 2  F0 09          beq @CHRIN_NO_CHAR            ; Branch if no character available
+000051r 2  20 rr rr       jsr READ_BUFFER               ; Read the character from the buffer
+000054r 2  20 rr rr       jsr CHROUT                    ; Echo
+000057r 2  FA             plx
+000058r 2  38             sec
+000059r 2  60             rts
+00005Ar 2               @CHRIN_NO_CHAR:
+00005Ar 2  FA             plx
+00005Br 2  18             clc
+00005Cr 2  60             rts
+00005Dr 2               
+00005Dr 2               ; Output a character from the A register to the Serial Card
+00005Dr 2               ; Modifies: Flags
+00005Dr 2               CHROUT:
+00005Dr 2  8D 00 90       sta SC_DATA
+000060r 2  48             pha
+000061r 2               @CHROUT_WAIT:
+000061r 2  AD 01 90       lda SC_STATUS
+000064r 2  29 10          and #%00010000                ; Check if tx buffer not empty
+000066r 2  F0 F9          beq @CHROUT_WAIT              ; Loop if tx buffer not empty
 000068r 2  68             pla
-000069r 2  40             rti
+000069r 2  60             rts
 00006Ar 2               
-00006Ar 1               
-00006Ar 1               .segment "CART"
-000000r 1               
+00006Ar 2               ; NMI Handler
+00006Ar 2               NMI:
+00006Ar 2  40             rti
+00006Br 2               
+00006Br 2               ; IRQ Handler
+00006Br 2               IRQ:
+00006Br 2  48             pha
+00006Cr 2  DA             phx
+00006Dr 2  AD 01 90       lda SC_STATUS
+000070r 2  29 80          and #%10000000                ; Check if Serial Card caused the interrupt
+000072r 2  F0 06          beq @IRQ_EXIT                 ; If not, exit
+000074r 2  AD 00 90       lda SC_DATA                   ; Read the data from ACIA
+000077r 2  20 rr rr       jsr WRITE_BUFFER              ; Store to the input buffer
+00007Ar 2               @IRQ_EXIT:
+00007Ar 2  FA             plx
+00007Br 2  68             pla
+00007Cr 2  40             rti
+00007Dr 2               
+00007Dr 2               ; NMI Vector
+00007Dr 2               NMI_VEC:
+00007Dr 2  6C rr rr       jmp (NMI_PTR)                 ; Indirect jump through NMI pointer to the NMI handler
+000080r 2               
+000080r 2               ; Reset Vector
+000080r 2               RESET_VEC:
+000080r 2  4C rr rr       jmp RESET                     ; Initialize the system
+000083r 2               
+000083r 2               ; IRQ Vector
+000083r 2               IRQ_VEC:
+000083r 2  6C rr rr       jmp (IRQ_PTR)                 ; Indirect jump through IRQ pointer to the IRQ handler
+000086r 2               
+000086r 1               .segment "CART"
 000000r 1               .segment "WOZMON"
 000000r 1               .include "Wozmon.asm"
 000000r 2               ; ***             ***
@@ -482,9 +518,9 @@ Current file: ./src/DB BIOS.asm
 0000EDr 2  20 rr rr       jsr CHROUT                  ; Output the character
 0000F0r 2  60             rts                         ; Return
 0000F1r 2               
-0000F1r 1               
 0000F1r 1               .segment "VECTORS"
-000000r 1  rr rr        .word   NMI           ; NMI vector
-000002r 1  rr rr        .word   RESET         ; RESET vector
-000004r 1  rr rr        .word   IRQ           ; IRQ vector
+000000r 1               
+000000r 1  rr rr        .word   NMI_VEC           ; NMI vector
+000002r 1  rr rr        .word   RESET_VEC         ; RESET vector
+000004r 1  rr rr        .word   IRQ_VEC           ; IRQ vector
 000004r 1               
