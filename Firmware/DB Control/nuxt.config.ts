@@ -2,9 +2,12 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  modules: ['@nuxt/ui', '@pinia/nuxt'],
+  modules: ['@nuxt/ui'],
   css: ['~/assets/css/main.css'],
   ssr: false,
+  typescript: {
+    strict: true
+  },
   app: {
     head: {
       title: 'DB Control',

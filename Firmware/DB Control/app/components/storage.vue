@@ -9,12 +9,12 @@
       </UFieldGroup>
       <br>
       <div class="flex flex-col text-center ml-auto mr-auto gap-2">
-        <div v-for="i in 8" class="flex flex-row gap-2">
+        <div v-for="(file, i) in info.romFiles" :key="i" class="flex flex-row gap-2">
           <UButton label="LOAD" size="xs"/>
           <p class="text-right w-4">
-            {{ i - 1 }}:
+            {{ i }}:
           </p>
-          <p>{{ i * 16 }} File Name.bin</p>
+          <p>{{ file }}</p>
         </div>
       </div>
       <br>
@@ -24,5 +24,7 @@
 </template>
 
 <script setup lang="ts">
-  const page = ref(1)
+  const { error: notification } = useNotifications()
+  const info = useState<Info>('info')
+  const page = ref(info.value.romFilePage + 1)
 </script>

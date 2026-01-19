@@ -1,3 +1,43 @@
-export default defineEventHandler((event) => {
-  return {}
+import { FetchError } from 'ofetch'
+
+export default defineEventHandler(async (event) => {
+  const query = getQuery(event)
+
+  if (!query.ipAddress) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'IP address must be included',
+    })
+  }
+  if (!query.target) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Target must be included',
+    })
+  }
+  if (!query.page) {
+    throw createError({
+      statusCode: 400,
+      statusMessage: 'Page must be included',
+    })
+  }
+
+  try {
+    return await $fetch(`http://${query.ipAddress}/memory`, {
+      query: {
+        target: query.target,
+        page: query.page,
+        formatted: true
+      }
+    })
+  } catch (error) {
+    if (error instanceof FetchError) {
+      throw createError({
+        statusCode: 404,
+        statusMessage: error.message,
+      })
+    } else {
+      throw error
+    }
+  }
 })

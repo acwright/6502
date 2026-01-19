@@ -20,12 +20,6 @@
         </div>
       </div>
       <br>
-      <div class="flex flex-row justify-center gap-2">
-        <UButton color="primary" size="sm" disabled>UPLOAD RAM</UButton>
-        <UButton color="primary" size="sm" disabled>UPLOAD ROM</UButton>
-        <UButton color="primary" size="sm" disabled>UPLOAD CART</UButton>
-      </div>
-      <br>
       <UPagination v-model:page="page" :items-per-page="256" :total="65535" size="sm" class="flex flex-row justify-center"/>
     </div>
   </div>

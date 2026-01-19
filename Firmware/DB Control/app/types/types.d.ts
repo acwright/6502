@@ -1,0 +1,52 @@
+declare global {
+  
+  interface Info {
+    address: number,
+    cartCode: number,
+    cartEnabled: boolean,
+    cartEnd: number,
+    cartFile: string,
+    cartFilePage: number,
+    cartFiles: string[],
+    cartStart: number,
+    cpuAccumulator: number,
+    cpuOpcodeCycle: number,
+    cpuPC: number,
+    cpuStackPointer: number,
+    cpuStatus: number,
+    cpuX: number,
+    cpuY: number,
+    data: number,
+    fileMax: number,
+    freqLabel: string,
+    freqPeriod: number,
+    inputCtx: number,
+    io: string[],
+    ioEnd: number,
+    ioSlots: number,
+    ioSlotSize: number,
+    ioStart: number,
+    ipAddress: string,
+    isRunning: boolean,
+    lastSnapshot: number,
+    programFile: string,
+    programFilePage: number,
+    ramCode: number,
+    ramEnabled: boolean,
+    ramEnd: number,
+    ramFiles: string[],
+    ramStart: number,
+    romEnabled: boolean,
+    romEnd: number,
+    romFile: string,
+    romFilePage: number,
+    romFiles: string[],
+    romStart: number,
+    rtc: number,
+    rw: number,
+    version: string
+  }
+
+}
+
+export {}

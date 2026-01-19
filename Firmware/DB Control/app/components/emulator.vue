@@ -3,72 +3,72 @@
     <h2>EMULATOR</h2>
     <div class="flex flex-col justify-evenly grow border-2 p-2">
       <br>
-      <p class="text-center text-xl font-bold" :class="store.isRunning ? 'text-primary' : 'text-error'">
-        {{ store.isRunning ? '-- RUNNING --' : '-- STOPPED --' }}
+      <p class="text-center text-xl font-bold" :class="info.isRunning ? 'text-primary' : 'text-error'">
+        {{ info.isRunning ? '-- RUNNING --' : '-- STOPPED --' }}
       </p>
       <br>
       <div class="flex flex-col ml-auto mr-auto gap-1 text-sm">
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">Version:</span>
-          <span>{{ store.version }}</span>
+          <span>{{ info.version }}</span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">RAM:</span>
-          <span :class="store.programFile != 'None' ? 'text-primary' : 'text-gray-400'">
-            {{ store.programFile.length ? store.programFile : 'None' }}
+          <span :class="info.programFile != 'None' ? 'text-primary' : 'text-gray-400'">
+            {{ info.programFile.length ? info.programFile : 'None' }}
           </span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">ROM:</span>
-          <span :class="store.romFile != 'None' ? 'text-primary' : 'text-gray-400'">
-            {{ store.romFile.length ? store.romFile : 'None' }}
+          <span :class="info.romFile != 'None' ? 'text-primary' : 'text-gray-400'">
+            {{ info.romFile.length ? info.romFile : 'None' }}
           </span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">Cart:</span>
-          <span :class="store.cartFile != 'None' ? 'text-primary' : 'text-gray-400'">
-            {{ store.cartFile.length ? store.cartFile : 'None' }}
+          <span :class="info.cartFile != 'None' ? 'text-primary' : 'text-gray-400'">
+            {{ info.cartFile.length ? info.cartFile : 'None' }}
           </span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">Frequency:</span>
-          <span>{{ store.freqLabel }} ({{ store.freqPeriod }} µS)</span>
+          <span>{{ info.freqLabel }} ({{ info.freqPeriod }} µS)</span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">IP Address:</span>
-          <span>{{ store.ipAddress }}</span>
+          <span>{{ info.ipAddress }}</span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">Date / Time:</span>
-          <span>{{ new Date(store.rtc * 1000).toLocaleString() }}</span>
+          <span>{{ new Date(info.rtc * 1000).toLocaleString() }}</span>
         </div>
       </div>
       <br>
       <div class="flex flex-row justify-center gap-2">
         <UButton 
           @click="toggleRAM" 
-          :color="store.ramEnabled ? 'primary' : 'error'"
+          :color="info.ramEnabled ? 'primary' : 'error'"
         >
-          {{ store.ramEnabled ? 'DISABLE' : 'ENABLE' }} RAM
+          TOGGLE RAM
         </UButton>
         <UButton 
           @click="toggleROM" 
-          :color="store.romEnabled ? 'primary' : 'error'"
+          :color="info.romEnabled ? 'primary' : 'error'"
         >
-          {{ store.romEnabled ? 'DISABLE' : 'ENABLE' }} ROM
+          TOGGLE ROM
         </UButton>
         <UButton
           @click="toggleCart" 
-          :color="store.cartEnabled ? 'primary' : 'error'"
+          :color="info.cartEnabled ? 'primary' : 'error'"
         >
-          {{ store.cartEnabled ? 'DISABLE' : 'ENABLE' }} CART
+          TOGGLE CART
         </UButton>
       </div>
       <br>
       <p class="text-center text-sm">
         <span class="font-bold pr-3">Last Snapshot:</span>
-        <span :class="store.lastSnapshot > 0 ? 'text-primary' : 'text-gray-400'">
-          {{ store.lastSnapshot > 0 ? store.lastSnapshot : 'None' }}
+        <span :class="info.lastSnapshot > 0 ? 'text-primary' : 'text-gray-400'">
+          {{ info.lastSnapshot > 0 ? info.lastSnapshot : 'None' }}
         </span>
       </p>
       <br>
@@ -77,18 +77,61 @@
 </template>
 
 <script setup lang="ts">
-  const store = useControlStore()
+  const { error: notification } = useNotifications()
+  const info = useState<Info>('info')
 
   const toggleRAM = async () => {
-    console.log('toggle RAM')
-    store.ramEnabled = !store.ramEnabled
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'A'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const toggleROM = async () => {
-    console.log('toggle ROM')
-    store.romEnabled = !store.romEnabled
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'O'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const toggleCart = async () => {
-    console.log('toggle Cart')
-    store.cartEnabled = !store.cartEnabled
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'L'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
+  }
+
+  const fetchInfo = async () => {
+    try {
+      info.value = await $fetch<Info>('/api/info', {
+        query: {
+          ipAddress: info.value.ipAddress
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
   }
 </script>

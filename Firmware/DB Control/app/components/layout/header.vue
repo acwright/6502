@@ -17,7 +17,7 @@
         color="primary"
         variant="solid"
         title="Snapshot"
-        :disabled="store.isRunning"
+        :disabled="info.isRunning"
         @click="snapshot"
       />
       <span class="text-xl">|</span>
@@ -44,7 +44,7 @@
         color="primary"
         variant="solid"
         title="Run"
-        :disabled="store.isRunning"
+        :disabled="info.isRunning"
         @click="run"
       />
       <UButton 
@@ -53,7 +53,7 @@
         color="error"
         variant="solid" 
         title="Stop"
-        :disabled="!store.isRunning"
+        :disabled="!info.isRunning"
         @click="stop"
       />
       <UButton 
@@ -62,7 +62,7 @@
         color="secondary"
         variant="solid"
         title="Step"
-        :disabled="store.isRunning"
+        :disabled="info.isRunning"
         @click="step"
       />
       <UButton 
@@ -71,7 +71,7 @@
         color="secondary"
         variant="solid"
         title="Tick"
-        :disabled="store.isRunning"
+        :disabled="info.isRunning"
         @click="tick"
       />
       <UButton 
@@ -87,41 +87,134 @@
 </template>
 
 <script setup lang="ts">
-  const store = useControlStore()
+  const { error: notification } = useNotifications()
+  const info = useState<Info>('info')
 
   const refresh = async () => {
-    await store.fetchInfo()
+    await fetchInfo()
   }
   const snapshot = async () => {
-    await store.doControl('P')
-    await store.fetchInfo()
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'P'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const decreaseFrequency = async () => {
-    await store.doControl('-')
-    await store.fetchInfo()
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: '-'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const increaseFrequency = async () => {
-    await store.doControl('+')
-    await store.fetchInfo()
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: '+'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const run = async () => {
-    store.isRunning = true
-    await store.doControl('R')
+    info.value.isRunning = true
+    
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'R'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
   }
   const stop = async () => {
-    await store.doControl('R')
-    await store.fetchInfo()
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'R'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const step = async () => {
-    await store.doControl('S')
-    await store.fetchInfo()
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'S'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const tick = async () => {
-    await store.doControl('K')
-    await store.fetchInfo()
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'K'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
   }
   const reset = async () => {
-    await store.doControl('T')
-    await store.fetchInfo()
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'T'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
+  }
+
+  const fetchInfo = async () => {
+    try {
+      info.value = await $fetch<Info>('/api/info', {
+        query: {
+          ipAddress: info.value.ipAddress
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
   }
 </script>

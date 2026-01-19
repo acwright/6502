@@ -6,7 +6,3 @@
     <Storage/>
   </main>
 </template>
-
-<script setup lang="ts">
-  const { data } = await useFetch('/api/info')
-</script>
