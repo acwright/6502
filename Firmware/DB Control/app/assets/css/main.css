@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme {
+  --font-retro: 'Retro Gaming', monospace;
+}
+
+html, body, #__nuxt {
+  @apply font-retro bg-black text-white w-lvw h-lvh;
+}
+
+pre, code {
+  @apply font-retro;
+}
+
+a {
+  @apply underline;
+}
