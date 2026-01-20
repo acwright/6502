@@ -12,6 +12,7 @@ The hardware consists of several custom-designed PCBs. These are divided into th
 - **Backplane Board**: A backplane board that provides multiple card slots for peripheral cards and connects to the main board via a ribbon cable.
 - **Backplane Board Pro**: An enhanced version of the backplane board with additional features.
 - **Dev Board**: The development board is an alternative to the main board which acts as a 65(c)02 emulator using a Teensy 4.1.
+- **Dev Output Board**: A compliment to the Dev Board that provides [VT-AC](https://github.com/acwright/VT-AC) ASCII terminal display output using a Waveshare 2.4in LCD.
 - **Input Board**: A board that provides PS/2 keyboard and mouse interfaces along with SNES controller support.
 - **LCD Board**: A board that provides a 320x240 LCD display. **UNTESTED**
 - **Main Board**: The main board that contains the 65(c)02 CPU, memory, memory decoding ICs, one peripheral card slot, and a bus connector.
