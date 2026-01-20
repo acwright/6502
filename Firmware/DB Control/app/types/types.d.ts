@@ -21,7 +21,7 @@ declare global {
     freqLabel: string,
     freqPeriod: number,
     inputCtx: number,
-    io: string[],
+    ioEnabled: boolean,
     ioEnd: number,
     ioSlots: number,
     ioSlotSize: number,

@@ -5,7 +5,6 @@
       <UFieldGroup orientation="horizontal" size="sm" class="flex flex-row justify-center">
         <UButton color="primary" variant="solid" label="RAM" />
         <UButton color="neutral" variant="outline" label="ROM" />
-        <UButton color="neutral" variant="outline" label="IO" />
       </UFieldGroup>
       <br>
       <div class="flex flex-row ml-auto mr-auto gap-3 text-xs">

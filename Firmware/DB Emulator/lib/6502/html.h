@@ -21,7 +21,7 @@ PROGMEM const char HTML[] = R"=====(
 88eee8 88eeeee8   88eee 88 8  8 88ee8 88eee 88  8   88  8eee8 88   8
     </header>
     <main>
-      <div>DB Emulator | Version: 1.0</div>
+      <div>DB Emulator | Version: 1.1</div>
       <div>
         ---------------------------------<br>
         | Created by A.C. Wright © 2024 |<br>

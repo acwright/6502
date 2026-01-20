@@ -21,19 +21,17 @@ RESET:
   sta NMI_PTR + 1
 
   jsr INIT_BUFFER               ; Initialize the input buffer
-  jsr INIT_SC                   ; Initialize the Serial Card
+  jsr INIT_SC                   ; Initialize the serial output
 
   cli                           ; Enable interrupts
 
   jmp WOZ_MON                   ; Jump to Wozmon
 
-; Initialize the Serial Card
+; Initialize the serial output
 ; Modifies: Flags, A
 INIT_SC:
-  lda #%00010000                ; 8-N-1, 115200 baud.
-  sta SC_CTRL
-  lda #%00001001                ; No parity, no echo, interrupts enabled.
-  sta SC_CMD
+  lda #%10000000                ; Interupts enabled, USB Serial, 115200 baud.
+  sta EMU_SER_CTRL
   rts
 
 ; Initialize the INPUT_BUFFER
@@ -89,13 +87,7 @@ CHRIN:
 ; Output a character from the A register to the Serial Card
 ; Modifies: Flags
 CHROUT:
-  sta SC_DATA
-  pha
-@CHROUT_WAIT:
-  lda SC_STATUS
-  and #%00010000                ; Check if tx buffer not empty
-  beq @CHROUT_WAIT              ; Loop if tx buffer not empty
-  pla
+  sta EMU_SER_DATA
   rts
 
 ; NMI Handler
@@ -106,10 +98,10 @@ NMI:
 IRQ:
   pha
   phx
-  lda SC_STATUS
-  and #%10000000                ; Check if Serial Card caused the interrupt
+  lda EMU_SER_STATUS
+  and #%10000000                ; Check if serial data caused the interrupt
   beq @IRQ_EXIT                 ; If not, exit
-  lda SC_DATA                   ; Read the data from ACIA
+  lda EMU_SER_DATA              ; Read the data from serial register
   jsr WRITE_BUFFER              ; Store to the input buffer
 @IRQ_EXIT:
   plx

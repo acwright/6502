@@ -14,20 +14,35 @@
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">RAM:</span>
-          <span :class="info.programFile != 'None' ? 'text-primary' : 'text-gray-400'">
-            {{ info.programFile.length ? info.programFile : 'None' }}
+          <span :class="info.ramEnabled ? 'text-primary' : 'text-gray-400'">
+            {{ info.ramEnabled ? 'ENABLED' : 'DISABLED' }}
+          </span>
+          <span>
+            ({{ info.programFile.length ? info.programFile : 'None' }})
           </span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">ROM:</span>
-          <span :class="info.romFile != 'None' ? 'text-primary' : 'text-gray-400'">
-            {{ info.romFile.length ? info.romFile : 'None' }}
+          <span :class="info.romEnabled ? 'text-primary' : 'text-gray-400'">
+            {{ info.romEnabled ? 'ENABLED' : 'DISABLED' }}
+          </span>
+          <span>
+            ({{ info.romFile.length ? info.romFile : 'None' }})
           </span>
         </div>
         <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-28">Cart:</span>
-          <span :class="info.cartFile != 'None' ? 'text-primary' : 'text-gray-400'">
-            {{ info.cartFile.length ? info.cartFile : 'None' }}
+          <span :class="info.cartEnabled ? 'text-primary' : 'text-gray-400'">
+            {{ info.cartEnabled ? 'ENABLED' : 'DISABLED' }}
+          </span>
+          <span>
+            ({{ info.cartFile.length ? info.cartFile : 'None' }})
+          </span>
+        </div>
+        <div class="flex flex-row gap-3">
+          <span class="text-right font-bold w-28">IO:</span>
+          <span :class="info.ioEnabled ? 'text-primary' : 'text-gray-400'">
+            {{ info.ioEnabled ? 'ENABLED' : 'DISABLED' }}
           </span>
         </div>
         <div class="flex flex-row gap-3">
@@ -62,6 +77,12 @@
           :color="info.cartEnabled ? 'primary' : 'error'"
         >
           TOGGLE CART
+        </UButton>
+        <UButton
+          @click="toggleIO" 
+          :color="info.ioEnabled ? 'primary' : 'error'"
+        >
+          TOGGLE IO
         </UButton>
       </div>
       <br>
@@ -114,6 +135,20 @@
         query: {
           ipAddress: info.value.ipAddress,
           command: 'L'
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+
+    await fetchInfo()
+  }
+  const toggleIO = async () => {
+    try {
+      await $fetch('/api/control', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          command: 'I'
         }
       })
     } catch (error) {

@@ -16,7 +16,7 @@ RAM_BANK_L          = $83FF             ; latch and can be univerally interchang
 RAM_BANK_H          = $87FF             ; RAM bank latch value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
 
 ; Emulator | IO 2 | $8400-$840F 
-EMU_SER_DATA        = $8400             ; Write
+EMU_SER_DATA        = $8400             ; R/W
 EMU_SER_CTRL        = $8401             ; Write
 EMU_SER_STATUS      = $8401             ; Read
 EMU_KB_CMD          = $8402             ; Write
@@ -34,6 +34,8 @@ EMU_RTC_MON         = $840C             ; Read
 EMU_RTC_YR          = $840D             ; Read
 EMU_PRAM_DATA       = $840E             ; R/W
 EMU_PRAM_ADDR       = $840F             ; R/W
+EMU_RAM             = $8600             ; R/W
+EMU_RAM_BANK        = $87FF             ; Write
 
 ; RTC Card | IO 3 | $8800-$881F
 RTC_SEC             = $8800

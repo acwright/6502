@@ -31,8 +31,8 @@ KeyboardController  keyboard(usb);
 MouseController     mouse(usb);
 JoystickController  joystick(usb);
 
-EthernetClient ethClient;
-AsyncWebServer    server(80);
+EthernetClient      ethClient;
+AsyncWebServer      server(80);
 
 void onCommand(char command);
 void onNumeric(uint8_t num);
@@ -52,6 +52,7 @@ void toggleRunStop();
 void toggleRAM();
 void toggleROM();
 void toggleCart();
+void toggleIO();
 void readROMs();
 void listROMs();
 void loadROM(uint index);
@@ -64,9 +65,6 @@ void readPrograms();
 void listPrograms();
 void loadProgram(uint index);
 void loadProgramPath(String path);
-void readIO();
-void listIO();
-void configureIO(uint index);
 void listFiles();
 void prevPage();
 void nextPage();
@@ -93,12 +91,11 @@ time_t lastSnapshot;
 
 void onServerRoot(AsyncWebServerRequest *request);
 void onServerInfo(AsyncWebServerRequest *request);
-void onServerUpload(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
 void onServerMemory(AsyncWebServerRequest *request);
 void onServerControl(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
 
-uint8_t freqIndex = FREQ_SIZE - 1;              // Max speed
+uint8_t freqIndex = FREQ_SIZE - 1;
 bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
@@ -106,7 +103,7 @@ bool autoStart = false;
 bool busEnabled = true;
 #endif
 
-uint8_t inputCtx = INPUT_CTX_ROM;                // By default, debugger IO bank is $8800
+uint8_t inputCtx = INPUT_CTX_ROM;
 
 uint16_t address = 0;
 uint8_t data = 0;
@@ -120,26 +117,16 @@ String Programs[FILE_MAX];
 uint programFilePage = 0;
 
 #ifdef MEM_EXTMEM
-EXTMEM uint8_t ramData[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
+EXTMEM uint8_t ramData[IO_RAM_BLOCK_SIZE * IO_RAM_BLOCK_COUNT];
 #else
-uint8_t ramData[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
+uint8_t ramData[IO_RAM_BLOCK_SIZE * IO_RAM_BLOCK_COUNT];
 #endif
 
 CPU cpu = CPU(read, write);
 RAM ram = RAM();
 ROM rom = ROM();
 Cart cart = Cart();
-
-IO *io[IO_SLOTS] = {
-  new RAMCard(ramData),
-  new Emulator(),
-  new Empty(),
-  new Empty(),
-  new SerialCard(),
-  new Empty(),
-  new Empty(),
-  new Empty()
-};
+IO io = IO(ramData);
 
 //
 // MAIN
@@ -147,6 +134,7 @@ IO *io[IO_SLOTS] = {
 
 void setup() {
   Serial.begin(115200);
+  SerialUSB1.begin(115200);
 
   setSyncProvider(syncTime);
   
@@ -164,6 +152,7 @@ void setup() {
   info();
 
   if (autoStart) {
+    delay(1000);
     reset();
     toggleRunStop();
   }
@@ -260,16 +249,6 @@ void onCommand(char command) {
           Serial.print("Loaded Program: ");
           Serial.println(ram.file);
           break;
-        case INPUT_CTX_IO:
-          Serial.print("(");
-          Serial.print(index);
-          Serial.print(") IO");
-          Serial.print(index + 1);
-          Serial.print(" $");
-          Serial.print(IO_START + (IO_SLOT_SIZE * index), HEX);
-          Serial.print(" - ");
-          Serial.println(io[index]->description());
-          break;
         default:
           break;
       }
@@ -297,8 +276,9 @@ void onCommand(char command) {
       break;
     case 'i':
     case 'I':
-      readIO();
-      listIO();
+      toggleIO();
+      Serial.print("IO: ");
+      Serial.println(io.enabled ? "Enabled" : "Disabled");
       break;
     case 'k':
     case 'K':
@@ -390,9 +370,6 @@ void onNumeric(uint8_t num) {
     case INPUT_CTX_PROG:
       loadProgram(num);
       break;
-    case INPUT_CTX_IO:
-      configureIO(num);
-      break;
   }
 }
 
@@ -436,15 +413,8 @@ void onKeyboard(int key) {
 
   if (key > 0x7F) { return; } // No extended ASCII
 
-  for (int i = 0; i < 8; i++) {
-    uint8_t id = io[i]->id();
-    if (id == IO_EMULATOR) {
-      Emulator *emu = (Emulator *)io[i];
-      emu->updateKeyboard((uint8_t)key);
-    }
-  }
+  io.updateKeyboard((uint8_t)key);
   
-
   #ifdef KEYBOARD_DEBUG
   Serial.print("Keyboard: ");
   Serial.print(key);
@@ -468,13 +438,7 @@ void onMouse() {
   int mouseW = mouse.getWheel();
   uint8_t mouseButtons = mouse.getButtons();
 
-  for (int i = 0; i < 8; i++) {
-    uint8_t id = io[i]->id();
-    if (id == IO_EMULATOR) {
-      Emulator *emu = (Emulator *)io[i];
-      emu->updateMouse(mouseX, mouseY, mouseW, mouseButtons);
-    }
-  }
+  io.updateMouse(mouseX, mouseY, mouseW, mouseButtons);
 
   mouse.mouseDataClear();
 
@@ -499,13 +463,7 @@ void onJoystick() {
   if (joystick.joystickType() == JoystickController::XBOX360 || 
       joystick.joystickType() == JoystickController::XBOXONE) 
   {
-    for (int i = 0; i < 8; i++) {
-      uint8_t id = io[i]->id();
-      if (id == IO_EMULATOR) {
-        Emulator *emu = (Emulator *)io[i];
-        emu->updateJoystick(buttons);
-      }
-    } 
+    io.updateJoystick(buttons);
   }
 
   joystick.joystickDataClear();
@@ -529,27 +487,30 @@ void info() {
   Serial.println("88   8 88     8   88    88 8  8 88  8 88    88  8   88  8   8 88   8 ");
   Serial.println("88eee8 88eeeee8   88eee 88 8  8 88ee8 88eee 88  8   88  8eee8 88   8");
   Serial.println();
-  Serial.print("DB Emulator | Version: 1.0");
+  Serial.print("DB Emulator | Version: ");
+  Serial.print(VERSION);
   Serial.println();
   Serial.println("---------------------------------");
   Serial.println("| Created by A.C. Wright © 2024 |");
   Serial.println("---------------------------------");
   Serial.println();
   Serial.print("RAM: ");
-  Serial.print(ram.file);
-  Serial.print(" (");
   Serial.print(ram.enabled ? "Enabled" : "Disabled");
+  Serial.print(" (");
+  Serial.print(ram.file);
   Serial.println(")");
   Serial.print("ROM: ");
-  Serial.print(rom.file);
-  Serial.print(" (");
   Serial.print(rom.enabled ? "Enabled" : "Disabled");
+  Serial.print(" (");
+  Serial.print(rom.file);
   Serial.println(")");
   Serial.print("Cart: ");
-  Serial.print(cart.file);
-  Serial.print(" (");
   Serial.print(cart.enabled ? "Enabled" : "Disabled");
+  Serial.print(" (");
+  Serial.print(cart.file);
   Serial.println(")");
+  Serial.print("IO: ");
+  Serial.println(io.enabled ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
   Serial.println(FREQ_LABELS[freqIndex]);
   Serial.print("IP Address: ");
@@ -562,7 +523,7 @@ void info() {
   Serial.println("--------------------------------------------------------------");
   Serial.println("| Toggle R(A)M          | Toggle R(O)M     | Toggle Cart (L) |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| List RO(M)s / (C)arts / (U)ser Programs  | Configure (I)O  |");
+  Serial.println("| List RO(M)s / (C)arts / (U)ser Programs  | Toggle (I)O     |");
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (+/-) Clk Frequency   | Sna(P)shot       | In(F)o / Lo(G)  |");
   Serial.println("--------------------------------------------------------------");
@@ -594,10 +555,7 @@ void reset() {
   }
 
   cpu.reset();
-  
-  for(uint i = 0; i < 8; i++) {
-    io[i]->reset();
-  }
+  io.reset();
 
   digitalWriteFast(RESB, LOW);
   delay(100);
@@ -629,9 +587,7 @@ void tick() {
   }
 
   // Tick IO and check for emulated interrupt
-  for(uint i = 0; i < IO_SLOTS; i++) {
-    interrupt |= io[i]->tick();
-  }
+  interrupt |= io.tick();
   
   if ((interrupt & 0x40) != 0x00) {
     cpu.nmiTrigger();
@@ -664,9 +620,7 @@ void step() {
     }
 
     // Tick IO and check for emulated interrupt
-    for(uint i = 0; i < IO_SLOTS; i++) {
-      interrupt |= io[i]->tick();
-    }
+    interrupt |= io.tick();
 
     if ((interrupt & 0x40) != 0x00) {
       cpu.nmiTrigger();
@@ -730,6 +684,10 @@ void toggleROM() {
 
 void toggleCart() {
   cart.enabled = !cart.enabled;
+}
+
+void toggleIO() {
+  io.enabled = !io.enabled;
 }
 
 void readROMs() {
@@ -994,60 +952,6 @@ void loadProgramPath(String path) {
   file.close();
 }
 
-void readIO() {
-  inputCtx = INPUT_CTX_IO;
-}
-
-void listIO() {
-  Serial.println();
-
-  for (uint i = 0; i < IO_SLOTS; i++) {
-    Serial.print("(");
-    Serial.print(i);
-    Serial.print(") IO ");
-    Serial.print(i + 1);
-    Serial.print(" $");
-    Serial.print(IO_START + (IO_SLOT_SIZE * i), HEX);
-    Serial.print(" - ");
-    Serial.println(io[i]->description());
-  }
-
-  Serial.println();
-}
-
-void configureIO(uint index) {
-  uint8_t currentID = io[index]->id();
-  uint8_t nextID;
-
-  if (currentID < 4) {
-    nextID = currentID + 1;
-  } else {
-    nextID = 0;
-  }
-
-  delete io[index];
-
-  switch (nextID) {
-    case IO_EMPTY:
-      io[index] = new Empty();
-      break;
-    case IO_SERIAL_CARD:
-      io[index] = new SerialCard();
-      break;
-    case IO_STORAGE_CARD:
-      io[index] = new StorageCard();
-      break;
-    case IO_RAM_CARD:
-      io[index] = new RAMCard(ramData);
-      break;
-    case IO_EMULATOR:
-      io[index] = new Emulator();
-      break;
-    default:
-      break;
-  }
-}
-
 void listFiles() {
   switch(inputCtx) {
     case INPUT_CTX_ROM:
@@ -1139,7 +1043,6 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
   digitalWriteFast(PHI2, HIGH);
   FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
-  data = readData();
 
   if ((addr >= CART_CODE) && (addr <= CART_END) && cart.enabled) { // Cart
     data = cart.read(addr - CART_START);
@@ -1149,8 +1052,10 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
     data = ram.read(addr - RAM_START);
   } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
     uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
-    if (!io[ioSlot]->passthrough()) {
-      data = io[ioSlot]->read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+    if (ioSlot == 1 && io.enabled) { // Emulator IO
+      data = io.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+    } else {
+      data = readData();
     }
   }
 
@@ -1182,8 +1087,8 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
     ram.write(addr - RAM_START, data);
   } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
     uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
-    if (!io[ioSlot]->passthrough()) {
-      io[ioSlot]->write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+    if (ioSlot == 1 && io.enabled) { // Emulator IO
+      io.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
     }
   }
 }
@@ -1312,7 +1217,11 @@ void initSD() {
   SD.begin(BUILTIN_SDCARD);
 
   if (SD.mediaPresent()) {
-    if (SD.exists("ROM.bin")) {
+    if (SD.exists("BIOS.bin")) {
+      loadROMPath("BIOS.bin");
+      rom.file = "BIOS.bin";
+      autoStart = true;
+    } else if (SD.exists("ROM.bin")) {
       loadROMPath("ROM.bin");
       rom.file = "ROM.bin";
       autoStart = true;
@@ -1322,14 +1231,6 @@ void initSD() {
       cart.file = "Cart.bin";
       cart.enabled = true;
       autoStart = true;
-    }
-
-    for (int i = 0; i < 8; i++) {
-      uint8_t id = io[i]->id();
-      if (id == IO_STORAGE_CARD) {
-        StorageCard *sc = (StorageCard *)io[i];
-        sc->begin();
-      }
     }
   }
 }
@@ -1350,13 +1251,6 @@ void initEthernet() {
 void initServer() {
   server.on("/", HTTP_GET, onServerRoot);
   server.on("/info", HTTP_GET, onServerInfo);
-  server.on(
-    "/upload",
-    HTTP_POST,
-    [&](AsyncWebServerRequest *request) {},
-    [&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) {},
-    onServerUpload
-  );
   server.on("/memory", HTTP_GET, onServerMemory);
   server.on("/control", HTTP_GET, onServerControl);
   server.onNotFound(onServerNotFound);
@@ -1482,106 +1376,61 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   String response;
   JsonDocument doc;
 
-  doc["freqLabel"]          = FREQ_LABELS[freqIndex];
-  doc["freqPeriod"]         = FREQ_PERIODS[freqIndex];
-  doc["cpuPC"]              = cpu.programCounter();
-  doc["cpuAccumulator"]     = cpu.accumulator();
-  doc["cpuX"]               = cpu.x();
-  doc["cpuY"]               = cpu.y();
-  doc["cpuStatus"]          = cpu.status();
-  doc["cpuStackPointer"]    = cpu.stackPointer();
-  doc["cpuOpcodeCycle"]     = cpu.opcodeCycle();
   doc["address"]            = address;
-  doc["data"]               = data;
-  doc["rw"]                 = readWrite ? 1 : 0;
-  doc["ipAddress"]          = Ethernet.localIP();
-  doc["isRunning"]          = isRunning;
-  doc["ramEnabled"]         = ram.enabled;
-  doc["ramStart"]           = RAM_START;
-  doc["ramEnd"]             = RAM_END;
-  doc["ramCode"]            = RAM_CODE;
-  doc["programFile"]        = ram.file;
-  doc["programFilePage"]    = programFilePage;
-  doc["romEnabled"]         = rom.enabled;
-  doc["romStart"]           = ROM_START;
-  doc["romEnd"]             = ROM_END;
-  doc["romFile"]            = rom.file;
-  doc["romFilePage"]        = romFilePage;
-  doc["cartEnabled"]        = cart.enabled;
-  doc["cartStart"]          = CART_START;
-  doc["cartEnd"]            = CART_END;
   doc["cartCode"]           = CART_CODE;
+  doc["cartEnabled"]        = cart.enabled;
+  doc["cartEnd"]            = CART_END;
   doc["cartFile"]           = cart.file;
   doc["cartFilePage"]       = cartFilePage;
+  doc["cartStart"]          = CART_START;
+  doc["cpuAccumulator"]     = cpu.accumulator();
+  doc["cpuOpcodeCycle"]     = cpu.opcodeCycle();
+  doc["cpuPC"]              = cpu.programCounter();
+  doc["cpuStackPointer"]    = cpu.stackPointer();
+  doc["cpuStatus"]          = cpu.status();
+  doc["cpuX"]               = cpu.x();
+  doc["cpuY"]               = cpu.y();
+  doc["data"]               = data;
+  doc["fileMax"]            = FILE_MAX;
+  doc["freqLabel"]          = FREQ_LABELS[freqIndex];
+  doc["freqPeriod"]         = FREQ_PERIODS[freqIndex];
   doc["inputCtx"]           = inputCtx;
-  doc["ioStart"]            = IO_START;
+  doc["ioEnabled"]          = io.enabled;
   doc["ioEnd"]              = IO_END;
   doc["ioSlots"]            = IO_SLOTS;
   doc["ioSlotSize"]         = IO_SLOT_SIZE;
-  doc["fileMax"]            = FILE_MAX;
+  doc["ioStart"]            = IO_START;
+  doc["ipAddress"]          = Ethernet.localIP();
+  doc["isRunning"]          = isRunning;
   doc["lastSnapshot"]       = lastSnapshot;
+  doc["programFile"]        = ram.file;
+  doc["programFilePage"]    = programFilePage;
+  doc["ramCode"]            = RAM_CODE;
+  doc["ramEnabled"]         = ram.enabled;
+  doc["ramEnd"]             = RAM_END;
+  doc["ramStart"]           = RAM_START;
+  doc["romEnabled"]         = rom.enabled;
+  doc["romEnd"]             = ROM_END;
+  doc["romFile"]            = rom.file;
+  doc["romFilePage"]        = romFilePage;
+  doc["romStart"]           = ROM_START;
   doc["rtc"]                = now();
-  doc["version"]            = "1.0";
+  doc["rw"]                 = readWrite ? 1 : 0;
+  doc["version"]            = VERSION;
 
+  for (size_t i = (cartFilePage * FILE_PER_PAGE); i < ((cartFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
+    doc["cartFiles"][i - (cartFilePage * FILE_PER_PAGE)] = Carts[i];
+  }
   for (size_t i = (programFilePage * FILE_PER_PAGE); i < ((programFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
     doc["ramFiles"][i - (programFilePage * FILE_PER_PAGE)] = Programs[i];
   }
   for (size_t i = (romFilePage * FILE_PER_PAGE); i < ((romFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
     doc["romFiles"][i - (romFilePage * FILE_PER_PAGE)] = ROMs[i];
   }
-  for (size_t i = (cartFilePage * FILE_PER_PAGE); i < ((cartFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
-    doc["cartFiles"][i - (cartFilePage * FILE_PER_PAGE)] = Carts[i];
-  }
-  for (size_t i = 0; i < IO_SLOTS; i++) {
-    doc["io"][i] = io[i]->description();
-  }
   
   serializeJson(doc, response);
 
   request->send(200, "application/json", response);
-}
-
-void onServerUpload(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) {
-  String target;
-
-  if (request->hasParam("target")) {
-    target = request->getParam("target")->value();
-
-    if (target != "ram" && target != "rom") {
-      request->send(400);
-      return;
-    }
-  } else {
-    request->send(400);
-    return;
-  }
-
-  if (target == "rom") {
-    if (total != ROM_END - ROM_START + 1) { // Upload size must equal ROM size (0x8000 bytes by default)
-      request->send(400);
-      return;
-    }
-
-    for (size_t i = 0; i < len; i++) {
-      rom.write(i + index, data[i]);
-    }
-  }
-  if (target == "ram") {
-    if (total > RAM_END - RAM_CODE + 1) { // Upload size must be less than RAM code space size (0x7800 bytes by default)
-      request->send(400);
-      return;
-    }
-
-    for (size_t i = 0; i < len; i++) {
-      ram.write(i + index + RAM_CODE, data[i]);
-    }
-  }
-
-  if ((index + len) == total) {
-    request->send(200);
-  }
-
-  return;
 }
 
 /* Notes: We are paginating RAM/ROM responses due to limitations in the AsyncWebServer_Teensy41 lib.              */
@@ -1654,8 +1503,8 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
     toggleRAM();
   } else if (command == "c" || command == "C") {  // Read Carts
     readCarts();
-  } else if (command == "i" || command == "I") {  // Read IO
-    readIO();
+  } else if (command == "i" || command == "I") {  // Toggle IO
+    toggleIO();
   } else if (command == "k" || command == "K") {  // Tick
     tick();
   } else if (command == "l" || command == "L") {  // Toggle Cart

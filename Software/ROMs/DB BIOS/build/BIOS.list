@@ -1,6 +1,6 @@
 ca65 V2.18 - N/A
-Main file   : ./src/DB BIOS.asm
-Current file: ./src/DB BIOS.asm
+Main file   : ./src/BIOS.asm
+Current file: ./src/BIOS.asm
 
 000000r 1               ; ***             ***
 000000r 1               ; ***   DB BIOS   ***
@@ -27,7 +27,7 @@ Current file: ./src/DB BIOS.asm
 000000r 2               RAM_BANK_H          = $87FF             ; RAM bank latch value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
 000000r 2               
 000000r 2               ; Emulator | IO 2 | $8400-$840F
-000000r 2               EMU_SER_DATA        = $8400             ; Write
+000000r 2               EMU_SER_DATA        = $8400             ; R/W
 000000r 2               EMU_SER_CTRL        = $8401             ; Write
 000000r 2               EMU_SER_STATUS      = $8401             ; Read
 000000r 2               EMU_KB_CMD          = $8402             ; Write
@@ -45,6 +45,7 @@ Current file: ./src/DB BIOS.asm
 000000r 2               EMU_RTC_YR          = $840D             ; Read
 000000r 2               EMU_PRAM_DATA       = $840E             ; R/W
 000000r 2               EMU_PRAM_ADDR       = $840F             ; R/W
+000000r 2               EMU_RAM_BANK        = $87FF             ; Write
 000000r 2               
 000000r 2               ; RTC Card | IO 3 | $8800-$881F
 000000r 2               RTC_SEC             = $8800
@@ -226,114 +227,106 @@ Current file: ./src/DB BIOS.asm
 000016r 2  8D rr rr       sta NMI_PTR + 1
 000019r 2               
 000019r 2  20 rr rr       jsr INIT_BUFFER               ; Initialize the input buffer
-00001Cr 2  20 rr rr       jsr INIT_SC                   ; Initialize the Serial Card
+00001Cr 2  20 rr rr       jsr INIT_SC                   ; Initialize the serial output
 00001Fr 2               
 00001Fr 2  58             cli                           ; Enable interrupts
 000020r 2               
 000020r 2  4C rr rr       jmp WOZ_MON                   ; Jump to Wozmon
 000023r 2               
-000023r 2               ; Initialize the Serial Card
+000023r 2               ; Initialize the serial output
 000023r 2               ; Modifies: Flags, A
 000023r 2               INIT_SC:
-000023r 2  A9 10          lda #%00010000                ; 8-N-1, 115200 baud.
-000025r 2  8D 03 90       sta SC_CTRL
-000028r 2  A9 09          lda #%00001001                ; No parity, no echo, interrupts enabled.
-00002Ar 2  8D 02 90       sta SC_CMD
-00002Dr 2  60             rts
-00002Er 2               
-00002Er 2               ; Initialize the INPUT_BUFFER
-00002Er 2               ; Modifies: Flags, A
-00002Er 2               INIT_BUFFER:
-00002Er 2  A9 00          lda #$00
-000030r 2  85 rr          sta READ_PTR                  ; Init read and write pointers
-000032r 2  85 rr          sta WRITE_PTR
-000034r 2  60             rts
-000035r 2               
-000035r 2               ; Write a character from the A register to the INPUT_BUFFER
-000035r 2               ; Modifies: Flags, X
-000035r 2               WRITE_BUFFER:
-000035r 2  A6 rr          ldx WRITE_PTR
-000037r 2  9D rr rr       sta INPUT_BUFFER,x
-00003Ar 2  E6 rr          inc WRITE_PTR
-00003Cr 2  60             rts
-00003Dr 2               
-00003Dr 2               ; Read a character from the INPUT_BUFFER and store it in A register
-00003Dr 2               ; Modifies: Flags, X, A
-00003Dr 2               READ_BUFFER:
-00003Dr 2  A6 rr          ldx READ_PTR
-00003Fr 2  BD rr rr       lda INPUT_BUFFER,x
-000042r 2  E6 rr          inc READ_PTR
-000044r 2  60             rts
-000045r 2               
-000045r 2               ; Return in A register the number of unread bytes in the INPUT_BUFFER
-000045r 2               ; Modifies: Flags, A
-000045r 2               BUFFER_SIZE:
-000045r 2  A5 rr          lda WRITE_PTR
-000047r 2  38             sec
-000048r 2  E5 rr          sbc READ_PTR
-00004Ar 2  60             rts
-00004Br 2               
-00004Br 2               ; Get a character from the INPUT_BUFFER if available
-00004Br 2               ; On return, carry flag indicates whether a character was available
-00004Br 2               ; If character available the character will be in the A regsiter
-00004Br 2               ; Modifies: Flags, A
-00004Br 2               CHRIN:
-00004Br 2  DA             phx
-00004Cr 2  20 rr rr       jsr BUFFER_SIZE               ; Check for character available
-00004Fr 2  F0 09          beq @CHRIN_NO_CHAR            ; Branch if no character available
-000051r 2  20 rr rr       jsr READ_BUFFER               ; Read the character from the buffer
-000054r 2  20 rr rr       jsr CHROUT                    ; Echo
-000057r 2  FA             plx
-000058r 2  38             sec
-000059r 2  60             rts
-00005Ar 2               @CHRIN_NO_CHAR:
-00005Ar 2  FA             plx
-00005Br 2  18             clc
-00005Cr 2  60             rts
+000023r 2  A9 80          lda #%10000000                ; Interupts enabled, USB Serial, 115200 baud.
+000025r 2  8D 01 84       sta EMU_SER_CTRL
+000028r 2  60             rts
+000029r 2               
+000029r 2               ; Initialize the INPUT_BUFFER
+000029r 2               ; Modifies: Flags, A
+000029r 2               INIT_BUFFER:
+000029r 2  A9 00          lda #$00
+00002Br 2  85 rr          sta READ_PTR                  ; Init read and write pointers
+00002Dr 2  85 rr          sta WRITE_PTR
+00002Fr 2  60             rts
+000030r 2               
+000030r 2               ; Write a character from the A register to the INPUT_BUFFER
+000030r 2               ; Modifies: Flags, X
+000030r 2               WRITE_BUFFER:
+000030r 2  A6 rr          ldx WRITE_PTR
+000032r 2  9D rr rr       sta INPUT_BUFFER,x
+000035r 2  E6 rr          inc WRITE_PTR
+000037r 2  60             rts
+000038r 2               
+000038r 2               ; Read a character from the INPUT_BUFFER and store it in A register
+000038r 2               ; Modifies: Flags, X, A
+000038r 2               READ_BUFFER:
+000038r 2  A6 rr          ldx READ_PTR
+00003Ar 2  BD rr rr       lda INPUT_BUFFER,x
+00003Dr 2  E6 rr          inc READ_PTR
+00003Fr 2  60             rts
+000040r 2               
+000040r 2               ; Return in A register the number of unread bytes in the INPUT_BUFFER
+000040r 2               ; Modifies: Flags, A
+000040r 2               BUFFER_SIZE:
+000040r 2  A5 rr          lda WRITE_PTR
+000042r 2  38             sec
+000043r 2  E5 rr          sbc READ_PTR
+000045r 2  60             rts
+000046r 2               
+000046r 2               ; Get a character from the INPUT_BUFFER if available
+000046r 2               ; On return, carry flag indicates whether a character was available
+000046r 2               ; If character available the character will be in the A regsiter
+000046r 2               ; Modifies: Flags, A
+000046r 2               CHRIN:
+000046r 2  DA             phx
+000047r 2  20 rr rr       jsr BUFFER_SIZE               ; Check for character available
+00004Ar 2  F0 09          beq @CHRIN_NO_CHAR            ; Branch if no character available
+00004Cr 2  20 rr rr       jsr READ_BUFFER               ; Read the character from the buffer
+00004Fr 2  20 rr rr       jsr CHROUT                    ; Echo
+000052r 2  FA             plx
+000053r 2  38             sec
+000054r 2  60             rts
+000055r 2               @CHRIN_NO_CHAR:
+000055r 2  FA             plx
+000056r 2  18             clc
+000057r 2  60             rts
+000058r 2               
+000058r 2               ; Output a character from the A register to the Serial Card
+000058r 2               ; Modifies: Flags
+000058r 2               CHROUT:
+000058r 2  8D 00 84       sta EMU_SER_DATA
+00005Br 2  60             rts
+00005Cr 2               
+00005Cr 2               ; NMI Handler
+00005Cr 2               NMI:
+00005Cr 2  40             rti
 00005Dr 2               
-00005Dr 2               ; Output a character from the A register to the Serial Card
-00005Dr 2               ; Modifies: Flags
-00005Dr 2               CHROUT:
-00005Dr 2  8D 00 90       sta SC_DATA
-000060r 2  48             pha
-000061r 2               @CHROUT_WAIT:
-000061r 2  AD 01 90       lda SC_STATUS
-000064r 2  29 10          and #%00010000                ; Check if tx buffer not empty
-000066r 2  F0 F9          beq @CHROUT_WAIT              ; Loop if tx buffer not empty
-000068r 2  68             pla
-000069r 2  60             rts
-00006Ar 2               
-00006Ar 2               ; NMI Handler
-00006Ar 2               NMI:
-00006Ar 2  40             rti
-00006Br 2               
-00006Br 2               ; IRQ Handler
-00006Br 2               IRQ:
-00006Br 2  48             pha
-00006Cr 2  DA             phx
-00006Dr 2  AD 01 90       lda SC_STATUS
-000070r 2  29 80          and #%10000000                ; Check if Serial Card caused the interrupt
-000072r 2  F0 06          beq @IRQ_EXIT                 ; If not, exit
-000074r 2  AD 00 90       lda SC_DATA                   ; Read the data from ACIA
-000077r 2  20 rr rr       jsr WRITE_BUFFER              ; Store to the input buffer
-00007Ar 2               @IRQ_EXIT:
-00007Ar 2  FA             plx
-00007Br 2  68             pla
-00007Cr 2  40             rti
-00007Dr 2               
-00007Dr 2               ; NMI Vector
-00007Dr 2               NMI_VEC:
-00007Dr 2  6C rr rr       jmp (NMI_PTR)                 ; Indirect jump through NMI pointer to the NMI handler
-000080r 2               
-000080r 2               ; Reset Vector
-000080r 2               RESET_VEC:
-000080r 2  4C rr rr       jmp RESET                     ; Initialize the system
-000083r 2               
-000083r 2               ; IRQ Vector
-000083r 2               IRQ_VEC:
-000083r 2  6C rr rr       jmp (IRQ_PTR)                 ; Indirect jump through IRQ pointer to the IRQ handler
-000086r 2               
-000086r 1               .segment "CART"
+00005Dr 2               ; IRQ Handler
+00005Dr 2               IRQ:
+00005Dr 2  48             pha
+00005Er 2  DA             phx
+00005Fr 2  AD 01 84       lda EMU_SER_STATUS
+000062r 2  29 80          and #%10000000                ; Check if serial data caused the interrupt
+000064r 2  F0 06          beq @IRQ_EXIT                 ; If not, exit
+000066r 2  AD 00 84       lda EMU_SER_DATA              ; Read the data from serial register
+000069r 2  20 rr rr       jsr WRITE_BUFFER              ; Store to the input buffer
+00006Cr 2               @IRQ_EXIT:
+00006Cr 2  FA             plx
+00006Dr 2  68             pla
+00006Er 2  40             rti
+00006Fr 2               
+00006Fr 2               ; NMI Vector
+00006Fr 2               NMI_VEC:
+00006Fr 2  6C rr rr       jmp (NMI_PTR)                 ; Indirect jump through NMI pointer to the NMI handler
+000072r 2               
+000072r 2               ; Reset Vector
+000072r 2               RESET_VEC:
+000072r 2  4C rr rr       jmp RESET                     ; Initialize the system
+000075r 2               
+000075r 2               ; IRQ Vector
+000075r 2               IRQ_VEC:
+000075r 2  6C rr rr       jmp (IRQ_PTR)                 ; Indirect jump through IRQ pointer to the IRQ handler
+000078r 2               
+000078r 1               .segment "CART"
 000000r 1               .segment "WOZMON"
 000000r 1               .include "Wozmon.asm"
 000000r 2               ; ***             ***
