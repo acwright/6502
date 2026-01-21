@@ -56,14 +56,17 @@ void toggleIO();
 void readROMs();
 void listROMs();
 void loadROM(uint index);
+void loadROMFile(String filename);
 void loadROMPath(String path);
 void readCarts();
 void listCarts();
 void loadCart(uint index);
+void loadCartFile(String filename);
 void loadCartPath(String path);
 void readPrograms();
 void listPrograms();
 void loadProgram(uint index);
+void loadProgramFile(String filename);
 void loadProgramPath(String path);
 void listFiles();
 void prevPage();
@@ -78,6 +81,7 @@ void initSD();
 void initUSB();
 void initEthernet();
 void initServer();
+void initFiles();
 
 void setDataDirIn();
 void setDataDirOut();
@@ -92,6 +96,8 @@ time_t lastSnapshot;
 void onServerRoot(AsyncWebServerRequest *request);
 void onServerInfo(AsyncWebServerRequest *request);
 void onServerMemory(AsyncWebServerRequest *request);
+void onServerStorage(AsyncWebServerRequest *request);
+void onServerLoad(AsyncWebServerRequest *request);
 void onServerControl(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
 
@@ -144,6 +150,7 @@ void setup() {
   initUSB();
   initEthernet();
   initServer();
+  initFiles();
 
   readROMs();
   readCarts();
@@ -747,16 +754,15 @@ void listROMs() {
 }
 
 void loadROM(uint index) {
-  String directory = "ROMs/";
-  String filename = ROMs[(romFilePage * FILE_PER_PAGE) + index];
-  
+  loadROMFile(ROMs[(romFilePage * FILE_PER_PAGE) + index]);
+}
+
+void loadROMFile(String filename) {
   if (!filename.length()) { return; }
 
-  loadROMPath(directory + filename);
-
   rom.file = filename;
-  rom.enabled = true;
-  cart.enabled = false;
+
+  loadROMPath("ROMs/" + filename);
 }
 
 void loadROMPath(String path) {
@@ -833,17 +839,15 @@ void listCarts() {
 }
 
 void loadCart(uint index) {
-  String directory = "Carts/";
-  String filename = Carts[(cartFilePage * FILE_PER_PAGE) + index];
+  loadCartFile(Carts[(cartFilePage * FILE_PER_PAGE) + index]);
+}
 
+void loadCartFile(String filename) {
   if (!filename.length()) { return; }
 
-  String path = directory + filename;
-
-  loadCartPath(path);
-
   cart.file = filename;
-  cart.enabled = true;
+
+  loadCartPath("Carts/" + filename);
 }
 
 void loadCartPath(String path) {
@@ -924,15 +928,15 @@ void listPrograms() {
 }
 
 void loadProgram(uint index) {
-  String directory = "Programs/";
-  String filename = Programs[(programFilePage * FILE_PER_PAGE) + index];
+  loadProgramFile(Programs[(programFilePage * FILE_PER_PAGE) + index]);
+}
 
+void loadProgramFile(String filename) {
   if (!filename.length()) { return; }
 
-  String path = directory + filename;
-
-  loadProgramPath(path);
   ram.file = filename;
+
+  loadProgramPath("Programs/" + filename);
 }
 
 void loadProgramPath(String path) {
@@ -1252,9 +1256,19 @@ void initServer() {
   server.on("/", HTTP_GET, onServerRoot);
   server.on("/info", HTTP_GET, onServerInfo);
   server.on("/memory", HTTP_GET, onServerMemory);
+  server.on("/storage", HTTP_GET, onServerStorage);
+  server.on("/load", HTTP_GET, onServerLoad);
   server.on("/control", HTTP_GET, onServerControl);
   server.onNotFound(onServerNotFound);
   server.begin();
+}
+
+void initFiles() {
+  for (size_t i = 0; i < FILE_MAX; i++) {
+    Carts[i] = "?";
+    Programs[i] = "?";
+    ROMs[i] = "?";
+  }
 }
 
 //
@@ -1377,12 +1391,8 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   JsonDocument doc;
 
   doc["address"]            = address;
-  doc["cartCode"]           = CART_CODE;
   doc["cartEnabled"]        = cart.enabled;
-  doc["cartEnd"]            = CART_END;
   doc["cartFile"]           = cart.file;
-  doc["cartFilePage"]       = cartFilePage;
-  doc["cartStart"]          = CART_START;
   doc["cpuAccumulator"]     = cpu.accumulator();
   doc["cpuOpcodeCycle"]     = cpu.opcodeCycle();
   doc["cpuPC"]              = cpu.programCounter();
@@ -1391,42 +1401,20 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   doc["cpuX"]               = cpu.x();
   doc["cpuY"]               = cpu.y();
   doc["data"]               = data;
-  doc["fileMax"]            = FILE_MAX;
   doc["freqLabel"]          = FREQ_LABELS[freqIndex];
   doc["freqPeriod"]         = FREQ_PERIODS[freqIndex];
   doc["inputCtx"]           = inputCtx;
   doc["ioEnabled"]          = io.enabled;
-  doc["ioEnd"]              = IO_END;
-  doc["ioSlots"]            = IO_SLOTS;
-  doc["ioSlotSize"]         = IO_SLOT_SIZE;
-  doc["ioStart"]            = IO_START;
   doc["ipAddress"]          = Ethernet.localIP();
   doc["isRunning"]          = isRunning;
   doc["lastSnapshot"]       = lastSnapshot;
   doc["programFile"]        = ram.file;
-  doc["programFilePage"]    = programFilePage;
-  doc["ramCode"]            = RAM_CODE;
   doc["ramEnabled"]         = ram.enabled;
-  doc["ramEnd"]             = RAM_END;
-  doc["ramStart"]           = RAM_START;
   doc["romEnabled"]         = rom.enabled;
-  doc["romEnd"]             = ROM_END;
   doc["romFile"]            = rom.file;
-  doc["romFilePage"]        = romFilePage;
-  doc["romStart"]           = ROM_START;
   doc["rtc"]                = now();
   doc["rw"]                 = readWrite ? 1 : 0;
   doc["version"]            = VERSION;
-
-  for (size_t i = (cartFilePage * FILE_PER_PAGE); i < ((cartFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
-    doc["cartFiles"][i - (cartFilePage * FILE_PER_PAGE)] = Carts[i];
-  }
-  for (size_t i = (programFilePage * FILE_PER_PAGE); i < ((programFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
-    doc["ramFiles"][i - (programFilePage * FILE_PER_PAGE)] = Programs[i];
-  }
-  for (size_t i = (romFilePage * FILE_PER_PAGE); i < ((romFilePage * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
-    doc["romFiles"][i - (romFilePage * FILE_PER_PAGE)] = ROMs[i];
-  }
   
   serializeJson(doc, response);
 
@@ -1489,6 +1477,94 @@ FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
   request->send(response);
 }
 
+FASTRUN void onServerStorage(AsyncWebServerRequest *request) {
+  String target;
+  size_t page;
+
+  String response;
+  JsonDocument doc;
+
+  if (request->hasParam("target")) {
+    target = request->getParam("target")->value();
+
+    if (target != "cart" && target != "program" && target != "rom") {
+      request->send(400);
+      return;
+    }
+  } else {
+    request->send(400);
+    return;
+  }
+  if (request->hasParam("page")) {
+    page = size_t(request->getParam("page")->value().toInt());
+
+    if (page >= (FILE_MAX / FILE_PER_PAGE)) {
+      request->send(400);
+      return;
+    }
+  } else {
+    request->send(400);
+    return;
+  }
+
+  if (target == "cart") {
+    readCarts();
+
+    for (uint i = (page * FILE_PER_PAGE); i < ((page * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
+      doc[i - (page * FILE_PER_PAGE)] = Carts[i];
+    }
+  } else if (target == "program") {
+    readPrograms();
+
+    for (uint i = (page * FILE_PER_PAGE); i < ((page * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
+      doc[i - (page * FILE_PER_PAGE)] = Programs[i];
+    }
+  } else if (target == "rom") {
+    readROMs();
+
+    for (uint i = (page * FILE_PER_PAGE); i < ((page * FILE_PER_PAGE) + FILE_PER_PAGE); i++) {
+      doc[i - (page * FILE_PER_PAGE)] = ROMs[i];
+    }
+  }
+
+  serializeJson(doc, response);
+
+  request->send(200, "application/json", response);
+}
+
+FASTRUN void onServerLoad(AsyncWebServerRequest *request) {
+  String target;
+  String filename;
+
+  if (request->hasParam("target")) {
+    target = request->getParam("target")->value();
+
+    if (target != "cart" && target != "program" && target != "rom") {
+      request->send(400);
+      return;
+    }
+  } else {
+    request->send(400);
+    return;
+  }
+  if (request->hasParam("filename")) {
+    filename = request->getParam("filename")->value();
+  } else {
+    request->send(400);
+    return;
+  }
+
+  if (target == "cart") {
+    loadCartFile(filename);
+  } else if (target == "program") {
+    loadProgramFile(filename);
+  } else if (target == "rom") {
+    loadROMFile(filename);
+  }
+
+  request->send(200);
+}
+
 FASTRUN void onServerControl(AsyncWebServerRequest *request) {
   String command;
 
@@ -1501,16 +1577,12 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
 
   if (command == "a" || command == "A") {         // Toggle RAM
     toggleRAM();
-  } else if (command == "c" || command == "C") {  // Read Carts
-    readCarts();
   } else if (command == "i" || command == "I") {  // Toggle IO
     toggleIO();
   } else if (command == "k" || command == "K") {  // Tick
     tick();
   } else if (command == "l" || command == "L") {  // Toggle Cart
     toggleCart();
-  } else if (command == "m" || command == "M") {  // Read ROMs
-    readROMs();
   } else if (command == "o" || command == "O") {  // Toggle ROM
     toggleROM();
   } else if (command == "p" || command == "P") {  // Snapshot
@@ -1521,21 +1593,10 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
     step();
   } else if (command == "t" || command == "T") {  // Reset
     reset();
-  } else if (command == "u" || command == "U") {  // Read Programs
-    readPrograms();
   } else if (command == "-") {                    // Decrease Frequency
     decreaseFrequency();
   } else if (command == "+") {                    // Increase Frequency
     increaseFrequency();
-  } else if (command == "prev") {                 // Prev Page
-    prevPage();
-  } else if (command == "next") {                 // Next Page
-    nextPage();
-  } else if (                                     // Load #
-      command >= '0' && 
-      command < '8'
-  ) {
-    onNumeric(command.toInt());
   } else {                                        // Bad Request
     request->send(400);
     return;

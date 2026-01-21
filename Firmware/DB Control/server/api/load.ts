@@ -15,18 +15,18 @@ export default defineEventHandler(async (event) => {
       statusMessage: 'Target must be included',
     })
   }
-  if (!query.page) {
+  if (!query.filename) {
     throw createError({
       statusCode: 400,
-      statusMessage: 'Page must be included',
+      statusMessage: 'Filename must be included',
     })
   }
 
   try {
-    return await $fetch(`http://${query.ipAddress}/memory`, {
+    return await $fetch(`http://${query.ipAddress}/load`, {
       query: {
         target: query.target,
-        page: query.page
+        filename: query.filename
       }
     })
   } catch (error) {

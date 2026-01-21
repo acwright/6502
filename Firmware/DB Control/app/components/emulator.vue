@@ -7,55 +7,61 @@
         {{ info.isRunning ? '-- RUNNING --' : '-- STOPPED --' }}
       </p>
       <br>
-      <div class="flex flex-col ml-auto mr-auto gap-1 text-sm">
+      <div class="flex flex-col w-full gap-1 text-sm">
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">Version:</span>
-          <span>{{ info.version }}</span>
+          <span class="text-right font-bold w-1/4">Version:</span>
+          <span class="text-left w-3/4">{{ info.version }}</span>
         </div>
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">RAM:</span>
-          <span :class="info.ramEnabled ? 'text-primary' : 'text-gray-400'">
-            {{ info.ramEnabled ? 'ENABLED' : 'DISABLED' }}
-          </span>
-          <span>
-            ({{ info.programFile.length ? info.programFile : 'None' }})
-          </span>
-        </div>
-        <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">ROM:</span>
-          <span :class="info.romEnabled ? 'text-primary' : 'text-gray-400'">
-            {{ info.romEnabled ? 'ENABLED' : 'DISABLED' }}
-          </span>
-          <span>
-            ({{ info.romFile.length ? info.romFile : 'None' }})
+          <span class="text-right font-bold w-1/4">RAM:</span>
+          <span class="text-left w-3/4">
+            <span :class="info.ramEnabled ? 'text-primary' : 'text-gray-400'">
+              {{ info.ramEnabled ? 'ENABLED' : 'DISABLED' }}
+            </span>
+            <span>
+              ({{ info.programFile.length ? info.programFile : 'None' }})
+            </span>
           </span>
         </div>
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">Cart:</span>
-          <span :class="info.cartEnabled ? 'text-primary' : 'text-gray-400'">
-            {{ info.cartEnabled ? 'ENABLED' : 'DISABLED' }}
-          </span>
-          <span>
-            ({{ info.cartFile.length ? info.cartFile : 'None' }})
+          <span class="text-right font-bold w-1/4">ROM:</span>
+          <span class="text-left w-3/4">
+            <span :class="info.romEnabled ? 'text-primary' : 'text-gray-400'">
+              {{ info.romEnabled ? 'ENABLED' : 'DISABLED' }}
+            </span>
+            <span>
+              ({{ info.romFile.length ? info.romFile : 'None' }})
+            </span>
           </span>
         </div>
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">IO:</span>
-          <span :class="info.ioEnabled ? 'text-primary' : 'text-gray-400'">
+          <span class="text-right font-bold w-1/4">Cart:</span>
+          <span class="text-left w-3/4">
+            <span :class="info.cartEnabled ? 'text-primary' : 'text-gray-400'">
+              {{ info.cartEnabled ? 'ENABLED' : 'DISABLED' }}
+            </span>
+            <span>
+              ({{ info.cartFile.length ? info.cartFile : 'None' }})
+            </span>
+          </span>
+        </div>
+        <div class="flex flex-row gap-3">
+          <span class="text-right font-bold w-1/4">IO:</span>
+          <span class="text-left w-3/4" :class="info.ioEnabled ? 'text-primary' : 'text-gray-400'">
             {{ info.ioEnabled ? 'ENABLED' : 'DISABLED' }}
           </span>
         </div>
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">Frequency:</span>
-          <span>{{ info.freqLabel }} ({{ info.freqPeriod }} µS)</span>
+          <span class="text-right font-bold w-1/4">Frequency:</span>
+          <span class="text-left w-3/4">{{ info.freqLabel }} ({{ info.freqPeriod }} µS)</span>
         </div>
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">IP Address:</span>
-          <span>{{ info.ipAddress }}</span>
+          <span class="text-right font-bold w-1/4">IP Address:</span>
+          <span class="text-left w-3/4">{{ info.ipAddress }}</span>
         </div>
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-28">Date / Time:</span>
-          <span>{{ new Date(info.rtc * 1000).toLocaleString() }}</span>
+          <span class="text-right font-bold w-1/4">Date / Time:</span>
+          <span class="text-left w-3/4">{{ new Date(info.rtc * 1000).toLocaleString() }}</span>
         </div>
       </div>
       <br>

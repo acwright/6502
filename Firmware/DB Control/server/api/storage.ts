@@ -23,7 +23,7 @@ export default defineEventHandler(async (event) => {
   }
 
   try {
-    return await $fetch(`http://${query.ipAddress}/memory`, {
+    return await $fetch(`http://${query.ipAddress}/storage`, {
       query: {
         target: query.target,
         page: query.page

@@ -3,18 +3,35 @@
     <h2>STORAGE</h2>
     <div class="flex flex-col justify-between grow border-2 pl-4 pr-4 pt-8 pb-8">
       <UFieldGroup orientation="horizontal" size="sm" class="flex flex-row justify-center">
-        <UButton color="primary" variant="solid" label="ROMs" />
-        <UButton color="neutral" variant="outline" label="Carts" />
-        <UButton color="neutral" variant="outline" label="Programs" />
+        <UButton 
+          @click="onTarget('rom')"
+          :color="target == 'rom' ? 'primary' : 'neutral'"
+          :variant="target == 'rom' ? 'solid' : 'outline'"
+          label="ROMs"
+        />
+        <UButton 
+          @click="onTarget('cart')"
+          :color="target == 'cart' ? 'primary' : 'neutral'"
+          :variant="target == 'cart' ? 'solid' : 'outline'"
+          label="Carts"
+        />
+        <UButton 
+          @click="onTarget('program')"
+          :color="target == 'program' ? 'primary' : 'neutral'"
+          :variant="target == 'program' ? 'solid' : 'outline'"
+          label="Programs"
+        />
       </UFieldGroup>
       <br>
-      <div class="flex flex-col text-center ml-auto mr-auto gap-2">
-        <div v-for="(file, i) in info.romFiles" :key="i" class="flex flex-row gap-2">
-          <UButton label="LOAD" size="xs"/>
-          <p class="text-right w-4">
-            {{ i }}:
-          </p>
-          <p>{{ file }}</p>
+      <div class="flex flex-col w-full gap-1">
+        <div v-for="(file, i) in files" :key="i" class="flex flex-row gap-2">
+          <span class="flex flex-row justify-end w-1/4 gap-1">
+            <UButton @click="onLoad(file)" label="LOAD" size="xs"/>
+            <span class="text-right w-8">
+              {{ i }}:
+            </span>
+          </span>
+          <span class="text-left w-3/4">{{ file }}</span>
         </div>
       </div>
       <br>
@@ -26,5 +43,53 @@
 <script setup lang="ts">
   const { error: notification } = useNotifications()
   const info = useState<Info>('info')
-  const page = ref(info.value.romFilePage + 1)
+  const files = ref<string[]>([])
+  const target = ref<'rom' | 'cart' | 'program'>('rom')
+  const page = ref(1)
+
+  const onTarget = (_target: 'rom' | 'cart' | 'program') => {
+    page.value = 1
+    target.value = _target
+  }
+
+  const onLoad = async (filename: string) => {
+    try {
+      await $fetch('/api/load', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          target: target.value,
+          filename: filename
+        }
+      })
+      await fetchInfo()
+    } catch (error) {
+      notification(error)
+    }
+  }
+
+  const fetchInfo = async () => {
+    try {
+      info.value = await $fetch<Info>('/api/info', {
+        query: {
+          ipAddress: info.value.ipAddress
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+  }
+
+  watch([info, target, page], async () => {
+    try {
+      files.value = await $fetch<string[]>('/api/storage', {
+        query: {
+          ipAddress: info.value.ipAddress,
+          target: target.value,
+          page: page.value - 1
+        }
+      })
+    } catch (error) {
+      notification(error)
+    }
+  }, { immediate: true })
 </script>
