@@ -26,8 +26,8 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 
 - **Backplane Board**: A backplane board that provides multiple card slots for peripheral cards and connects to the main board via a ribbon cable.
 - **Backplane Board Pro**: An enhanced version of the backplane board with additional features.
-- **Dev Board**: The development board is an alternative to the main board which acts as a 65(c)02 emulator using a Teensy 4.1.
-- **Dev Output Board**: A compliment to the Dev Board that provides [VT-AC](https://github.com/acwright/VT-AC) ASCII terminal display output using a Waveshare 2.4in LCD.
+- **Dev Board**: The development board is an alternative to the main board which acts as a 65(c)02 emulator using a Teensy 4.1 with [vrEmu6502](https://github.com/visrealm/vrEmu6502).
+- **Dev Output Board**: A compliment to the Dev Board that provides [VT-AC](https://github.com/acwright/VT-AC) ASCII terminal display output using a Waveshare 2.4in LCD. **UNTESTED**
 - **Input Board**: A board that provides PS/2 keyboard and mouse interfaces along with SNES controller support.
 - **LCD Board**: A board that provides a 320x240 LCD display. **UNTESTED**
 - **Main Board**: The main board that contains the 65(c)02 CPU, memory, memory decoding ICs, one peripheral card slot, and a bus connector.
@@ -39,7 +39,7 @@ The [Hardware](./Hardware) folder contains several custom-designed PCBs. These a
 - **CPU Card**: A card that can host a 65(c)02 CPU and associated components. 
 - **CPU Card Pro**: A card that can host a 65816 CPU and associated components. **UNTESTED**
 - **GPIO Card**: A card that provides general-purpose input/output (GPIO) pins for interfacing with external devices.
-- **LCD Card**: A card that provides output to an LCD display.
+- **LCD Card**: A card that provides output to a 16x2 LCD display.
 - **Memory Card**: A card that provides RAM or ROM memory. 
 - **Prototype Card**: A card that provides a prototyping area for custom circuits. 
 - **RAM Card**: A card that provides 512k of extra RAM. 
@@ -80,7 +80,7 @@ The [Schematics](./Schematics) folder contains the schematic diagrams for all th
 
 ## Firmware
 
-The [Firmware](./Firmware) folder contains the source code for the firmware running on the various microcontrollers used in the project, such as the Teensy 4.1, Arduino Nano. The firmware is written in C/C++ and is designed to interface with the 65(c)02 and other hardware components. See the README file in the Firmware folder for more details.
+The [Firmware](./Firmware) folder contains the source code for the firmware running on the various microcontrollers used in the project, such as the Teensy 4.1. The firmware is written in C/C++ and is designed to interface with the 65(c)02 and other hardware components. See the README file in the Firmware folder for more details.
 
 ## Software
 
