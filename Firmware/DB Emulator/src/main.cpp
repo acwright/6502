@@ -45,6 +45,7 @@ void log();
 void reset();
 void tick();
 void step();
+void dump();
 void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
@@ -121,6 +122,8 @@ String Carts[FILE_MAX];
 uint cartFilePage = 0;
 String Programs[FILE_MAX];
 uint programFilePage = 0;
+
+uint memoryPage = 0;
 
 #ifdef MEM_EXTMEM
 EXTMEM uint8_t ramData[IO_RAM_BLOCK_SIZE * IO_RAM_BLOCK_COUNT];
@@ -256,6 +259,8 @@ void onCommand(char command) {
           Serial.print("Loaded Program: ");
           Serial.println(ram.file);
           break;
+        case INPUT_CTX_MEM:
+          break;
         default:
           break;
       }
@@ -272,6 +277,10 @@ void onCommand(char command) {
       if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
       readCarts();
       listCarts();
+      break;
+    case 'd':
+    case 'D':
+      dump();
       break;
     case 'f':
     case 'F':
@@ -356,12 +365,28 @@ void onCommand(char command) {
       Serial.println(FREQ_LABELS[freqIndex]);
       break;
     case '[':
-      prevPage();
-      listFiles();
+      switch(inputCtx) {
+        case INPUT_CTX_MEM:
+          prevPage();
+          dump();
+          break;
+        default:          
+          prevPage();
+          listFiles();
+          break;
+      }
       break;
     case ']':
-      nextPage();
-      listFiles();
+      switch(inputCtx) {
+        case INPUT_CTX_MEM:
+          nextPage();
+          dump();
+          break;
+        default:          
+          nextPage();
+          listFiles();
+          break;
+      }
       break;
   }
 }
@@ -376,6 +401,8 @@ void onNumeric(uint8_t num) {
       break;
     case INPUT_CTX_PROG:
       loadProgram(num);
+      break;
+    case INPUT_CTX_MEM:
       break;
   }
 }
@@ -526,13 +553,13 @@ void info() {
   Serial.println(formattedDateTime());
   Serial.println();
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| (R)un / Stop          | (S)tep / Tic(K)  | Rese(T)         |");
+  Serial.println("| (R)un / Stop       | (S)tep / Tic(K)     | Rese(T)         |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| Toggle R(A)M          | Toggle R(O)M     | Toggle Cart (L) |");
+  Serial.println("| Toggle R(A)M       | Toggle R(O)M        | Toggle Cart (L) |");
   Serial.println("--------------------------------------------------------------");
   Serial.println("| List RO(M)s / (C)arts / (U)ser Programs  | Toggle (I)O     |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| (+/-) Clk Frequency   | Sna(P)shot       | In(F)o / Lo(G)  |");
+  Serial.println("| (+/-) Clk Freq     | (D)ump / Sna(P)shot | In(F)o / Lo(G)  |");
   Serial.println("--------------------------------------------------------------");
   Serial.println();
 }
@@ -638,6 +665,42 @@ void step() {
       cpu.irqClear();
     }
   }
+}
+
+void dump() {
+  inputCtx = INPUT_CTX_MEM;
+
+  Serial.println();
+  Serial.println("RAM Dump:");
+  Serial.println();
+
+  char ascii[16];
+
+  for (size_t i = 0; i < MEM_PER_PAGE; i++) {
+    size_t index = i % 16;
+    uint8_t value = ram.data[i + (memoryPage * MEM_PER_PAGE)];
+
+    if (index == 0) {
+      Serial.print("$");
+      Serial.printf("%04X ", (memoryPage * MEM_PER_PAGE) + i);
+      Serial.print(": ");
+    }
+
+    Serial.printf("%02X ", value);
+    ascii[index] = (value >= 0x20 && value <= 0x7E) ? (char)value : '.';
+
+    if (index == 15) {
+      Serial.print("| ");
+      Serial.print(ascii);
+      Serial.println(" |");
+    }
+  }
+
+  Serial.println();
+  Serial.print("Page: ");
+  Serial.print(memoryPage);
+  Serial.println(" | ([) Prev Page | Next Page (]) |");
+  Serial.println();
 }
 
 void snapshot() {
@@ -967,6 +1030,8 @@ void listFiles() {
     case INPUT_CTX_PROG:
       listPrograms();
       break;
+    case INPUT_CTX_MEM:
+      break;
     default:
       break;
   }
@@ -995,6 +1060,13 @@ void prevPage() {
         programFilePage = ((FILE_MAX / FILE_PER_PAGE) - 1);
       }
       break;
+    case INPUT_CTX_MEM:
+      if (memoryPage > 0)  {
+        memoryPage--;
+      } else {
+        memoryPage = ((MEM_MAX / MEM_PER_PAGE) - 1);
+      }
+      break;
     default:
       break;
   }
@@ -1021,6 +1093,13 @@ void nextPage() {
         programFilePage++;
       } else {
         programFilePage = 0;
+      }
+      break;
+    case INPUT_CTX_MEM:
+      if (memoryPage < ((MEM_MAX / MEM_PER_PAGE) - 1)) {
+        memoryPage++;
+      } else {
+        memoryPage = 0;
       }
       break;
     default:
@@ -1403,7 +1482,6 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   doc["data"]               = data;
   doc["freqLabel"]          = FREQ_LABELS[freqIndex];
   doc["freqPeriod"]         = FREQ_PERIODS[freqIndex];
-  doc["inputCtx"]           = inputCtx;
   doc["ioEnabled"]          = io.enabled;
   doc["ipAddress"]          = Ethernet.localIP();
   doc["isRunning"]          = isRunning;
@@ -1468,10 +1546,10 @@ FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
 
   for (size_t i = 0; i < PAGE_SIZE; i++) {
     if (target == "ram") {
-        formatted ? response->printf("%02X ", ram.data[i + (page * PAGE_SIZE)]) : response->write(ram.data[i + (page * PAGE_SIZE)]);
-      } else if (target == "rom") {
-        formatted ? response->printf("%02X ", rom.data[i + (page * PAGE_SIZE)]) : response->write(rom.data[i + (page * PAGE_SIZE)]);
-      }
+      formatted ? response->printf("%02X ", ram.data[i + (page * PAGE_SIZE)]) : response->write(ram.data[i + (page * PAGE_SIZE)]);
+    } else if (target == "rom") {
+      formatted ? response->printf("%02X ", rom.data[i + (page * PAGE_SIZE)]) : response->write(rom.data[i + (page * PAGE_SIZE)]);
+    }
   }
   
   request->send(response);

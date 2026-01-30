@@ -49,6 +49,7 @@
 #define INPUT_CTX_ROM   0
 #define INPUT_CTX_CART  1
 #define INPUT_CTX_PROG  2
+#define INPUT_CTX_MEM   3
 
 #define PAGE_SIZE       0x100
 
@@ -59,5 +60,8 @@
 #define DEBOUNCE        5     // 5 milliseconds
 #define FILE_PER_PAGE   8
 #define FILE_MAX        0x100
+
+#define MEM_PER_PAGE    256
+#define MEM_MAX         0x8000
 
 #endif
