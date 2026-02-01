@@ -7749,12 +7749,6 @@
 		(uuid "0652c01a-c122-4a5c-b489-dfd862a54cff")
 	)
 	(junction
-		(at 161.29 157.48)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "07a1139f-3880-4127-960c-2c385b817a63")
-	)
-	(junction
 		(at 87.63 196.85)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -12325,16 +12319,6 @@
 			(type default)
 		)
 		(uuid "a671b625-55d4-429d-9de0-b46ec7a5e37d")
-	)
-	(wire
-		(pts
-			(xy 160.02 157.48) (xy 161.29 157.48)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "a6f7cc57-4f39-4276-a173-949e386269f3")
 	)
 	(wire
 		(pts
@@ -18613,7 +18597,7 @@
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-00006060ad8a")
 		(property "Reference" "U1"
-			(at 179.07 31.75 0)
+			(at 188.722 33.782 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -18621,7 +18605,7 @@
 			)
 		)
 		(property "Value" "LM555xM"
-			(at 181.61 34.29 0)
+			(at 191.77 36.068 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -22835,7 +22819,6 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "9c58332f-5317-43bb-8e23-79775970e66c")
 		(property "Reference" "Q1"
 			(at 231.14 45.7199 0)
@@ -22846,14 +22829,13 @@
 				(justify left)
 			)
 		)
-		(property "Value" "Q_NPN_BEC"
-			(at 231.14 46.9899 0)
+		(property "Value" "SS8050"
+			(at 231.394 47.752 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
 				(justify left)
-				(hide yes)
 			)
 		)
 		(property "Footprint" "Package_TO_SOT_SMD:SOT-23"
