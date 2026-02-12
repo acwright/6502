@@ -1,5 +1,5 @@
 make:
-	ca65 -v -l ./build/NOP.list -o ./build/NOP.o ./src/*.asm
+	ca65 -v -l ./build/NOP.list -o ./build/NOP.o ./src/NOP.asm
 	cl65 -v -C NOP.cfg -o ./build/NOP.bin ./build/NOP.o
 
 view:

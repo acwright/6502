@@ -1,7 +1,6 @@
 make:
-	ca65 -v -l ./build/DB\ Hello\ World.list -o ./build/DB\ Hello\ World.o ./src/*.asm
+	ca65 -v -l ./build/DB\ Hello\ World.list -o ./build/DB\ Hello\ World.o ./src/DB\ Hello\ World.asm
 	cl65 -v -C ../../6502.cfg -o ./build/DB\ Hello\ World ./build/DB\ Hello\ World.o
-	rm ./build/DB\ Hello\ World.bin
 	
 view:
 	hexdump -C ./build/DB\ Hello\ World.prg

@@ -2,12 +2,7 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-.segment "STACK"
-.segment "INPUT_BUFFER"
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-.segment "PROGRAM"
+.segment "CODE"
 
 reset:
   lda #%11111111              ; Set all pins on port B to output
@@ -80,8 +75,3 @@ print_char:
   lda #LCD_RS                 ; Clear E bits
   sta LCD_PORTA
   rts
-
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
-.segment "VECTORS"

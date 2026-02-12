@@ -1,7 +1,6 @@
 make:
-	ca65 -v -l ./build/GPIO\ Blink.list -o ./build/GPIO\ Blink.o ./src/*.asm
+	ca65 -v -l ./build/GPIO\ Blink.list -o ./build/GPIO\ Blink.o ./src/GPIO\ Blink.asm
 	cl65 -v -C ../../6502.cfg -o ./build/GPIO\ Blink ./build/GPIO\ Blink.o
-	rm ./build/GPIO\ Blink.bin
 	
 view:
 	hexdump -C ./build/GPIO\ Blink.prg

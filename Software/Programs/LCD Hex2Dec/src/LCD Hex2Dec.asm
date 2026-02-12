@@ -2,15 +2,11 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-VALUE:   .res 2
-MOD10:   .res 2
-RESULT:  .res 2
-.segment "STACK"
-.segment "INPUT_BUFFER"
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-.segment "PROGRAM"
+.segment "CODE"
+
+VALUE       := $00
+MOD10       := $02
+RESULT      := $04
 
 reset:
   ldx #$ff
@@ -149,8 +145,3 @@ print_char:
   lda #LCD_RS         ; Clear E bits
   sta LCD_PORTA
   rts
-
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
-.segment "VECTORS"

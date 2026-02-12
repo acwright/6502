@@ -1,7 +1,6 @@
 make:
-	ca65 -v -l ./build/VC\ Text.list -o ./build/VC\ Text.o ./src/*.asm
+	ca65 -v -l ./build/VC\ Text.list -o ./build/VC\ Text.o ./src/VC\ Text.asm
 	cl65 -v -C ../../6502.cfg -o ./build/VC\ Text ./build/VC\ Text.o
-	rm ./build/VC\ Text.bin
 	
 view:
 	hexdump -C ./build/VC\ Text.prg

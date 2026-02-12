@@ -2,16 +2,7 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-.segment "STACK"
-.segment "INPUT_BUFFER"
-INPUT_BUFFER: .res $100
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-.segment "PROGRAM"
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
+.segment "CODE"
 
 XAML  = $24                 ; Last "opened" location Low
 XAMH  = $25                 ; Last "opened" location High

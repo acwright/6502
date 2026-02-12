@@ -2,12 +2,7 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-.segment "STACK"
-.segment "INPUT_BUFFER"
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-.segment "PROGRAM"
+.segment "CODE"
 
 ;*******************************************************************************
 ; Build a 16x16 256 color tile in VRAM location $12000
@@ -89,8 +84,3 @@ brick:
     .byte $E5,$08,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$2A,$29
     .byte $E5,$08,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29,$29
     .byte $E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5,$E5
-
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
-.segment "VECTORS"

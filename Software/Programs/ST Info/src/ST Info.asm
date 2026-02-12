@@ -2,16 +2,12 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-ST_INFO_PTR:  .res 2
-ST_BUFFER_PTR:  .res 2
-.segment "STACK"
-.segment "INPUT_BUFFER"
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-ST_INFO:        .res 256
-ST_BUFFER:      .res 512
-.segment "PROGRAM"
+.segment "CODE"
+
+ST_INFO_PTR     := $00
+ST_BUFFER_PTR   := $02
+ST_INFO         := $400
+ST_BUFFER       := $500
 
 reset:
   ldx #$ff
@@ -170,8 +166,3 @@ acia_tx_wait:
   rts
 
 success:     .asciiz "Success!"
-
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
-.segment "VECTORS"

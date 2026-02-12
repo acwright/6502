@@ -1,7 +1,6 @@
 make:
-	ca65 -v -l ./build/Wozmon.list -o ./build/Wozmon.o ./src/*.asm
-	cl65 -v -C ../../6502.cfg -o ./build/Wozmon ./build/Wozmon.o
-	rm ./build/Wozmon.prg
+	ca65 -v -l ./build/Wozmon.list -o ./build/Wozmon.o ./src/Wozmon.asm
+	cl65 -v -C Wozmon.cfg -o ./build/Wozmon ./build/Wozmon.o
 	
 view:
 	hexdump -C ./build/Wozmon.bin

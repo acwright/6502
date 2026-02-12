@@ -2,12 +2,7 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-.segment "STACK"
-.segment "INPUT_BUFFER"
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-.segment "PROGRAM"
+.segment "CODE"
 
 reset:
   lda #$00
@@ -20,8 +15,3 @@ loop:
 
 halt:
   rts
-
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
-.segment "VECTORS"

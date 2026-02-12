@@ -2,12 +2,7 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-.segment "STACK"
-.segment "INPUT_BUFFER"
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-.segment "PROGRAM"
+.segment "CODE"
 
 reset:
   lda #%00000000            ; Set all pins on port B to inputs
@@ -77,8 +72,3 @@ send_value_wait:
   beq send_value_wait       ; Loop if tx buffer not empty
   pla
   rts
-
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
-.segment "VECTORS"

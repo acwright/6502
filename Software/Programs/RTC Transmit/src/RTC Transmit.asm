@@ -2,12 +2,7 @@
 
 .include "../../../6502.inc"
 
-.segment "ZEROPAGE"
-.segment "STACK"
-.segment "INPUT_BUFFER"
-.segment "KERNAL_VARS"
-.segment "USER_VARS"
-.segment "PROGRAM"
+.segment "CODE"
 
 reset:
   ldx #$ff
@@ -58,8 +53,3 @@ tx_wait:
   beq tx_wait     ; Loop if tx buffer not empty
   pla
   rts
-
-.segment "KERNAL"
-.segment "CART"
-.segment "WOZMON"
-.segment "VECTORS"
