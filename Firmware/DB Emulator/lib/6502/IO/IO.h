@@ -71,14 +71,14 @@
 /* IE    - Interrupt Enable (1 = ENABLED, 0 = DISABLED)               */
 /* CE    - Chip Enable Pin (1 = LOW, 0 = HIGH) (Dev Board 1.1 ONLY)   */
 /* T0-1  - Target Select                                              */
-/* M0-3  - Mode Select (Target dependent; See docs)                   */
+/* M0-3  - Mode Select (Target dependent; See code)                   */
 /*                                                                    */
 /* TARGET:                                                            */
 /* | T1 | T0 |     TARGET     |                                       */
-/* | 0  | 0  |     SERIAL     |  USB Serial (TX ONLY)                 */
+/* | 0  | 0  |     SERIAL     |  USB and HW Serial                    */
 /* | 0  | 1  |      SPI       |  Dev Board 1.0 and 1.1 ONLY           */
 /* | 1  | 0  |      I2C       |  Dev Board 0.0 and 1.1 ONLY           */
-/* | 1  | 1  |     TX/RX      |  Hardware Serial                      */
+/* | 1  | 1  |    DISABLE     |  Disabled                             */
 /*                                                                    */
 /* SERIAL STATUS REGISTER                                             */
 /* | 7  | 6 | 5 | 4 | 3 | 2 | 1 | 0 |                                 */
@@ -129,7 +129,7 @@
 #define IO_TARGET_SERIAL   0
 #define IO_TARGET_SPI      1
 #define IO_TARGET_I2C      2
-#define IO_TARGET_TXRX     3
+#define IO_TARGET_DISABLE  3
 
 #define IO_I2C_READ        1
 #define IO_I2C_WRITE       0
@@ -171,7 +171,6 @@ class IO {
     void modeToSPIChipSelect(uint8_t mode);
     uint32_t modeToSPISpeed(uint8_t mode);
     uint32_t modeToI2CSpeed(uint8_t mode);
-    uint32_t modeToBaudRate(uint8_t mode);
 
   public:
     IO(uint8_t *ramData);

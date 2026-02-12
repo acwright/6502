@@ -126,26 +126,6 @@ uint8_t IO::tick() {
         this->serialData = SerialUSB1.read();
         this->serialStatus |= IO_SER_STATUS_DA;
       }
-      break;
-    case IO_TARGET_SPI:
-      break; // Do Nothing
-    case IO_TARGET_I2C:
-      if (this->i2cRead) {
-        #ifdef DEVBOARD_0
-        if (Wire1.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
-          this->serialData = Wire1.read();
-          this->serialStatus |= IO_SER_STATUS_DA;
-        }
-        #endif
-        #ifdef DEVBOARD_1_1
-        if (Wire2.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
-          this->serialData = Wire2.read();
-          this->serialStatus |= IO_SER_STATUS_DA;
-        }
-        #endif
-      }
-      break;
-    case IO_TARGET_TXRX:
       #ifdef DEVBOARD_0
       if (Serial4.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
         this->serialData = Serial4.read();
@@ -165,6 +145,26 @@ uint8_t IO::tick() {
       }
       #endif
       break;
+    case IO_TARGET_SPI:
+      break; // Do Nothing
+    case IO_TARGET_I2C:
+      if (this->i2cRead) {
+        #ifdef DEVBOARD_0
+        if (Wire1.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
+          this->serialData = Wire1.read();
+          this->serialStatus |= IO_SER_STATUS_DA;
+        }
+        #endif
+        #ifdef DEVBOARD_1_1
+        if (Wire2.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
+          this->serialData = Wire2.read();
+          this->serialStatus |= IO_SER_STATUS_DA;
+        }
+        #endif
+      }
+      break;
+    case IO_TARGET_DISABLE:
+      break;
     default:
       break;
   }
@@ -180,6 +180,15 @@ uint8_t IO::tick() {
 
 void IO::reset() {
   SerialUSB1.clear();
+  #ifdef DEVBOARD_0
+  Serial4.clear();
+  #endif
+  #ifdef DEVBOARD_1
+  Serial7.clear();
+  #endif
+  #ifdef DEVBOARD_1_1
+  Serial6.clear();
+  #endif
 
   this->serialData = 0x00;
   this->serialControl = 0x00;
@@ -262,6 +271,7 @@ void IO::configureSerial(uint8_t value) {
   if (target != this->target) { // New target selected...
     switch (this->target) { // So... End old target
       case IO_TARGET_SERIAL:
+        // Do nothing since USB Serial1 and HW SerialX is always enabled
         break;
       case IO_TARGET_SPI:
         #ifdef DEVBOARD_1
@@ -293,19 +303,7 @@ void IO::configureSerial(uint8_t value) {
         this->i2cRead = false;
         #endif
         break;
-      case IO_TARGET_TXRX:
-        #ifdef DEVBOARD_0
-        Serial4.clear();
-        Serial4.end();
-        #endif
-        #ifdef DEVBOARD_1
-        Serial7.clear();
-        Serial7.end();
-        #endif
-        #ifdef DEVBOARD_1_1
-        Serial6.clear();
-        Serial6.end();
-        #endif
+      case IO_TARGET_DISABLE:
         break;
       default:
         break;
@@ -315,6 +313,7 @@ void IO::configureSerial(uint8_t value) {
 
     switch (this->target) { // And... Start new target
       case IO_TARGET_SERIAL:
+        // Do nothing since USB Serial1 and HW SerialX is always enabled
         break;
       case IO_TARGET_SPI:
         #ifdef DEVBOARD_1
@@ -338,16 +337,7 @@ void IO::configureSerial(uint8_t value) {
         Wire2.setClock(modeToI2CSpeed(mode));
         #endif
         break;
-      case IO_TARGET_TXRX:
-        #ifdef DEVBOARD_0
-        Serial4.begin(modeToBaudRate(mode));
-        #endif
-        #ifdef DEVBOARD_1
-        Serial7.begin(modeToBaudRate(mode));
-        #endif
-        #ifdef DEVBOARD_1_1
-        Serial6.begin(modeToBaudRate(mode));;
-        #endif
+      case IO_TARGET_DISABLE:
         break;
       default:
         break;
@@ -365,6 +355,15 @@ void IO::transmitSerial(uint8_t value) {
   switch (this->target) {
     case IO_TARGET_SERIAL:
       SerialUSB1.write(value);
+      #ifdef DEVBOARD_0
+      Serial4.write(value);
+      #endif
+      #ifdef DEVBOARD_1
+      Serial7.write(value);
+      #endif
+      #ifdef DEVBOARD_1_1
+      Serial6.write(value);
+      #endif
       break;
     case IO_TARGET_SPI:
       this->serialData = SPI1.transfer(value);
@@ -403,8 +402,7 @@ void IO::transmitSerial(uint8_t value) {
         #endif
       }
       break;
-    case IO_TARGET_TXRX:
-      Serial6.write(value);
+    case IO_TARGET_DISABLE:
       break;
     default:
       break;
@@ -497,44 +495,5 @@ uint32_t IO::modeToI2CSpeed(uint8_t mode) {
       return 10000; // Low Speed Mode
     default:
       return 100000; // Normal Mode
-  }
-}
-
-uint32_t IO::modeToBaudRate(uint8_t mode) {
-  switch (mode) {
-    case 0x00:
-      return 115200;
-    case 0x01:
-      return 50;
-    case 0x02:
-      return 75;
-    case 0x03:
-      return 110;
-    case 0x04:
-      return 135;
-    case 0x05:
-      return 150;
-    case 0x06:
-      return 300;
-    case 0x07:
-      return 600;
-    case 0x08:
-      return 1200;
-    case 0x09:
-      return 1800;
-    case 0x0A:
-      return 2400;
-    case 0x0B:
-      return 3600;
-    case 0x0C:
-      return 4800;
-    case 0x0D:
-      return 7200;
-    case 0x0E:
-      return 9600;
-    case 0x0F:
-      return 19200;
-    default:
-      return 115200;
   }
 }

@@ -144,6 +144,15 @@ IO io = IO(ramData);
 void setup() {
   Serial.begin(115200);
   SerialUSB1.begin(115200);
+  #ifdef DEVBOARD_0
+  Serial4.begin(115200);
+  #endif
+  #ifdef DEVBOARD_1
+  Serial7.begin(115200);
+  #endif
+  #ifdef DEVBOARD_1_1
+  Serial6.begin(115200);
+  #endif
 
   setSyncProvider(syncTime);
   
