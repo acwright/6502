@@ -1341,6 +1341,8 @@ void initEthernet() {
 }
 
 void initServer() {
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  
   server.on("/", HTTP_GET, onServerRoot);
   server.on("/info", HTTP_GET, onServerInfo);
   server.on("/memory", HTTP_GET, onServerMemory);

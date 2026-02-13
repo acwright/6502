@@ -109,9 +109,8 @@
 
   const toggleRAM = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'A'
         }
       })
@@ -123,9 +122,8 @@
   }
   const toggleROM = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'O'
         }
       })
@@ -137,9 +135,8 @@
   }
   const toggleCart = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'L'
         }
       })
@@ -151,9 +148,8 @@
   }
   const toggleIO = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'I'
         }
       })
@@ -166,11 +162,7 @@
 
   const fetchInfo = async () => {
     try {
-      info.value = await $fetch<Info>('/api/info', {
-        query: {
-          ipAddress: info.value.ipAddress
-        }
-      })
+      info.value = await $fetch<Info>(`http://${info.value.ipAddress}/info`)
     } catch (error) {
       notification(error)
     }

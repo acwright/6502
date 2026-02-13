@@ -54,9 +54,8 @@
 
   const onLoad = async (filename: string) => {
     try {
-      await $fetch('/api/load', {
+      await $fetch(`http://${info.value.ipAddress}/load`, {
         query: {
-          ipAddress: info.value.ipAddress,
           target: target.value,
           filename: filename
         }
@@ -69,11 +68,7 @@
 
   const fetchInfo = async () => {
     try {
-      info.value = await $fetch<Info>('/api/info', {
-        query: {
-          ipAddress: info.value.ipAddress
-        }
-      })
+      info.value = await $fetch<Info>(`http://${info.value.ipAddress}/info`)
     } catch (error) {
       notification(error)
     }
@@ -81,9 +76,8 @@
 
   watch([info, target, page], async () => {
     try {
-      files.value = await $fetch<string[]>('/api/storage', {
+      files.value = await $fetch<string[]>(`http://${info.value.ipAddress}/storage`, {
         query: {
-          ipAddress: info.value.ipAddress,
           target: target.value,
           page: page.value - 1
         }

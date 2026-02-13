@@ -7,7 +7,7 @@
         size="md"
         color="primary"
         variant="solid"
-        title="Snapshot"
+        title="Refresh"
         @click="refresh"
       />
       <span class="text-xl">|</span>
@@ -95,9 +95,8 @@
   }
   const snapshot = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'P'
         }
       })
@@ -109,9 +108,8 @@
   }
   const decreaseFrequency = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: '-'
         }
       })
@@ -123,9 +121,8 @@
   }
   const increaseFrequency = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: '+'
         }
       })
@@ -139,9 +136,8 @@
     info.value.isRunning = true
     
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'R'
         }
       })
@@ -151,9 +147,8 @@
   }
   const stop = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'R'
         }
       })
@@ -165,9 +160,8 @@
   }
   const step = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'S'
         }
       })
@@ -179,9 +173,8 @@
   }
   const tick = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'K'
         }
       })
@@ -193,9 +186,8 @@
   }
   const reset = async () => {
     try {
-      await $fetch('/api/control', {
+      await $fetch(`http://${info.value.ipAddress}/control`, {
         query: {
-          ipAddress: info.value.ipAddress,
           command: 'T'
         }
       })
@@ -208,11 +200,7 @@
 
   const fetchInfo = async () => {
     try {
-      info.value = await $fetch<Info>('/api/info', {
-        query: {
-          ipAddress: info.value.ipAddress
-        }
-      })
+      info.value = await $fetch<Info>(`http://${info.value.ipAddress}/info`)
     } catch (error) {
       notification(error)
     }

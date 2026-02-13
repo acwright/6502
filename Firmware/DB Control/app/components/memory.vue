@@ -49,13 +49,12 @@
 
   watch([info, target, page], async () => {
     try {
-      const blob = await $fetch<Blob>('/api/memory', {
+      const blob = await $fetch<Blob>(`http://${info.value.ipAddress}/memory`, {
         headers: {
           'Accept': 'application/octet-stream',
         },
         responseType: 'blob',
         query: {
-          ipAddress: info.value.ipAddress,
           target: target.value,
           page: page.value - 1
         }

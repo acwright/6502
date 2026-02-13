@@ -29,11 +29,7 @@
   const connect = async () => {
     try {
       connecting.value = true
-      info.value = await $fetch<Info>('/api/info', {
-        query: {
-          ipAddress: '6502.local'
-        }
-      })
+      info.value = await $fetch<Info>('http://6502.local/info')
       connected.value = true
     } catch (error) {
       notification(error)
