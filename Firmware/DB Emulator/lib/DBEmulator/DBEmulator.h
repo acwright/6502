@@ -1,5 +1,5 @@
-#ifndef _6502_H
-#define _6502_H
+#ifndef _DBEMULATOR_H
+#define _DBEMULATOR_H
 
 #include "constants.h"
 #include "macros.h"

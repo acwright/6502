@@ -7,7 +7,7 @@
 #include <USBHost_t36.h>
 #include <QNEthernet.h>
 #include <AsyncWebServer_Teensy41.h>
-#include <6502.h>
+#include <DBEmulator.h>
 
 using namespace qindesign::network;
 
