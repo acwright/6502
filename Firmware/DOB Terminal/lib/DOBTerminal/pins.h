@@ -1,12 +1,13 @@
 #ifndef _PINS_H
 #define _PINS_H
 
-#define LCD_RESET      3  // RESET          
-#define LCD_BL         4  // BACKLIGHT           
-#define LCD_DC         5  // DATA/COMMAND     
-#define LCD_CS        10  // CHIP SELECT
-#define LCD_DATA      11  // DATA            
-#define LCD_CLOCK     13  // CLOCK
+#define TFT_RESET      3  // RESET          
+#define TFT_BL         4  // BACKLIGHT           
+#define TFT_DC         5  // DATA/COMMAND     
+#define TFT_CS        10  // CHIP SELECT
+#define TFT_MOSI      11  // MOSI  
+#define TFT_MISO      12  // MISO            
+#define TFT_CLOCK     13  // CLOCK
 
 #define BELL          14  // BELL
 

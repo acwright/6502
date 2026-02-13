@@ -1,5 +1,7 @@
 #include <Arduino.h>
 #include <DOBTerminal.h>
+#include <SPI.h>
+#include <ILI9341_t3n.h>
 
 void onCommand(char command);
 
@@ -24,6 +26,7 @@ void clearCharacterCell(uint8_t col, uint8_t row);
 
 void initPins();
 void initBuffer();
+void initTFT();
 
 uint8_t buffer[WIDTH * HEIGHT];
 
@@ -58,16 +61,19 @@ bool backgroundColorNextByte = false;
 time_t lastRenderTime = 0;
 uint8_t targetFrameTime = 17;  // 60fps = ~16.67ms per frame so 17ms
 
+ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RESET);
+
 //
 // MAIN
 //
 
 void setup() {
+  initPins();
+  initTFT();
+  initBuffer();
+
   Serial.begin(115200);
   Serial1.begin(115200);
-
-  initPins();
-  initBuffer();
 }
 
 void loop() {
@@ -92,6 +98,9 @@ void loop() {
 //
 // RENDER
 //
+
+// https://github.com/KurtE/ILI9341_t3n
+// https://forum.pjrc.com/index.php?threads/highly-optimized-ili9341-320x240-tft-color-display-library.26305/
 
 void render() {
   time_t now = millis();
@@ -602,12 +611,21 @@ void clearCharacterCell(uint8_t col, uint8_t row) {
 
 void initPins() {
   pinMode(BELL, OUTPUT);
+  pinMode(TFT_BL, OUTPUT);
+  pinMode(TFT_RESET, OUTPUT);
 
   digitalWriteFast(BELL, LOW);
+  digitalWriteFast(TFT_BL, HIGH);
+  digitalWriteFast(TFT_RESET, HIGH);
 }
 
 void initBuffer() {
   for (uint16_t i = 0; i < WIDTH * HEIGHT; i++) {
     buffer[i] = backgroundColor; 
   }
+}
+
+void initTFT() {
+  tft.begin();
+  tft.fillScreen(ILI9341_BLACK);
 }
