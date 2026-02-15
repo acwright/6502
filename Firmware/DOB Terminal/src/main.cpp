@@ -5,6 +5,7 @@
 
 void onCommand(char command);
 
+void info();
 void reset();
 void bell(uint8_t action);
 void backspace();
@@ -27,8 +28,10 @@ void clearCharacterCell(uint8_t col, uint8_t row);
 void initPins();
 void initBuffer();
 void initTFT();
+void initPalette();
 
 uint8_t buffer[WIDTH * HEIGHT];
+uint16_t palette[256]; // RGB565 color palette for 8-bit colors
 
 uint8_t mode = MODE_TEXT;
 
@@ -70,10 +73,12 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RESET);
 void setup() {
   initPins();
   initTFT();
-  initBuffer();
+  initPalette();
 
   Serial.begin(115200);
   Serial1.begin(115200);
+
+  info();
 }
 
 void loop() {
@@ -126,8 +131,8 @@ void render() {
     drawCursor(renderBuffer);
   }
   
-  // TODO: Actual rendering to display hardware will go here
-  // e.g., send renderBuffer to VGA/LCD controller
+  // Render the entire screen using 8-bit paletted bitmap function
+  tft.writeRect8BPP(0, 0, WIDTH, HEIGHT, renderBuffer, palette);
   
   lastRenderTime = now;
 }
@@ -156,6 +161,9 @@ void drawCursor(uint8_t* renderBuffer) {
 //
 
 void onCommand(char command) {
+  // Echo to the standard serial output (USB Serial)
+  Serial.write(command);
+
   if (cursorCharNextByte) {
     cursorChar = command;
     cursorCharNextByte = false;
@@ -312,6 +320,28 @@ void onCommand(char command) {
       }
       break;
   }
+}
+
+//
+// METHODS
+//
+
+void info() {
+  Serial.println();
+  Serial.println("888888 888888 888888     88888 88888 88888  8888888 8  88888 888888 8    ");                        
+  Serial.println("8    8 8    8 8    8       8   8     8   8  8  8  8 8  8   8 8    8 8    ");
+  Serial.println("8e   8 8    8 8eeee8ee     8e  8eeee 8eee8e 8e 8  8 8e 8e  8 8eeee8 8e   ");
+  Serial.println("88   8 8    8 88     8     88  88    88   8 88 8  8 88 88  8 88   8 88   ");
+  Serial.println("88   8 8    8 88     8     88  88    88   8 88 8  8 88 88  8 88   8 88   ");
+  Serial.println("88eee8 8eeee8 88eeeee8     88  88eee 88   8 88 8  8 88 88  8 88   8 88eee");
+  Serial.println();
+  Serial.print("DOB Terminal | Version: ");
+  Serial.print(VERSION);
+  Serial.println();
+  Serial.println("---------------------------------");
+  Serial.println("| Created by A.C. Wright © 2026 |");
+  Serial.println("---------------------------------");
+  Serial.println();
 }
 
 void reset() {
@@ -627,5 +657,23 @@ void initBuffer() {
 
 void initTFT() {
   tft.begin();
+  tft.setRotation(3);
   tft.fillScreen(ILI9341_BLACK);
+}
+
+void initPalette() {
+  // Generate RGB565 palette from 8-bit RGB332 color values
+  for (uint16_t i = 0; i < 256; i++) {
+    uint8_t r = (i >> 5) & 0x07;  // Extract 3-bit red
+    uint8_t g = (i >> 2) & 0x07;  // Extract 3-bit green
+    uint8_t b = i & 0x03;         // Extract 2-bit blue
+    
+    // Scale to full bit depth for RGB565
+    uint16_t r5 = (r * 255 / 7) >> 3;   // Scale 3-bit to 5-bit
+    uint16_t g6 = (g * 255 / 7) >> 2;   // Scale 3-bit to 6-bit
+    uint16_t b5 = (b * 255 / 3) >> 3;   // Scale 2-bit to 5-bit
+    
+    // Pack into RGB565 format
+    palette[i] = (r5 << 11) | (g6 << 5) | b5;
+  }
 }
