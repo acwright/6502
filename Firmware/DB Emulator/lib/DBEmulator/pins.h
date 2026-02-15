@@ -90,9 +90,9 @@
 #define MOSI1     26  // MOSI1        
 #define MISO1     1   // MISO1         
 #define SCK1      27  // SCK1         
-#define CS0       28  // CS0/RX
-#define CS1       29  // CS1/TX          
-#define CS2       39  // CS2 
+#define RX        28  // RX
+#define TX        29  // TX          
+#define CS        39  // CS
 
 #define RESET_SWB 23  // RESET SWITCH
 #define CLK_SWB   22  // CLOCK SWITCH
@@ -138,9 +138,9 @@
 #define MOSI1     26  // MOSI1        
 #define MISO1     1   // MISO1         
 #define SCK1      27  // SCK1         
-#define CS0       24  // CS0/SCL/TX
-#define CS1       25  // CS1/SDA/RX          
-#define CS2       39  // CS2
+#define TX        24  // TX
+#define RX        25  // RX          
+#define CS        39  // CS
 #define CE        35  // CE 
 
 #define RESET_SWB 23  // RESET SWITCH

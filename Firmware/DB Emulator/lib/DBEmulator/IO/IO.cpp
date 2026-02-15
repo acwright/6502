@@ -411,52 +411,32 @@ void IO::transmitSerial(uint8_t value) {
 
 void IO::modeToSPIChipSelect(uint8_t mode) {
   #ifdef DEVBOARD_1
-  uint8_t chipSelect = mode & 0b00000011;
+  uint8_t chipSelect = mode & 0b00000001;
   
-  pinMode(CS0, OUTPUT);
-  pinMode(CS1, OUTPUT);
-  pinMode(CS2, OUTPUT);
+  pinMode(CS, OUTPUT);
 
   switch (chipSelect) {
     case 0x00:
-      digitalWriteFast(CS0, HIGH);
-      digitalWriteFast(CS1, HIGH);
-      digitalWriteFast(CS2, HIGH);
+      digitalWriteFast(CS, HIGH);
       break;
     case 0x01:
-      digitalWriteFast(CS0, LOW);
-      break;
-    case 0x02:
-      digitalWriteFast(CS1, LOW);
-      break;
-    case 0x03:
-      digitalWriteFast(CS2, LOW);
+      digitalWriteFast(CS, LOW);
       break;
     default:
       break; 
   }
   #endif
   #ifdef DEVBOARD_1_1
-  uint8_t chipSelect = mode & 0b00000011;
+  uint8_t chipSelect = mode & 0b00000001;
 
-  pinMode(CS0, OUTPUT);
-  pinMode(CS1, OUTPUT);
-  pinMode(CS2, OUTPUT);
+  pinMode(CS, OUTPUT);
 
   switch (chipSelect) {
     case 0x00:
-      digitalWriteFast(CS0, HIGH);
-      digitalWriteFast(CS1, HIGH);
-      digitalWriteFast(CS2, HIGH);
+      digitalWriteFast(CS, HIGH);
       break;
     case 0x01:
-      digitalWriteFast(CS0, LOW);
-      break;
-    case 0x02:
-      digitalWriteFast(CS1, LOW);
-      break;
-    case 0x03:
-      digitalWriteFast(CS2, LOW);
+      digitalWriteFast(CS, LOW);
       break;
     default:
       break; 

@@ -127,8 +127,10 @@ uint memoryPage = 0;
 
 #ifdef MEM_EXTMEM
 EXTMEM uint8_t ramData[IO_RAM_BLOCK_SIZE * IO_RAM_BLOCK_COUNT];
+EXTMEM uint8_t serialData[1024];
 #else
 uint8_t ramData[IO_RAM_BLOCK_SIZE * IO_RAM_BLOCK_COUNT];
+uint8_t serialData[1024];
 #endif
 
 CPU cpu = CPU(read, write);
@@ -142,16 +144,19 @@ IO io = IO(ramData);
 //
 
 void setup() {
-  Serial.begin(115200);
-  SerialUSB1.begin(115200);
+  Serial.begin(115200);       // Ignored by Teensy; Baud rate is USB rate 480Mbps
+  SerialUSB1.begin(115200);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
   #ifdef DEVBOARD_0
-  Serial4.begin(115200);
+  Serial4.begin(2000000);
+  Serial4.addMemoryForWrite(serialData, 1024);
   #endif
   #ifdef DEVBOARD_1
-  Serial7.begin(115200);
+  Serial7.begin(2000000);
+  Serial7.addMemoryForWrite(serialData, 1024);
   #endif
   #ifdef DEVBOARD_1_1
-  Serial6.begin(115200);
+  Serial6.begin(2000000);
+  Serial6.addMemoryForWrite(serialData, 1024);
   #endif
 
   setSyncProvider(syncTime);
@@ -1252,13 +1257,9 @@ void initPins() {
   pinMode(MOSI1, OUTPUT);
   pinMode(MISO1, INPUT_PULLUP);
   pinMode(SCK1, OUTPUT);
-  pinMode(CS0, OUTPUT);
-  pinMode(CS1, OUTPUT);
-  pinMode(CS2, OUTPUT);
+  pinMode(CS, OUTPUT);
 
-  digitalWriteFast(CS0, HIGH);
-  digitalWriteFast(CS1, HIGH);
-  digitalWriteFast(CS2, HIGH);
+  digitalWriteFast(CS, HIGH);
   #endif
 
   #ifdef DEVBOARD_1_1
@@ -1267,14 +1268,10 @@ void initPins() {
   pinMode(MOSI1, OUTPUT);
   pinMode(MISO1, INPUT_PULLUP);
   pinMode(SCK1, OUTPUT);
-  pinMode(CS0, OUTPUT);
-  pinMode(CS1, OUTPUT);
-  pinMode(CS2, OUTPUT);
+  pinMode(CS, OUTPUT);
   pinMode(CE, OUTPUT);
 
-  digitalWriteFast(CS0, HIGH);
-  digitalWriteFast(CS1, HIGH);
-  digitalWriteFast(CS2, HIGH);
+  digitalWriteFast(CS, HIGH);
   digitalWriteFast(CE, HIGH);
   #endif
 }

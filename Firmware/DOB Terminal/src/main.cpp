@@ -46,7 +46,7 @@ uint8_t cursorMode = CURSOR_SOLID;
 bool cursorCharNextByte = false;
 time_t cursorBlinkTime = 0;
 bool cursorVisible = false;
-uint cursorBlinkInterval = 500;
+uint16_t cursorBlinkInterval = 500;
 
 uint8_t bellDuration = 0x3C; // Duration in jiffies (1/60th of a second) (Default: 1 second)
 uint8_t bellFrequency = 0x3D; // Frequency value (Default: C6) **NOT USED**
@@ -66,17 +66,21 @@ uint8_t targetFrameTime = 17;  // 60fps = ~16.67ms per frame so 17ms
 
 ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RESET);
 
+uint8_t serialBuffer[1024];
+
 //
 // MAIN
 //
 
 void setup() {
   initPins();
+  initBuffer();
   initTFT();
   initPalette();
 
-  Serial.begin(115200);
-  Serial1.begin(115200);
+  Serial.begin(115200);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
+  Serial1.begin(2000000);
+  Serial1.addMemoryForRead(&serialBuffer, sizeof(serialBuffer));
 
   info();
 }
@@ -88,15 +92,14 @@ void loop() {
 
   if (Serial.available()) {
     onCommand(Serial.read());
-  }
-  if (Serial1.available()) {
+  } else if (Serial1.available()) {
     onCommand(Serial1.read());
-  }
-
-  // Render at approximately 60fps
-  time_t now = millis();
-  if (now - lastRenderTime >= targetFrameTime) {
-    render();
+  } else {
+    // Render at approximately 60fps
+    time_t now = millis();
+    if (now - lastRenderTime >= targetFrameTime) {
+      render();
+    }
   }
 }
 
@@ -145,7 +148,7 @@ void drawCursor(uint8_t* renderBuffer) {
   // Draw cursor character with inverted colors
   for (uint8_t y = 0; y < 8; y++) {
     uint8_t rowByte = character[y];
-    uint16_t bufferRowStart = (startRow + y) * WIDTH;
+    uint32_t bufferRowStart = (startRow + y) * WIDTH;
     
     for (uint8_t x = 0; x < 8; x++) {
       uint8_t bit = (rowByte >> (7 - x)) & 1;
@@ -248,7 +251,7 @@ void onCommand(char command) {
       mode == MODE_TEXT ? mode = MODE_GRAPHICS : mode = MODE_TEXT;
       break;
     case 0x0C: // CLEAR SCREEN
-      for (uint16_t i = 0; i < WIDTH * HEIGHT; i++) {
+      for (uint32_t i = 0; i < WIDTH * HEIGHT; i++) {
         buffer[i] = backgroundColor; 
       }
       break;
@@ -364,7 +367,7 @@ void reset() {
   bellDurationNextByte = false;
   bellFrequencyNextByte = false;
 
-  for (uint16_t i = 0; i < WIDTH * HEIGHT; i++) {
+  for (uint32_t i = 0; i < WIDTH * HEIGHT; i++) {
     buffer[i] = backgroundColor; 
   }
 }
@@ -394,7 +397,7 @@ void tab() {
 void lineFeed() {
   uint8_t nextRow = row + 1;
 
-  if (nextRow > ROWS) {
+  if (nextRow >= ROWS) {
     nextRow = ROWS - 1;
     scroll(UP);
   }
@@ -551,7 +554,7 @@ void insertTextData(uint8_t data) {
   // Render 8x8 character bitmap
   for (uint8_t y = 0; y < 8; y++) {
     uint8_t rowByte = character[y];
-    uint16_t bufferRowStart = (startRow + y) * WIDTH;
+    uint32_t bufferRowStart = (startRow + y) * WIDTH;
     
     for (uint8_t x = 0; x < 8; x++) {
       uint8_t bit = (rowByte >> (7 - x)) & 1;
@@ -567,6 +570,7 @@ void insertTextData(uint8_t data) {
     row++;
     if (row >= ROWS) {
       row = ROWS - 1;
+      scroll(UP);
     }
   }
   offset = 0;
@@ -576,7 +580,7 @@ void insertGraphicsData(uint8_t data) {
   // Calculate starting pixel position (offset is the row within the 8x8 block)
   uint16_t pixelRow = row * 8 + offset;
   uint16_t startColumn = column * 8;
-  uint16_t bufferRowStart = pixelRow * WIDTH;
+  uint32_t bufferRowStart = pixelRow * WIDTH;
   
   // Write 8 pixels horizontally - each bit in data represents one pixel
   // Bit 7 (MSB) is leftmost pixel, bit 0 (LSB) is rightmost pixel
@@ -613,11 +617,10 @@ void copyCharacterCell(uint8_t sourceCol, uint8_t sourceRow, uint8_t destCol, ui
   
   // Copy 8x8 pixel block
   for (uint8_t y = 0; y < 8; y++) {
-    uint16_t sourceBufferRowStart = (sourceStartRow + y) * WIDTH;
-    uint16_t destBufferRowStart = (destStartRow + y) * WIDTH;
+    uint32_t sourceBufferRowStart = (sourceStartRow + y) * WIDTH;
+    uint32_t destBufferRowStart = (destStartRow + y) * WIDTH;
     for (uint8_t x = 0; x < 8; x++) {
-      buffer[destBufferRowStart + destStartColumn + x] = 
-        buffer[sourceBufferRowStart + sourceStartColumn + x];
+      buffer[destBufferRowStart + destStartColumn + x] = buffer[sourceBufferRowStart + sourceStartColumn + x];
     }
   }
 }
@@ -628,7 +631,7 @@ void clearCharacterCell(uint8_t col, uint8_t row) {
   
   // Clear 8x8 pixel block with background color
   for (uint8_t y = 0; y < 8; y++) {
-    uint16_t bufferRowStart = (startRow + y) * WIDTH;
+    uint32_t bufferRowStart = (startRow + y) * WIDTH;
     for (uint8_t x = 0; x < 8; x++) {
       buffer[bufferRowStart + startColumn + x] = backgroundColor;
     }
@@ -650,7 +653,7 @@ void initPins() {
 }
 
 void initBuffer() {
-  for (uint16_t i = 0; i < WIDTH * HEIGHT; i++) {
+  for (uint32_t i = 0; i < WIDTH * HEIGHT; i++) {
     buffer[i] = backgroundColor; 
   }
 }
