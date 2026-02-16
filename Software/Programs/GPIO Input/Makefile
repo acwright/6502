@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/GPIO\ Input.list -o ./build/GPIO\ Input.o ./src/GPIO\ Input.asm
-	cl65 -v -C ../../6502.cfg -o ./build/GPIO\ Input ./build/GPIO\ Input.o
+TARGET = GPIO\ Input
+CONFIG = 6502
+
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
 	
 view:
-	hexdump -C ./build/GPIO\ Input.prg
+	hexdump -C $(TARGET).prg
 
 woz:
-	bin2woz -a 0x0800 ./build/GPIO\ Input.prg > ./build/GPIO\ Input.woz
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/DB\ PRAM\ Fill.list -o ./build/DB\ PRAM\ Fill.o ./src/DB\ PRAM\ Fill.asm
-	cl65 -v -C ../../6502.cfg -o ./build/DB\ PRAM\ Fill ./build/DB\ PRAM\ Fill.o
+TARGET = DB\ PRAM\ Fill
+CONFIG = 6502
+
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
 	
 view:
-	hexdump -C ./build/DB\ PRAM\ Fill.prg
+	hexdump -C $(TARGET).prg
 
 woz:
-	bin2woz -a 0x0800 ./build/DB\ PRAM\ Fill.prg > ./build//DB\ PRAM\ Fill.woz
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

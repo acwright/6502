@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/SC\ Echo\ Flow\ Control.list -o ./build/SC\ Echo\ Flow\ Control.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/SC\ Echo\ Flow\ Control.bin ./build/SC\ Echo\ Flow\ Control.o
+TARGET = SC\ Echo\ Flow\ Control
+CONFIG = 6502
 
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
+	
 view:
-	hexdump -C ./build/SC\ Echo\ Flow\ Control.bin
+	hexdump -C $(TARGET).prg
 
-eeprom:
-	minipro -p AT28C256	-w ./build/SC\ Echo\ Flow\ Control.bin
+woz:
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

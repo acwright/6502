@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/SC\ Echo\ Interrupt.list -o ./build/SC\ Echo\ Interrupt.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/SC\ Echo\ Interrupt.bin ./build/SC\ Echo\ Interrupt.o
+TARGET = SC\ Echo\ Interrupt
+CONFIG = 6502
 
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
+	
 view:
-	hexdump -C ./build/SC\ Echo\ Interrupt.bin
+	hexdump -C $(TARGET).prg
 
-eeprom:
-	minipro -p AT28C256	-w ./build/SC\ Echo\ Interrupt.bin
+woz:
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

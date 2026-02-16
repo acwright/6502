@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/DB\ Keyboard\ Interrupt\ Echo.list -o ./build/DB\ Keyboard\ Interrupt\ Echo.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/DB\ Keyboard\ Interrupt\ Echo.bin ./build/DB\ Keyboard\ Interrupt\ Echo.o
+TARGET = DB\ Keyboard\ Interrupt\ Echo
+CONFIG = 6502
 
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
+	
 view:
-	hexdump -C ./build/DB\ Keyboard\ Interrupt\ Echo.bin
+	hexdump -C $(TARGET).prg
 
-eeprom:
-	minipro -p AT28C256	-w ./build/DB\ Keyboard\ Interrupt\ Echo.bin
+woz:
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

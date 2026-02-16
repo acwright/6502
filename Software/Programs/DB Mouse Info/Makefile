@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/DB\ Mouse\ Info.list -o ./build/DB\ Mouse\ Info.o ./src/DB\ Mouse\ Info.asm
-	cl65 -v -C ../../6502.cfg -o ./build/DB\ Mouse\ Info ./build/DB\ Mouse\ Info.o
+TARGET = DB\ Mouse\ Info
+CONFIG = 6502
+
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
 	
 view:
-	hexdump -C ./build/DB\ Mouse\ Info.prg
+	hexdump -C $(TARGET).prg
 
 woz:
-	bin2woz -a 0x0800 ./build/DB\ Mouse\ Info.prg > ./build//DB\ Mouse\ Info.woz
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

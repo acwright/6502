@@ -1,9 +1,19 @@
-make:
-	ca65 -v -l ./build/BIOS.list -o ./build/BIOS.o ./src/BIOS.asm
-	cl65 -v -C BIOS.cfg -o ./build/BIOS ./build/BIOS.o
+TARGET = BIOS
+CONFIG = BIOS
 
+.PHONY: all clean
+
+all: build
+
+build: $(TARGET).asm
+	cl65 -C $(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).bin $(TARGET).asm 
+	
 view:
-	hexdump -C ./build/BIOS.bin
+	hexdump -C $(TARGET).bin
 
 eeprom:
-	minipro -p AT28C256	-w ./build/BIOS.bin
+	minipro -p AT28C256	-w $(TARGET).bin
+
+clean:
+	rm $(TARGET).bin
+	rm $(TARGET).lst

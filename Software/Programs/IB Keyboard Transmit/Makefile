@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/IB\ Keyboard\ Transmit.list -o ./build/IB\ Keyboard\ Transmit.o ./src/*.asm
-	cl65 -v -C 6502.cfg -o ./build/IB\ Keyboard\ Transmit.bin ./build/IB\ Keyboard\ Transmit.o
+TARGET = IB\ Keyboard\ Transmit
+CONFIG = 6502
 
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
+	
 view:
-	hexdump -C ./build/IB\ Keyboard\ Transmit.bin
+	hexdump -C $(TARGET).prg
 
-eeprom:
-	minipro -p AT28C256	-w ./build/IB\ Keyboard\ Transmit.bin
+woz:
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/VC\ Text.list -o ./build/VC\ Text.o ./src/VC\ Text.asm
-	cl65 -v -C ../../6502.cfg -o ./build/VC\ Text ./build/VC\ Text.o
+TARGET = VC\ Text
+CONFIG = 6502
+
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
 	
 view:
-	hexdump -C ./build/VC\ Text.prg
+	hexdump -C $(TARGET).prg
 
 woz:
-	bin2woz -a 0x0800 ./build/VC\ Text.prg > ./build/VC\ Text.woz
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

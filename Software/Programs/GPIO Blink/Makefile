@@ -1,9 +1,20 @@
-make:
-	ca65 -v -l ./build/GPIO\ Blink.list -o ./build/GPIO\ Blink.o ./src/GPIO\ Blink.asm
-	cl65 -v -C ../../6502.cfg -o ./build/GPIO\ Blink ./build/GPIO\ Blink.o
+TARGET = GPIO\ Blink
+CONFIG = 6502
+
+.PHONY: all clean
+
+all: build woz
+
+build: $(TARGET).asm
+	cl65 -C ../../$(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).prg $(TARGET).asm 
 	
 view:
-	hexdump -C ./build/GPIO\ Blink.prg
+	hexdump -C $(TARGET).prg
 
 woz:
-	bin2woz -a 0x0800 ./build/GPIO\ Blink.prg > ./build/GPIO\ Blink.woz
+	bin2woz -a 0x0800 $(TARGET).prg > $(TARGET).woz
+
+clean:
+	rm $(TARGET).prg
+	rm $(TARGET).woz
+	rm $(TARGET).lst

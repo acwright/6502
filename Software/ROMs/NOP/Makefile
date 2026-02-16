@@ -1,9 +1,19 @@
-make:
-	ca65 -v -l ./build/NOP.list -o ./build/NOP.o ./src/NOP.asm
-	cl65 -v -C NOP.cfg -o ./build/NOP.bin ./build/NOP.o
+TARGET = NOP
+CONFIG = NOP
 
+.PHONY: all clean
+
+all: build
+
+build: $(TARGET).asm
+	cl65 -C $(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).bin $(TARGET).asm 
+	
 view:
-	hexdump -C ./build/NOP.bin
+	hexdump -C $(TARGET).bin
 
 eeprom:
-	minipro -p AT28C256	-w ./build/NOP.bin
+	minipro -p AT28C256	-w NOP.bin
+
+clean:
+	rm $(TARGET).bin
+	rm $(TARGET).lst

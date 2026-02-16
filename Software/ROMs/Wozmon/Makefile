@@ -1,9 +1,19 @@
-make:
-	ca65 -v -l ./build/Wozmon.list -o ./build/Wozmon.o ./src/Wozmon.asm
-	cl65 -v -C Wozmon.cfg -o ./build/Wozmon ./build/Wozmon.o
+TARGET = Wozmon
+CONFIG = Wozmon
+
+.PHONY: all clean
+
+all: build
+
+build: $(TARGET).asm
+	cl65 -C $(CONFIG).cfg -l $(TARGET).lst -o $(TARGET).bin $(TARGET).asm 
 	
 view:
-	hexdump -C ./build/Wozmon.bin
+	hexdump -C $(TARGET).bin
 
 eeprom:
-	minipro -p AT28C256	-w ./build/Wozmon.bin
+	minipro -p AT28C256	-w $(TARGET).bin
+
+clean:
+	rm $(TARGET).bin
+	rm $(TARGET).lst
