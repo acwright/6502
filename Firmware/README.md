@@ -14,3 +14,10 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **SCP**: Storage Card Pro
 - **VGAP**: VGA Card Pro
 - **VCP**: Video Card Pro
+
+Or the following to indicate specific system environments:
+
+- **COB**: The "COB"
+- **DEV**: The "DEV"
+- **KIM**: The "KIM"
+- **VCS**: The "VCS"

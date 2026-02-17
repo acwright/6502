@@ -76,8 +76,8 @@ See the [README](./CAD/README.md) file in the CAD folder for more details.
 
 ## Firmware
 
-The [Firmware](./Firmware) folder contains the source code for the firmware running on the various microcontrollers used in the project, such as the Teensy 4.1. 
-The firmware is written in C/C++ and is designed to interface with the 65(c)02 and other hardware components. 
+The [Firmware](./Firmware) folder contains the source code for the firmware running on the various microcontrollers used in the project, such as the Teensy 4.1, and the BIOS code for the various systems. 
+The firmware is written in C/C++ or Assembly and is designed to interface with the 65(c)02 and other hardware components. 
 See the [README](./Firmware/README.md) file in the Firmware folder for more details.
 
 ## Hardware
@@ -151,12 +151,6 @@ See the [README](./Production/README.md) file in the Production folder for more 
 The [Schematics](./Schematics) folder contains the schematic diagrams for all the PCBs in the project. 
 These schematics are created using KiCad and provide detailed information about the components and connections used in each board. 
 See the [README](./Schematics/README.md) file in the Schematics folder for more details.
-
-## Software
-
-The [Software](./Software) folder contains various example projects written in assembly language for the 65(c)02. 
-These examples demonstrate how to interface with the various hardware components and peripherals. 
-See the [README](./Software/README.md) file in the Software folder for more details.
 
 ## Licensing
 

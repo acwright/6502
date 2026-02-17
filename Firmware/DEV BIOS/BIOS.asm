@@ -4,7 +4,7 @@
 
 .setcpu "65C02"
 
-.include "../../6502.inc"
+.include "BIOS.inc"
 
 .segment "KERNAL"
 .include "src/Kernal.asm"
