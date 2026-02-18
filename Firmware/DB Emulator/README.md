@@ -34,11 +34,10 @@ DB Emulator transforms a Teensy 4.1 into a powerful 6502 computer system emulato
 
 ### Hardware Variants
 
-The firmware supports three development board configurations:
+The firmware supports two development board configurations:
 
 - **DevBoard 0** (`devboard_0`): Original development board
-- **DevBoard 1** (`devboard_1`): Enhanced board with PSRAM support
-- **DevBoard 1.1** (`devboard_1_1`): Latest revision
+- **DevBoard 1** (`devboard_1`): Latest revision with improved layout and additional features (recommended)
 
 ## Prerequisites
 
@@ -53,7 +52,7 @@ The firmware supports three development board configurations:
   - USB keyboard
   - USB mouse
   - USB joystick (Xbox 360/One)
-  - PSRAM chip (for DevBoard 1 configuration)
+  - PSRAM chip (for extended memory support)
 
 ### Software Requirements
 
@@ -123,9 +122,8 @@ Additional dependencies included in the project:
 
 Edit `platformio.ini` or use the PlatformIO environment selector to choose your board configuration:
 
-- **devboard_0**: Original development board (no PSRAM)
-- **devboard_1**: Enhanced board with PSRAM support
-- **devboard_1_1**: Latest revision
+- **devboard_0**: Original development board
+- **devboard_1**: Latest revision with improved layout and additional features (recommended)
 
 ### Build Flags
 
@@ -138,7 +136,7 @@ build_flags =
     ; -D MOUSE_DEBUG        ; Enable mouse debugging output
     ; -D JOYSTICK_DEBUG     ; Enable joystick debugging output
     ; -D KEYBOARD_DEBUG     ; Enable keyboard debugging output
-    -D MEM_EXTMEM           ; Use external PSRAM (DevBoard 1 only)
+    -D MEM_EXTMEM           ; Use external PSRAM
 ```
 
 ### SD Card Setup (Optional)
@@ -165,7 +163,7 @@ build_flags =
 
 2. **Select your environment**:
    - Click the environment selector in the status bar
-   - Choose `devboard_0`, `devboard_1`, or `devboard_1_1`
+   - Choose `devboard_0`, or `devboard_1`
 
 3. **Build the project**:
    - Click the ✓ (Build) button in the status bar
@@ -355,9 +353,8 @@ Executes control command:
 **Problem**: Compilation errors with PSRAM
 
 **Solutions**:
-- Ensure `MEM_EXTMEM` flag matches your hardware
-- DevBoard 0 and 1.1 should NOT have this flag enabled
-- Only DevBoard 1 supports PSRAM
+- Ensure `MEM_EXTMEM` flag matches your hardware configuration
+- Check PSRAM wiring and connections
 
 ### Upload Issues
 

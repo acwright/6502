@@ -16,11 +16,6 @@
 #include <SPI.h>
 #endif
 
-#ifdef DEVBOARD_1_1
-#include <Wire.h>
-#include <SPI.h>
-#endif
-
 /* ------------------------------------------------------------------ */
 /*                                REGISTERS                           */
 /* ------------------------------------------------------------------ */
@@ -64,20 +59,19 @@
 /* ------------------------------------------------------------------ */
 /*                                                                    */
 /* SERIAL CONTROL REGISTER                                            */
-/* | 7   | 6  | 5  | 4  | 3  | 2  | 1  | 0  |                         */
-/* | IE  | CE | TO | T0 | M3 | M2 | M1 | M0 |                         */
-/* | 0   | 0  | 0  | 0  | 0  |  0 |  0 |  0 |  <- Default Values      */
+/* | 7   | 6 | 5  | 4  | 3  | 2  | 1  | 0  |                          */
+/* | IE  | X | T1 | T0 | M3 | M2 | M1 | M0 |                          */
+/* | 0   | 0 | 0  | 0  | 0  | 0  | 0  | 0  |  <- Default Values       */
 /*                                                                    */
 /* IE    - Interrupt Enable (1 = ENABLED, 0 = DISABLED)               */
-/* CE    - Chip Enable Pin (1 = LOW, 0 = HIGH) (Dev Board 1.1 ONLY)   */
 /* T0-1  - Target Select                                              */
 /* M0-3  - Mode Select (Target dependent; See code)                   */
 /*                                                                    */
 /* TARGET:                                                            */
 /* | T1 | T0 |     TARGET     |                                       */
 /* | 0  | 0  |     SERIAL     |  USB and HW Serial                    */
-/* | 0  | 1  |      SPI       |  Dev Board 1.0 and 1.1 ONLY           */
-/* | 1  | 0  |      I2C       |  Dev Board 0.0 and 1.1 ONLY           */
+/* | 0  | 1  |      SPI       |  Dev Board 1.0 ONLY                   */
+/* | 1  | 0  |      I2C       |  Dev Board 0.0 ONLY                   */
 /* | 1  | 1  |    DISABLE     |  Disabled                             */
 /*                                                                    */
 /* SERIAL STATUS REGISTER                                             */

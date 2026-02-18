@@ -138,12 +138,6 @@ uint8_t IO::tick() {
         this->serialStatus |= IO_SER_STATUS_DA;
       }
       #endif
-      #ifdef DEVBOARD_1_1
-      if (Serial6.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
-        this->serialData = Serial6.read();
-        this->serialStatus |= IO_SER_STATUS_DA;
-      }
-      #endif
       break;
     case IO_TARGET_SPI:
       break; // Do Nothing
@@ -152,12 +146,6 @@ uint8_t IO::tick() {
         #ifdef DEVBOARD_0
         if (Wire1.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
           this->serialData = Wire1.read();
-          this->serialStatus |= IO_SER_STATUS_DA;
-        }
-        #endif
-        #ifdef DEVBOARD_1_1
-        if (Wire2.available() && (this->serialStatus & IO_SER_STATUS_DA) == 0) {
-          this->serialData = Wire2.read();
           this->serialStatus |= IO_SER_STATUS_DA;
         }
         #endif
@@ -185,9 +173,6 @@ void IO::reset() {
   #endif
   #ifdef DEVBOARD_1
   Serial7.clear();
-  #endif
-  #ifdef DEVBOARD_1_1
-  Serial6.clear();
   #endif
 
   this->serialData = 0x00;
@@ -279,11 +264,6 @@ void IO::configureSerial(uint8_t value) {
         SPI1.endTransaction();
         SPI1.end();
         #endif
-        #ifdef DEVBOARD_1_1
-        modeToSPIChipSelect(mode);
-        SPI1.endTransaction();
-        SPI1.end();
-        #endif
         break;
       case IO_TARGET_I2C:
         #ifdef DEVBOARD_0
@@ -291,14 +271,6 @@ void IO::configureSerial(uint8_t value) {
           Wire1.endTransmission();
         }
         Wire1.end();
-        this->i2cAddress = 0x00;
-        this->i2cRead = false;
-        #endif
-        #ifdef DEVBOARD_1_1
-        if (this->i2cReadWrite == IO_I2C_WRITE) {
-          Wire2.endTransmission();
-        }
-        Wire2.end();
         this->i2cAddress = 0x00;
         this->i2cRead = false;
         #endif
@@ -321,20 +293,11 @@ void IO::configureSerial(uint8_t value) {
         SPI1.beginTransaction(SPISettings(modeToSPISpeed(mode), MSBFIRST, SPI_MODE0));
         modeToSPIChipSelect(mode);
         #endif
-        #ifdef DEVBOARD_1_1
-        SPI1.begin();
-        SPI1.beginTransaction(SPISettings(modeToSPISpeed(mode), MSBFIRST, SPI_MODE0));
-        modeToSPIChipSelect(mode);
-        #endif
         break;
       case IO_TARGET_I2C:
         #ifdef DEVBOARD_0
         Wire1.begin();
         Wire1.setClock(modeToI2CSpeed(mode));
-        #endif
-        #ifdef DEVBOARD_1_1
-        Wire2.begin();
-        Wire2.setClock(modeToI2CSpeed(mode));
         #endif
         break;
       case IO_TARGET_DISABLE:
@@ -343,10 +306,6 @@ void IO::configureSerial(uint8_t value) {
         break;
     }
   }
-
-  #ifdef DEVBOARD_1_1
-  digitalWriteFast(CE, (value & IO_SER_CTRL_CE) >> 6 ? LOW : HIGH);
-  #endif
 }
 
 void IO::transmitSerial(uint8_t value) {
@@ -360,9 +319,6 @@ void IO::transmitSerial(uint8_t value) {
       #endif
       #ifdef DEVBOARD_1
       Serial7.write(value);
-      #endif
-      #ifdef DEVBOARD_1_1
-      Serial6.write(value);
       #endif
       break;
     case IO_TARGET_SPI:
@@ -379,25 +335,13 @@ void IO::transmitSerial(uint8_t value) {
           Wire1.beginTransmission(this->i2cAddress);
         }
         #endif
-        #ifdef DEVBOARD_1_1
-        if (!this->i2cRead) {
-          Wire2.beginTransmission(this->i2cAddress);
-        }
-        #endif
-      // Subsequent bytes are written if writing to I2C or sets number of bytes to read
+        // Subsequent bytes are written if writing to I2C or sets number of bytes to read
       } else {
         #ifdef DEVBOARD_0
         if (this->i2cRead) {
           Wire1.requestFrom(this->i2cAddress, value);
         } else {
           Wire1.write(value);
-        }
-        #endif
-        #ifdef DEVBOARD_1_1
-        if (this->i2cRead) {
-          Wire2.requestFrom(this->i2cAddress, value);
-        } else {
-          Wire2.write(value);
         }
         #endif
       }
@@ -413,22 +357,6 @@ void IO::modeToSPIChipSelect(uint8_t mode) {
   #ifdef DEVBOARD_1
   uint8_t chipSelect = mode & 0b00000001;
   
-  pinMode(CS, OUTPUT);
-
-  switch (chipSelect) {
-    case 0x00:
-      digitalWriteFast(CS, HIGH);
-      break;
-    case 0x01:
-      digitalWriteFast(CS, LOW);
-      break;
-    default:
-      break; 
-  }
-  #endif
-  #ifdef DEVBOARD_1_1
-  uint8_t chipSelect = mode & 0b00000001;
-
   pinMode(CS, OUTPUT);
 
   switch (chipSelect) {

@@ -17,9 +17,6 @@ Button runStopButton  = Button();
 #ifdef DEVBOARD_1
 Button resetButton    = Button();
 #endif
-#ifdef DEVBOARD_1_1
-Button resetButton    = Button();
-#endif
 
 USBHost             usb;
 USBHub              hub1(usb);
@@ -154,10 +151,6 @@ void setup() {
   Serial7.begin(2000000);
   Serial7.addMemoryForWrite(serialData, 1024);
   #endif
-  #ifdef DEVBOARD_1_1
-  Serial6.begin(2000000);
-  Serial6.addMemoryForWrite(serialData, 1024);
-  #endif
 
   setSyncProvider(syncTime);
   
@@ -191,9 +184,6 @@ void loop() {
   #ifdef DEVBOARD_1
   resetButton.update();
   #endif
-  #ifdef DEVBOARD_1_1
-  resetButton.update();
-  #endif
 
   if (intButton.pressed()) {
     increaseFrequency();
@@ -205,11 +195,6 @@ void loop() {
     toggleRunStop();
   }
   #ifdef DEVBOARD_1
-  if (resetButton.pressed()) {
-    reset();
-  }
-  #endif
-  #ifdef DEVBOARD_1_1
   if (resetButton.pressed()) {
     reset();
   }
@@ -1261,19 +1246,6 @@ void initPins() {
 
   digitalWriteFast(CS, HIGH);
   #endif
-
-  #ifdef DEVBOARD_1_1
-  pinMode(RESET_SWB, INPUT_PULLUP);
-
-  pinMode(MOSI1, OUTPUT);
-  pinMode(MISO1, INPUT_PULLUP);
-  pinMode(SCK1, OUTPUT);
-  pinMode(CS, OUTPUT);
-  pinMode(CE, OUTPUT);
-
-  digitalWriteFast(CS, HIGH);
-  digitalWriteFast(CE, HIGH);
-  #endif
 }
 
 void initButtons() {
@@ -1290,12 +1262,6 @@ void initButtons() {
   runStopButton.setPressedState(LOW);
 
   #ifdef DEVBOARD_1
-  resetButton.attach(RESET_SWB, INPUT_PULLUP);
-  resetButton.interval(DEBOUNCE);
-  resetButton.setPressedState(LOW);
-  #endif
-
-  #ifdef DEVBOARD_1_1
   resetButton.attach(RESET_SWB, INPUT_PULLUP);
   resetButton.interval(DEBOUNCE);
   resetButton.setPressedState(LOW);
