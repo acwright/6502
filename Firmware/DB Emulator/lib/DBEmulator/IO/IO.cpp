@@ -30,16 +30,14 @@ uint8_t IO::read(uint16_t address) {
   } else { // REGISTERS
     switch(address & 0x0F) {
       case 0x00: {
-        uint8_t data = this->serialData;
         this->serialStatus &= ~IO_SER_STATUS_DA; // Reading from serial data clears data available bit
-        return data;
+        return this->serialData;
       }
       case 0x01:
         return this->serialStatus;
       case 0x02: {
-        uint8_t data = this->keyboardData; 
         this->keyboardData &= ~IO_KEY_AVAILABLE; // Reading from KB data clears key available bit
-        return data;
+        return this->keyboardData;
       }
       case 0x03:
         return this->mouseXData;

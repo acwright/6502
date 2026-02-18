@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <DOBTerminal.h>
+#include <notes.h>
 #include <SPI.h>
 #include <ILI9341_t3n.h>
 
@@ -29,6 +30,20 @@ void initPins();
 void initBuffer();
 void initTFT();
 void initPalette();
+void processBellQueue();
+
+// Bell queue structure
+struct BellRequest {
+  uint8_t frequency;
+  uint8_t duration;
+};
+
+#define BELL_QUEUE_SIZE 32
+BellRequest bellQueue[BELL_QUEUE_SIZE];
+uint8_t bellQueueHead = 0;
+uint8_t bellQueueTail = 0;
+uint8_t bellQueueCount = 0;
+bool bellPlaying = false;
 
 uint8_t buffer[WIDTH * HEIGHT];
 uint16_t palette[256]; // RGB565 color palette for 8-bit colors
@@ -49,7 +64,7 @@ bool cursorVisible = false;
 uint16_t cursorBlinkInterval = 500;
 
 uint8_t bellDuration = 0x3C; // Duration in jiffies (1/60th of a second) (Default: 1 second)
-uint8_t bellFrequency = 0x3D; // Frequency value (Default: C6) **NOT USED**
+uint8_t bellFrequency = 0x3D; // Frequency value (Default: C6)
 bool bellDurationNextByte = false;
 bool bellFrequencyNextByte = false;
 time_t bellEnd = 0;
@@ -86,9 +101,7 @@ void setup() {
 }
 
 void loop() {
-  if (millis() >= bellEnd) {
-    bell(BELL_END);
-  }
+  processBellQueue();
 
   if (Serial.available()) {
     onCommand(Serial.read());
@@ -366,6 +379,15 @@ void reset() {
   backgroundColorNextByte = false;
   bellDurationNextByte = false;
   bellFrequencyNextByte = false;
+  
+  // Clear bell queue
+  bellQueueHead = 0;
+  bellQueueTail = 0;
+  bellQueueCount = 0;
+  if (bellPlaying) {
+    noTone(BELL);
+    bellPlaying = false;
+  }
 
   for (uint32_t i = 0; i < WIDTH * HEIGHT; i++) {
     buffer[i] = backgroundColor; 
@@ -374,11 +396,33 @@ void reset() {
 
 void bell(uint8_t action) {
   if (action == BELL_START) {
-    bellEnd = millis() + (bellDuration * (1000 / 60));
-    digitalWriteFast(BELL, HIGH);
+    // Add current bell settings to the queue
+    if (bellQueueCount < BELL_QUEUE_SIZE) {
+      bellQueue[bellQueueTail].frequency = bellFrequency;
+      bellQueue[bellQueueTail].duration = bellDuration;
+      bellQueueTail = (bellQueueTail + 1) % BELL_QUEUE_SIZE;
+      bellQueueCount++;
+    }
   }
-  if (action == BELL_END) {
-    digitalWriteFast(BELL, LOW);
+}
+
+void processBellQueue() {
+  // Check if current bell has finished playing
+  if (bellPlaying && millis() >= bellEnd) {
+    noTone(BELL);
+    bellPlaying = false;
+  }
+  
+  // Start next bell if queue has requests and nothing is currently playing
+  if (!bellPlaying && bellQueueCount > 0) {
+    BellRequest& request = bellQueue[bellQueueHead];
+    bellEnd = millis() + (request.duration * (1000 / 60));
+    tone(BELL, NOTE_FREQUENCIES[request.frequency]);
+    bellPlaying = true;
+    
+    // Remove processed request from queue
+    bellQueueHead = (bellQueueHead + 1) % BELL_QUEUE_SIZE;
+    bellQueueCount--;
   }
 }
 

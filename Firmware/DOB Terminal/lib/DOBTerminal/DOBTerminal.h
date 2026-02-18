@@ -4,5 +4,6 @@
 #include "characters.h"
 #include "constants.h"
 #include "pins.h"
+#include "notes.h"
 
 #endif
