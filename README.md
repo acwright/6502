@@ -94,7 +94,7 @@ The [Hardware](./Hardware) folder contains KICAD files for the system's custom-d
 - **Backplane Board**: A backplane board that provides multiple card slots for peripheral cards and connects to the main board via a ribbon cable.
 - **Backplane Board Pro**: An enhanced version of the backplane board with addition of clock, reset and power circuitry.
 - **Dev Board**: The development board emulates the 65(c)02 using a Teensy 4.1 running custom firmware and using [vrEmu6502](https://github.com/visrealm/vrEmu6502).
-- **Dev Output Board**: A compliment to the Dev Board that provides [VT-AC](https://github.com/acwright/VT-AC) compatible ASCII terminal display output using a 2.4in LCD. **UNTESTED**
+- **Dev Output Board**: A compliment to the Dev Board that provides [VT-AC](https://github.com/acwright/VT-AC) compatible ASCII terminal display output using a 2.4in LCD.
 - **Input Board**: A board that provides PS/2 keyboard and mouse input along with SNES controller support.
 - **LCD Board**: A board that provides a 320x240 LCD display via a 6522 VIA interface. **UNTESTED**
 - **Main Board**: The main board that contains the 65(c)02 CPU, 32K RAM, 32K ROM along with bus connection, clock and reset circuitry.
@@ -134,7 +134,7 @@ The [Hardware](./Hardware) folder contains KICAD files for the system's custom-d
 - **Keyboard Encoder Helper**: A board that translates keyboard scan data and PS/2 keyboard data to ASCII using the Atmega1284p.
 - **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input. **UNTESTED**
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper. **UNTESTED**
-- **Mega Helper**: A board that interfaces the Arduino Mega 2560 R3 with 6502 bus. **UNTESTED**
+- **Mega Helper**: A board that interfaces the Arduino Mega 2560 R3 with 6502 bus.
 - **PS2 Helper**: A board that allows connection of a PS/2 keyboard using the Atmega328p.
 
 **Carts**:
