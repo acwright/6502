@@ -3,7 +3,7 @@
 
 #include "characters.h"
 #include "constants.h"
+#include "frequencies.h"
 #include "pins.h"
-#include "notes.h"
 
 #endif

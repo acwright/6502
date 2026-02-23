@@ -1272,19 +1272,9 @@ void initSD() {
   SD.begin(BUILTIN_SDCARD);
 
   if (SD.mediaPresent()) {
-    if (SD.exists("BIOS.bin")) {
-      loadROMPath("BIOS.bin");
+    if (SD.exists("ROMs/BIOS.bin")) {
+      loadROMPath("ROMs/BIOS.bin");
       rom.file = "BIOS.bin";
-      autoStart = true;
-    } else if (SD.exists("ROM.bin")) {
-      loadROMPath("ROM.bin");
-      rom.file = "ROM.bin";
-      autoStart = true;
-    }
-    if (SD.exists("Cart.bin")) {
-      loadCartPath("Cart.bin");
-      cart.file = "Cart.bin";
-      cart.enabled = true;
       autoStart = true;
     }
   }

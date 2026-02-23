@@ -1,6 +1,5 @@
 #include <Arduino.h>
 #include <DOBTerminal.h>
-#include <notes.h>
 #include <SPI.h>
 #include <ILI9341_t3n.h>
 
@@ -396,6 +395,13 @@ void reset() {
 
 void bell(uint8_t action) {
   if (action == BELL_START) {
+    const size_t frequencyCount = sizeof(FREQUENCIES) / sizeof(FREQUENCIES[0]);
+
+    // Ignore invalid bell requests
+    if (bellFrequency == 0 || bellDuration == 0 || bellFrequency >= frequencyCount) {
+      return;
+    }
+
     // Add current bell settings to the queue
     if (bellQueueCount < BELL_QUEUE_SIZE) {
       bellQueue[bellQueueTail].frequency = bellFrequency;
@@ -417,7 +423,7 @@ void processBellQueue() {
   if (!bellPlaying && bellQueueCount > 0) {
     BellRequest& request = bellQueue[bellQueueHead];
     bellEnd = millis() + (request.duration * (1000 / 60));
-    tone(BELL, NOTE_FREQUENCIES[request.frequency]);
+    tone(BELL, FREQUENCIES[request.frequency]);
     bellPlaying = true;
     
     // Remove processed request from queue

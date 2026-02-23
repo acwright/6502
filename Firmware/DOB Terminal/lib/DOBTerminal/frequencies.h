@@ -1,12 +1,12 @@
-#ifndef _NOTES_H
-#define _NOTES_H
+#ifndef _FREQUENCIES_H
+#define _FREQUENCIES_H
 
 #include <stdint.h>
 
 // Note frequency lookup table (hex values $01-$54 mapped to Hz)
 // Index corresponds to note value (0x00-0x54)
-const float NOTE_FREQUENCIES[] = {
-  0.0,       // 0x00 - unused
+const float FREQUENCIES[] = {
+  0.0,       // 0x00 - NONE
   32.70,     // 0x01 - C1
   34.65,     // 0x02 - C#1
   36.71,     // 0x03 - D1
