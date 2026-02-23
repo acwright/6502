@@ -29,7 +29,7 @@ The project supports the creation of several different computer systems, includi
   * 1x Backplane Helper
   * 1x CPU Card (or 1x CPU Card Pro)
   * 1x Memory Card
-  * 1x Video Card (or 1x Video Card Pro)
+  * 1x Video Card (or 1x Video Card Pro or 1x VGA Card)
   * 1x Sound Card
   * 1x Storage Card (or 1x Storage Card Pro)
   * 1x Serial Card (or 1x Serial Card Pro)
