@@ -4,7 +4,7 @@
 ## A 65(c)02 Based 8-Bit Retro Computer Project
 
 ![The 6502 Project](./Assets/Images/6502.png?raw=true)
-*Shown above are some of the PCBs from the 6502 project*
+*Shown above are some of the systems that can be assembled from the 6502 project*
 
 ## Overview
 
@@ -22,6 +22,7 @@ The project supports the creation of several different computer systems, includi
 **The "COB" (COMPUTER ON-A BACKPLANE)**: A compact 8-bit computer on a backplane:
 
 ![The COB](./CAD/Bases/The%20COB/The%20COB.png?raw=true)
+![The COB](./Assets/Images/COB.png?raw=true)
 
   * 1x Backplane
   * 1x Backplane Pro
@@ -42,15 +43,17 @@ The project supports the creation of several different computer systems, includi
 **The "DEV" (DEVELOPMENT ENVIRONMENT VEHICLE)**: A development system featuring an emulated 65(c)02 CPU:
 
 ![The DEV](./CAD/Bases/The%20DEV/The%20DEV.png?raw=true)
+![The DEV](./Assets/Images/DEV.png?raw=true)
 
   * 1x Dev Board
-  * 1x Dev Output Board
+  * 1x Dev Output Board (or 1x LCD Board or 1x Output Board)
 
 ---
 
 **The "KIM" (KEYPAD INPUT MONITOR)**: A modern take on the classic KIM-1 computer:
 
 ![The KIM](./CAD/Bases/The%20KIM/The%20KIM.png?raw=true)
+![The KIM](./Assets/Images/KIM.png?raw=true)
 
   * 1x Main Board
   * 1x Backplane Helper
@@ -64,10 +67,12 @@ The project supports the creation of several different computer systems, includi
 **The "VCS" (VIDEO COMPUTER SYSTEM)**: A retro-style gaming console:
 
 ![The VCS](./CAD/Bases/The%20VCS/The%20VCS.png?raw=true)
+![The VCS](./Assets/Images/VCS.png?raw=true)
 
   * 1x Main Board
   * 1x Input Board
   * 1x Output Board
+  * 1x ROM Cart
 
 ## CAD
 
