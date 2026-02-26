@@ -26,35 +26,13 @@ USER_VARS           := $0400             ; $0400-$07FF
 ; Program
 PROGRAM             := $0800             ; $0800-$7FFF
 
-; RAM Card | IO 1 & 2 | $8000-$87FF 
-RAM_DATA            := $8000             ; R/W ($8000-$83FE)
+; RAM Card | IO 1 | $8000-$83FF 
 RAM_DATA_L          := $8000             ; R/W ($8000-$83FE)
-RAM_DATA_H          := $8400             ; R/W ($8400-$87FE)
-RAM_BANK            := $83FF             ; All three RAM_BANK addresses address the same bank switching
-RAM_BANK_L          := $83FF             ; latch and can be univerally interchanged
-RAM_BANK_H          := $87FF             ; RAM bank latch value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
+RAM_BANK_L          := $83FF             ; Write-only RAM bank latch, value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
 
-; Emulator | IO 2 | $8400-$840F 
-EMU_SER_DATA        := $8400             ; R/W
-EMU_SER_CTRL        := $8401             ; Write
-EMU_SER_STATUS      := $8401             ; Read
-EMU_KB_CMD          := $8402             ; Write
-EMU_KB_DATA         := $8402             ; Read
-EMU_MOUSE_X         := $8403             ; Read
-EMU_MOUSE_Y         := $8404             ; Read
-EMU_MOUSE_W         := $8405             ; Read
-EMU_MOUSE_BTNS      := $8406             ; Read
-EMU_JOY_BTNS        := $8407             ; Read
-EMU_RTC_SEC         := $8408             ; Read
-EMU_RTC_MIN         := $8409             ; Read
-EMU_RTC_HR          := $840A             ; Read
-EMU_RTC_DAY         := $840B             ; Read
-EMU_RTC_MON         := $840C             ; Read
-EMU_RTC_YR          := $840D             ; Read
-EMU_PRAM_DATA       := $840E             ; R/W
-EMU_PRAM_ADDR       := $840F             ; R/W
-EMU_RAM             := $8600             ; R/W
-EMU_RAM_BANK        := $87FF             ; Write
+; RAM Card | IO 2 | $8400-$87FF 
+RAM_DATA_H          := $8400             ; R/W ($8400-$87FE)
+RAM_BANK_H          := $87FF             ; Write-only RAM bank latch, value ($00-$FF) sets which of 256 ~1K banks of RAM is selected in both H or L
 
 ; RTC Card | IO 3 | $8800-$881F
 RTC_SEC             := $8800
@@ -127,7 +105,7 @@ GPIO_IER            := $940E
 GPIO_ORA            := $940F
 
 ; Sound Card (SID/ARMSID) | IO 7 | $9800-$980F
-
+; TODO: Add ARMSID registers
 
 ; Sound Card (AY-3-8912) | IO 7 | $9800-$980F
 AY_PORTB            := $9800

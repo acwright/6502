@@ -30,8 +30,10 @@ RESET:
 ; Initialize the serial output
 ; Modifies: Flags, A
 INIT_SC:
-  lda #%10000000                ; Interupts enabled, USB Serial, 115200 baud.
-  sta EMU_SER_CTRL
+  lda     #$10              ; 8-N-1, 115200 baud
+  sta     SC_CTRL
+  lda     #$09              ; No parity, no echo, transmit interrupts disabled, receive interrupts enabled
+  sta     SC_CMD
   rts
 
 ; Initialize the INPUT_BUFFER
@@ -68,7 +70,7 @@ BUFFER_SIZE:
 
 ; Get a character from the INPUT_BUFFER if available
 ; On return, carry flag indicates whether a character was available
-; If character available the character will be in the A regsiter
+; If character available the character will be in the A register
 ; Modifies: Flags, A
 CHRIN:
   phx
@@ -87,7 +89,13 @@ CHRIN:
 ; Output a character from the A register to the Serial Card
 ; Modifies: Flags
 CHROUT:
-  sta EMU_SER_DATA
+  sta SC_DATA
+  pha
+@CHROUT_WAIT:
+  lda SC_STATUS
+  and #%00010000                ; Check if tx buffer not empty
+  beq @CHROUT_WAIT              ; Loop if tx buffer not empty
+  pla
   rts
 
 ; NMI Handler
@@ -98,10 +106,10 @@ NMI:
 IRQ:
   pha
   phx
-  lda EMU_SER_STATUS
+  lda SC_STATUS
   and #%10000000                ; Check if serial data caused the interrupt
   beq @IRQ_EXIT                 ; If not, exit
-  lda EMU_SER_DATA              ; Read the data from serial register
+  lda SC_DATA                   ; Read the data from serial register
   jsr WRITE_BUFFER              ; Store to the input buffer
 @IRQ_EXIT:
   plx

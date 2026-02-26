@@ -30,7 +30,13 @@
 /* |                  | */
 /* -------------------- */
 
-#define VERSION         "1.1"
+#ifdef DEVBOARD_0
+#define VERSION         "0.0"
+#elif DEVBOARD_1
+#define VERSION         "1.0"
+#else
+#define VERSION         "Unknown"
+#endif
 
 #define RAM_START       0x0000
 #define RAM_END         0x7FFF
@@ -53,9 +59,9 @@
 
 #define PAGE_SIZE       0x100
 
-#define FREQ_SIZE       21
-#define FREQ_LABELS     (String[FREQ_SIZE])  { "1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz" }
-#define FREQ_PERIODS    (int[FREQ_SIZE])  { 1000000, 500000, 250000, 125000, 62500, 31250, 15625, 7812, 3906, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1 } // Full cycle period in microseconds
+#define FREQ_SIZE       22
+#define FREQ_LABELS     (String[FREQ_SIZE])  { "1 Hz", "2 Hz", "4 Hz", "8 Hz", "16 Hz", "32 Hz", "64 Hz", "122 Hz", "244 Hz", "488 Hz", "976 Hz", "1.9 kHz", "3.9 kHz", "7.8 kHz", "15.6 kHz", "31.2 kHz", "62.5 kHz", "125 kHz", "250 kHz", "500 kHz", "1 MHz", "2 MHz" }
+#define FREQ_PERIODS    (double[FREQ_SIZE])  { 1000000, 500000, 250000, 125000, 62500, 31250, 15625, 7812, 3906, 2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1, 0.5 } // Full cycle period in microseconds
 
 #define DEBOUNCE        5     // 5 milliseconds
 #define FILE_PER_PAGE   8

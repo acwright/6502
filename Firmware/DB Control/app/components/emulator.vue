@@ -46,12 +46,6 @@
           </span>
         </div>
         <div class="flex flex-row gap-3">
-          <span class="text-right font-bold w-1/4">IO:</span>
-          <span class="text-left w-3/4" :class="info.ioEnabled ? 'text-primary' : 'text-gray-400'">
-            {{ info.ioEnabled ? 'ENABLED' : 'DISABLED' }}
-          </span>
-        </div>
-        <div class="flex flex-row gap-3">
           <span class="text-right font-bold w-1/4">Frequency:</span>
           <span class="text-left w-3/4">{{ info.freqLabel }} ({{ info.freqPeriod }} µS)</span>
         </div>
@@ -83,12 +77,6 @@
           :color="info.cartEnabled ? 'primary' : 'error'"
         >
           TOGGLE CART
-        </UButton>
-        <UButton
-          @click="toggleIO" 
-          :color="info.ioEnabled ? 'primary' : 'error'"
-        >
-          TOGGLE IO
         </UButton>
       </div>
       <br>

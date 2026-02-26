@@ -25,7 +25,6 @@ USBHIDParser        hid2(usb);
 USBHIDParser        hid3(usb);
 
 KeyboardController  keyboard(usb);
-MouseController     mouse(usb);
 JoystickController  joystick(usb);
 
 EthernetClient      ethClient;
@@ -34,7 +33,7 @@ AsyncWebServer      server(80);
 void onCommand(char command);
 void onNumeric(uint8_t num);
 void onKeyboard(int key);
-void onMouse();
+void onKeyboardRelease(int key);
 void onJoystick();
 
 void info();
@@ -81,11 +80,7 @@ void initEthernet();
 void initServer();
 void initFiles();
 
-void setDataDirIn();
-void setDataDirOut();
-uint8_t readData();
-void writeData(uint8_t data);
-void writeAddress(uint16_t address);
+void buildMemoryMap();
 
 time_t syncTime();
 String formattedDateTime();
@@ -103,9 +98,6 @@ uint8_t freqIndex = FREQ_SIZE - 1;
 bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
-#ifdef DEVBOARD_0
-bool busEnabled = true;
-#endif
 
 uint8_t inputCtx = INPUT_CTX_ROM;
 
@@ -123,36 +115,49 @@ uint programFilePage = 0;
 uint memoryPage = 0;
 
 #ifdef MEM_EXTMEM
-EXTMEM uint8_t ramData[IO_RAM_BLOCK_SIZE * IO_RAM_BLOCK_COUNT];
-EXTMEM uint8_t serialData[1024];
+EXTMEM __attribute__((aligned(32))) uint8_t ramData1[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
+EXTMEM __attribute__((aligned(32))) uint8_t ramData2[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 #else
-uint8_t ramData[IO_RAM_BLOCK_SIZE * IO_RAM_BLOCK_COUNT];
-uint8_t serialData[1024];
+__attribute__((aligned(32))) uint8_t ramData1[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
+__attribute__((aligned(32))) uint8_t ramData2[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 #endif
+
+static uint32_t cachedDelay = 0;
+static uint8_t cachedFreqIndex = 0xFF;
+static uint32_t cachedCpuFrequency = 1000000;
+static uint8_t cachedCpuFreqIndex = 0xFF;
+
+enum MemoryRegion : uint8_t {
+  REGION_CART_CODE,
+  REGION_ROM,
+  REGION_RAM,
+  REGION_IO,
+  REGION_NONE
+};
+static MemoryRegion memoryMap[256]; // 256 possible high bytes
 
 CPU cpu = CPU(read, write);
 RAM ram = RAM();
 ROM rom = ROM();
 Cart cart = Cart();
-IO io = IO(ramData);
+
+RAMCard ramCard1 = RAMCard(ramData1);
+RAMCard ramCard2 = RAMCard(ramData2);
+RTCCard rtcCard = RTCCard();
+StorageCard storageCard = StorageCard();
+SerialCard serialCard = SerialCard();
+GPIOCard gpioCard = GPIOCard();
 
 //
 // MAIN
 //
 
 void setup() {
-  Serial.begin(115200);       // Ignored by Teensy; Baud rate is USB rate 480Mbps
-  SerialUSB1.begin(115200);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
-  #ifdef DEVBOARD_0
-  Serial4.begin(2000000);
-  Serial4.addMemoryForWrite(serialData, 1024);
-  #endif
-  #ifdef DEVBOARD_1
-  Serial7.begin(2000000);
-  Serial7.addMemoryForWrite(serialData, 1024);
-  #endif
+  Serial.begin(9600);       // Ignored by Teensy; Baud rate is USB rate 480Mbps
+  SerialUSB1.begin(9600);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
 
   setSyncProvider(syncTime);
+  buildMemoryMap();
   
   initPins();
   initButtons();
@@ -169,7 +174,7 @@ void setup() {
   info();
 
   if (autoStart) {
-    delay(1000);
+    delay(500);
     reset();
     toggleRunStop();
   }
@@ -200,9 +205,6 @@ void loop() {
   }
   #endif
 
-  if (mouse.available()) {
-    onMouse();
-  }
   if (joystick.available()) {
     onJoystick();
   }
@@ -210,20 +212,7 @@ void loop() {
     onCommand(Serial.read());
   }
 
-  #ifdef DEVBOARD_0
-  if (digitalReadFast(BE) == LOW && busEnabled) {
-    busEnabled = false;
-    digitalWriteFast(OE1, LOW);
-    digitalWriteFast(OE2, LOW);
-    pinMode(RWB, INPUT);
-  } else if (digitalReadFast(BE) == HIGH && !busEnabled) {
-    digitalWriteFast(OE1, HIGH);
-    digitalWriteFast(OE2, HIGH);
-    pinMode(RWB, OUTPUT);
-  }
-  #endif
-
-  if (digitalReadFast(RDY) == HIGH && isRunning) {
+  if (isRunning) {
     tick();
   }
 }
@@ -288,12 +277,6 @@ void onCommand(char command) {
     case 'g':
     case 'G':
       log();
-      break;
-    case 'i':
-    case 'I':
-      toggleIO();
-      Serial.print("IO: ");
-      Serial.println(io.enabled ? "Enabled" : "Disabled");
       break;
     case 'k':
     case 'K':
@@ -446,7 +429,9 @@ void onKeyboard(int key) {
 
   if (key > 0x7F) { return; } // No extended ASCII
 
-  io.updateKeyboard((uint8_t)key);
+  // Route keyboard input to both encoder (Port B) and PS/2 (Port A)
+  gpioCard.updateKeyboard((uint8_t)key);    // Keyboard encoder on Port B
+  gpioCard.updatePS2Keyboard((uint8_t)key); // PS/2 port on Port A
   
   #ifdef KEYBOARD_DEBUG
   Serial.print("Keyboard: ");
@@ -465,28 +450,48 @@ void onKeyboard(int key) {
   #endif
 }
 
-void onMouse() {
-  int mouseX = mouse.getMouseX();
-  int mouseY = mouse.getMouseY();
-  int mouseW = mouse.getWheel();
-  uint8_t mouseButtons = mouse.getButtons();
-
-  io.updateMouse(mouseX, mouseY, mouseW, mouseButtons);
-
-  mouse.mouseDataClear();
-
-  #ifdef MOUSE_DEBUG
-  if (mouseBtns > 0 || mouseX > 0 || mouseY > 0 || mouseW || 0) {
-    Serial.print("Mouse: Buttons = ");
-    Serial.print(mouseButtons);
-    Serial.print(",  X = ");
-    Serial.print(mouseX);
-    Serial.print(",  Y = ");
-    Serial.print(mouseY);
-    Serial.print(",  Wheel = ");
-    Serial.print(mouseW);
-    Serial.println();
+void onKeyboardRelease(int key) {
+  // Apply same key mapping as press handler
+  switch (key) {
+    case 0x7F:
+      key = 0x08;
+      break;
+    case 0xD1:
+      key = 0x1A;
+      break;
+    case 0xD2:
+      key = 0x01;
+      break;
+    case 0xD4:
+      key = 0x7F;
+      break;
+    case 0xD5:
+      key = 0x04;
+      break;
+    case 0xD7:
+      key = 0x1D;
+      break;
+    case 0xD8:
+      key = 0x1C;
+      break;
+    case 0xD9:
+      key = 0x1F;
+      break;
+    case 0xDA:
+      key = 0x1E;
+      break;
   }
+
+  if (key > 0x7F) { return; }
+
+  // Release key from both keyboard matrix and PS/2 buffer
+  gpioCard.releaseKey((uint8_t)key);
+  // Note: PS/2 port uses interrupt-driven single-key buffer,
+  // so key release doesn't need separate PS/2 handling
+  
+  #ifdef KEYBOARD_DEBUG
+  Serial.print("Key Released: 0x");
+  Serial.println(key, HEX);
   #endif
 }
 
@@ -496,15 +501,52 @@ void onJoystick() {
   if (joystick.joystickType() == JoystickController::XBOX360 || 
       joystick.joystickType() == JoystickController::XBOXONE) 
   {
-    io.updateJoystick(buttons);
+    // Map Xbox controller to 8-bit joystick format
+    // Xbox button layout: bit 0=A, 1=B, 2=X, 3=Y, 4=LB, 5=RB, 6=Back, 7=Start, etc.
+    // DB Joystick: bit 0=U, 1=D, 2=L, 3=R, 4=A, 5=B, 6=X, 7=Y
+    
+    uint8_t mappedButtons = 0;
+    
+    // Map face buttons (A, B, X, Y from Xbox to DB format)
+    if (buttons & 0x0001) mappedButtons |= 0x10;  // Xbox A -> DB A (bit 4)
+    if (buttons & 0x0002) mappedButtons |= 0x20;  // Xbox B -> DB B (bit 5)
+    if (buttons & 0x0004) mappedButtons |= 0x40;  // Xbox X -> DB X (bit 6)
+    if (buttons & 0x0008) mappedButtons |= 0x80;  // Xbox Y -> DB Y (bit 7)
+    
+    // Map D-Pad or analog stick to directions
+    // Get analog stick positions for directional control
+    int axisX = joystick.getAxis(0);  // Left stick X
+    int axisY = joystick.getAxis(1);  // Left stick Y
+    
+    // Check D-Pad buttons (typically bits 12-15 on Xbox controllers)
+    bool dpadUp    = (buttons & 0x0100) != 0;
+    bool dpadDown  = (buttons & 0x0200) != 0;
+    bool dpadLeft  = (buttons & 0x0400) != 0;
+    bool dpadRight = (buttons & 0x0800) != 0;
+    
+    // Combine D-Pad and analog stick (analog stick uses threshold)
+    const int analogThreshold = 128;  // Threshold for analog stick direction
+    
+    if (dpadUp || axisY < -analogThreshold)    mappedButtons |= 0x01;  // UP
+    if (dpadDown || axisY > analogThreshold)   mappedButtons |= 0x02;  // DOWN
+    if (dpadLeft || axisX < -analogThreshold)  mappedButtons |= 0x04;  // LEFT
+    if (dpadRight || axisX > analogThreshold)  mappedButtons |= 0x08;  // RIGHT
+    
+    gpioCard.updateJoystick(mappedButtons);
+    
+    #ifdef JOYSTICK_DEBUG
+    Serial.print("Joystick: Raw=0x");
+    Serial.print(buttons, HEX);
+    Serial.print(" Mapped=0x");
+    Serial.print(mappedButtons, HEX);
+    Serial.print(" X=");
+    Serial.print(axisX);
+    Serial.print(" Y=");
+    Serial.println(axisY);
+    #endif
   }
 
   joystick.joystickDataClear();
-
-  #ifdef JOYSTICK_DEBUG
-  Serial.print("Joystick: Buttons = ");
-  Serial.println(buttons, HEX);
-  #endif
 }
 
 //
@@ -542,8 +584,6 @@ void info() {
   Serial.print(" (");
   Serial.print(cart.file);
   Serial.println(")");
-  Serial.print("IO: ");
-  Serial.println(io.enabled ? "Enabled" : "Disabled");
   Serial.print("Frequency: ");
   Serial.println(FREQ_LABELS[freqIndex]);
   Serial.print("IP Address: ");
@@ -556,9 +596,9 @@ void info() {
   Serial.println("--------------------------------------------------------------");
   Serial.println("| Toggle R(A)M       | Toggle R(O)M        | Toggle Cart (L) |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| List RO(M)s / (C)arts / (U)ser Programs  | Toggle (I)O     |");
-  Serial.println("--------------------------------------------------------------");
   Serial.println("| (+/-) Clk Freq     | (D)ump / Sna(P)shot | In(F)o / Lo(G)  |");
+  Serial.println("--------------------------------------------------------------");
+  Serial.println("|          List RO(M)s / (C)arts / (U)ser Programs           |");
   Serial.println("--------------------------------------------------------------");
   Serial.println();
 }
@@ -588,7 +628,6 @@ void reset() {
   }
 
   cpu.reset();
-  io.reset();
 
   digitalWriteFast(RESB, LOW);
   delay(100);
@@ -601,31 +640,37 @@ void reset() {
 }
 
 void tick() {
+  // SYNC signal indicates opcode fetch cycle (65C02 behavior)
+  // SYNC goes HIGH during opcode fetch (when step == 0)
+  // Set SYNC before the tick to match hardware timing
   if (cpu.opcodeCycle() == 0) {
     digitalWriteFast(SYNC, HIGH);
   } else {
     digitalWriteFast(SYNC, LOW);
   }
 
-  cpu.tick();
-  
+  if (freqIndex != cachedCpuFreqIndex) {
+    cachedCpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
+    cachedCpuFreqIndex = freqIndex;
+  }
+
   uint8_t interrupt = 0x00;
+  if (digitalReadFast(IRQB) == LOW) interrupt |= 0x80;
+  if (digitalReadFast(NMIB) == LOW) interrupt |= 0x40;
 
-  // Check for external interrupt
-  if (digitalReadFast(IRQB) == LOW) {
-    interrupt |= 0x80;
-  }
-  if (digitalReadFast(NMIB) == LOW) {
-    interrupt |= 0x40;
-  }
+  cpu.tick();
 
-  // Tick IO and check for emulated interrupt
-  interrupt |= io.tick();
+  // Tick IO cards and accumulate interrupts
+  interrupt |= rtcCard.tick(cachedCpuFrequency);
+  interrupt |= storageCard.tick(cachedCpuFrequency);
+  interrupt |= serialCard.tick(cachedCpuFrequency);
+  interrupt |= gpioCard.tick(cachedCpuFrequency);
   
-  if ((interrupt & 0x40) != 0x00) {
+  // Single interrupt processing
+  if (interrupt & 0x40) {
     cpu.nmiTrigger();
   }
-  if ((interrupt & 0x80) != 0x00) {
+  if (interrupt & 0x80) {
     cpu.irqTrigger();
   } else {
     cpu.irqClear();
@@ -633,14 +678,19 @@ void tick() {
 }
 
 void step() {
+  // Execute one complete instruction and handle ticks/interrupts
   uint8_t ticks = cpu.step();
 
+  // SYNC signal indicates opcode fetch cycle (65C02 behavior)
+  // After step() completes, we're at the start of the next instruction
+  // Set SYNC HIGH for the next opcode fetch
   if (cpu.opcodeCycle() == 0) {
     digitalWriteFast(SYNC, HIGH);
   } else {
     digitalWriteFast(SYNC, LOW);
   }
 
+  // Process interrupts for each tick of the instruction
   for(uint i = 0; i < ticks; i++) {
     uint8_t interrupt = 0x00;
 
@@ -652,8 +702,14 @@ void step() {
       interrupt |= 0x40;
     }
 
-    // Tick IO and check for emulated interrupt
-    interrupt |= io.tick();
+    // Calculate CPU frequency from the period (period is in microseconds)
+    uint32_t cpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
+
+    // Tick IO and check for interrupt
+    interrupt |= rtcCard.tick(cpuFrequency);
+    interrupt |= storageCard.tick(cpuFrequency);
+    interrupt |= serialCard.tick(cpuFrequency);
+    interrupt |= gpioCard.tick(cpuFrequency);
 
     if ((interrupt & 0x40) != 0x00) {
       cpu.nmiTrigger();
@@ -753,10 +809,6 @@ void toggleROM() {
 
 void toggleCart() {
   cart.enabled = !cart.enabled;
-}
-
-void toggleIO() {
-  io.enabled = !io.enabled;
 }
 
 void readROMs() {
@@ -1107,6 +1159,75 @@ void nextPage() {
 }
 
 //
+// UTILITIES
+//
+
+static inline __attribute__((always_inline)) void setDataDirIn() {
+  pinMode(D0, INPUT_PULLUP);
+  pinMode(D1, INPUT_PULLUP);
+  pinMode(D2, INPUT_PULLUP);
+  pinMode(D3, INPUT_PULLUP);
+  pinMode(D4, INPUT_PULLUP);
+  pinMode(D5, INPUT_PULLUP);
+  pinMode(D6, INPUT_PULLUP);
+  pinMode(D7, INPUT_PULLUP);
+}
+
+static inline __attribute__((always_inline)) void setDataDirOut() {
+  pinMode(D0, OUTPUT);
+  pinMode(D1, OUTPUT);
+  pinMode(D2, OUTPUT);
+  pinMode(D3, OUTPUT);
+  pinMode(D4, OUTPUT);
+  pinMode(D5, OUTPUT);
+  pinMode(D6, OUTPUT);
+  pinMode(D7, OUTPUT);
+}
+
+static inline __attribute__((always_inline)) void writeAddress(uint16_t address) {
+  digitalWriteFast(A0,  (address >> 0)  & 1);
+  digitalWriteFast(A1,  (address >> 1)  & 1);
+  digitalWriteFast(A2,  (address >> 2)  & 1);
+  digitalWriteFast(A3,  (address >> 3)  & 1);
+  digitalWriteFast(A4,  (address >> 4)  & 1);
+  digitalWriteFast(A5,  (address >> 5)  & 1);
+  digitalWriteFast(A6,  (address >> 6)  & 1);
+  digitalWriteFast(A7,  (address >> 7)  & 1);
+  digitalWriteFast(A8,  (address >> 8)  & 1);
+  digitalWriteFast(A9,  (address >> 9)  & 1);
+  digitalWriteFast(A10, (address >> 10) & 1);
+  digitalWriteFast(A11, (address >> 11) & 1);
+  digitalWriteFast(A12, (address >> 12) & 1);
+  digitalWriteFast(A13, (address >> 13) & 1);
+  digitalWriteFast(A14, (address >> 14) & 1);
+  digitalWriteFast(A15, (address >> 15) & 1);
+}
+
+static inline __attribute__((always_inline)) uint8_t readData() {
+  uint8_t data = 0;
+  data |= digitalReadFast(D0) << 0;
+  data |= digitalReadFast(D1) << 1;
+  data |= digitalReadFast(D2) << 2;
+  data |= digitalReadFast(D3) << 3;
+  data |= digitalReadFast(D4) << 4;
+  data |= digitalReadFast(D5) << 5;
+  data |= digitalReadFast(D6) << 6;
+  data |= digitalReadFast(D7) << 7;
+  return data;
+}
+
+static inline __attribute__((always_inline)) void writeData(uint8_t data) {
+  digitalWriteFast(D0, (data >> 0) & 1);
+  digitalWriteFast(D1, (data >> 1) & 1);
+  digitalWriteFast(D2, (data >> 2) & 1);
+  digitalWriteFast(D3, (data >> 3) & 1);
+  digitalWriteFast(D4, (data >> 4) & 1);
+  digitalWriteFast(D5, (data >> 5) & 1);
+  digitalWriteFast(D6, (data >> 6) & 1);
+  digitalWriteFast(D7, (data >> 7) & 1);
+}
+
+//
 // READ / WRITE
 //
 
@@ -1115,30 +1236,85 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   data = 0x00;
   readWrite = HIGH;
 
-  uint32_t delay = FREQ_PERIODS[freqIndex] <= 1 ? (FREQ_PERIODS[freqIndex] * 1000) / 2 : FREQ_PERIODS[freqIndex] / 2;
+  if (cachedFreqIndex != freqIndex) {
+    cachedFreqIndex = freqIndex;
+    cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
+                  (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
+                  FREQ_PERIODS[freqIndex] / 2;
+  }
   
+  // WDC 65C02 read cycle timing:
+  // - Address and R/W̅ must be stable before PHI2 rises
+  // - Data is valid during PHI2 high
   digitalWriteFast(PHI2, LOW);
-  delayNanoseconds(20);
+  delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
   writeAddress(address);
   digitalWriteFast(RWB, readWrite);
   setDataDirIn();
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
-  digitalWriteFast(PHI2, HIGH);
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
-
-  if ((addr >= CART_CODE) && (addr <= CART_END) && cart.enabled) { // Cart
-    data = cart.read(addr - CART_START);
-  } else if ((addr >= ROM_CODE) && (addr <= ROM_END) && rom.enabled) { // ROM
-    data = rom.read(addr - ROM_START);
-  } else if ((addr >= RAM_START) && (addr <= RAM_END) && ram.enabled) { // RAM
-    data = ram.read(addr - RAM_START);
-  } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
-    uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
-    if (ioSlot == 1 && io.enabled) { // Emulator IO
-      data = io.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-    } else {
-      data = readData();
+  
+  // RDY handling: 65C02 samples RDY during PHI1 (PHI2 LOW) on read cycles only
+  // If RDY is LOW, wait here until it goes HIGH before continuing
+  // This allows external hardware to stretch the read cycle
+  if (!isDbg) {
+    while (digitalReadFast(RDY) == LOW) {
+      // Wait for RDY to go HIGH - CPU is halted during read cycle
+      // Write cycles are not affected by RDY (handled elsewhere)
     }
+  }
+  
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
+  digitalWriteFast(PHI2, HIGH);
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
+
+  // Priority: Cart overrides ROM from $C000-$FFFF when enabled
+  if (addr >= CART_CODE && addr <= CART_END && cart.enabled) {
+    data = cart.read(addr - CART_START);
+    return data;
+  }
+
+  // Fast lookup based on high byte for other regions
+  switch (memoryMap[addr >> 8]) {
+    case REGION_ROM:
+      if (rom.enabled) {
+        data = rom.read(addr - ROM_START);
+      }
+      break;
+    case REGION_RAM:
+      if (ram.enabled) {
+        data = ram.read(addr - RAM_START);
+      }
+      break;
+    case REGION_IO: {
+      uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
+      switch (ioSlot) {
+        case 0: // IO 1 - RAM Card
+          data = ramCard1.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+          break;
+        case 1: // IO 2 - RAM Card
+          data = ramCard2.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+          break;
+        case 2: // IO 3 - RTC Card
+          data = rtcCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+          break;
+        case 3: // IO 4 - Storage Card
+          data = storageCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+          break;
+        case 4: // IO 5 - Serial Card
+          data = serialCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+          break;
+        case 5: // IO 6 - GPIO Card
+          data = gpioCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+          break;
+        case 6: // IO 7 - Sound Card
+        case 7: // IO 8 - Video Card
+        default:
+          data = readData();
+          break;
+      }
+      break;
+    }
+    default:
+      break;
   }
 
   return data;
@@ -1149,29 +1325,74 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   data = val;
   readWrite = LOW;
 
-  uint32_t delay = FREQ_PERIODS[freqIndex] <= 1 ? (FREQ_PERIODS[freqIndex] * 1000) / 2 : FREQ_PERIODS[freqIndex] / 2;
+  if (cachedFreqIndex != freqIndex) {
+    cachedFreqIndex = freqIndex;
+    cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
+                  (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
+                  FREQ_PERIODS[freqIndex] / 2;
+  }
 
+  // WDC 65C02 write cycle timing:
+  // - Address and R/W̅ must be stable before PHI2 rises
+  // - Data must be valid during PHI2 high
   digitalWriteFast(PHI2, LOW);
-  delayNanoseconds(20);
+  delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
   writeAddress(address);
   digitalWriteFast(RWB, readWrite);
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
+  setDataDirOut(); // Set data direction to output before driving bus
+  writeData(data);     // Data ready before PHI2 goes high
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
   digitalWriteFast(PHI2, HIGH);
-  setDataDirOut();
-  writeData(data);
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(delay) : delayMicroseconds(delay);
+  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
 
-  if ((addr >= CART_CODE) && (addr <= CART_END) && cart.enabled) { // Cart
+  // Priority: Cart overrides ROM from $C000-$FFFF when enabled
+  if (addr >= CART_CODE && addr <= CART_END && cart.enabled) {
     cart.write(addr - CART_START, data);
-  } else if ((addr >= ROM_CODE) && (addr <= ROM_END) && rom.enabled) { // ROM
-    rom.write(addr - ROM_START, data);
-  } else if ((addr >= RAM_START) && (addr <= RAM_END) && ram.enabled) { // RAM
-    ram.write(addr - RAM_START, data);
-  } else if ((addr >= IO_START) && (addr <= IO_END)) { // IO
-    uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
-    if (ioSlot == 1 && io.enabled) { // Emulator IO
-      io.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+    return;
+  }
+
+  // Fast lookup based on high byte for other regions
+  switch (memoryMap[addr >> 8]) {
+    case REGION_ROM:
+      if (rom.enabled) {
+        rom.write(addr - ROM_START, data);
+      }
+      break;
+    case REGION_RAM:
+      if (ram.enabled) {
+        ram.write(addr - RAM_START, data);
+      }
+      break;
+    case REGION_IO: {
+      uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
+      switch (ioSlot) {
+        case 0: // IO 1 - RAM Card
+          ramCard1.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+          break;
+        case 1: // IO 2 - RAM Card
+          ramCard2.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+          break;
+        case 2: // IO 3 - RTC Card
+          rtcCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+          break;
+        case 3: // IO 4 - Storage Card
+          storageCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+          break;
+        case 4: // IO 5 - Serial Card
+          serialCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+          break;
+        case 5: // IO 6 - GPIO Card
+          gpioCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+          break;
+        case 6: // IO 7 - Sound Card
+        case 7: // IO 8 - Video Card
+        default:
+          break;
+      }
+      break;
     }
+    default:
+      break;
   }
 }
 
@@ -1213,14 +1434,13 @@ void initPins() {
   pinMode(IRQB, INPUT_PULLUP);
   pinMode(NMIB, INPUT_PULLUP);
   pinMode(RDY, INPUT_PULLUP);
+  pinMode(BE, INPUT_PULLUP);
 
   pinMode(CLK_SWB, INPUT_PULLUP);
   pinMode(STEP_SWB, INPUT_PULLUP);
   pinMode(RS_SWB, INPUT_PULLUP);
 
   #ifdef DEVBOARD_0
-  pinMode(BE, INPUT_PULLUP);
-
   pinMode(OE1, OUTPUT);
   pinMode(OE2, OUTPUT);
   pinMode(OE3, OUTPUT);
@@ -1236,7 +1456,6 @@ void initPins() {
   #endif
 
   #ifdef DEVBOARD_1
-  pinMode(BE, INPUT_PULLUP);
   pinMode(RESET_SWB, INPUT_PULLUP);
 
   pinMode(MOSI1, OUTPUT);
@@ -1283,6 +1502,7 @@ void initSD() {
 void initUSB() {
   usb.begin();
   keyboard.attachPress(onKeyboard);
+  keyboard.attachRelease(onKeyboardRelease);
 }
 
 void initEthernet() {
@@ -1314,73 +1534,21 @@ void initFiles() {
   }
 }
 
-//
-// UTILITIES
-//
-
-void setDataDirIn() {
-  pinMode(D0, INPUT_PULLUP);
-  pinMode(D1, INPUT_PULLUP);
-  pinMode(D2, INPUT_PULLUP);
-  pinMode(D3, INPUT_PULLUP);
-  pinMode(D4, INPUT_PULLUP);
-  pinMode(D5, INPUT_PULLUP);
-  pinMode(D6, INPUT_PULLUP);
-  pinMode(D7, INPUT_PULLUP);
-}
-
-void setDataDirOut() {
-  pinMode(D0, OUTPUT);
-  pinMode(D1, OUTPUT);
-  pinMode(D2, OUTPUT);
-  pinMode(D3, OUTPUT);
-  pinMode(D4, OUTPUT);
-  pinMode(D5, OUTPUT);
-  pinMode(D6, OUTPUT);
-  pinMode(D7, OUTPUT);
-}
-
-void writeAddress(uint16_t address) {
-  digitalWriteFast(A0,  (address >> 0)  & 1);
-  digitalWriteFast(A1,  (address >> 1)  & 1);
-  digitalWriteFast(A2,  (address >> 2)  & 1);
-  digitalWriteFast(A3,  (address >> 3)  & 1);
-  digitalWriteFast(A4,  (address >> 4)  & 1);
-  digitalWriteFast(A5,  (address >> 5)  & 1);
-  digitalWriteFast(A6,  (address >> 6)  & 1);
-  digitalWriteFast(A7,  (address >> 7)  & 1);
-  digitalWriteFast(A8,  (address >> 8)  & 1);
-  digitalWriteFast(A9,  (address >> 9)  & 1);
-  digitalWriteFast(A10, (address >> 10) & 1);
-  digitalWriteFast(A11, (address >> 11) & 1);
-  digitalWriteFast(A12, (address >> 12) & 1);
-  digitalWriteFast(A13, (address >> 13) & 1);
-  digitalWriteFast(A14, (address >> 14) & 1);
-  digitalWriteFast(A15, (address >> 15) & 1);
-}
-
-uint8_t readData() {
-  uint8_t data = 0;
-  data |= digitalReadFast(D0) << 0;
-  data |= digitalReadFast(D1) << 1;
-  data |= digitalReadFast(D2) << 2;
-  data |= digitalReadFast(D3) << 3;
-  data |= digitalReadFast(D4) << 4;
-  data |= digitalReadFast(D5) << 5;
-  data |= digitalReadFast(D6) << 6;
-  data |= digitalReadFast(D7) << 7;
-  return data;
-}
-
-void writeData(uint8_t data) {
-  digitalWriteFast(D0, (data >> 0) & 1);
-  digitalWriteFast(D1, (data >> 1) & 1);
-  digitalWriteFast(D2, (data >> 2) & 1);
-  digitalWriteFast(D3, (data >> 3) & 1);
-  digitalWriteFast(D4, (data >> 4) & 1);
-  digitalWriteFast(D5, (data >> 5) & 1);
-  digitalWriteFast(D6, (data >> 6) & 1);
-  digitalWriteFast(D7, (data >> 7) & 1);
+void buildMemoryMap() {
+  for (int i = 0; i < 256; i++) {
+    uint16_t testAddr = i << 8;
+    // Note: Cart region overlaps ROM and is checked dynamically in read/write
+    // so we map the ROM region here, and cart takes priority at runtime
+    if (testAddr >= ROM_CODE && testAddr <= ROM_END) {
+      memoryMap[i] = REGION_ROM;
+    } else if (testAddr >= RAM_START && testAddr <= RAM_END) {
+      memoryMap[i] = REGION_RAM;
+    } else if (testAddr >= IO_START && testAddr <= IO_END) {
+      memoryMap[i] = REGION_IO;
+    } else {
+      memoryMap[i] = REGION_NONE;
+    }
+  }
 }
 
 //
@@ -1392,23 +1560,14 @@ time_t syncTime() {
 }
 
 String formattedDateTime() {
-  String time;
-
-  time.append(month());
-  time.append("/");
-  time.append(day());
-  time.append("/");
-  time.append(year());
-  time.append(" ");
-  time.append(hour());
-  time.append(":");
-  time.append(minute() < 10 ? "0": "");
-  time.append(minute());
-  time.append(":");
-  time.append(second() < 10 ? "0": "");
-  time.append(second());
-
-  return time;
+  // Use static buffer and snprintf for better performance
+  static char buffer[32];
+  
+  snprintf(buffer, sizeof(buffer), "%d/%d/%d %d:%02d:%02d",
+           month(), day(), year(),
+           hour(), minute(), second());
+  
+  return String(buffer);
 }
 
 //
@@ -1446,7 +1605,6 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   doc["data"]               = data;
   doc["freqLabel"]          = FREQ_LABELS[freqIndex];
   doc["freqPeriod"]         = FREQ_PERIODS[freqIndex];
-  doc["ioEnabled"]          = io.enabled;
   doc["ipAddress"]          = Ethernet.localIP();
   doc["isRunning"]          = isRunning;
   doc["lastSnapshot"]       = lastSnapshot;
@@ -1619,8 +1777,6 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
 
   if (command == "a" || command == "A") {         // Toggle RAM
     toggleRAM();
-  } else if (command == "i" || command == "I") {  // Toggle IO
-    toggleIO();
   } else if (command == "k" || command == "K") {  // Tick
     tick();
   } else if (command == "l" || command == "L") {  // Toggle Cart

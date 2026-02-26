@@ -14,7 +14,6 @@ declare global {
     data: number,
     freqLabel: string,
     freqPeriod: number,
-    ioEnabled: boolean,
     ipAddress: string,
     isRunning: boolean,
     lastSnapshot: number,
