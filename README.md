@@ -46,7 +46,7 @@ The project supports the creation of several different computer systems, includi
 ![The DEV](./Assets/Images/DEV.png?raw=true)
 
   * 1x Dev Board
-  * 1x Dev Output Board (or 1x LCD Board or 1x Output Board)
+  * 1x Output Board
 
 ---
 
@@ -99,7 +99,6 @@ The [Hardware](./Hardware) folder contains KICAD files for the system's custom-d
 - **Backplane Board**: A backplane board that provides multiple card slots for peripheral cards and connects to the main board via a ribbon cable.
 - **Backplane Board Pro**: An enhanced version of the backplane board with addition of clock, reset and power circuitry.
 - **Dev Board**: The development board emulates the 65(c)02 using a Teensy 4.1 running custom firmware and using [vrEmu6502](https://github.com/visrealm/vrEmu6502).
-- **Dev Output Board**: A compliment to the Dev Board that provides [VT-AC](https://github.com/acwright/VT-AC) compatible ASCII terminal display output using a 2.4in LCD.
 - **Input Board**: A board that provides PS/2 keyboard and mouse input along with SNES controller support.
 - **LCD Board**: A board that provides a 320x240 LCD display via a 6522 VIA interface. **UNTESTED**
 - **Main Board**: The main board that contains the 65(c)02 CPU, 32K RAM, 32K ROM along with bus connection, clock and reset circuitry.
