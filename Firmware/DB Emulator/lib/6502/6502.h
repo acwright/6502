@@ -5,6 +5,7 @@
 #include "macros.h"
 #include "pins.h"
 #include "html.h"
+#include "utilities.h"
 
 #include "Cart/Cart.h"
 #include "CPU/CPU.h"
@@ -16,7 +17,6 @@
 #include "IO/GPIOAttachments/GPIOAttachment.h"
 #include "IO/GPIOAttachments/GPIOKeyboardMatrixAttachment.h"
 #include "IO/GPIOAttachments/GPIOKeyboardEncoderAttachment.h"
-#include "IO/GPIOAttachments/GPIOPS2Attachment.h"
 #include "IO/GPIOAttachments/GPIOJoystickAttachment.h"
 #include "IO/RAMCard.h"
 #include "IO/RTCCard.h"

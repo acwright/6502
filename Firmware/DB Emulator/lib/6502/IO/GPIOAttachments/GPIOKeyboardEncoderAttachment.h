@@ -6,21 +6,35 @@
 /**
  * @brief Keyboard Encoder Attachment for GPIO Card
  * 
- * Emulates a keyboard encoder that presents ASCII values on Port B (Keyboard Encoder Helper).
- * The encoder is controlled by CB2 (enable) and generates interrupts on CB1.
+ * Emulates a keyboard encoder that presents ASCII values on Port A or Port B.
+ * Can act as a PS/2 keyboard interface (Port A) or keyboard encoder (Port B).
  * 
+ * Port A (PS/2 Keyboard Interface):
+ * - Port A: ASCII character output when enabled
+ * - CA2: Enable/disable control (LOW = enabled, HIGH = disabled)
+ * - CA1: Data ready interrupt (triggered when new character available)
+ * 
+ * Port B (Keyboard Matrix Encoder):
  * - Port B: ASCII character output when enabled
  * - CB2: Enable/disable control (LOW = enabled, HIGH = disabled)
  * - CB1: Data ready interrupt (triggered when new character available)
  * 
- * When a key is pressed, the ASCII value is buffered and a CB1 interrupt
- * is generated. Reading Port B clears the data-ready flag.
+ * When a key is pressed, the ASCII value is buffered and an interrupt
+ * is generated on the appropriate port. Reading the port clears the data-ready flag.
  */
 class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
   private:
-    uint8_t asciiData;      // Buffered ASCII character
-    bool dataReady;         // Data ready flag (triggers CB1 interrupt)
-    bool interruptPending;  // CB1 interrupt pending
+    // Port A data
+    uint8_t asciiDataA;      // Buffered ASCII character for Port A
+    bool dataReadyA;         // Data ready flag for Port A (triggers CA1 interrupt)
+    bool interruptPendingA;  // CA1 interrupt pending
+    bool enabledA;           // Port A enabled state
+    
+    // Port B data
+    uint8_t asciiDataB;      // Buffered ASCII character for Port B
+    bool dataReadyB;         // Data ready flag for Port B (triggers CB1 interrupt)
+    bool interruptPendingB;  // CB1 interrupt pending
+    bool enabledB;           // Port B enabled state
     
   public:
     /**
@@ -36,6 +50,15 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     void reset() override;
     
     /**
+     * @brief Read Port A - returns ASCII data when enabled and data ready
+     * 
+     * @param ddrA Data Direction Register A
+     * @param orA Output Register A
+     * @return uint8_t ASCII character or 0xFF if no data
+     */
+    uint8_t readPortA(uint8_t ddrA, uint8_t orA) override;
+    
+    /**
      * @brief Read Port B - returns ASCII data when enabled and data ready
      * 
      * @param ddrB Data Direction Register B
@@ -47,7 +70,8 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     /**
      * @brief Update control lines - determines enabled state
      * 
-     * CB2 LOW = encoder enabled, CB2 HIGH = encoder disabled
+     * CA2 LOW = Port A enabled, CA2 HIGH = Port A disabled
+     * CB2 LOW = Port B enabled, CB2 HIGH = Port B disabled
      * 
      * @param ca1 Current state of CA1 line
      * @param ca2 Current state of CA2 line
@@ -57,16 +81,23 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     void updateControlLines(bool ca1, bool ca2, bool cb1, bool cb2) override;
     
     /**
+     * @brief Check if CA1 interrupt is pending
+     * 
+     * @return true if Port A data ready interrupt is pending
+     */
+    bool hasCA1Interrupt() const override;
+    
+    /**
      * @brief Check if CB1 interrupt is pending
      * 
-     * @return true if data ready interrupt is pending
+     * @return true if Port B data ready interrupt is pending
      */
     bool hasCB1Interrupt() const override;
     
     /**
      * @brief Clear interrupt flags
      * 
-     * Called when Port B is read to clear the data-ready interrupt.
+     * Called when a port is read to clear the data-ready interrupt.
      * 
      * @param ca1 Clear CA1 interrupt
      * @param ca2 Clear CA2 interrupt
@@ -76,20 +107,30 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     void clearInterrupts(bool ca1, bool ca2, bool cb1, bool cb2) override;
     
     /**
-     * @brief Update keyboard with new ASCII character
+     * @brief Update keyboard with new key event
      * 
-     * Buffers the ASCII value and triggers CB1 interrupt if enabled.
+     * Converts USB HID keycode to ASCII and buffers it, triggering interrupt on both ports if enabled.
+     * Only processes key press events (ignores key releases).
+     * This allows the same keyboard data to be available on both Port A and Port B.
      * 
-     * @param ascii ASCII character code
+     * @param usbHidKeycode USB HID keycode (raw keycode from USB keyboard)
+     * @param pressed True if key is pressed, false if released
      */
-    void updateKeyboard(uint8_t ascii);
+    void updateKey(uint8_t usbHidKeycode, bool pressed);
     
     /**
-     * @brief Check if encoder has data ready
+     * @brief Check if Port A has data ready
      * 
-     * @return true if ASCII data is buffered and ready to read
+     * @return true if ASCII data is buffered and ready to read on Port A
      */
-    bool hasDataReady() const;
+    bool hasDataReadyA() const;
+    
+    /**
+     * @brief Check if Port B has data ready
+     * 
+     * @return true if ASCII data is buffered and ready to read on Port B
+     */
+    bool hasDataReadyB() const;
 };
 
 #endif // _GPIO_KEYBOARD_ENCODER_ATTACHMENT_H

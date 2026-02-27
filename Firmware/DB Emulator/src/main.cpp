@@ -32,8 +32,8 @@ AsyncWebServer      server(80);
 
 void onCommand(char command);
 void onNumeric(uint8_t num);
-void onKeyboard(int key);
-void onKeyboardRelease(int key);
+void onKeyDown(uint8_t keycode);
+void onKeyUp(uint8_t keycode);
 void onJoystick();
 
 void info();
@@ -49,7 +49,6 @@ void toggleRunStop();
 void toggleRAM();
 void toggleROM();
 void toggleCart();
-void toggleIO();
 void readROMs();
 void listROMs();
 void loadROM(uint index);
@@ -149,10 +148,9 @@ SerialCard serialCard = SerialCard();
 GPIOCard gpioCard = GPIOCard();
 
 // GPIO Attachments
-GPIOKeyboardMatrixAttachment kbdMatrixAttachment = GPIOKeyboardMatrixAttachment(10);    // Priority 10
-GPIOKeyboardEncoderAttachment kbdEncoderAttachment = GPIOKeyboardEncoderAttachment(20); // Priority 20
-GPIOPS2Attachment ps2Attachment = GPIOPS2Attachment(30);                                // Priority 30
-GPIOJoystickAttachment joystickAttachment = GPIOJoystickAttachment(false, 100);         // Port B, Priority 100
+GPIOKeyboardMatrixAttachment keyboardMatrixAttachment = GPIOKeyboardMatrixAttachment(10);     // Priority 10
+GPIOKeyboardEncoderAttachment keyboardEncoderAttachment = GPIOKeyboardEncoderAttachment(20);  // Priority 20 (supports both Port A and B)
+GPIOJoystickAttachment joystickAttachment = GPIOJoystickAttachment(false, 100);               // Port B, Priority 100
 
 //
 // MAIN
@@ -167,14 +165,12 @@ void setup() {
   
   // Attach peripherals to GPIO Card
   // Keyboard matrix (manual scanning) - highest priority for Port A rows
-  gpioCard.attachToPortA(&kbdMatrixAttachment);
-  gpioCard.attachToPortB(&kbdMatrixAttachment);
+  gpioCard.attachToPortA(&keyboardMatrixAttachment);
+  gpioCard.attachToPortB(&keyboardMatrixAttachment);
   
-  // Keyboard encoder (ASCII on Port B) - medium priority
-  gpioCard.attachToPortB(&kbdEncoderAttachment);
-  
-  // PS/2 keyboard (ASCII on Port A) - medium priority
-  gpioCard.attachToPortA(&ps2Attachment);
+  // Keyboard encoder (ASCII on both Port A and Port B) - medium priority
+  gpioCard.attachToPortA(&keyboardEncoderAttachment);
+  gpioCard.attachToPortB(&keyboardEncoderAttachment);
   
   // Joystick (Port B) - lowest priority, fallback
   gpioCard.attachToPortB(&joystickAttachment);
@@ -193,11 +189,11 @@ void setup() {
 
   info();
 
-  if (autoStart) {
-    delay(500);
-    reset();
-    toggleRunStop();
-  }
+  // if (autoStart) {
+  //   delay(500);
+  //   reset();
+  //   toggleRunStop();
+  // }
 }
 
 void loop() {
@@ -409,99 +405,89 @@ void onNumeric(uint8_t num) {
   }
 }
 
-void onKeyboard(int key) {
-  // Fix some quirks in the USBHost_t36 lib and add our own
-  // Rewrites are equivalent to CoolTerm TX
-  switch (key) {
-    case 0x7F: // BACKSPACE
-      key = 0x08;
+void onKeyDown(uint8_t keycode) {
+  // Fix some quirks in the USBHost_t36 library
+  // Remapped following this: https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2
+  switch (keycode) {
+    case 0x67: // LEFT CTRL
+      keycode = 0xE0;
       break;
-    // 0xC2 - 0xCD = F1-F12 (Not handled)
-    case 0xD1: // INSERT
-      key = 0x1A;
+    case 0x68: // LEFT SHIFT
+      keycode = 0xE1;
       break;
-    case 0xD2: // HOME
-      key = 0x01;
+    case 0x69: // LEFT ALT
+      keycode = 0xE2;
       break;
-    case 0xD3: // PG UP (Not handled)
+    case 0x6A: // LEFT META
+      keycode = 0xE3;
       break;
-    case 0xD4: // DELETE
-      key = 0x7F;
+    case 0x6B: // RIGHT CTRL
+      keycode = 0xE4;
       break;
-    case 0xD5: // END
-      key = 0x04;
+    case 0x6C: // RIGHT SHIFT
+      keycode = 0xE5;
       break;
-    case 0xD6: // PG DOWN (Not handled)
+    case 0x6D: // RIGHT ALT
+      keycode = 0xE6;
       break;
-    case 0xD7: // RIGHT ARROW
-      key = 0x1D;
+    case 0x6E: // RIGHT META
+      keycode = 0xE7;
       break;
-    case 0xD8: // LEFT ARROW
-      key = 0x1C;
-      break;
-    case 0xD9: // DOWN ARROW
-      key = 0x1F;
-      break;
-    case 0xDA: // UP ARROW
-      key = 0x1E;
+    default:
       break;
   }
 
-  if (key > 0x7F) { return; } // No extended ASCII
-
   // Route keyboard input to attachments
-  kbdMatrixAttachment.updateKey((uint8_t)key, true);  // Update keyboard matrix
-  kbdEncoderAttachment.updateKeyboard((uint8_t)key);  // Keyboard encoder on Port B
-  ps2Attachment.updatePS2Keyboard((uint8_t)key);      // PS/2 port on Port A
+  keyboardMatrixAttachment.updateKey(keycode, true);   // Update keyboard matrix
+  keyboardEncoderAttachment.updateKey(keycode, true);  // Updaate keyboard encoder
   
   #ifdef KEYBOARD_DEBUG
   Serial.print("Key pressed: 0x");
-  Serial.println(key, HEX);
+  Serial.println(keycode, HEX);
+  Serial.println(keycode);
   #endif
 }
 
-void onKeyboardRelease(int key) {
-  // Apply same key mapping as press handler
-  switch (key) {
-    case 0x7F:
-      key = 0x08;
+void onKeyUp(uint8_t keycode) {
+  // Fix some quirks in the USBHost_t36 library
+  // Remapped following this: https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2
+  switch (keycode) {
+    case 0x67: // LEFT CTRL
+      keycode = 0xE0;
       break;
-    case 0xD1:
-      key = 0x1A;
+    case 0x68: // LEFT SHIFT
+      keycode = 0xE1;
       break;
-    case 0xD2:
-      key = 0x01;
+    case 0x69: // LEFT ALT
+      keycode = 0xE2;
       break;
-    case 0xD4:
-      key = 0x7F;
+    case 0x6A: // LEFT META
+      keycode = 0xE3;
       break;
-    case 0xD5:
-      key = 0x04;
+    case 0x6B: // RIGHT CTRL
+      keycode = 0xE4;
       break;
-    case 0xD7:
-      key = 0x1D;
+    case 0x6C: // RIGHT SHIFT
+      keycode = 0xE5;
       break;
-    case 0xD8:
-      key = 0x1C;
+    case 0x6D: // RIGHT ALT
+      keycode = 0xE6;
       break;
-    case 0xD9:
-      key = 0x1F;
+    case 0x6E: // RIGHT META
+      keycode = 0xE7;
       break;
-    case 0xDA:
-      key = 0x1E;
+    default:
       break;
   }
 
-  if (key > 0x7F) { return; }
-
   // Release key from keyboard matrix
-  kbdMatrixAttachment.updateKey((uint8_t)key, false);
-  // Note: PS/2 and encoder use interrupt-driven single-key buffer,
-  // so key release doesn't need separate handling
+  keyboardMatrixAttachment.updateKey(keycode, false);  // Update keyboard matrix
+  keyboardEncoderAttachment.updateKey(keycode, false); // Update keyboard encoder
   
   #ifdef KEYBOARD_DEBUG
   Serial.print("Key Released: 0x");
-  Serial.println(key, HEX);
+  Serial.println(keycode, HEX);
+  Serial.println(keycode);
   #endif
 }
 
@@ -1513,8 +1499,8 @@ void initSD() {
 
 void initUSB() {
   usb.begin();
-  keyboard.attachPress(onKeyboard);
-  keyboard.attachRelease(onKeyboardRelease);
+  keyboard.attachRawPress(onKeyDown);
+  keyboard.attachRawRelease(onKeyUp);
 }
 
 void initEthernet() {

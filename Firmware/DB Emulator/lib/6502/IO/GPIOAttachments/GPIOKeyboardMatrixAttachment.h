@@ -77,10 +77,10 @@ class GPIOKeyboardMatrixAttachment : public GPIOAttachment {
     /**
      * @brief Update keyboard matrix when a key is pressed or released
      * 
-     * @param key ASCII character corresponding to the key
+     * @param usbHidKeycode USB HID keycode (raw keycode from USB keyboard)
      * @param pressed True if key is pressed, false if released
      */
-    void updateKey(uint8_t key, bool pressed);
+    void updateKey(uint8_t usbHidKeycode, bool pressed);
     
     /**
      * @brief Update keyboard matrix for a specific row/column position
