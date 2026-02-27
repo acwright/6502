@@ -1,31 +1,5 @@
 #include "GPIOCard.h"
-
-// Keyboard matrix mapping
-// Rows are PA0-PA7, Columns are PB0-PB7
-static const uint8_t KEYBOARD_MATRIX[8][8] = {
-  // PB0    PB1    PB2    PB3    PB4    PB5    PB6    PB7
-  {  '`',   '1',   '2',   '3',   '4',   '5',   '6',   '7'  }, // PA0
-  {  '8',   '9',   '0',   '-',   '=',   0x08,  0x1B,  0x09 }, // PA1 (BS=Backspace, ESC, TAB)
-  {  'q',   'w',   'e',   'r',   't',   'y',   'u',   'i'  }, // PA2
-  {  'o',   'p',   '[',   ']',   '\\',  0x00,  0x00,  'a'  }, // PA3 (INS, CAPS placeholders)
-  {  's',   'd',   'f',   'g',   'h',   'j',   'k',   'l'  }, // PA4
-  {  ';',   '\'',  0x0D,  0x7F,  0x00,  'z',   'x',   'c'  }, // PA5 (ENTER, DEL, SHIFT placeholder)
-  {  'v',   'b',   'n',   'm',   ',',   '.',   '/',   0x00 }, // PA6 (UP placeholder)
-  {  0x00,  0x00,  0x00,  ' ',   0x00,  0x00,  0x00,  0x00 }  // PA7 (CTRL, MENU, ALT, SPACE, FN, LEFT, DOWN, RIGHT placeholders)
-};
-
-// Special key codes for non-ASCII keys (prefixed to avoid Arduino conflicts)
-#define KBDKEY_INS     0x90
-#define KBDKEY_CAPS    0x91
-#define KBDKEY_SHIFT   0x92
-#define KBDKEY_UP      0x93
-#define KBDKEY_DOWN    0x94
-#define KBDKEY_LEFT    0x95
-#define KBDKEY_RIGHT   0x96
-#define KBDKEY_CTRL    0x97
-#define KBDKEY_MENU    0x98
-#define KBDKEY_ALT     0x99
-#define KBDKEY_FN      0x9A
+#include "GPIOAttachments/GPIOAttachment.h"
 
 GPIOCard::GPIOCard() {
   this->reset();
@@ -59,19 +33,25 @@ void GPIOCard::reset() {
   T1_IRQ_enabled = false;
   T2_IRQ_enabled = false;
   
-  // Reset keyboard state
-  for (int i = 0; i < 8; i++) {
-    keyboardMatrix[i] = 0x00;
+  // Initialize attachment arrays
+  portA_attachmentCount = 0;
+  portB_attachmentCount = 0;
+  for (int i = 0; i < MAX_ATTACHMENTS_PER_PORT; i++) {
+    portA_attachments[i] = nullptr;
+    portB_attachments[i] = nullptr;
   }
-  keyboardASCII_A = 0x00;
-  keyboardASCII_B = 0x00;
-  keyboardData_A_ready = false;
-  keyboardData_B_ready = false;
-  keyboardEncoder_enabled = true;  // Enabled by default (CB2 LOW)
-  ps2_enabled = true;              // Enabled by default (CA2 LOW)
   
-  // Reset joystick
-  joystickButtons = 0x00;
+  // Reset all attachments
+  for (uint8_t i = 0; i < portA_attachmentCount; i++) {
+    if (portA_attachments[i] != nullptr) {
+      portA_attachments[i]->reset();
+    }
+  }
+  for (uint8_t i = 0; i < portB_attachmentCount; i++) {
+    if (portB_attachments[i] != nullptr) {
+      portB_attachments[i]->reset();
+    }
+  }
   
   // Reset timing
   tickCounter = 0;
@@ -87,16 +67,24 @@ uint8_t GPIOCard::read(uint16_t address) {
       // Reading ORB clears CB1 and CB2 interrupt flags
       clearIRQFlag(IRQ_CB1 | IRQ_CB2);
       value = readPortB();
-      // Clear keyboard encoder data ready flag after reading
-      keyboardData_B_ready = false;
+      // Notify attachments that interrupts were cleared
+      for (uint8_t i = 0; i < portB_attachmentCount; i++) {
+        if (portB_attachments[i] != nullptr) {
+          portB_attachments[i]->clearInterrupts(false, false, true, true);
+        }
+      }
       break;
       
     case VIA_ORA:
       // Reading ORA clears CA1 and CA2 interrupt flags
       clearIRQFlag(IRQ_CA1 | IRQ_CA2);
       value = readPortA();
-      // Clear PS/2 data ready flag after reading
-      keyboardData_A_ready = false;
+      // Notify attachments that interrupts were cleared
+      for (uint8_t i = 0; i < portA_attachmentCount; i++) {
+        if (portA_attachments[i] != nullptr) {
+          portA_attachments[i]->clearInterrupts(true, true, false, false);
+        }
+      }
       break;
       
     case VIA_DDRB:
@@ -301,6 +289,40 @@ uint8_t GPIOCard::tick(uint32_t cpuFrequency) {
     }
   }
   
+  // Tick all attachments
+  for (uint8_t i = 0; i < portA_attachmentCount; i++) {
+    if (portA_attachments[i] != nullptr) {
+      portA_attachments[i]->tick(cpuFrequency);
+    }
+  }
+  for (uint8_t i = 0; i < portB_attachmentCount; i++) {
+    if (portB_attachments[i] != nullptr) {
+      portB_attachments[i]->tick(cpuFrequency);
+    }
+  }
+  
+  // Check for attachment interrupts
+  for (uint8_t i = 0; i < portA_attachmentCount; i++) {
+    if (portA_attachments[i] != nullptr) {
+      if (portA_attachments[i]->hasCA1Interrupt()) {
+        setIRQFlag(IRQ_CA1);
+      }
+      if (portA_attachments[i]->hasCA2Interrupt()) {
+        setIRQFlag(IRQ_CA2);
+      }
+    }
+  }
+  for (uint8_t i = 0; i < portB_attachmentCount; i++) {
+    if (portB_attachments[i] != nullptr) {
+      if (portB_attachments[i]->hasCB1Interrupt()) {
+        setIRQFlag(IRQ_CB1);
+      }
+      if (portB_attachments[i]->hasCB2Interrupt()) {
+        setIRQFlag(IRQ_CB2);
+      }
+    }
+  }
+  
   // Return IRQ status (bit 7 of IFR)
   return (regIFR & regIER & 0x7F) ? IRQ_IRQ : 0x00;
 }
@@ -327,32 +349,15 @@ void GPIOCard::clearIRQFlag(uint8_t flag) {
 uint8_t GPIOCard::readPortA() {
   uint8_t value = 0xFF;
   
-  // Determine input sources
+  // Determine input sources from attachments (priority-based multiplexing)
   uint8_t externalInput = 0xFF;
   
-  // Port A serves multiple functions:
-  // 1. PS/2 keyboard ASCII input (when encoder enabled via CA2)
-  // 2. Joystick input
-  // 3. Keyboard matrix row input (when manually scanning)
-  
-  if (ps2_enabled && keyboardData_A_ready) {
-    // PS/2 keyboard data takes priority
-    externalInput = keyboardASCII_A;
-  } else {
-    // Start with joystick data (active-low, so invert)
-    externalInput = ~joystickButtons;
-    
-    // If keyboard encoder is disabled, overlay manual matrix scanning
-    if (!keyboardEncoder_enabled) {
-      // Check keyboard matrix based on Port B column selection
-      for (int row = 0; row < 8; row++) {
-        for (int col = 0; col < 8; col++) {
-          // If column is selected (low) on Port B and key is pressed
-          if (!(regORB & (1 << col)) && (keyboardMatrix[row] & (1 << col))) {
-            externalInput &= ~(1 << row);  // Pull row low
-          }
-        }
-      }
+  // Query all Port A attachments in priority order
+  for (uint8_t i = 0; i < portA_attachmentCount; i++) {
+    if (portA_attachments[i] != nullptr && portA_attachments[i]->isEnabled()) {
+      uint8_t attachmentData = portA_attachments[i]->readPortA(regDDRA, regORA);
+      // First enabled attachment with data (not 0xFF) wins, or AND all values together
+      externalInput &= attachmentData;
     }
   }
   
@@ -381,25 +386,16 @@ uint8_t GPIOCard::readPortA() {
 uint8_t GPIOCard::readPortB() {
   uint8_t value = 0xFF;
   
-  // Determine input sources
+  // Determine input sources from attachments (priority-based multiplexing)
   uint8_t externalInput = 0xFF;
   
-  // Port B serves multiple functions:
-  // 1. Keyboard encoder ASCII input (when encoder enabled via CB2)
-  // 2. Keyboard matrix column input (when manually scanning)
-  // 3. Joystick input
-  
-  if (keyboardEncoder_enabled && keyboardData_B_ready) {
-    // Keyboard encoder ASCII data takes priority
-    externalInput = keyboardASCII_B;
-  } else if (!keyboardEncoder_enabled) {
-    // Manual keyboard matrix scanning mode
-    // In this mode, software writes to Port B to select columns
-    // and reads Port A for rows. Port B typically reads as 0xFF
-    externalInput = 0xFF;
-  } else {
-    // Read joystick state (active-low, so invert)
-    externalInput = ~joystickButtons;
+  // Query all Port B attachments in priority order
+  for (uint8_t i = 0; i < portB_attachmentCount; i++) {
+    if (portB_attachments[i] != nullptr && portB_attachments[i]->isEnabled()) {
+      uint8_t attachmentData = portB_attachments[i]->readPortB(regDDRB, regORB);
+      // First enabled attachment with data (not 0xFF) wins, or AND all values together
+      externalInput &= attachmentData;
+    }
   }
   
   // Apply DDR settings: output bits come from ORB, input bits from external
@@ -425,15 +421,21 @@ uint8_t GPIOCard::readPortB() {
 }
 
 void GPIOCard::writePortA(uint8_t value) {
-  // Port A outputs
-  // In manual keyboard scanning mode, Port A may be used to select rows
-  // Most commonly Port A is inputs for PS/2 and joystick
+  // Notify all Port A attachments of the write
+  for (uint8_t i = 0; i < portA_attachmentCount; i++) {
+    if (portA_attachments[i] != nullptr) {
+      portA_attachments[i]->writePortA(value, regDDRA);
+    }
+  }
 }
 
 void GPIOCard::writePortB(uint8_t value) {
-  // Port B outputs
-  // In manual keyboard scanning mode, Port B is used to select columns
-  // The value written selects which column(s) to scan
+  // Notify all Port B attachments of the write
+  for (uint8_t i = 0; i < portB_attachmentCount; i++) {
+    if (portB_attachments[i] != nullptr) {
+      portB_attachments[i]->writePortB(value, regDDRB);
+    }
+  }
 }
 
 void GPIOCard::updateCA2() {
@@ -446,25 +448,24 @@ void GPIOCard::updateCA2() {
     case 0x02:  // Input mode - positive edge
     case 0x03:  // Independent interrupt input - positive edge
       // Input modes
-      ps2_enabled = true;
       break;
       
     case 0x04:  // Handshake output
     case 0x05:  // Pulse output
       // Output modes
-      ps2_enabled = false;
       break;
       
     case 0x06:  // Manual output LOW
       CA2 = false;
-      ps2_enabled = true;  // LOW enables PS/2
       break;
       
     case 0x07:  // Manual output HIGH
       CA2 = true;
-      ps2_enabled = false;  // HIGH disables PS/2
       break;
   }
+  
+  // Notify all attachments of control line changes
+  notifyAttachmentsControlLines();
 }
 
 void GPIOCard::updateCB2() {
@@ -477,76 +478,98 @@ void GPIOCard::updateCB2() {
     case 0x02:  // Input mode - positive edge
     case 0x03:  // Independent interrupt input - positive edge
       // Input modes
-      keyboardEncoder_enabled = true;
       break;
       
     case 0x04:  // Handshake output
     case 0x05:  // Pulse output
       // Output modes
-      keyboardEncoder_enabled = false;
       break;
       
     case 0x06:  // Manual output LOW
       CB2 = false;
-      keyboardEncoder_enabled = true;  // LOW enables keyboard encoder
       break;
       
     case 0x07:  // Manual output HIGH
       CB2 = true;
-      keyboardEncoder_enabled = false;  // HIGH disables keyboard encoder
       break;
   }
-}
-
-void GPIOCard::updateKeyboard(uint8_t key) {
-  // This handles keyboard matrix updates
-  // Convert ASCII key to matrix position
   
-  for (int row = 0; row < 8; row++) {
-    for (int col = 0; col < 8; col++) {
-      if (KEYBOARD_MATRIX[row][col] == key) {
-        // Set the bit in the keyboard matrix
-        keyboardMatrix[row] |= (1 << col);
-        
-        // If keyboard encoder is enabled, send ASCII to Port B
-        if (keyboardEncoder_enabled) {
-          keyboardASCII_B = key;
-          keyboardData_B_ready = true;
-          
-          // Generate CB1 interrupt to signal data ready
-          setIRQFlag(IRQ_CB1);
+  // Notify all attachments of control line changes
+  notifyAttachmentsControlLines();
+}
+
+void GPIOCard::notifyAttachmentsControlLines() {
+  // Notify all attachments of control line state changes
+  for (uint8_t i = 0; i < portA_attachmentCount; i++) {
+    if (portA_attachments[i] != nullptr) {
+      portA_attachments[i]->updateControlLines(CA1, CA2, CB1, CB2);
+    }
+  }
+  for (uint8_t i = 0; i < portB_attachmentCount; i++) {
+    if (portB_attachments[i] != nullptr) {
+      portB_attachments[i]->updateControlLines(CA1, CA2, CB1, CB2);
+    }
+  }
+}
+
+void GPIOCard::sortAttachmentsByPriority() {
+  // Simple bubble sort for Port A attachments by priority (lower = higher priority)
+  for (uint8_t i = 0; i < portA_attachmentCount - 1; i++) {
+    for (uint8_t j = 0; j < portA_attachmentCount - i - 1; j++) {
+      if (portA_attachments[j] != nullptr && portA_attachments[j + 1] != nullptr) {
+        if (portA_attachments[j]->getPriority() > portA_attachments[j + 1]->getPriority()) {
+          // Swap
+          GPIOAttachment* temp = portA_attachments[j];
+          portA_attachments[j] = portA_attachments[j + 1];
+          portA_attachments[j + 1] = temp;
         }
-        
-        return;
+      }
+    }
+  }
+  
+  // Simple bubble sort for Port B attachments by priority
+  for (uint8_t i = 0; i < portB_attachmentCount - 1; i++) {
+    for (uint8_t j = 0; j < portB_attachmentCount - i - 1; j++) {
+      if (portB_attachments[j] != nullptr && portB_attachments[j + 1] != nullptr) {
+        if (portB_attachments[j]->getPriority() > portB_attachments[j + 1]->getPriority()) {
+          // Swap
+          GPIOAttachment* temp = portB_attachments[j];
+          portB_attachments[j] = portB_attachments[j + 1];
+          portB_attachments[j + 1] = temp;
+        }
       }
     }
   }
 }
 
-void GPIOCard::updatePS2Keyboard(uint8_t ascii) {
-  // Update PS/2 keyboard input on Port A
-  if (ps2_enabled) {
-    keyboardASCII_A = ascii;
-    keyboardData_A_ready = true;
-    
-    // Generate CA1 interrupt to signal data ready
-    setIRQFlag(IRQ_CA1);
+void GPIOCard::attachToPortA(GPIOAttachment* attachment) {
+  if (attachment != nullptr && portA_attachmentCount < MAX_ATTACHMENTS_PER_PORT) {
+    portA_attachments[portA_attachmentCount++] = attachment;
+    sortAttachmentsByPriority();
+    // Notify the attachment of current control line states
+    attachment->updateControlLines(CA1, CA2, CB1, CB2);
   }
 }
 
-void GPIOCard::releaseKey(uint8_t key) {
-  // Clear the key from the keyboard matrix
-  for (int row = 0; row < 8; row++) {
-    for (int col = 0; col < 8; col++) {
-      if (KEYBOARD_MATRIX[row][col] == key) {
-        keyboardMatrix[row] &= ~(1 << col);
-        return;
-      }
-    }
+void GPIOCard::attachToPortB(GPIOAttachment* attachment) {
+  if (attachment != nullptr && portB_attachmentCount < MAX_ATTACHMENTS_PER_PORT) {
+    portB_attachments[portB_attachmentCount++] = attachment;
+    sortAttachmentsByPriority();
+    // Notify the attachment of current control line states
+    attachment->updateControlLines(CA1, CA2, CB1, CB2);
   }
 }
 
-void GPIOCard::updateJoystick(uint8_t buttons) {
-  // Update joystick button state
-  joystickButtons = buttons;
+GPIOAttachment* GPIOCard::getPortAAttachment(uint8_t index) {
+  if (index < portA_attachmentCount) {
+    return portA_attachments[index];
+  }
+  return nullptr;
+}
+
+GPIOAttachment* GPIOCard::getPortBAttachment(uint8_t index) {
+  if (index < portB_attachmentCount) {
+    return portB_attachments[index];
+  }
+  return nullptr;
 }

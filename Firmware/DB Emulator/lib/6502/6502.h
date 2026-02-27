@@ -13,6 +13,11 @@
 
 #include "IO/IO.h"
 #include "IO/GPIOCard.h"
+#include "IO/GPIOAttachments/GPIOAttachment.h"
+#include "IO/GPIOAttachments/GPIOKeyboardMatrixAttachment.h"
+#include "IO/GPIOAttachments/GPIOKeyboardEncoderAttachment.h"
+#include "IO/GPIOAttachments/GPIOPS2Attachment.h"
+#include "IO/GPIOAttachments/GPIOJoystickAttachment.h"
 #include "IO/RAMCard.h"
 #include "IO/RTCCard.h"
 #include "IO/SerialCard.h"

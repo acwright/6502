@@ -3,6 +3,12 @@
 
 #include "IO.h"
 
+// Forward declaration
+class GPIOAttachment;
+
+// Maximum number of attachments per port
+#define MAX_ATTACHMENTS_PER_PORT 4
+
 // 65C22 VIA Register Addresses
 #define VIA_ORB     0x00  // Output Register B (or Input Register B)
 #define VIA_ORA     0x01  // Output Register A (or Input Register A)
@@ -32,16 +38,16 @@
 #define IRQ_IRQ     0x80
 
 // Joystick button bits
-// | 7     | 6     | 5    | 4    | 3    | 2    | 1 | 0 |
-// | Y     | X     | B    | A    | R    | L    | D | U |
-#define JOY_UP      0x01
-#define JOY_DOWN    0x02
-#define JOY_LEFT    0x04
-#define JOY_RIGHT   0x08
-#define JOY_A       0x10
-#define JOY_B       0x20
-#define JOY_X       0x40
-#define JOY_Y       0x80
+// | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
+// | R | L | D | U | Y | X | B | A |
+#define JOY_A       0x01
+#define JOY_B       0x02
+#define JOY_X       0x04
+#define JOY_Y       0x08
+#define JOY_UP      0x10
+#define JOY_DOWN    0x20
+#define JOY_LEFT    0x40
+#define JOY_RIGHT   0x80
 
 class GPIOCard: public IO {
   private:
@@ -72,17 +78,11 @@ class GPIOCard: public IO {
     bool T1_IRQ_enabled;
     bool T2_IRQ_enabled;
     
-    // Keyboard state
-    uint8_t keyboardMatrix[8];    // 8 rows of keyboard matrix (PA0-PA7)
-    uint8_t keyboardASCII_A;      // ASCII data from PS/2 port (Port A)
-    uint8_t keyboardASCII_B;      // ASCII data from keyboard encoder (Port B)
-    bool keyboardData_A_ready;    // Data ready flag for Port A
-    bool keyboardData_B_ready;    // Data ready flag for Port B
-    bool keyboardEncoder_enabled; // CB2 controls keyboard encoder enable
-    bool ps2_enabled;             // CA2 controls PS/2 port enable
-    
-    // Joystick state
-    uint8_t joystickButtons;      // Current joystick button state
+    // Attachments (peripherals connected to the GPIO ports)
+    GPIOAttachment* portA_attachments[MAX_ATTACHMENTS_PER_PORT];
+    GPIOAttachment* portB_attachments[MAX_ATTACHMENTS_PER_PORT];
+    uint8_t portA_attachmentCount;
+    uint8_t portB_attachmentCount;
     
     // Timing
     uint32_t tickCounter;
@@ -98,6 +98,8 @@ class GPIOCard: public IO {
     void writePortB(uint8_t value);
     void updateCA2();
     void updateCB2();
+    void notifyAttachmentsControlLines();
+    void sortAttachmentsByPriority();
     
   public:
     GPIOCard();
@@ -108,10 +110,13 @@ class GPIOCard: public IO {
     uint8_t tick(uint32_t cpuFrequency) override;
     void    reset() override;
 
-    void updateKeyboard(uint8_t key);
-    void updatePS2Keyboard(uint8_t ascii);
-    void updateJoystick(uint8_t buttons);
-    void releaseKey(uint8_t key);
+    // Attachment management
+    void attachToPortA(GPIOAttachment* attachment);
+    void attachToPortB(GPIOAttachment* attachment);
+    GPIOAttachment* getPortAAttachment(uint8_t index);
+    GPIOAttachment* getPortBAttachment(uint8_t index);
+    uint8_t getPortAAttachmentCount() const { return portA_attachmentCount; }
+    uint8_t getPortBAttachmentCount() const { return portB_attachmentCount; }
 };
 
 #endif

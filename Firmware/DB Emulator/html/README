@@ -1,0 +1,90 @@
+# DB Emulator Embedded HTML
+
+This directory contains the web page served by the DB Emulator firmware. The HTML files are minified and embedded in the firmware to provide a lightweight embedded web page.
+
+## Overview
+
+The DB Emulator web oage displays the emulator branding, version information, and provides quick access to documentation and the project homepage. The HTML is designed to be minimal and self-contained (inline CSS, no external dependencies) to reduce the firmware footprint.
+
+## Prerequisites
+
+- Node.js (v14 or higher recommended)
+- npm (comes with Node.js)
+
+## Project Structure
+
+```
+html/
+├── README                  # This file
+├── package.json           # Project dependencies and scripts
+├── public/                # Source HTML files
+│   └── index.html        # Main web interface
+├── dist/                  # Minified output (generated)
+│   └── index.html        # Minified HTML for embedding
+└── node_modules/          # npm dependencies (generated)
+```
+
+## Installation
+
+Install the development dependencies:
+
+```sh
+npm install
+```
+
+This will install:
+- **five-server** - Live-reloading development server
+- **html-minifier-terser** - HTML/CSS/JS minification tool
+
+## Development Workflow
+
+### Local Development
+
+Start the development server with live reload:
+
+```sh
+npm run dev
+```
+
+This launches a local server at `http://localhost:5555` (or another available port) with automatic browser refresh when files change. Edit files in the `public/` directory.
+
+### Building for Production
+
+Generate minified HTML for firmware embedding:
+
+```sh
+npm run build
+```
+
+This processes all files in `public/` and outputs minified versions to `dist/`. The minification:
+- Removes comments and whitespace
+- Minifies inline CSS and JavaScript
+- Preserves case sensitivity
+- Reduces file size for efficient firmware storage
+
+## Integration with Firmware
+
+The minified HTML from `dist/` is embedded in the DB Emulator firmware and served via the built-in web server. After building, the minified files need to be converted to C header files for inclusion in the firmware source.
+
+The typical workflow is:
+1. Modify HTML in `public/`
+2. Test with `npm run dev`
+3. Build with `npm run build`
+4. Convert `dist/index.html` to embedded format
+5. Rebuild the firmware with PlatformIO
+
+## File Size Considerations
+
+The HTML must remain minimal to fit within the microcontroller's flash memory constraints. Keep the following in mind:
+- Use inline CSS and JavaScript (no external files)
+- Avoid large libraries or frameworks
+- Optimize images as data URIs or use minimal SVG
+- Test the size of minified output before embedding
+
+## Version Management
+
+Update the version number in `public/index.html` when releasing new firmware versions to keep the web interface version in sync with the firmware version.
+
+## License
+
+See the LICENSE file in the root directory of the DB Emulator project.

@@ -1,21 +1,20 @@
 # DB Emulator
 
-A 6502 CPU emulator firmware for the Teensy 4.1 microcontroller. This project provides a complete hardware-accelerated 6502 emulation platform with support for RAM, ROM, cartridge loading, I/O devices, and network control.
+A 65C02 CPU emulator firmware for the Teensy 4.1 microcontroller. This project provides a complete hardware-accelerated 65C02 emulation platform with support for RAM, ROM, cartridge loading, I/O devices, and network control.
 
 ## Overview
 
-DB Emulator transforms a Teensy 4.1 into a powerful 6502 computer system emulator. It emulates the complete 6502 CPU instruction set, memory management, and provides hardware interfaces for keyboards, mice, joysticks, and network connectivity. The emulator can be controlled via serial terminal or through the web-based [DB Control](../DB%20Control/README.md) interface.
+DB Emulator transforms a Teensy 4.1 into a powerful 65C02 computer system emulator. It emulates the complete 65C02 CPU instruction set, memory management, and provides hardware interfaces for keyboards, joysticks, and network connectivity. The emulator can be controlled via serial terminal or through the web-based [DB Control](../DB%20Control/README.md) interface.
 
 ### Features
 
-- **Complete 6502 CPU Emulation**: Accurate cycle-by-cycle emulation using [vrEmu6502](https://github.com/visrealm/vrEmu6502)
+- **Complete 65C02 CPU Emulation**: Accurate cycle-by-cycle emulation using [vrEmu6502](https://github.com/visrealm/vrEmu6502)
 - **Memory Management**: 
   - Configurable RAM (up to 32KB, with optional PSRAM support)
   - ROM support (up to 24KB)
   - Cartridge loading (16KB)
 - **I/O Support**:
   - USB Keyboard input
-  - USB Mouse input
   - USB Joystick support (Xbox 360/One controllers)
 - **Storage**:
   - SD card support for loading ROMs, cartridges, and programs
@@ -50,7 +49,6 @@ The firmware supports two development board configurations:
 - **USB cable** for programming and serial communication
 - **Optional**:
   - USB keyboard
-  - USB mouse
   - USB joystick (Xbox 360/One)
   - PSRAM chip (for extended memory support)
 
@@ -152,8 +150,7 @@ build_flags =
 3. **Place ROM files** (.bin format) in appropriate directories
 
 **Auto-boot Configuration**:
-- Place `BIOS.bin` or `ROM.bin` in the root directory for automatic loading
-- Place `Cart.bin` in the root directory for automatic cartridge mounting
+- Place `BIOS.bin` in the `ROMs` directory for automatic loading
 
 ## Building and Uploading
 
@@ -247,7 +244,6 @@ Once connected, you'll see the emulator banner and status. Available commands:
 #### Configuration
 - **`+`** - Increase Frequency: Speed up CPU clock
 - **`-`** - Decrease Frequency: Slow down CPU clock
-- **`I`** - Toggle I/O: Enable/disable I/O emulation
 
 #### Information & Debugging
 - **`F`** - Info: Display system information and status
@@ -279,7 +275,7 @@ If your development board has physical buttons:
 - **INT Button**: Increase clock frequency
 - **STEP Button**: Execute one instruction
 - **RUN/STOP Button**: Toggle execution
-- **RESET Button**: Hardware reset (DevBoard 1 and 1.1 only)
+- **RESET Button**: Hardware reset (DevBoard 1 only)
 
 ## API Endpoints
 
@@ -303,7 +299,6 @@ Returns system information and CPU state in JSON format:
   "freqLabel": "1 MHz",
   "freqPeriod": 1,
   "inputCtx": 0,
-  "ioEnabled": true,
   "ipAddress": "192.168.1.100",
   "isRunning": false,
   "lastSnapshot": 1234567890,
@@ -380,7 +375,7 @@ Executes control command:
 **Solutions**:
 - Check serial output for error messages
 - Verify SD card is properly formatted (FAT32)
-- Ensure ROM files are valid 6502 binaries
+- Ensure ROM files are valid 65C02 binaries
 - Reset via serial command `T` or power cycle
 
 **Problem**: Network features not working
@@ -416,23 +411,23 @@ Executes control command:
 ```
 DB Emulator/
 ├── lib/
-│   └── 6502/                  # Custom 6502 emulation library
+│   └── 6502/                 # Custom 6502 emulation library
 │       ├── 6502.h            # Main library header
 │       ├── constants.h       # System constants
 │       ├── macros.h          # Utility macros
 │       ├── pins.h            # Pin definitions
 │       ├── html.h            # Embedded web interface
 │       ├── CPU/              # CPU emulator wrapper
+│       │   └── [vrEmu6502](https://github.com/visrealm/vrEmu6502)/        # Core 6502 emulator
 │       ├── RAM/              # RAM emulation
 │       ├── ROM/              # ROM emulation
 │       ├── Cart/             # Cartridge support
-│       ├── IO/               # I/O device emulation
-│       └── [vrEmu6502](https://github.com/visrealm/vrEmu6502)/        # Core 6502 emulator
+│       └── IO/               # I/O device emulation
 ├── src/
 │   └── main.cpp              # Main firmware code
-├── include/                   # Additional headers
-├── test/                      # Unit tests
-├── html/                      # Web interface source
+├── include/                  # Additional headers
+├── test/                     # Unit tests
+├── html/                     # Web interface source
 └── platformio.ini            # PlatformIO configuration
 ```
 
@@ -448,16 +443,18 @@ DB Emulator/
 ```
 $0000 - $00FF : Zero Page
 $0100 - $01FF : Stack
-$0200 - $07FF : Low RAM
-$0800 - $7FFF : RAM (30KB)
-$8000 - $83FF : I/O Slot 0 (1KB)
-$8400 - $87FF : I/O Slot 1 (1KB) - Emulator I/O
-$8800 - $8BFF : I/O Slot 2 (1KB)
-$8C00 - $8FFF : I/O Slot 3 (1KB)
-$9000 - $93FF : I/O Slot 4 (1KB)
-$9400 - $97FF : I/O Slot 5 (1KB)
-$9800 - $9BFF : I/O Slot 6 (1KB)
-$9C00 - $9FFF : I/O Slot 7 (1KB)
+$0200 - $02FF : Input Buffer
+$0300 - $03FF : Kernal Variables
+$0400 - $07FF : User Variables
+$0800 - $7FFF : Program RAM (30KB)
+$8000 - $83FF : I/O Slot 0 (1KB) - RAM Card
+$8400 - $87FF : I/O Slot 1 (1KB) - RAM Card
+$8800 - $8BFF : I/O Slot 2 (1KB) - RTC Card
+$8C00 - $8FFF : I/O Slot 3 (1KB) - Storage Card
+$9000 - $93FF : I/O Slot 4 (1KB) - Serial Card
+$9400 - $97FF : I/O Slot 5 (1KB) - GPIO Card
+$9800 - $9BFF : I/O Slot 6 (1KB) - Sound Card (Not emulated)
+$9C00 - $9FFF : I/O Slot 7 (1KB) - Video Card (Not emulated)
 $A000 - $BFFF : ROM (8KB)
 $C000 - $FFFF : ROM/Cartridge (16KB)
 ```
@@ -470,7 +467,6 @@ Enable debug flags in `platformio.ini` for verbose logging:
 
 ```ini
 -D KEYBOARD_DEBUG    ; Log all keyboard events
--D MOUSE_DEBUG       ; Log mouse movements and clicks
 -D JOYSTICK_DEBUG    ; Log joystick button presses
 ```
 
@@ -502,4 +498,4 @@ See LICENSE file in project root.
 
 ## Version History
 
-- **v1.0.0**: Initial release with full 6502 emulation, network support, and web API
+- **v1.0.0**: Initial release with full 65C02 emulation, network support, and web API

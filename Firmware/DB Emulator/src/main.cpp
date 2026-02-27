@@ -7,7 +7,7 @@
 #include <USBHost_t36.h>
 #include <QNEthernet.h>
 #include <AsyncWebServer_Teensy41.h>
-#include <DBEmulator.h>
+#include <6502.h>
 
 using namespace qindesign::network;
 
@@ -148,6 +148,12 @@ StorageCard storageCard = StorageCard();
 SerialCard serialCard = SerialCard();
 GPIOCard gpioCard = GPIOCard();
 
+// GPIO Attachments
+GPIOKeyboardMatrixAttachment kbdMatrixAttachment = GPIOKeyboardMatrixAttachment(10);    // Priority 10
+GPIOKeyboardEncoderAttachment kbdEncoderAttachment = GPIOKeyboardEncoderAttachment(20); // Priority 20
+GPIOPS2Attachment ps2Attachment = GPIOPS2Attachment(30);                                // Priority 30
+GPIOJoystickAttachment joystickAttachment = GPIOJoystickAttachment(false, 100);         // Port B, Priority 100
+
 //
 // MAIN
 //
@@ -158,6 +164,20 @@ void setup() {
 
   setSyncProvider(syncTime);
   buildMemoryMap();
+  
+  // Attach peripherals to GPIO Card
+  // Keyboard matrix (manual scanning) - highest priority for Port A rows
+  gpioCard.attachToPortA(&kbdMatrixAttachment);
+  gpioCard.attachToPortB(&kbdMatrixAttachment);
+  
+  // Keyboard encoder (ASCII on Port B) - medium priority
+  gpioCard.attachToPortB(&kbdEncoderAttachment);
+  
+  // PS/2 keyboard (ASCII on Port A) - medium priority
+  gpioCard.attachToPortA(&ps2Attachment);
+  
+  // Joystick (Port B) - lowest priority, fallback
+  gpioCard.attachToPortB(&joystickAttachment);
   
   initPins();
   initButtons();
@@ -429,24 +449,14 @@ void onKeyboard(int key) {
 
   if (key > 0x7F) { return; } // No extended ASCII
 
-  // Route keyboard input to both encoder (Port B) and PS/2 (Port A)
-  gpioCard.updateKeyboard((uint8_t)key);    // Keyboard encoder on Port B
-  gpioCard.updatePS2Keyboard((uint8_t)key); // PS/2 port on Port A
+  // Route keyboard input to attachments
+  kbdMatrixAttachment.updateKey((uint8_t)key, true);  // Update keyboard matrix
+  kbdEncoderAttachment.updateKeyboard((uint8_t)key);  // Keyboard encoder on Port B
+  ps2Attachment.updatePS2Keyboard((uint8_t)key);      // PS/2 port on Port A
   
   #ifdef KEYBOARD_DEBUG
-  Serial.print("Keyboard: ");
-  Serial.print(key);
-
-  char output[64];
-
-  sprintf(
-    output, 
-    " | %c%c%c%c%c%c%c%c | 0x%02X",
-    BYTE_TO_BINARY(key /*& 0b01111111*/),
-    key /*& 0b01111111*/
-  );
-
-  Serial.println(output);
+  Serial.print("Key pressed: 0x");
+  Serial.println(key, HEX);
   #endif
 }
 
@@ -484,10 +494,10 @@ void onKeyboardRelease(int key) {
 
   if (key > 0x7F) { return; }
 
-  // Release key from both keyboard matrix and PS/2 buffer
-  gpioCard.releaseKey((uint8_t)key);
-  // Note: PS/2 port uses interrupt-driven single-key buffer,
-  // so key release doesn't need separate PS/2 handling
+  // Release key from keyboard matrix
+  kbdMatrixAttachment.updateKey((uint8_t)key, false);
+  // Note: PS/2 and encoder use interrupt-driven single-key buffer,
+  // so key release doesn't need separate handling
   
   #ifdef KEYBOARD_DEBUG
   Serial.print("Key Released: 0x");
@@ -503,15 +513,15 @@ void onJoystick() {
   {
     // Map Xbox controller to 8-bit joystick format
     // Xbox button layout: bit 0=A, 1=B, 2=X, 3=Y, 4=LB, 5=RB, 6=Back, 7=Start, etc.
-    // DB Joystick: bit 0=U, 1=D, 2=L, 3=R, 4=A, 5=B, 6=X, 7=Y
+    // DB Joystick: bit 0=A, 1=B, 2=X, 3=Y, 4=U, 5=D, 6=L, 7=R
     
     uint8_t mappedButtons = 0;
     
     // Map face buttons (A, B, X, Y from Xbox to DB format)
-    if (buttons & 0x0001) mappedButtons |= 0x10;  // Xbox A -> DB A (bit 4)
-    if (buttons & 0x0002) mappedButtons |= 0x20;  // Xbox B -> DB B (bit 5)
-    if (buttons & 0x0004) mappedButtons |= 0x40;  // Xbox X -> DB X (bit 6)
-    if (buttons & 0x0008) mappedButtons |= 0x80;  // Xbox Y -> DB Y (bit 7)
+    if (buttons & 0x0001) mappedButtons |= 0x01;  // Xbox A -> DB A (bit 0)
+    if (buttons & 0x0002) mappedButtons |= 0x02;  // Xbox B -> DB B (bit 1)
+    if (buttons & 0x0004) mappedButtons |= 0x04;  // Xbox X -> DB X (bit 2)
+    if (buttons & 0x0008) mappedButtons |= 0x08;  // Xbox Y -> DB Y (bit 3)
     
     // Map D-Pad or analog stick to directions
     // Get analog stick positions for directional control
@@ -527,12 +537,12 @@ void onJoystick() {
     // Combine D-Pad and analog stick (analog stick uses threshold)
     const int analogThreshold = 128;  // Threshold for analog stick direction
     
-    if (dpadUp || axisY < -analogThreshold)    mappedButtons |= 0x01;  // UP
-    if (dpadDown || axisY > analogThreshold)   mappedButtons |= 0x02;  // DOWN
-    if (dpadLeft || axisX < -analogThreshold)  mappedButtons |= 0x04;  // LEFT
-    if (dpadRight || axisX > analogThreshold)  mappedButtons |= 0x08;  // RIGHT
+    if (dpadUp || axisY < -analogThreshold)    mappedButtons |= 0x10;  // UP (bit 4)
+    if (dpadDown || axisY > analogThreshold)   mappedButtons |= 0x20;  // DOWN (bit 5)
+    if (dpadLeft || axisX < -analogThreshold)  mappedButtons |= 0x40;  // LEFT (bit 6)
+    if (dpadRight || axisX > analogThreshold)  mappedButtons |= 0x80;  // RIGHT (bit 7)
     
-    gpioCard.updateJoystick(mappedButtons);
+    joystickAttachment.updateJoystick(mappedButtons);
     
     #ifdef JOYSTICK_DEBUG
     Serial.print("Joystick: Raw=0x");
@@ -1434,7 +1444,7 @@ void initPins() {
   pinMode(IRQB, INPUT_PULLUP);
   pinMode(NMIB, INPUT_PULLUP);
   pinMode(RDY, INPUT_PULLUP);
-  pinMode(BE, INPUT_PULLUP);
+  pinMode(BE, INPUT_PULLUP); // Unused but set to input with pullup to prevent floating
 
   pinMode(CLK_SWB, INPUT_PULLUP);
   pinMode(STEP_SWB, INPUT_PULLUP);
@@ -1458,12 +1468,14 @@ void initPins() {
   #ifdef DEVBOARD_1
   pinMode(RESET_SWB, INPUT_PULLUP);
 
-  pinMode(MOSI1, OUTPUT);
-  pinMode(MISO1, INPUT_PULLUP);
-  pinMode(SCK1, OUTPUT);
-  pinMode(CS, OUTPUT);
-
-  digitalWriteFast(CS, HIGH);
+  // These pins are currently unused on the dev board but 
+  // should be set to inputs to avoid floating and potential interference
+  pinMode(MOSI1, INPUT);
+  pinMode(MISO1, INPUT);
+  pinMode(SCK1, INPUT);
+  pinMode(CS, INPUT);
+  pinMode(RX, INPUT);
+  pinMode(TX, INPUT);
   #endif
 }
 
