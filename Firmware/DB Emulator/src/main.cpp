@@ -189,11 +189,11 @@ void setup() {
 
   info();
 
-  // if (autoStart) {
-  //   delay(500);
-  //   reset();
-  //   toggleRunStop();
-  // }
+  if (autoStart) {
+    delay(500);
+    reset();
+    toggleRunStop();
+  }
 }
 
 void loop() {

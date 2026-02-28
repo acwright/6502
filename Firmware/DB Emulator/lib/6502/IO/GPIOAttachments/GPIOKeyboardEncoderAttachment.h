@@ -36,6 +36,23 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     bool interruptPendingB;  // CB1 interrupt pending
     bool enabledB;           // Port B enabled state
     
+    // Modifier key states
+    bool shiftPressed;       // Shift modifier active
+    bool ctrlPressed;        // Ctrl modifier active
+    bool altPressed;         // Alt modifier active
+    bool menuPressed;        // Menu modifier active
+    
+    /**
+     * @brief Map USB HID keycode with modifiers to hex value
+     * 
+     * Maps a key press with active modifiers to the appropriate hex value
+     * according to the keyboard mapping table.
+     * 
+     * @param usbHidKeycode USB HID keycode
+     * @return uint8_t Mapped hex value (0x00-0xFF)
+     */
+    uint8_t mapKeyWithModifiers(uint8_t usbHidKeycode);
+    
   public:
     /**
      * @brief Construct a new Keyboard Encoder Attachment
