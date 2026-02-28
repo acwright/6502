@@ -1,5 +1,28 @@
 #define CIRCULAR_BUFFER_INT_SAFE
 
+// ============================================================================
+// Keyboard Matrix Mapping (MT8808 IC connected to 65C22)
+// ============================================================================
+// Rows: PA0-PA7 (VIA Port A)
+// Columns: PB0-PB7 (VIA Port B)
+//
+//      PB0    PB1    PB2    PB3    PB4    PB5    PB6    PB7
+// PA0:  `      1      2      3      4      5      6      7
+// PA1:  8      9      0      -      =      BS     ESC    TAB
+// PA2:  q      w      e      r      t      y      u      i
+// PA3:  o      p      [      ]      \      INS    CAPS   a
+// PA4:  s      d      f      g      h      j      k      l
+// PA5:  ;      '      ENTER  DEL    SHIFT  z      x      c
+// PA6:  v      b      n      m      ,      .      /      UP
+// PA7:  CTRL   GUI    ALT    SPACE  FN     LEFT   DOWN   RIGHT
+//
+// Notes:
+// - BS = Backspace (0x08), ESC = Escape (0x1B), TAB (0x09)
+// - INS = Insert (0x1A), DEL = Delete (0x7F), ENTER (0x0D)
+// - Arrow keys: UP (0x1E), LEFT (0x1C), DOWN (0x1F), RIGHT (0x1D)
+// - Function keys F1-F10 are mapped as FN + number keys 1-0
+// ============================================================================
+
 #include <Arduino.h>
 #include <CircularBuffer.hpp>
 
@@ -22,6 +45,7 @@
 CircularBuffer<uint8_t, BUFFER_SIZE> buffer;
 
 bool release = false;
+bool extended = false;
 
 void onInterrupt();
 void writeMatrix(uint8_t x, uint8_t y, uint8_t data);
@@ -43,7 +67,7 @@ void setup() {
   pinMode(PS2CLK, INPUT_PULLUP);
   pinMode(PS2DATA, INPUT_PULLUP);
 
-  // Reset the Mt8808
+  // Reset the MT8808
   digitalWrite(RESET, HIGH);
   delay(1);
   digitalWrite(RESET, LOW);
@@ -89,14 +113,14 @@ void onInterrupt() {
     case 7:
     case 8:
     case 9:                              // Data bits
-      parity += val;                     // another one received ?
-      incoming >>= 1;                    // right shift one place for next bit
-      incoming |= (val) ? 0x80 : 0;      // or in MSbit
+      parity += val;                     // Count number of 1 bits
+      incoming >>= 1;                    // Right shift one place for next bit
+      incoming |= (val) ? 0x80 : 0;      // OR in MSbit
       break;
-    case 10:                             // Parity check
-      parity &= 1;                       // Get LSB if 1 = odd number of 1's so parity should be 0
-      if (parity == val)                 // Both same parity error
-        parity = 0xFD;                   // To ensure at next bit count clear and discard
+    case 10:                             // Parity check (PS/2 uses odd parity)
+      parity &= 1;                       // Get LSB: 1=odd count, 0=even count
+      if (parity == val)                 // For odd parity: bit should be opposite of data parity
+        parity = 0xFD;                   // Mark invalid to discard byte
       break;
     case 11: // Stop bit
       if (parity < 0xFD) {               // Good so save byte in buffer, otherwise discard
@@ -132,6 +156,7 @@ void writeMatrix(uint8_t x, uint8_t y, uint8_t data) {
 void ps2ToMatrix(uint8_t scancode) {
   // Handle special code prefix
   if (scancode == 0xE0) {
+    extended = true;
     return;
   }
   if (scancode == 0xE1) {
@@ -144,8 +169,49 @@ void ps2ToMatrix(uint8_t scancode) {
     return;
   }
 
-  // Handle scancode
+  // Handle extended scancodes (E0 prefix)
+  if (extended) {
+    extended = false;
+    switch (scancode) {
+      case 0x70:      // INSERT
+        writeMatrix(0x3, 0x5, release ? 0x0 : 0x1);
+        break;
+      case 0x71:      // DELETE
+        writeMatrix(0x5, 0x3, release ? 0x0 : 0x1);
+        break;
+      case 0x75:      // UP
+        writeMatrix(0x6, 0x7, release ? 0x0 : 0x1);
+        break;
+      case 0x6B:      // LEFT
+        writeMatrix(0x7, 0x5, release ? 0x0 : 0x1);
+        break;
+      case 0x72:      // DOWN
+        writeMatrix(0x7, 0x6, release ? 0x0 : 0x1);
+        break;
+      case 0x74:      // RIGHT
+        writeMatrix(0x7, 0x7, release ? 0x0 : 0x1);
+        break;
+      case 0x1F:      // Left GUI/Windows
+      case 0x27:      // Right GUI/Windows  
+      case 0x2F:      // Apps/Menu
+        writeMatrix(0x7, 0x1, release ? 0x0 : 0x1);
+        break;
+      case 0x14:      // Right CTRL (same as left CTRL)
+        writeMatrix(0x7, 0x0, release ? 0x0 : 0x1);
+        break;
+      case 0x11:      // Right ALT (same as left ALT)
+        writeMatrix(0x7, 0x2, release ? 0x0 : 0x1);
+        break;
+      default:
+        break;
+    }
+    if (release) {
+      release = false;
+    }
+    return;
+  }
 
+  // Handle normal scancodes
   switch (scancode) {
     // Row X0
     case 0x0E:      // `
@@ -238,9 +304,6 @@ void ps2ToMatrix(uint8_t scancode) {
     case 0x5D:      // "\"
       writeMatrix(0x3, 0x4, release ? 0x0 : 0x1);
       break;
-    case 0x70:      // INSERT
-      writeMatrix(0x3, 0x5, release ? 0x0 : 0x1);
-      break;
     case 0x58:      // CAPS LOCK
       writeMatrix(0x3, 0x6, release ? 0x0 : 0x1);
       break;
@@ -282,9 +345,6 @@ void ps2ToMatrix(uint8_t scancode) {
     case 0x5A:      // ENTER
       writeMatrix(0x5, 0x2, release ? 0x0 : 0x1);
       break;
-    case 0x71:      // DELETE
-      writeMatrix(0x5, 0x3, release ? 0x0 : 0x1);
-      break;
     case 0x12:      // SHIFT
     case 0x59:
       writeMatrix(0x5, 0x4, release ? 0x0 : 0x1);
@@ -320,33 +380,15 @@ void ps2ToMatrix(uint8_t scancode) {
     case 0x4A:      // /
       writeMatrix(0x6, 0x6, release ? 0x0 : 0x1);
       break;
-    case 0x75:      // UP
-      writeMatrix(0x6, 0x7, release ? 0x0 : 0x1);
-      break;
     // Row X7
-    case 0x14:      // CTRL
+    case 0x14:      // CTRL (Left)
       writeMatrix(0x7, 0x0, release ? 0x0 : 0x1);
       break;
-    case 0x2F:      // MENU
-    case 0x1F:
-    case 0x27:
-      writeMatrix(0x7, 0x1, release ? 0x0 : 0x1);
-      break;
-    case 0x11:      // ALT
+    case 0x11:      // ALT (Left)
       writeMatrix(0x7, 0x2, release ? 0x0 : 0x1);
       break;
     case 0x29:      // SPACE
       writeMatrix(0x7, 0x3, release ? 0x0 : 0x1);
-      break;
-    // N/A...       // FN
-    case 0x6B:      // LEFT
-      writeMatrix(0x7, 0x5, release ? 0x0 : 0x1);
-      break;
-    case 0x72:      // DOWN
-      writeMatrix(0x7, 0x6, release ? 0x0 : 0x1);
-      break;
-    case 0x74:      // RIGHT
-      writeMatrix(0x7, 0x7, release ? 0x0 : 0x1);
       break;
     // Function Keys
     case 0x05:      // F1
