@@ -20,6 +20,7 @@ bool shiftPressed = false;
 bool ctrlPressed = false;
 bool capsLockOn = false;
 bool breakCodeNext = false;
+bool extendedCodeNext = false;
 
 void onInterrupt();
 void enable();
@@ -114,18 +115,18 @@ void onInterrupt() {
     case 7:
     case 8:
     case 9:                              // Data bits
-      parity += val;                     // another one received ?
-      incoming >>= 1;                    // right shift one place for next bit
-      incoming |= (val) ? 0x80 : 0;      // or in MSbit
+      parity += val;                     // Count number of 1 bits
+      incoming >>= 1;                    // Right shift one place for next bit
+      incoming |= (val) ? 0x80 : 0;      // OR in MSbit
       break;
-    case 10:                             // Parity check
-      parity &= 1;                       // Get LSB if 1 = odd number of 1's so parity should be 0
-      if (parity == val)                 // Both same parity error
-        parity = 0xFD;                   // To ensure at next bit count clear and discard
+    case 10:                             // Parity check (PS/2 uses odd parity)
+      parity &= 1;                       // Get LSB: 1=odd count, 0=even count
+      if (parity == val)                 // For odd parity: bit should be opposite of data parity
+        parity = 0xFD;                   // Mark invalid to discard byte
       break;
     case 11: // Stop bit
       if (parity < 0xFD) {               // Good so save byte in buffer, otherwise discard
-        ps2ToAscii(incoming);            // Add to circular buffer if valid ASCII (if full, oldest data lost)
+        ps2ToAscii(incoming);            // Convert to ASCII if valid scancode (if full, oldest data lost)
       }
       bitcount = 0;
       break;
@@ -139,6 +140,7 @@ void onInterrupt() {
 void ps2ToAscii(uint8_t scancode) {
   // Handle special code prefix
   if (scancode == 0xE0) {
+    extendedCodeNext = true;
     return;
   }
   if (scancode == 0xE1) {
@@ -154,6 +156,21 @@ void ps2ToAscii(uint8_t scancode) {
   // Handle break codes (key releases)
   if (breakCodeNext) {
     breakCodeNext = false;
+    
+    // Handle extended keys in break codes
+    if (extendedCodeNext) {
+      extendedCodeNext = false;
+      switch (scancode) {
+        case 0x11: // Right Alt
+          altPressed = false;
+          break;
+        case 0x14: // Right Control
+          ctrlPressed = false;
+          break;
+      }
+      return;
+    }
+    
     switch (scancode) {
       case 0x11: // Alt
         altPressed = false;
@@ -172,91 +189,137 @@ void ps2ToAscii(uint8_t scancode) {
   // Handle make codes (key presses)
   switch (scancode) {
     case 0x05: // F1
-      buffer.push(0x81);
+      buffer.push(altPressed ? 0x91 : 0x81);
       return;
     case 0x06: // F2
-      buffer.push(0x82);
+      buffer.push(altPressed ? 0x92 : 0x82);
       return;
     case 0x04: // F3
-      buffer.push(0x83);
+      buffer.push(altPressed ? 0x93 : 0x83);
       return;
     case 0x0C: // F4
-      buffer.push(0x84);
+      buffer.push(altPressed ? 0x94 : 0x84);
       return;
     case 0x03: // F5
-      buffer.push(0x85);
+      buffer.push(altPressed ? 0x95 : 0x85);
       return;
     case 0x0B: // F6
-      buffer.push(0x86);
+      buffer.push(altPressed ? 0x96 : 0x86);
       return;
     case 0x83: // F7
-      buffer.push(0x87);
+      buffer.push(altPressed ? 0x97 : 0x87);
       return;
     case 0x0A: // F8
-      buffer.push(0x88);
+      buffer.push(altPressed ? 0x98 : 0x88);
       return;
     case 0x01: // F9
-      buffer.push(0x89);
+      buffer.push(altPressed ? 0x99 : 0x89);
       return;
     case 0x09: // F10
-      buffer.push(0x8A);
+      buffer.push(altPressed ? 0x9A : 0x8A);
       return;
     case 0x78: // F11
-      buffer.push(0x8B);
+      buffer.push(altPressed ? 0x9B : 0x8B);
       return;
     case 0x07: // F12
-      buffer.push(0x8C);
+      buffer.push(altPressed ? 0x9C : 0x8C);
       return;
     case 0x0D: // Tab
       buffer.push(0x09);
       return;
     case 0x11: // Alt
-      altPressed = true;
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        altPressed = true; // Right Alt (same as left Alt)
+      } else {
+        altPressed = true;
+      }
       return;
     case 0x12: // Left Shift
     case 0x59: // Right Shift
       shiftPressed = true;
       return;
     case 0x14: // Control
-      ctrlPressed = true;
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        ctrlPressed = true; // Right Control (same as left Control)
+      } else {
+        ctrlPressed = true;
+      }
       return;
-    case 0x1F: // Windows / Menu
-    case 0x27:
+    case 0x1F: // Windows / Menu (Left)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(altPressed ? 0x90 : 0x80); // Right Windows / Menu
+      } else {
+        buffer.push(altPressed ? 0x90 : 0x80); // Left Windows / Menu
+      }
+      return;
+    case 0x27: // Windows / Menu (additional scancode)
     case 0x2F:
-      buffer.push(0x80);
+      buffer.push(altPressed ? 0x90 : 0x80);
       return;
     case 0x58: // Caps Lock
       capsLockOn = !capsLockOn;
       return;
     case 0x5A: // Enter
-      buffer.push(0x0A);
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(0x0D); // Keypad Enter
+      } else {
+        buffer.push(0x0D); // Main Enter
+      }
       return;
     case 0x66: // Backspace
       buffer.push(0x08);
       return;
-    case 0x69: // End
-      buffer.push(0x04);
+    case 0x69: // End (E0 69)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        // End key - not in keyboard matrix, ignore
+      }
       return;
-    case 0x6B: // Left Arrow
-      buffer.push(0x1C);
+    case 0x6B: // Left Arrow (E0 6B)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(0x1C);
+      }
       return;
-    case 0x6C: // Home
-      buffer.push(0x01);
+    case 0x6C: // Home (E0 6C)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        // Home key - not in keyboard matrix, ignore
+      }
       return;
-    case 0x70: // Insert
-      buffer.push(0x1A);
+    case 0x70: // Insert (E0 70)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(0x1A);
+      }
       return;
-    case 0x71: // Delete
-      buffer.push(0x7F);
+    case 0x71: // Delete (E0 71)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(0x7F);
+      }
       return;
-    case 0x72: // Down Arrow
-      buffer.push(0x1F);
+    case 0x72: // Down Arrow (E0 72)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(0x1F);
+      }
       return;
-    case 0x74: // Right Arrow
-      buffer.push(0x1D);
+    case 0x74: // Right Arrow (E0 74)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(0x1D);
+      }
       return;
-    case 0x75: // Up Arrow
-      buffer.push(0x1E);
+    case 0x75: // Up Arrow (E0 75)
+      if (extendedCodeNext) {
+        extendedCodeNext = false;
+        buffer.push(0x1E);
+      }
       return;
     case 0x76: // Escape
       buffer.push(0x1B);
@@ -270,6 +333,12 @@ void ps2ToAscii(uint8_t scancode) {
     case 0x7D: // Page Up
     case 0x7E: // Scroll Lock
       return;
+  }
+
+  // If we get here with an extended code, clear the flag and ignore the scancode
+  if (extendedCodeNext) {
+    extendedCodeNext = false;
+    return;
   }
 
   // Handle control codes
