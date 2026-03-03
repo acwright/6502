@@ -162,6 +162,15 @@ uint8_t SerialCard::tick(uint32_t cpuFrequency) {
     // Check if enough cycles have passed to transmit a byte
     if (txCycleCounter >= cyclesPerByte) {
       SerialUSB1.write(this->tx);
+      #ifdef HW_SERIAL
+      #ifdef DEVBOARD_0
+      Serial4.write(this->tx);
+      #endif
+      #ifdef DEVBOARD_1
+      Serial7.write(this->tx);
+      #endif
+      #endif
+
       this->status |= SC_STATUS_TX_REG_EMPTY;
       txPending = false;
       txCycleCounter = 0;
@@ -183,6 +192,15 @@ uint8_t SerialCard::tick(uint32_t cpuFrequency) {
 void SerialCard::reset() {
   SerialUSB1.clear();
   
+  #ifdef HW_SERIAL
+  #ifdef DEVBOARD_0
+  Serial4.clear();
+  #endif
+  #ifdef DEVBOARD_1
+  Serial7.clear();
+  #endif
+  #endif
+
   this->tx = 0x00;
   this->rx = 0x00;
   this->cmd = 0x00;

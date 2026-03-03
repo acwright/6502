@@ -121,6 +121,10 @@ __attribute__((aligned(32))) uint8_t ramData1[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 __attribute__((aligned(32))) uint8_t ramData2[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 #endif
 
+#ifdef HW_SERIAL
+uint8_t serialData[1024];
+#endif
+
 static uint32_t cachedDelay = 0;
 static uint8_t cachedFreqIndex = 0xFF;
 static uint32_t cachedCpuFrequency = 1000000;
@@ -159,6 +163,16 @@ GPIOJoystickAttachment joystickAttachment = GPIOJoystickAttachment(false, 100); 
 void setup() {
   Serial.begin(9600);       // Ignored by Teensy; Baud rate is USB rate 480Mbps
   SerialUSB1.begin(9600);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
+  #ifdef HW_SERIAL
+  #ifdef DEVBOARD_0
+  Serial4.begin(2000000);
+  Serial4.addMemoryForWrite(serialData, 1024);
+  #endif
+  #ifdef DEVBOARD_1
+  Serial7.begin(2000000);
+  Serial7.addMemoryForWrite(serialData, 1024);
+  #endif
+  #endif
 
   setSyncProvider(syncTime);
   buildMemoryMap();
