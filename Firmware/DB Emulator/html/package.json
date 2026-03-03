@@ -1,14 +1,15 @@
 {
-  "name": "debugger-web",
+  "name": "db-emulator",
   "version": "1.0.0",
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npx five-server ./public",
-    "build": "npx html-minifier-terser --input-dir ./public --output-dir ./dist --case-sensitive --remove-comments --minify-css true --minify-js true"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "five-server": "^0.4.5",
-    "html-minifier-terser": "^7.2.0"
+    "vite": "^7.3.1",
+    "vite-plugin-mock-dev-server": "^2.0.7"
   }
 }

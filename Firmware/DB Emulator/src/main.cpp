@@ -1572,18 +1572,58 @@ String formattedDateTime() {
 // WEB SERVER
 //
 
-FASTRUN void onServerRoot(AsyncWebServerRequest *request) {
+String getContentType(String path) {
+  if (path.endsWith(".html") || path.endsWith(".htm")) return "text/html; charset=utf-8";
+  if (path.endsWith(".css"))  return "text/css; charset=utf-8";
+  if (path.endsWith(".js"))   return "application/javascript; charset=utf-8";
+  if (path.endsWith(".json")) return "application/json";
+  if (path.endsWith(".png"))  return "image/png";
+  if (path.endsWith(".jpg") || path.endsWith(".jpeg")) return "image/jpeg";
+  if (path.endsWith(".gif"))  return "image/gif";
+  if (path.endsWith(".svg"))  return "image/svg+xml";
+  if (path.endsWith(".ico"))  return "image/x-icon";
+  if (path.endsWith(".woff")) return "font/woff";
+  if (path.endsWith(".woff2")) return "font/woff2";
+  return "application/octet-stream";
+}
+
+void sendSDFile(AsyncWebServerRequest *request, String path) {
+  if (!SD.mediaPresent() || !SD.exists(path.c_str())) {
+    request->send(404);
+    return;
+  }
+
+  File file = SD.open(path.c_str());
+  if (!file) {
+    request->send(500);
+    return;
+  }
+
+  size_t fileSize = file.size();
+  file.close();
+
+  String contentType = getContentType(path);
+
+  // Use chunked callback to stream from SD card
   request->send(
-    "text/html",
-    sizeof(HTML) / sizeof(char), 
-    [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t 
+    contentType,
+    fileSize,
+    [path](uint8_t *buffer, size_t maxLen, size_t index) -> size_t
   {
-    size_t length = min(maxLen, (sizeof(HTML) / sizeof(char)) - index);
+    File f = SD.open(path.c_str());
+    if (!f) return 0;
 
-    memcpy(buffer, HTML + index, length);
+    f.seek(index);
+    size_t toRead = min(maxLen, f.size() - index);
+    size_t bytesRead = f.read(buffer, toRead);
+    f.close();
 
-    return length;
+    return bytesRead;
   });
+}
+
+FASTRUN void onServerRoot(AsyncWebServerRequest *request) {
+  sendSDFile(request, "WWW/index.html");
 }
 
 FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
@@ -1802,5 +1842,14 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
 }
 
 FASTRUN void onServerNotFound(AsyncWebServerRequest *request) {
+  // Attempt to serve static files from SD card WWW folder
+  String uri = request->url();
+  String path = "WWW" + uri;
+
+  if (SD.mediaPresent() && SD.exists(path.c_str())) {
+    sendSDFile(request, path);
+    return;
+  }
+
   request->send(404);
 }

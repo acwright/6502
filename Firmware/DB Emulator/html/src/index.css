@@ -1,0 +1,344 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  min-width: 1024px;
+  min-height: 728px;
+  height: 100vh;
+  margin: 0px;
+  font-family: monospace;
+  background-color: black;
+  color: white;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px;
+  border-bottom: 1px dashed white;
+}
+main {
+  display: grid;
+  flex-grow: 1;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  padding: 20px;
+  gap: 20px;
+}
+footer {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  border-top: 1px dashed white;
+}
+a {
+  color: white;
+}
+input[type="checkbox"] {
+  accent-color: #00ff00;
+}
+
+.button {
+  padding: 6px 8px;
+  display: inline-block;
+  width: auto;
+  border: none;
+  border-radius: 4px;
+  font-weight: bold;
+  text-align: center;
+  text-transform: uppercase;
+  font-size: 12px;
+  cursor: pointer;
+  font-family: monospace;
+}
+.button:hover {
+  background-color: lightgray;
+}
+.button:disabled {
+  color: black;
+  background-color: lightgray;
+  cursor: auto;
+}
+.button-green {
+  color: black;
+  background-color: #00ff00;
+}
+.button-green:hover, .button-green:disabled {
+  background-color: #00dd00;
+}
+.button-red {
+  color: white;
+  background-color: #ff0000;
+}
+.button-red:hover, .button-red:disabled {
+  background-color: #dd0000;
+}
+.button-blue {
+  color: white;
+  background-color: #0099ff;
+}
+.button-blue:hover, .button-blue:disabled {
+  background-color: #0077dd;
+}
+.green, .enabled {
+  color: #00ff00;
+}
+.red, .disabled {
+  color: #ff0000;
+}
+.blue, .info {
+  color: #0099ff;
+}
+
+.tabs {
+  display: flex;
+  justify-content: center;
+}
+
+.tab {
+  padding: 6px 8px;
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.tab.active {
+  background-color: #00cc00;
+  color: black;
+  font-weight: bold;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0px;
+}
+
+.page-btn {
+  padding: 4px 8px;
+  background-color: black;
+  border: 1px solid white;
+  color: white;
+  cursor: pointer;
+  font-family: monospace;
+  font-size: 10px;
+  min-width: 25px;
+}
+
+.page-btn.active {
+  background-color: #00cc00;
+  color: black;
+  font-weight: bold;
+}
+
+/* Panel Content Styles */
+.panel {
+  display: flex;
+  flex-direction: column;
+  background-color: black;
+  border: 1px solid white;
+  padding: 20px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.panel-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  justify-content: center;
+  font-size: 12px;
+  padding: 8px;
+  gap: 8px;
+}
+
+/* Emulator Panel Styles */
+.emulator-status {
+  color: #00ff00;
+  text-align: center;
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.emulator-info-row {
+  padding: 4px 0px;
+  text-align: center;
+}
+
+.emulator-info-label {
+  display: inline-block;
+}
+
+.emulator-toggle-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+}
+.emulator-toggle-buttons-group {
+  display: flex;
+  gap: 4px;
+}
+
+/* CPU Panel Styles */
+.cpu-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 24px 48px;
+}
+
+.cpu-registers {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.cpu-register-hex {
+  color: #00ff00;
+  font-weight: bold;
+}
+
+.cpu-register-dec {
+  color: gray;
+  display: inline-block;
+  width: 28px;
+  text-align: left;
+}
+
+.cpu-flags {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.cpu-flags-label {
+  margin-bottom: 8px;
+}
+
+.cpu-flags-values {
+  font-weight: bold;
+  font-size: 14px;
+}
+
+.cpu-flag {
+  color: gray;
+}
+
+.cpu-flag.on {
+  color: #00ff00;
+}
+
+.cpu-bus {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.cpu-bus-label {
+  margin-bottom: 8px;
+}
+
+.cpu-bus-hex {
+  color: #00ff00;
+  font-weight: bold;
+  font-size: 14px;
+}
+.cpu-bus-dec {
+  color: gray;
+  font-weight: bold;
+  font-size: 14px;
+}
+.cpu-bus-rw {
+  color: gray;
+}
+
+.cpu-led-indicators {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 8px 0;
+}
+
+.cpu-led {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #333;
+}
+
+.cpu-led.on {
+  background-color: #00ff00;
+  box-shadow: 0 0 5px #00ff00;
+}
+
+.cpu-rw-status {
+  text-align: center;
+}
+
+/* Memory Panel Styles */
+.memory-dump {
+  margin: 16px 0px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow-y: auto;
+}
+
+.memory-row {
+  display: flex;
+  color: white;
+  gap: 8px;
+  margin: 4px 0px;
+}
+
+.memory-addr {
+  color: #00ff00;
+  text-align: right;
+}
+
+/* Storage Panel Styles */
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0px;
+  font-size: 12px;
+}
+
+.file-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: start;
+  padding: 2px;
+  gap: 8px;
+  border: 1px solid #333;
+}
+
+.file-button {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-weight: bold;
+  font-size: 10px;
+  width: 48px;
+  text-align: center;
+}
+
+.file-button.load {
+  background-color: #00cc00;
+  color: black;
+}
+
+.file-button.empty {
+  background-color: #333;
+  color: white;
+}
+
+.file-name {
+  text-align: left;
+}

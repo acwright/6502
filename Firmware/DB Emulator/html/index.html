@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="/src/favicon.ico" />
+    <title>DB Emulator</title>
+  </head>
+  <body>
+    <header>
+      <h1>DB Emulator</h1>
+      <span>
+        <button id="refresh" class="button button-green">Refresh</button>
+        |
+        <button id="snapshot" class="button button-green">Snapshot</button>
+        |
+        <button id="decrease-frequency" class="button button-blue">Clk -</button>
+        <button id="increase-frequency" class="button button-blue">Clk +</button>
+        |
+        <button id="run" class="button button-green">Run</button>
+        <button id="stop" class="button button-red">Stop</button>
+        <button id="step" class="button button-blue">Step</button>
+        <button id="tick" class="button button-blue">Tick</button>
+        <button id="reset" class="button button-red">Reset</button>
+      </span>
+    </header>
+    <main>
+      <!-- EMULATOR Panel -->
+      <div class="panel">
+        <h2>Emulator</h2>
+        <div class="panel-content">
+            <div id="is-running" class="emulator-status">-- RUNNING --</div>
+            
+            <div class="emulator-info">
+              <div class="emulator-info-row">
+                <span class="emulator-info-label">RAM:</span>
+                <span id="ram-enabled">DISABLED</span> (<span id="program-file">None</span>)
+              </div>
+              <div class="emulator-info-row">
+                <span class="emulator-info-label">ROM:</span>
+                <span id="rom-enabled">DISABLED</span> (<span id="rom-file">None</span>)
+              </div>
+              <div class="emulator-info-row">
+                <span class="emulator-info-label">Cart:</span>
+                <span id="cart-enabled">DISABLED</span> (<span id="cart-file">None</span>)
+              </div>
+              <div class="emulator-info-row">
+                <span class="emulator-info-label">Frequency:</span>
+                <span id="freq-label">0 MHz (<span id="freq-period">0 &micro;s</span>)</span>
+              </div>
+              <div class="emulator-info-row">
+                <span class="emulator-info-label">IP Address:</span>
+                <span id="ip-address">0.0.0.0</span>
+              </div>
+              <div class="emulator-info-row">
+                <span class="emulator-info-label">Date / Time:</span>
+                <span id="rtc">0/0/0000, 00:00:00 AM</span>
+              </div>
+              <div class="emulator-info-row">
+                <span class="emulator-info-label">Last Snapshot:</span>
+                <span id="last-snapshot">None</span>
+              </div>
+            </div>
+
+            <div class="emulator-toggle-buttons">
+              <span class="emulator-toggle-buttons-group">
+                <label for="toggle-ram">RAM Enabled:</label>
+                <input id="toggle-ram" type="checkbox">
+              </span>
+              <span class="emulator-toggle-buttons-group">
+                <label for="toggle-rom">ROM Enabled:</label>
+                <input id="toggle-rom" type="checkbox">
+              </span>
+              <span class="emulator-toggle-buttons-group">
+                <label for="toggle-cart">Cart Enabled:</label>
+                <input id="toggle-cart" type="checkbox">
+              </span>
+            </div>
+        </div>
+      </div>
+      
+      <!-- CPU Panel -->
+      <div class="panel">
+        <h2>CPU</h2>
+        <div class="panel-content">
+          <div class="cpu-grid">
+            <div class="cpu-registers">
+              <div class="cpu-register-row">
+                <span>A:</span>
+                <span id="cpu-accumulator-hex" class="cpu-register-hex">$00</span>
+                <span id="cpu-accumulator-dec" class="cpu-register-dec">0</span>
+              </div>
+              <div class="cpu-register-row">
+                <span>X:</span>
+                <span id="cpu-x-hex" class="cpu-register-hex">$00</span>
+                <span id="cpu-x-dec" class="cpu-register-dec">0</span>
+              </div>
+              <div class="cpu-register-row">
+                <span>Y:</span>
+                <span id="cpu-y-hex" class="cpu-register-hex">$00</span>
+                <span id="cpu-y-dec" class="cpu-register-dec">0</span>
+              </div>
+            </div>
+            <div class="cpu-registers">
+              <div class="cpu-register-row">
+                <span>PC:</span>
+                <span id="cpu-pc-hex" class="cpu-register-hex">$0000</span>
+                <span id="cpu-pc-dec" class="cpu-register-dec">0</span>
+              </div>
+              <div class="cpu-register-row">
+                <span>SP:</span>
+                <span id="cpu-sp-hex" class="cpu-register-hex">$00</span>
+                <span id="cpu-sp-dec" class="cpu-register-dec">0</span>
+              </div>
+              <div class="cpu-register-row">
+                <span>ST:</span>
+                <span id="cpu-status-hex" class="cpu-register-hex">$00</span>
+                <span id="cpu-status-dec" class="cpu-register-dec">0</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="cpu-flags">
+            <div class="cpu-flags-label">FLAGS:</div>
+            <div class="cpu-flags-values">
+              <span id="cpu-flag-negative" class="cpu-flag">N</span>
+              <span id="cpu-flag-overflow" class="cpu-flag">V</span>
+              <span class="cpu-flag">-</span>
+              <span id="cpu-flag-break" class="cpu-flag">B</span>
+              <span id="cpu-flag-decimal" class="cpu-flag">D</span>
+              <span id="cpu-flag-interrupt" class="cpu-flag">I</span>
+              <span id="cpu-flag-zero" class="cpu-flag">Z</span>
+              <span id="cpu-flag-carry" class="cpu-flag">C</span>
+            </div>
+          </div>
+          
+          <div class="cpu-bus">
+            <div class="cpu-bus-label">
+              ADDRESS BUS: 
+            </div>
+            <div>
+              <span id="address-hex" class="cpu-bus-hex">$0000</span>
+              <span id="address-dec" class="cpu-bus-dec">0</span>
+            </div>
+            <div id="address-leds" class="cpu-led-indicators">
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+            </div>
+          </div>
+          
+          <div class="cpu-bus">
+            <div class="cpu-bus-label">
+              DATA BUS: 
+            </div>
+            <div>
+              <span id="data-hex" class="cpu-bus-hex">$00</span>
+              <span id="data-dec" class="cpu-bus-dec">0</span>
+            </div>
+            <div id="data-leds" class="cpu-led-indicators">
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+              <div class="cpu-led"></div>
+            </div>
+          </div>
+          
+          <div class="cpu-bus">
+            <div class="cpu-bus-label">
+              R/W: 
+            </div>
+            <div class="cpu-led-indicators">
+              <div id="rw-led" class="cpu-led"></div>
+            </div>
+            <div id="rw-label" class="cpu-bus-rw">WRITE</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- MEMORY Panel -->
+      <div class="panel">
+        <h2>Memory</h2>
+        <div class="panel-content">
+          <div class="tabs" id="memory-tabs">
+            <div id="tab-ram" class="tab active" data-target="ram">RAM</div>
+            <div id="tab-rom" class="tab" data-target="rom">ROM</div>
+          </div>
+          <div id="memory-dump" class="memory-dump"></div>     
+          <div id="memory-pagination" class="pagination"></div>
+        </div>
+      </div>
+      
+      <!-- STORAGE Panel -->
+      <div class="panel">
+        <h2>Storage</h2>
+        <div class="panel-content">
+          <div class="tabs" id="storage-tabs">
+            <div class="tab active" data-target="rom">ROMs</div>
+            <div class="tab" data-target="cart">Carts</div>
+            <div class="tab" data-target="program">Programs</div>
+          </div>
+          <div id="file-list" class="file-list"></div>
+          <div id="storage-pagination" class="pagination"></div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p id="links">
+        <a href="https://github.com/acwright/6502">Home Page</a>
+        <span>|</span>
+        <a href="https://6502.acwrightdesign.com">Documentation</a>
+      </p>
+      <p>
+        <span id="version">
+          Version: 1.0
+        </span>
+        <span>|</span>
+        <span>Created by A.C. Wright &copy; 2024</span>
+      </p>
+    </footer>
+    <script type="module" src="/src/index.js"></script>
+  </body>
+</html>

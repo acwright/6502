@@ -4,7 +4,6 @@
 #include "constants.h"
 #include "macros.h"
 #include "pins.h"
-#include "html.h"
 #include "utilities.h"
 
 #include "Cart/Cart.h"
