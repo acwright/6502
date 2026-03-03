@@ -4066,7 +4066,7 @@
 	)
 	(wire
 		(pts
-			(xy 50.8 171.45) (xy 53.34 171.45)
+			(xy 50.8 171.45) (xy 60.96 171.45)
 		)
 		(stroke
 			(width 0)
@@ -4373,6 +4373,16 @@
 			(type default)
 		)
 		(uuid "ae611449-1c41-41ba-a6cd-e9026746a7a5")
+	)
+	(wire
+		(pts
+			(xy 60.96 181.61) (xy 60.96 171.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b33114c5-a68b-4042-8c61-7b83b39f4efc")
 	)
 	(wire
 		(pts
@@ -4896,28 +4906,8 @@
 			)
 		)
 	)
-	(global_label "GND"
-		(shape input)
-		(at 53.34 171.45 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "0dbad2d1-f174-402b-b069-2d74874b77b0")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 53.34 171.45 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "X2"
-		(shape input)
+		(shape output)
 		(at 193.04 64.77 180)
 		(fields_autoplaced yes)
 		(effects
@@ -4939,7 +4929,7 @@
 		)
 	)
 	(global_label "X1"
-		(shape input)
+		(shape output)
 		(at 193.04 62.23 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5177,7 +5167,7 @@
 		)
 	)
 	(global_label "X3"
-		(shape input)
+		(shape output)
 		(at 193.04 67.31 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5199,7 +5189,7 @@
 		)
 	)
 	(global_label "Y3"
-		(shape input)
+		(shape output)
 		(at 38.1 81.28 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5221,7 +5211,7 @@
 		)
 	)
 	(global_label "Y2"
-		(shape input)
+		(shape output)
 		(at 38.1 64.77 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5243,7 +5233,7 @@
 		)
 	)
 	(global_label "Y4"
-		(shape input)
+		(shape output)
 		(at 38.1 97.79 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5351,7 +5341,7 @@
 		)
 	)
 	(global_label "Y6"
-		(shape input)
+		(shape output)
 		(at 38.1 130.81 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5373,7 +5363,7 @@
 		)
 	)
 	(global_label "Y1"
-		(shape input)
+		(shape output)
 		(at 38.1 48.26 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5461,7 +5451,7 @@
 		)
 	)
 	(global_label "Y5"
-		(shape input)
+		(shape output)
 		(at 38.1 114.3 180)
 		(fields_autoplaced yes)
 		(effects
@@ -5571,7 +5561,7 @@
 		)
 	)
 	(global_label "VCC"
-		(shape input)
+		(shape output)
 		(at 35.56 171.45 180)
 		(effects
 			(font
@@ -5657,7 +5647,7 @@
 		)
 	)
 	(global_label "X4"
-		(shape input)
+		(shape output)
 		(at 193.04 69.85 180)
 		(fields_autoplaced yes)
 		(effects
@@ -9010,6 +9000,72 @@
 			(project "Keypad Helper"
 				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
 					(reference "SW14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 60.96 181.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f6c53b59-5fee-4503-8754-59c0bb17471a")
+		(property "Reference" "#PWR01"
+			(at 60.96 187.96 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 60.96 186.69 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 60.96 181.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 60.96 181.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 60.96 181.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a4d25ba2-3a51-4bab-8e8d-8095b7632e24")
+		)
+		(instances
+			(project "Keypad Helper"
+				(path "/1eb588e8-a8a6-45d4-8449-ed494748d485"
+					(reference "#PWR01")
 					(unit 1)
 				)
 			)
