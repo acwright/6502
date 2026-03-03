@@ -141,6 +141,7 @@ The [Hardware](./Hardware) folder contains KICAD files for the system's custom-d
 - **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper. **UNTESTED**
 - **Mega Helper**: A board that interfaces the Arduino Mega 2560 R3 with 6502 bus.
 - **PS2 Helper**: A board that allows connection of a PS/2 keyboard using the Atmega328p.
+- **VERA Helper**: A board that adapts the VERA module to the 6502 bus.
 
 **Carts**:
 
