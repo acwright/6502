@@ -137,8 +137,8 @@ The [Hardware](./Hardware) folder contains KICAD files for the system's custom-d
 - **Joystick Helper**: A board that provides an Atari 2600 style joystick interface for user input.
 - **Keyboard Helper**: A board that provides a 64 key matrix keyboard interface and dual joystick ports for user input.
 - **Keyboard Encoder Helper**: A board that translates keyboard scan data and PS/2 keyboard data to ASCII using the Atmega1284p.
-- **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input. **UNTESTED**
-- **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper. **UNTESTED**
+- **Keypad Helper**: A board that provides a 4x4 and 2x4 matrix keypad for user input.
+- **Keypad LCD Helper**: A board that contains an LCD display and is designed to work with the Keypad Helper.
 - **Mega Helper**: A board that interfaces the Arduino Mega 2560 R3 with 6502 bus.
 - **PS2 Helper**: A board that allows connection of a PS/2 keyboard using the Atmega328p.
 - **VERA Helper**: A board that adapts the VERA module to the 6502 bus.
