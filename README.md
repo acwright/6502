@@ -6,8 +6,6 @@
 ![The 6502 Project](./Assets/Images/6502.png?raw=true)
 *Shown above are some of the systems that can be assembled from the 6502 project*
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
