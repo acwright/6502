@@ -3,8 +3,6 @@
 
 This folder contains KiCad worksheet (title block) templates for the 6502 project. Worksheets provide consistent title blocks across all schematics and PCB layouts, including project information, revision history, and branding.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Overview
@@ -125,5 +123,3 @@ Worksheets (.kicad_wks files) typically include:
 - [KiCad Worksheet Editor](https://docs.kicad.org/7.0/en/kicad/kicad.html#page-layout-editor) - Official documentation
 
 ---
-
-**Last Updated:** March 7, 2026
