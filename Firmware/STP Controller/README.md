@@ -1,4 +1,4 @@
-# SCP Controller
+# STP Controller
 
 An SPI Controller Peripheral for 6502-based computer systems. This firmware runs on an ATmega328P microcontroller and acts as a memory-mapped I/O device, providing the 6502 CPU with access to SPI peripherals including SD cards, Flash memory, and external SPI devices.
 
@@ -43,7 +43,7 @@ An SPI Controller Peripheral for 6502-based computer systems. This firmware runs
 
 ## Register Map
 
-The SCP Controller presents two 8-bit registers to the 6502:
+The STP Controller presents two 8-bit registers to the 6502:
 
 ### DATA Register ($0)
 **Address Offset**: 0  
@@ -218,7 +218,7 @@ This project is configured for development with:
 ## Project Structure
 
 ```
-SCP Controller/
+STP Controller/
 ├── src/
 │   └── main.cpp          # Main firmware source
 ├── include/              # Header files (if any)

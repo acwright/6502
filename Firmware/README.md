@@ -10,6 +10,6 @@ Folder names are prefixed with the following to indicate specific hardware envir
 - **KEH**: Keyboard Encoder Helper
 - **MH**: Mega Helper
 - **PS2**: PS2 Helper
-- **SCP**: Storage Card Pro
+- **STP**: Storage Card Pro
 - **VGAP**: VGA Card Pro
 - **VCP**: Video Card Pro
