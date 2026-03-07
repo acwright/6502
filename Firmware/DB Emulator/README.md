@@ -10,7 +10,8 @@ DB Emulator transforms a Teensy 4.1 into a powerful 65C02 computer system emulat
 
 - **Complete 65C02 CPU Emulation**: Accurate cycle-by-cycle emulation using [vrEmu6502](https://github.com/visrealm/vrEmu6502)
 - **Memory Management**: 
-  - Configurable RAM (up to 32KB, with optional PSRAM support)
+  - Base RAM: up to 32KB (configurable)
+  - Banked RAM: 32KB (default), up to 512KB with PSRAM installed
   - ROM support (up to 24KB)
   - Cartridge loading (16KB)
 - **I/O Support**:
@@ -476,7 +477,7 @@ Enable debug flags in `platformio.ini` for verbose logging:
 
 - **Maximum Emulation Speed**: ~2 MHz (Teensy 4.1 @ 600 MHz)
 - **Accurate Timing**: Down to microsecond precision
-- **Memory**: 32KB RAM (up to 8MB with PSRAM)
+- **Memory**: 32KB base RAM + 32KB banked RAM (default), up to 544KB total with PSRAM (32KB base + 512KB banked)
 - **Storage**: Limited only by SD card size
 
 ## Related Documentation
