@@ -30,6 +30,7 @@
   - [Carts](#carts)
 - [Assembly & Connection Guide](#assembly--connection-guide)
 - [Firmware](#firmware)
+- [Software & Related Projects](#software--related-projects)
 - [CAD](#cad)
 - [Production](#production)
 - [Schematics](#schematics)
@@ -1279,6 +1280,59 @@ pio device monitor    # PlatformIO serial monitor
 ```
 
 See individual firmware project README files for specific build instructions and configuration options.
+
+---
+
+## Software & Related Projects
+
+The 6502 project has several companion repositories containing software that runs on the 6502 systems, as well as development tools.
+
+### Emulator
+
+**[6502-Emulator](https://github.com/acwright/6502-Emulator)**
+- Software emulator for the 6502 computer systems
+- Allows running and testing 6502 programs without physical hardware
+- Useful for software development and debugging
+
+### Assembly Code & BIOS
+
+The following repositories contain 6502 assembly code that runs on the hardware:
+
+**[6502-ASM](https://github.com/acwright/6502-ASM)**
+- General 6502 assembly code examples and utilities
+- Sample programs demonstrating hardware features
+- Library routines for common tasks
+
+**[6502-BIOS](https://github.com/acwright/6502-BIOS)**
+- BIOS (Basic Input/Output System) for COB and VCS systems
+- Low-level hardware initialization and I/O routines
+- System ROM code providing fundamental services
+
+**[6502-KIMBIOS](https://github.com/acwright/6502-KIMBIOS)**
+- BIOS specifically for the KIM system
+- Hexadecimal keypad input and LCD display routines
+- KIM-1 compatible monitor program
+
+**[6502-NOP](https://github.com/acwright/6502-NOP)**
+- NOP (No Operation) test program
+- Minimal ROM code for hardware testing
+- Useful for verifying basic CPU and memory operation
+
+**[6502-WOZMON](https://github.com/acwright/6502-WOZMON)**
+- Woz Monitor (Apple I monitor program)
+- Classic machine language monitor by Steve Wozniak
+- Adapted for the 6502 project hardware
+
+### Using the Software
+
+To use these programs on your 6502 hardware:
+1. Clone the desired repository
+2. Assemble the code using a 6502 assembler (ca65, vasm, or similar)
+3. Program the resulting binary to EEPROM using TL866 or similar programmer
+4. Install the EEPROM in your 6502 system
+5. Power on and test
+
+See individual repository README files for specific build and usage instructions.
 
 ---
 
