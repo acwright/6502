@@ -3,8 +3,6 @@
 
 This document provides a detailed technical deep-dive into the architecture of the 6502 computer systems. Covers bus protocols, memory mapping, address decoding, timing, and hardware/software interaction.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -144,9 +142,8 @@ $FFFF └───────────────────────�
 - Access time: 55-70ns typical
 - 5V operation
 - Mapped to $0000-$7FFF (lower 32KB)
-- Battery backup capable (for data retention)
 
-**ROM (Built-in System ROM):**
+**ROM (28C256 or equivalent):**
 - Total: 24KB built-in ROM
 - **LO ROM ($A000-$BFFF, 8KB):** KERNAL routines
   - System calls and I/O routines
@@ -155,17 +152,15 @@ $FFFF └───────────────────────�
   - BASIC interpreter or Monitor program
   - Can be replaced by ROM Cart (cartridge slots)
 
-**ROM Cart (Optional Cartridge):**
+**ROM Cart (28C256 or equivalent):**
+- Optional cartridge
 - 16KB maximum
 - Replaces HI ROM ($C000-$FFFF)
-- Allows game cartridges, custom software
-- Switchable between built-in ROM and cart
+- Allows game cartridges, custom ROM software
 
-**Banked Memory (Advanced Configurations):**
+**Banked Memory (RAM Card):**
 - Some systems support bank switching for >64KB
 - Uses additional control registers
-- Allows switching ROM or RAM banks in/out of address space
-- See system-specific documentation
 
 ---
 
@@ -177,7 +172,7 @@ $FFFF └───────────────────────�
 - Driven by CPU during normal operation
 - Addresses 64KB memory space ($0000-$FFFF)
 - Valid during entire PHI2 high period
-- Can be tri-stated for DMA (not implemented in basic systems)
+- Can be tri-stated for DMA (not implemented in any systems)
 
 **Timing:**
 - Valid by PHI2 rising edge
@@ -197,7 +192,7 @@ $FFFF └───────────────────────�
 
 ### Control Signals
 
-**RW (Read/Write):**
+**RWB (Read/Write):**
 - Direction: CPU output
 - **High (1)**: Read cycle (CPU reads from bus)
 - **Low (0)**: Write cycle (CPU writes to bus)
@@ -211,7 +206,7 @@ $FFFF └───────────────────────�
 - **High period**: Data transfer occurs
 - **Falling edge**: Data latched (reads) or written (writes)
 
-**RESET:**
+**RESB:**
 - Active-low system reset
 - When low: CPU halts, enters reset state
 - **Reset sequence**:
@@ -221,7 +216,7 @@ $FFFF └───────────────────────�
   4. PC loaded with vector value
   5. Execution begins at reset address
 
-**IRQ (Interrupt Request):**
+**IRQB (Interrupt Request):**
 - Active-low maskable interrupt
 - When low (and I flag clear): CPU completes current instruction, then:
   1. Push PC high byte to stack
@@ -232,7 +227,7 @@ $FFFF └───────────────────────�
   6. Jump to interrupt handler
 - Handler ends with `RTI` (restores P and PC)
 
-**NMI (Non-Maskable Interrupt):**
+**NMIB (Non-Maskable Interrupt):**
 - Active-low, edge-triggered, non-maskable
 - Cannot be disabled by I flag
 - Used for critical events (power failure, hardware errors)
@@ -299,21 +294,8 @@ IO_REGION = A15 AND (NOT A14) AND (NOT A13)
 ```
 This is true when A15=1, A14=0, A13=0, giving addresses $8000-$9FFF.
 
-**Using 74LS138 3-to-8 decoder for memory regions:**
-- Inputs: A15, A14, A13
-- Enable inputs: PHI2 (ensures only during valid cycle)
-- Outputs: 8 regions of 8KB each
-  - Output 0: $0000-$1FFF (RAM)
-  - Output 1: $2000-$3FFF (RAM)
-  - Output 2: $4000-$5FFF (RAM)
-  - Output 3: $6000-$7FFF (RAM)
-  - Output 4: $8000-$9FFF (I/O space) ← Enable I/O decode
-  - Output 5: $A000-$BFFF (LO ROM - KERNAL)
-  - Output 6: $C000-$DFFF (HI ROM upper half)
-  - Output 7: $E000-$FFFF (HI ROM upper half)
-
 **Fine decode** (which I/O slot in $8000-$9FFF?):
-- Use A12, A11, A10 to select 1 of 8 I/O slots (1KB each)
+- Use A15, A14, A13, A12, A11, A10 to select 1 of 8 I/O slots (1KB each)
 - Example: 74LS138 with inputs A12, A11, A10
   - Output 0: $8000-$83FF (IO 1 - RAM Card)
   - Output 1: $8400-$87FF (IO 2 - RAM Card)
@@ -329,20 +311,20 @@ This is true when A15=1, A14=0, A13=0, giving addresses $8000-$9FFF.
 **Card-based systems** use address decode logic on each card:
 - All cards receive full address bus
 - Each card decodes its own assigned address range
-- Only one card responds to any given address (no conflicts!)
+- Ensure only one card responds to any given address (no conflicts!)
 
 **I/O Card Implementation:**
 Each I/O card uses a 74HC138 3-to-8 decoder:
 - Inputs: A15, A14, A13, A12, A11, A10
 - Jumper-selectable configuration determines which I/O slot ($8000-$9FFF range)
-- Enable inputs qualified with PHI2 for valid bus cycle timing
+- Enable inputs qualified with PHI2 for valid bus cycle timing on some cards
 
 **Example (Serial Card at $9000-$93FF):**
 ```
-Serial_CS = A15 AND (NOT A14) AND (NOT A13) AND A12 AND (NOT A11) AND (NOT A10) AND PHI2
+Serial_CS = A15 AND (NOT A14) AND (NOT A13) AND A12 AND (NOT A11) AND (NOT A10)
 ```
 
-Implemented with 74HC138 decoder and standard 74-series logic gates. Jumpers allow reconfiguration to different I/O slots.
+Implemented with 74HC138 decoder. Jumpers allow reconfiguration to different I/O slots.
 
 ---
 
@@ -360,16 +342,11 @@ Implemented with 74HC138 decoder and standard 74-series logic gates. Jumpers all
   - All peripherals (for synchronization)
   - Address decoding logic (qualify chip selects)
 
-**Clock Circuit:**
-```
-Crystal → Oscillator → Divider (optional) → PHI2
-                     └─→ UART clock (for serial)
 ```
 
 **Typical implementations:**
 1. **Discrete oscillator can:** Pre-packaged oscillator module (4 pins: VCC, GND, OUT, EN)
-2. **Crystal + gates:** Pierce oscillator using 74HC04 inverters
-3. **Microcontroller-generated**: For DEV system (Teensy generates clock for emulated CPU)
+2. **Microcontroller-generated**: For DEV system (Teensy generates clock for emulated CPU)
 
 ### Reset Circuit
 
@@ -399,6 +376,9 @@ VCC ──┬─── R ────┬──── RESET (to CPU and periphera
 - Holds RESET low until VCC stable and valid
 - Debounces manual reset button
 - More reliable than RC circuit
+
+**555 Timer:***
+- Backplane Pro and Main Board include 555 timer based POR circuit
 
 ---
 
@@ -456,6 +436,7 @@ Handle_VIA:
 - Hardware watchdog timer
 - Panic button
 - Reserved for critical, non-recoverable events
+- Not currently used in this project
 
 **Handling:**
 - Similar to IRQ but uses $FFFA-$FFFB vector
@@ -541,15 +522,55 @@ Wait_TX:
     STA $9000     ; Write to data register
 ```
 
-### Video Card Registers
+### Video Card Registers (TMS9918A)
 
 **Video Card at IO 8: $9C00-$9FFF (1KB)**
-**Typical register map (varies by specific video card):**
-- **$9C00**: Command/control register
-- **$9C01**: Cursor position X
-- **$9C02**: Cursor position Y
-- **$9C03**: Character/color data
-- **$9C10-$9FFF**: Video RAM (text mode or register space)
+**TMS9918A Video Display Processor - 2-port interface:**
+
+**External Ports (6502 accessible):**
+- **$9C00**: VRAM Data Port (read/write)
+  - Read: Returns byte from VRAM at current address pointer, auto-increments
+  - Write: Writes byte to VRAM at current address pointer, auto-increments
+- **$9C01**: Control/Status Register
+  - Write: Control register (sets VRAM address or writes to internal register)
+  - Read: Status register (interrupt flag, sprite collision, etc.)
+
+**Internal Registers (accessed via control port $9C01):**
+- **R0**: Mode Control Register 0 - External video input, M3 mode bit
+- **R1**: Mode Control Register 1 - 16K RAM, blank, interrupt enable, M1/M2 mode bits, sprite size, magnification
+- **R2**: Name Table Base Address - Bits 10-13 of name table address in VRAM (bits 0-9 = 0)
+- **R3**: Color Table Base Address - Bits 6-13 of color table address
+- **R4**: Pattern Generator Base Address - Bits 11-13 of pattern generator address
+- **R5**: Sprite Attribute Table Base Address - Bits 7-13 of sprite attribute table address
+- **R6**: Sprite Pattern Generator Base Address - Bits 11-13 of sprite pattern generator address
+- **R7**: Text/Backdrop Color - Foreground/background color for text modes
+
+**Programming sequence:**
+```assembly
+; Write to internal register (e.g., set backdrop color to black)
+LDA #$00      ; Color value (black)
+STA $9C01     ; First write: data
+LDA #$87      ; Register 7 + $80 (register write flag)
+STA $9C01     ; Second write: register select
+
+; Set VRAM address for read/write
+LDA #$00      ; Address low byte
+STA $9C01     ; First write
+LDA #$40      ; Address high byte + $40 (write flag) or $00 (read flag)
+STA $9C01     ; Second write
+
+; Write data to VRAM
+LDA #$55      ; Data byte
+STA $9C00     ; Write to VRAM (address auto-increments)
+```
+
+**Status Register (read from $9C01):**
+- Bit 7: Frame interrupt flag (set at start of vertical retrace)
+- Bit 6: 5th sprite flag (more than 4 sprites on a line)
+- Bit 5: Sprite collision flag
+- Bits 4-0: 5th sprite number (which sprite triggered 5th sprite condition)
+
+**VRAM:** 16KB internal to TMS9918A (not in 6502 address space)
 
 ---
 
@@ -638,67 +659,9 @@ tDHW: Data hold time for write (data stable after WE)
 
 ---
 
-## System Variants
-
-### The COB (Computer On Backplane)
-
-**Bus architecture:**
-- Parallel backplane with card edge connectors
-- All signals bussed to slots (A0-A15, D0-D7, control)
-- Each card decodes own address range
-
-**Advantages:**
-- Modular expansion
-- Easy to add/remove peripherals
-- Educational (shows bus clearly)
-
-**Challenges:**
-- Bus loading (capacitance limits speed)
-- Address conflicts (must carefully assign addresses)
-
-### The DEV (Development System)
-
-**Emulation architecture:**
-- Teensy 4.1 emulates entire 6502 system
-- vrEmu6502 library (cycle-accurate emulator)
-- GPIO pins emulate bus signals (for peripherals)
-
-**Advantages:**
-- No need for vintage chips
-- Easy firmware updates (flash new ROM via USB)
-- Built-in debugging (serial monitor, breakpoints)
-
-**Architecture differences:**
-- Software memory (not physical RAM/ROM chips)
-- Emulated bus (not physical signal lines)
-- Same instruction set and behavior as real 6502
-
-### The KIM (Single-Board Computer)
-
-**Integrated architecture:**
-- All components on one PCB
-- ATmega1284p handles keyboard/LCD
-- W65C02S CPU, RAM, ROM on same board
-
-**Advantages:**
-- Simpler assembly (no backplane/cards)
-- Lower cost
-- Compact footprint
-
-### The VCS (Compact Variant)
-
-**Simplified architecture:**
-- Minimal component count
-- On-board peripherals only
-- No expansion bus
-
----
-
 **For more technical details, see:**
 - [W65C02S Datasheet](https://www.westerndesigncenter.com/wdc/documentation/w65c02s.pdf)
 - [6522 VIA Datasheet](http://archive.6502.org/datasheets/mos_6522_preliminary_nov_1977.pdf)
 - [Main README](../../README.md) - Project overview
 
 ---
-
-**Last Updated:** March 7, 2026

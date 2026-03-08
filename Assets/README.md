@@ -3,8 +3,6 @@
 
 This folder contains supporting assets for the 6502 project including documentation, images, branding materials, and reference files.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Folder Structure
@@ -56,7 +54,7 @@ Technical documentation and reference materials:
 
 **Keyboard Layout:**
 - JSON format keyboard layout
-- For use with keyboard configuration tools
+- For use with keyboard design tools ([keyboard-layout-editor.com](https://www.keyboard-layout-editor.com))
 
 **Keyboard Matrix:**
 - Matrix scanning architecture
@@ -64,13 +62,13 @@ Technical documentation and reference materials:
 
 ### Images
 
-Photos and renders of complete systems:
+Photos of complete systems:
 - COB system photos
 - DEV system photos
 - KIM system photos
 - VCS system photos
-- Assembly examples
-- Demonstration setups
+- Other general use photos
+- Community contributions
 
 **Usage:**
 - Main README illustrations
@@ -165,5 +163,3 @@ Logo files optimized for PCB silkscreen:
 - [Hardware README](../Hardware/README.md) - Hardware specifications
 
 ---
-
-**Last Updated:** March 7, 2026

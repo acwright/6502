@@ -3,8 +3,6 @@
 
 This folder contains firmware for microcontrollers used throughout the 6502 project. Firmware is written in C/C++ using the **PlatformIO** development environment and targets various microcontrollers including Teensy 4.1, ATmega328p, ATmega1284p, and ATTiny85.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -52,22 +50,6 @@ The 6502 project uses microcontrollers to provide:
 | [KEH Controller](./KEH%20Controller/) | Keyboard Encoder Helper | ATmega1284p | COB/KIM | PS/2 + matrix keyboard to ASCII |
 | [PS2 Keyboard Controller](./PS2%20Keyboard%20Controller/) | PS2 Helper | ATmega328p | COB/KIM | PS/2 keyboard to matrix emulation |
 | [STP Controller](./STP%20Controller/) | Storage Card Pro | (varies) | COB | SD + Flash storage controller |
-
-### Feature Comparison
-
-| Feature | DB Emulator | DOB Terminal | KEH Controller | PS2 Controller | IB Controllers |
-|---------|-------------|--------------|----------------|----------------|----------------|
-| **Primary Function** | CPU emulator | Display driver | Keyboard encoder | Keyboard interface | Input devices |
-| **Networking** | ✓ Ethernet | ✗ | ✗ | ✗ | ✗ |
-| **USB Host** | ✓ USB devices | ✗ | ✗ | ✗ | ✗ |
-| **Storage** | ✓ SD card | ✗ | ✗ | ✗ | ✗ |
-| **Display** | ✗ | ✓ ILI9341 LCD | ✗ | ✗ | ✗ |
-| **PS/2 Input** | ✗ | ✗ | ✓ Keyboard | ✓ Keyboard | ✓ KB + Mouse |
-| **Matrix Input** | ✗ | ✗ | ✓ 8×8 matrix | ✗ | ✗ |
-| **ASCII Output** | Serial | ✗ | ✓ VIA ports | ✗ | Serial interface |
-| **Web Interface** | ✓ REST API | ✗ | ✗ | ✗ | ✗ |
-| **Clock Control** | ✓ Variable | ✗ | ✗ | ✗ | ✗ |
-| **Debugging** | ✓ Advanced | Basic | Basic | Basic | Basic |
 
 ---
 
@@ -192,41 +174,6 @@ pio device monitor -b 115200
 
 ## Debugging
 
-### Serial Debug Output
-
-Most firmware projects include debug output via serial (UART):
-
-**DB Emulator:**
-```cpp
-// Enable debug output in src/config.h
-#define DEBUG_ENABLED 1
-```
-Output at 115200 baud includes:
-- CPU state (PC, A, X, Y, SP, flags)
-- Memory reads/writes
-- Interrupt events
-- Network activity
-
-**KEH Controller:**
-```cpp
-// Debug output on UART
-// Shows key presses, scancode conversions, ASCII output
-```
-Output at 9600 baud (typical for ATmega)
-
-### LED Indicators
-
-Many boards include status LEDs:
-
-**Dev Board:**
-- Power (always on when powered)
-- CPU Running (blinks during emulation)
-- SD Card Activity (flashes on SD access)
-- Network Activity (flashes on Ethernet traffic)
-
-**Microcontroller Boards:**
-- Built-in LED (usually on pin 13 or PB5) can be toggled for debugging
-
 ### Common Issues
 
 **Upload fails:**
@@ -252,19 +199,6 @@ Many boards include status LEDs:
 - Power supply issues (check voltage and current)
 - Buffer overruns (check array bounds)
 
-### Logic Analyzer / Oscilloscope
-
-For advanced debugging:
-- **Saleae Logic Analyzer**: Capture I2C, SPI, UART, GPIO signals
-- **DSLogic**: Budget logic analyzer alternative
-- **Oscilloscope**: Check signal integrity, timing, voltage levels
-
-Useful signals to probe:
-- PS/2 Clock + Data (keyboard/mouse communication)
-- SPI MOSI/MISO/SCK (display, SD card)
-- VIA Port A/B (keyboard output)
-- Clock signals (verify frequency and duty cycle)
-
 ---
 
 ## Firmware by System
@@ -282,7 +216,7 @@ Useful signals to probe:
 - Real-time clock
 
 **[DOB Terminal](./DOB%20Terminal/)** (Dev Output Board):
-- VT-AC compatible ASCII terminal
+- [VT-AC](https://github.com/acwright/VT-AC) compatible ASCII terminal
 - ILI9341 2.4" TFT LCD (320×240)
 - Color text modes
 - Cursor control
@@ -318,16 +252,16 @@ Useful signals to probe:
 - PS/2 mouse protocol decoding
 - X/Y coordinate tracking
 - Button state (left, right, middle)
-- Serial output interface
+- Interrupt-driven (low latency)
 
-### Experimental Firmware
+### Other Firmware
 
 **[STP Controller](./STP%20Controller/)** (Storage Card Pro):
+- SPI controller for 6502
 - SD card interface (SPI)
 - SPI Flash interface (16MB onboard)
-- Block device access
-- FAT16/FAT32 support (planned)
-- **Status:** Development in progress
+- External SPI header
+- **Status:** Firmware not verified
 
 ---
 
@@ -509,5 +443,3 @@ pio run -e devboard_1
 - Individual firmware project READMEs for detailed documentation
 
 ---
-
-**Last Updated:** March 7, 2026

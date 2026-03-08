@@ -3,8 +3,6 @@
 
 Comprehensive testing procedures for validating hardware, firmware, and system integration. Use these tests to verify new builds, diagnose issues, and validate modifications.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -946,17 +944,6 @@ jobs:
 
 ## Test Status
 
-### Tested Boards/Cards
-
-| Board/Card | Status | Last Tested | Tester | Notes |
-|------------|--------|-------------|--------|-------|
-| Main Board | ✅ Tested | 2025-01-15 | A. Wright | Fully functional |
-| Dev Board | ✅ Tested | 2025-01-10 | A. Wright | Emulation working |
-| Backplane | ✅ Tested | 2025-01-05 | A. Wright | 5 slots verified |
-| Serial Card | ✅ Tested | 2025-01-12 | A. Wright | Flow control works |
-| GPIO Card | ⚠️ UNTESTED | - | - | Design complete, prototype ordered |
-| Sound Card | ⚠️ UNTESTED | - | - | PCB not yet manufactured |
-
 ### Test Coverage Goals
 
 **Hardware:**
@@ -984,5 +971,3 @@ jobs:
 - [Hardware README](../../Hardware/README.md) - Hardware specifications
 
 ---
-
-**Last Updated:** March 7, 2026

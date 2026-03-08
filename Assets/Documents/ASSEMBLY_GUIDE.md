@@ -3,8 +3,6 @@
 
 Detailed physical assembly instructions with diagrams, measurements, and best practices for building 6502 systems. Covers PCB assembly, card installation, cabling, enclosures, and testing.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -527,7 +525,7 @@ G = Green (RoHS compliant)
 - Keep signal cables away from power cables (reduce interference)
 - Label cables (especially if multiple identical connectors)
 
-### Single-Board System (KIM, Main Board)
+### Single-Board System (KIM, VCS)
 
 **Step 1: Assemble PCB**
 - Follow PCB assembly section
@@ -556,28 +554,17 @@ G = Green (RoHS compliant)
 
 **Step 1: Assemble Both Boards**
 - Dev Board (Teensy 4.1)
-- Dev Output Board (Raspberry Pi Pico)
+- Dev Output Board (Teensy 4.0)
 
 **Step 2: Program Firmware**
 - Before connecting boards, program both
-- Teensy: Upload DB Emulator firmware
-- Pico: Upload DOB Terminal firmware
+- Teensy 4.1: Upload DB Emulator firmware
+- Teensy 4.0: Upload DOB Terminal firmware
 
 **Step 3: Connect Boards**
-- Use included cable or jumpers
-- Pin mapping:
-  ```
-  Dev Board    Dev Output Board
-  PA0       →  GP0
-  PA1       →  GP1
-  ...
-  GND       →  GND
-  5V        →  VBUS
-  ```
 - Verify all connections before powering on
 
-**Step 4: Connect Display**
-- VGA cable from Dev Output Board to monitor
+**Step 4: Connect USB**
 - USB cable from Dev Board to computer (power + serial terminal)
 
 **Step 5: Power On**
@@ -742,10 +729,10 @@ G = Green (RoHS compliant)
 **Test 3: Memory Access**
 - Write data to RAM address
 - Read back, verify correct data
-- Example (in monitor):
+- Example (in Wozmon):
   ```
-  :W 0200 42    (Write $42 to address $0200)
-  :R 0200       (Read from $0200, should return $42)
+  0200: 42    (Write $42 to address $0200)
+  0200        (Read from $0200, should return $42)
   ```
 
 **Test 4: I/O**
@@ -816,5 +803,3 @@ See [TROUBLESHOOTING.md](TROUBLESHOOTING.md) for detailed diagnostic procedures.
 - [Hardware README](../../Hardware/README.md) - PCB specifications
 
 ---
-
-**Last Updated:** March 7, 2026

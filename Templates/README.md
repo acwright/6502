@@ -3,8 +3,6 @@
 
 This folder contains KiCad project templates for creating new boards, cards, or helpers in the 6502 project. Templates provide pre-configured project settings, library links, and starting schematics/PCBs that follow project conventions.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Overview
@@ -24,18 +22,20 @@ Templates accelerate new board development by providing:
 - For backplane-compatible peripheral cards
 - Includes standard card edge connector
 - Preconfigured dimensions (100mm × 60mm typical)
-- Bus connection labels (A0-A15, D0-D7, control signals)
+- Bus connection (A0-A15, D0-D7, control signals)
 - Address decoding subcircuit placeholder
+- Standard libraries linked
 
 **Helper Template:**
 - For helper boards connecting to GPIO Card or other peripherals
-- Standard IDC headers
-- Power connections
+- Preconfigured dimensions (100mm × 50mm typical)
+- Standard libraries linked
 
 **Board Template:**
 - Blank starting point for standalone boards
+- Preconfigured dimensions (100mm × 100mm typical)
+- Bus connection (A0-A15, D0-D7, control signals)
 - Standard libraries linked
-- JLCPCB design rules preloaded
 
 ---
 
@@ -120,5 +120,3 @@ card edge connector, address decoding subcircuit, and project libraries.
 - [Libraries README](../Libraries/README.md) - Component libraries
 
 ---
-
-**Last Updated:** March 7, 2026

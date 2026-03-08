@@ -3,8 +3,6 @@ Getting Started with the 6502 Project
 
 Welcome to the 6502 Project! This guide will walk you through building your first 6502 system from scratch. We recommend starting with **The KIM** system as it's the easiest entry point.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -25,11 +23,10 @@ Welcome to the 6502 Project! This guide will walk you through building your firs
 ### The KIM - Best for Beginners ⭐ RECOMMENDED
 
 **Why start here:**
-- Single board design (Main Board only)
+- Minimal PCBs required
 - No backplane or card assembly required
 - Built-in keypad and LCD display
 - Fully tested and documented
-- Complete project in one PCB
 
 **What you'll learn:**
 - PCB assembly basics
@@ -38,8 +35,6 @@ Welcome to the 6502 Project! This guide will walk you through building your firs
 - 6502 programming fundamentals
 
 **Time to complete:** 4-8 hours (assembly + testing)
-
-**Cost:** ~$50-100 (PCB + components + assembly)
 
 ### The DEV - Best for Software Development
 
@@ -57,25 +52,6 @@ Welcome to the 6502 Project! This guide will walk you through building your firs
 - Firmware development workflow
 
 **Time to complete:** 6-10 hours (2 boards + firmware)
-
-**Cost:** ~$80-150
-
-### The COB - Advanced Modular System
-
-**Why choose this:**
-- Maximum expandability
-- Mix and match cards
-- Learn about bus systems
-- Professional computer architecture
-
-**Prerequisites:**
-- Experience with The KIM or similar project
-- Understanding of bus protocols
-- Advanced soldering skills
-
-**Time to complete:** 20-40 hours (backplane + multiple cards)
-
-**Cost:** ~$200-500 (depending on cards chosen)
 
 ---
 
@@ -131,6 +107,7 @@ Welcome to the 6502 Project! This guide will walk you through building your firs
 
 **Resources to learn:**
 - [Learn to Solder](https://learn.adafruit.com/adafruit-guide-excellent-soldering) - Adafruit tutorial
+- [Ben Eater YouTube](https://www.youtube.com/@BenEater) - Ben Eater's excellent YouTube series
 - [6502.org](http://www.6502.org/) - 6502 programming and architecture
 - [Easy 6502](https://skilldrick.github.io/easy6502/) - Interactive 6502 assembly tutorial
 
@@ -162,12 +139,11 @@ Welcome to the 6502 Project! This guide will walk you through building your firs
 
 ### Overview
 
-The KIM system is a single-board computer with:
-- ATmega1284p microcontroller (handles keyboard/LCD)
+The KIM system is a simple computer with:
 - W65C02S CPU (8-bit processor)
 - 32KB RAM (AS6C62256 or similar)
 - 32KB ROM (AT28C256 EEPROM)
-- 4x5 matrix keypad
+- 4x6 matrix keypad
 - 16x2 LCD character display
 - Serial port (for terminal communication)
 
@@ -313,37 +289,27 @@ When PCB arrives:
 
 ### Step 7: Insert ICs
 
-**Order matters! Start with least critical, end with CPU:**
-
-1. **ATmega1284p (keyboard/LCD controller):**
-   - Verify chip orientation (pin 1 dot/notch matches socket notch)
-   - Gently bend pins inward (on flat surface) if too wide
-   - Align all pins with socket holes
-   - Press firmly but gently until fully seated
-   - **Double-check pin 1 orientation!**
-
-2. **RAM (AS6C62256):**
+1. **RAM (AS6C62256):**
    - Same insertion procedure
    - Check pin 1 orientation
 
-3. **ROM (AT28C256 - if pre-programmed):**
+2. **ROM (AT28C256 - if pre-programmed):**
    - Same insertion procedure
    - If blank, you'll need to program it first (see firmware section)
 
-4. **W65C02S CPU:**
-   - **Triple-check orientation** (CPU is expensive!)
+3. **W65C02S CPU:**
    - Insert carefully
    - Verify all pins seated
 
-5. **Other ICs** (logic chips, VIA, etc.):
+4. **Other ICs** (logic chips, VIA, etc.):
    - Insert in any order
    - Always check orientation
 
-### Step 8: Program ROM (if not pre-programmed)
+### Step 8: Program ROM
 
 **Requires TL866 programmer or similar:**
 
-1. Download BIOS/monitor from `Firmware/` folder (`.bin` or `.hex` file)
+1. Download BIOS/monitor from [https://github.com/acwright/6502-KIMBIOS](https://github.com/acwright/6502-KIMBIOS)
 2. Insert blank EEPROM into programmer
 3. Use programmer software (Xgpro for TL866):
    - Select chip type: AT28C256 or compatible
@@ -352,20 +318,7 @@ When PCB arrives:
    - **Verify** (confirm correct programming)
 4. Insert programmed ROM into board
 
-### Step 9: Program ATmega1284p
-
-**Using Arduino IDE or PlatformIO:**
-
-1. Open `Firmware/KEH Controller/` project
-2. Connect ISP programmer (USBasp, Arduino as ISP, etc.) to programming header
-3. Select board: ATmega1284p
-4. Select programmer type
-5. **Upload** firmware
-6. Disconnect programmer
-
-**Alternatively:** Order PCBs with pre-programmed ATmega from assembly service
-
-### Step 10: Final Power-On and Testing
+### Step 9: Final Power-On and Testing
 
 1. Connect LCD to LCD header
 2. Connect keypad to keypad connector
@@ -387,18 +340,17 @@ When PCB arrives:
 - Check all IC orientations (especially CPU!)
 - Verify power supply voltage (5V)
 
-### Step 11: First Program
+### Step 10: First Program
 
 **Using keypad (KIM-1 style monitor):**
 1. Press keys to enter addresses and data
-2. See keyboard map in [Assets/Documents/Keyboard Map/](../Keyboard%20Map/)
-3. Write simple program (e.g., loop that increments a register)
-4. Execute and observe
+2. Write simple program (e.g., loop that increments a register)
+3. Execute and observe
 
 **Using serial terminal:**
 1. Connect serial cable (USB-to-serial adapter)
 2. Open terminal (PuTTY, screen, minicom)
-3. Settings: 9600 baud, 8N1
+3. Settings: 19200 baud, 8N1
 4. Type commands to monitor/BIOS
 5. Load and run programs
 
@@ -410,7 +362,7 @@ When PCB arrives:
 
 The DEV system consists of:
 - **Dev Board:** Teensy 4.1 running 6502 emulator
-- **Dev Output Board:** VGA output via Raspberry Pi Pico
+- **Dev Output Board:** Teensy 4.0 running [VT-AC](https://github.com/acwright/VT-AC) emulator
 
 **Total time:** 6-10 hours (both boards + firmware)
 
@@ -422,10 +374,10 @@ The DEV system consists of:
 
 **2. Order Components:**
 - Teensy 4.1 (without headers or with headers pre-soldered)
-- Raspberry Pi Pico
+- Teensy 4.0 (without headers or with headers pre-soldered)
 - Components from BOM files
 - VGA connector
-- Power supply (5V 2A via USB or barrel jack)
+- Power supply (5V 2A via USB)
 
 **3. Assemble Dev Board:**
 - Solder Teensy 4.1 socket or headers
@@ -433,10 +385,11 @@ The DEV system consists of:
 - Insert Teensy 4.1
 
 **4. Assemble Dev Output Board:**
-- Solder Raspberry Pi Pico socket or headers
-- Solder VGA connector
+- Solder Teensy 4.0 socket or headers
+- Solder LCD connector
 - Solder remaining components
-- Insert Pico
+- Insert Teensy 4.0
+- Insert LCD
 
 **5. Program Firmware:**
 
@@ -446,71 +399,24 @@ cd Firmware/DB\ Emulator/
 pio run -t upload
 ```
 
-**Raspberry Pi Pico (Dev Output Board):**
+**Teensy 4.0 (Dev Output Board):**
 ```bash
 cd Firmware/DOB\ Terminal/
 pio run -t upload
 ```
 
 **6. Connect Boards:**
-- Use included cable or jumper wires
-- Connect Dev Board output header to Dev Output Board input header
-- Pin mapping in Hardware README
+- Connect Dev Board SERIAL header to Dev Output Board input header (see schematic)
 
-**7. Connect Display:**
-- VGA monitor to Dev Output Board VGA port
-- Or serial terminal to Dev Board USB (for text output)
-
-**8. Power On:**
+**7. Power On:**
 - USB power to Teensy 4.1
 - System should boot and display on VGA
 - Serial console available at 115200 baud
 
-**9. Test:**
+**8. Test:**
 - System boots to monitor prompt
 - Run demo programs (included in firmware)
 - Write simple 6502 assembly programs
-
----
-
-## Building The COB System
-
-### Overview
-
-The COB (Computer On Backplane) is an advanced modular system. **Not recommended for first build** unless you have prior experience.
-
-### Recommended Build Order
-
-**Phase 1: Core System (Minimal Bootable)**
-1. Backplane or Backplane Pro
-2. CPU Card
-3. Memory Card (RAM + ROM)
-4. Serial Card (for terminal communication)
-
-**Phase 2: Add I/O**
-5. GPIO Card (for peripherals)
-6. Video Card or VGA Card (for display)
-
-**Phase 3: Expansion**
-7. Sound Card
-8. Storage Card
-9. Additional cards as desired
-
-### Build Process
-
-**For each card:**
-1. Order PCB and components (see Production README)
-2. Assemble through-hole components (same process as KIM)
-3. Insert into backplane slot
-4. Verify card-edge connector alignment
-5. Power on and test individual card
-6. Add next card
-
-**Critical:**
-- **One card at a time!** Don't insert all cards at once
-- Test after each card addition
-- Check for address conflicts (no two cards at same I/O address)
-- Verify backplane slot jumpers configured correctly
 
 ---
 
@@ -567,11 +473,6 @@ The COB (Computer On Backplane) is an advanced modular system. **Not recommended
 - Write custom ROMs
 - Add networking features (Teensy supports Ethernet)
 - Port vintage software
-
-**COB System:**
-- Add more cards (sound, storage, video)
-- Design custom cards for specialized functions
-- Build complete retro computer workstation
 
 ### Join the Community
 
@@ -646,5 +547,3 @@ For detailed troubleshooting, see:
 ---
 
 **Good luck with your build! Join the community on GitHub if you need help.**
-
-**Last Updated:** March 7, 2026

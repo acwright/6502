@@ -3,8 +3,6 @@
 
 Comprehensive troubleshooting procedures for diagnosing and fixing issues with 6502 systems. Organized by symptom with step-by-step diagnostic procedures.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -980,5 +978,3 @@ Measure setup/hold times:
 - [Main README](../../README.md) - Project overview
 
 ---
-
-**Last Updated:** March 7, 2026

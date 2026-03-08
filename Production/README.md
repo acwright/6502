@@ -3,8 +3,6 @@
 
 This folder contains JLCPCB-ready production files for manufacturing all PCBs in the 6502 project. Each board/card/helper has complete manufacturing packages including Gerber files, drill files, BOMs (Bill of Materials), and pick-and-place files for assembly.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -24,6 +22,10 @@ This folder contains JLCPCB-ready production files for manufacturing all PCBs in
 
 All production files are optimized for **JLCPCB** manufacturing and assembly services. Files follow JLCPCB's specifications and use components from their assembly catalog when possible.
 
+**Production File Generation:**
+- All production files are generated using [Fabrication-Toolkit](https://github.com/bennymeg/Fabrication-Toolkit)
+- This KiCad plugin automates the generation of Gerbers, drill files, BOMs, and pick-and-place files optimized for JLCPCB
+
 **What's Included:**
 - Gerber files (PCB layers, soldermask, silkscreen)
 - Excellon drill files (plated and non-plated holes)
@@ -38,11 +40,12 @@ All production files are optimized for **JLCPCB** manufacturing and assembly ser
 ```
 Production/
 ├── <BoardName>/
-│   ├── <BoardName>_Gerber.zip       # Gerber + drill files (upload to JLCPCB)
-│   ├── <BoardName>_BOM.csv          # Bill of Materials
-│   ├── <BoardName>_CPL.csv          # Component placement (pick-and-place)
-│   ├── <BoardName>.kicad_dru        # Design rules file
-│   └── README.md (optional)         # Board-specific notes
+|   └── Rev X.X/
+│       ├── <BoardName>_Gerber.zip       # Gerber + drill files (upload to JLCPCB)
+│       ├── <BoardName>_BOM.csv          # Bill of Materials
+│       ├── <BoardName>_CPL.csv          # Component placement (pick-and-place)
+│       ├── <BoardName>.kicad_dru        # Design rules file
+│       └── README.md (optional)         # Board-specific notes
 └── ...
 ```
 
@@ -75,11 +78,11 @@ Production/
    - **Thickness**: 1.6mm (standard)
    
    **Advanced Settings:**
-   - **PCB Color**: Green (cheapest), Black/White/Blue (slightly more), others (premium)
+   - **PCB Color**: Your choice
    - **Surface Finish**: 
      - HASL (lead-free): Most economical
      - ENIG: Better for edge connectors and fine pitch
-   - **Remove Order Number**: Optional ($1.50-3.00 fee to remove JLCPCB logo)
+   - **Remove Order Number**: Optional
    - **Gold Fingers**: Yes (for card edge connectors on Cards), No (for most boards)
    
 **5. Enable SMD Assembly** (Optional but Recommended)
@@ -92,8 +95,8 @@ Production/
    - **PCBA Qty**: Same as PCB quantity or fewer (e.g., order 10 PCBs, assemble 5)
    
    **Upload Assembly Files:**
-   - Click "Add BOM File" → upload `<BoardName>_BOM.csv`
-   - Click "Add CPL File" → upload `<BoardName>_CPL.csv`
+   - Click "Add BOM File" → upload `bom.csv`
+   - Click "Add CPL File" → upload `positions.csv`
    - Click "Process BOM & CPL"
    
 **6. Component Selection**
@@ -122,10 +125,7 @@ Production/
      - PCB cost
      - Assembly cost ($3-8 setup fee + component costs)
      - Shipping cost
-   - Select shipping method:
-     - **US Shipping**: ~$3-5, 7-15 days
-     - **Global Direct Line**: ~$10-15, 7-21 days
-     - **DHL/FedEx**: ~$20-30, 3-7 days
+   - Select shipping method
    - Add to cart
    - Proceed to checkout
    - Enter shipping address and payment
@@ -179,43 +179,6 @@ Pick-and-place file for assembly machines:
 - **Mid X/Y**: Component center coordinates (mm)
 - **Rotation**: Component orientation (degrees)
 - **Layer**: Top or Bottom
-
----
-
-## Cost Estimates
-
-### PCB Only (No Assembly)
-
-| Board Type | Quantity | Typical Cost | Shipping | Total |
-|------------|----------|--------------|----------|-------|
-| 2-layer, <100×100mm | 5 pcs | $2 | $3-5 | $5-7 |
-| 2-layer, <100×100mm | 10 pcs | $2 | $3-5 | $5-7 |
-| 4-layer, <100×100mm | 5 pcs | $10-15 | $3-5 | $13-20 |
-| 4-layer, <100×100mm | 10 pcs | $15-25 | $3-5 | $18-30 |
-| Card with gold fingers | +5 pcs | +$5-10 | - | - |
-
-### PCB + SMD Assembly
-
-| Board Complexity | Setup Fee | Component Cost | Total (5 pcs) |
-|------------------|-----------|----------------|---------------|
-| Simple (Backplane) | $3 | $5-10 per board | $28-53 |
-| Medium (Serial Card) | $5 | $10-20 per board | $55-105 |
-| Complex (Dev Board) | $8 | $30-50 per board | $158-258 |
-
-**Note:** Prices vary based on:
-- Component availability and cost
-- PCB quantity (more = cheaper per unit)
-- Shipping method
-- Special options (gold fingers, ENIG finish, etc.)
-
-### Through-Hole Assembly
-
-JLCPCB can assemble some through-hole components (limited types):
-- Additional fee: ~$0.01-0.05 per pin
-- Limited to basic components (resistors, capacitors, headers)
-- Not available for all component types (ICs typically excluded)
-
-**Recommendation:** Assemble through-hole components manually (see Assembly Guide)
 
 ---
 
@@ -323,5 +286,3 @@ Most boards require some manual through-hole assembly after SMD assembly.
 - [JLCPCB Capabilities](https://jlcpcb.com/capabilities/Capabilities) - Current manufacturing limits
 
 ---
-
-**Last Updated:** March 7, 2026

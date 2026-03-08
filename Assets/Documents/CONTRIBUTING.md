@@ -3,8 +3,6 @@ Contributing to the 6502 Project
 
 Thank you for your interest in contributing! This guide explains how to contribute hardware designs, firmware, documentation, and other improvements to the 6502 project.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -127,6 +125,10 @@ Thank you for your interest in contributing! This guide explains how to contribu
 - Add your logo/attribution on silkscreen (optional)
 
 **Step 4: Generate production files**
+- Production files are generated using [Fabrication-Toolkit](https://github.com/bennymeg/Fabrication-Toolkit)
+- This KiCad plugin automates generation of Gerbers, drill files, BOMs, and pick-and-place files for JLCPCB
+- Install the plugin and run it from KiCad to generate all required manufacturing files
+- Output files should be moved to approprite folder in Production folder
 - Gerber files (PCB layers)
 - Drill files (PTH and NPTH)
 - BOM (bill of materials) with LCSC part numbers
@@ -457,8 +459,8 @@ Tables:
 - Address bus: A0, A1, ..., A15
 - Data bus: D0, D1, ..., D7
 - Power: +5V, GND (or VCC, VSS)
-- Active-low signals: RES (or RESET with overline), IRQ, NMI
-- Descriptive names: PHI2, RW, ACIA_TX, VIA_CS
+- Active-low signals: RESB, IRQB, NMIB
+- Descriptive names: PHI2, RWB, ACIA_TX, VIA_CS
 
 **Schematic organization:**
 - Group related components (power supply, CPU, memory, I/O)
@@ -504,7 +506,7 @@ Tables:
 ### Card Design (COB System)
 
 **Standard card dimensions:**
-- 100mm × 60mm typical (Euro card size)
+- 100mm × 60mm typical
 - Adjust as needed for components
 
 **Card edge connector:**
@@ -718,5 +720,3 @@ Contributors are recognized through:
 **Thank you for contributing to the 6502 project!**
 
 ---
-
-**Last Updated:** March 7, 2026

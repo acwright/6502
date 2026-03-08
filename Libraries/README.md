@@ -3,8 +3,6 @@
 
 This folder contains KiCad component libraries (symbols, footprints, and 3D models) used throughout the 6502 project. These libraries provide custom and project-specific components for schematic capture and PCB layout.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -65,7 +63,6 @@ KiCad uses three types of libraries:
 - STEP files for components
 - Used in KiCad 3D viewer
 - Accurate component dimensions
-- See [Models README](./Models/README.md) for details
 
 ---
 
@@ -186,21 +183,9 @@ When creating footprints with 3D models:
 
 ---
 
-## 3D Models
-
-See [Models/README.md](./Models/README.md) for:
-- Available 3D model library
-- Model sources (manufacturer, GrabCAD, component library)
-- How to add new models
-- Model file formats and conversions
-
----
-
 **For more information, see:**
 - [Main README](../README.md) - Project overview
 - [Hardware README](../Hardware/README.md) - PCB designs using these libraries
 - [KiCad Libraries Documentation](https://docs.kicad.org/7.0/en/kicad/kicad.html#libraries) - Official KiCad library guide
 
 ---
-
-**Last Updated:** March 7, 2026

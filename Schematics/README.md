@@ -1,9 +1,7 @@
 6502 Schematics
 ===============
 
-This folder contains schematic diagrams for all PCBs in the 6502 project. Schematics are created using **KiCad 7.0+** and provide complete electrical design documentation for every board, card, and helper.
-
-**Last Updated:** March 7, 2026
+This folder contains **PDF exports** of schematic diagrams for all PCBs in the 6502 project. The original KiCad schematic source files (.kicad_sch) are located in the [Hardware](../Hardware) folder alongside the PCB layouts.
 
 ---
 
@@ -20,7 +18,7 @@ This folder contains schematic diagrams for all PCBs in the 6502 project. Schema
 
 ## Overview
 
-Schematics show electrical connections between components:
+This folder provides **PDF exports** of all schematics for easy viewing without requiring KiCad. The PDFs show:
 - Component placement and values
 - Net connections (wires)
 - Power distribution
@@ -28,11 +26,13 @@ Schematics show electrical connections between components:
 - Component reference designators
 
 **Use cases:**
+- Quick reference without opening KiCad
 - Understanding circuit operation
 - Troubleshooting hardware issues
-- Modifying designs
+- Printing for bench reference
 - Learning digital design principles
-- Creating custom peripherals
+
+**To modify designs:** Access the original KiCad schematic files in the [Hardware](../Hardware) folder.
 
 ---
 
@@ -40,64 +40,77 @@ Schematics show electrical connections between components:
 
 ```
 Schematics/
+├── <BoardName>/<Rev X.X>/
+│   └── <BoardName>.pdf           # PDF schematic export
+└── ...
+```
+
+**For KiCad source files (.kicad_sch), see:**
+```
+Hardware/
 ├── <BoardName>/
-│   ├── <BoardName>.kicad_sch      # Schematic file
-│   ├── <Sheet>.kicad_sch          # Additional sheets (if multi-sheet)
-│   ├── <BoardName>.pdf (optional) # PDF export for easy viewing
-│   └── sym-lib-table              # Symbol library table
+│   └── Rev X.X/
+│       ├── <BoardName>.kicad_sch      # Schematic source file
+│       ├── <BoardName>.kicad_pcb      # PCB layout
+│       └── <BoardName>.kicad_pro      # KiCad project
 └── ...
 ```
 
 ### Multi-Sheet Schematics
 
-Complex designs use hierarchical schematics:
-- **Root sheet**: Top-level schematic showing major blocks
-- **Sub-sheets**: Detailed schematics for each block (CPU, memory, I/O, power, etc.)
-
-**Example (Main Board):**
-```
-Main Board/
-├── Main Board.kicad_sch         # Root sheet
-├── CPU.kicad_sch                # CPU subcircuit
-├── Memory.kicad_sch             # RAM/ROM subcircuit
-├── Clock_Reset.kicad_sch        # Clock and reset circuitry
-└── Power.kicad_sch              # Power supply
-```
+Complex designs use hierarchical schematics with multiple sheets. In the PDF exports:
+- Multi-page PDFs contain all sheets
+- Each page represents one schematic sheet
+- Navigation index usually on first page
 
 ---
 
-## Opening Schematics
+## Viewing Schematics
 
-### Using KiCad
+### PDF Viewing (This Folder)
 
+1. **Navigate** to `Schematics/<BoardName>/`
+2. **Open** `<BoardName>.pdf` in any PDF viewer
+   - Adobe Acrobat Reader
+   - Preview (macOS)
+   - Browser (Chrome, Firefox, Edge)
+   - PDF viewers on Linux (Evince, Okular)
+
+**Features:**
+- Searchable text (component references, net names)
+- Printable for bench reference
+- Zoom and pan for detail
+- Multi-page navigation for complex designs
+- No KiCad installation required
+
+**Limitations:**
+- Not editable (view-only)
+- Cannot export netlists or BOMs
+
+### Editing Schematics (KiCad Required)
+
+To modify schematics:
 1. **Install KiCad 7.0+** from [kicad.org](https://www.kicad.org/)
-2. **Navigate** to `Schematics/<BoardName>/`
+2. **Navigate** to `Hardware/<BoardName>/Rev X.X/`
 3. **Open** `<BoardName>.kicad_sch` in KiCad Schematic Editor
-   - Double-click file (if KiCad associated), OR
-   - Launch KiCad → File → Open → select .kicad_sch file
-
-### Viewing Without KiCad
-
-If PDF exports are available:
-- Open `<BoardName>.pdf` in any PDF viewer
-- Searchable, printable, but not editable
+4. Make edits and regenerate PDFs if needed
 
 ---
 
 ## Reading Schematics
 
-### Navigation
+### Navigation in PDF
 
-**Single-Sheet Schematics:**
-- Pan: Middle mouse button drag or arrow keys
-- Zoom: Mouse wheel or +/- keys
-- Fit to screen: Home key
+**Single-Page PDFs:**
+- Zoom: Ctrl/Cmd + Plus/Minus or zoom controls
+- Pan: Click and drag or scroll bars
+- Fit to page: Zoom controls or keyboard shortcuts (varies by viewer)
+- Search: Ctrl/Cmd + F to find component references or net names
 
-**Multi-Sheet Schematics:**
-- Hierarchy navigator: Left sidebar shows sheet structure
-- Click sheet name to navigate
-- Double-click hierarchical sheet symbol to enter sub-sheet
-- Up arrow icon: Return to parent sheet
+**Multi-Page PDFs:**
+- Page navigation: Sidebar thumbnails or page controls
+- Jump to page: Direct page number entry
+- Bookmarks: Some PDFs include bookmarks for major sections
 
 ### Component Information
 
@@ -107,10 +120,9 @@ If PDF exports are available:
 - Reference designator (U1, R5, C12)
 - Value (10K, 100nF, 74LS245)
 
-**Right-click component** → Properties to see:
-- Footprint assignment
-- Datasheet link
-- Additional fields (manufacturer, part number)
+**To see additional details** (footprint, datasheet, part numbers):
+- Refer to BOM files in Production/ folder
+- Open source schematic in KiCad (Hardware/ folder)
 
 ### Net Names
 
@@ -119,9 +131,10 @@ Wires (nets) connect components:
 - **Global labels**: Connections across sheets (bus signals)
 - **Power symbols**: +5V, GND (automatically connected)
 
-**Tracing connections:**
-- Click net → highlights entire net
-- Right-click → "Highlight Net" shows all connected pins
+**Tracing connections in PDF:**
+- Follow wire lines visually
+- Use search (Ctrl/Cmd + F) to find all instances of a net name
+- Check multiple pages for connections in multi-sheet designs
 
 ---
 
@@ -135,21 +148,24 @@ Wires (nets) connect components:
 **Data Bus:**
 - D0, D1, D2, ..., D7 (8-bit data)
 
-**Control Signals:**
-- PHI2: System clock
-- RW: Read/Write (1=Read, 0=Write)
-- RESET: System reset (active low)
-- IRQ: Interrupt Request (active low)
-- NMI: Non-Maskable Interrupt (active low)
+**Bus Control Signals:**
+- PHI2: Clock
+- RWB: Read/Write (1=Read, 0=Write)
+- RESB: Reset (active low)
+- IRQB: Interrupt Request (active low)
+- NMIB: Non-Maskable Interrupt (active low)
 - RDY: Ready (for clock stretching)
+- SYNC: Sync 
+- BE: Bus Enable
+- EXP0-3: Extra Pins 0-3 (Reserved for future use)
 
 **Power:**
 - +5V or VCC: Positive supply
 - GND: Ground
 
 **Chip Enables:**
-- CE, CS: Chip Enable/Chip Select (active high)
-- CEB, CSB: Chip Enable/Select (active low, indicated by B suffix or overline)
+- CS: Chip Enable/Chip Select (active high)
+- CSB: Chip Enable/Select (active low, indicated by B suffix or overline)
 
 ### Component References
 
@@ -170,7 +186,7 @@ Wires (nets) connect components:
 ### Value Notation
 
 **Resistors:**
-- 100R or 100Ω = 100 ohms
+- 100 or 100R or 100Ω = 100 ohms
 - 1K or 1KΩ = 1,000 ohms (1 kilo-ohm)
 - 10K = 10,000 ohms
 - 1M = 1,000,000 ohms (1 mega-ohm)
@@ -188,46 +204,35 @@ Wires (nets) connect components:
 
 ---
 
-## Exporting Schematics
+## Regenerating PDF Exports
 
-### PDF Export
+The PDFs in this folder are exported from the KiCad source files in the Hardware/ folder. If you modify a schematic, regenerate the PDF:
 
-1. Open schematic in KiCad
-2. File → Print (or File → Plot)
+### PDF Export from KiCad
+
+1. Open schematic in KiCad (from Hardware/<BoardName>/ folder)
+2. File → Plot
 3. Select "PDF" as output format
 4. Configure:
    - Include border + title block: Yes
    - Single page per sheet: Yes (for multi-sheet)
+   - Output directory: Set to Schematics/<BoardName>/
 5. Click "Plot All Pages"
-6. PDF saved to schematic folder
+6. PDF saved to Schematics/ folder
 
-**Use cases:**
-- Viewing without KiCad
-- Printing for reference
-- Sharing with collaborators
+### Additional Exports (From Hardware/ Folder)
 
-### Netlist Export
-
+**Netlist Export:**
 1. File → Export → Netlist
 2. Select format (usually "Classic KiCad")
-3. Click "Export Netlist"
+3. Use for simulation tools (SPICE, LTSpice) or custom analysis
 
-**Use cases:**
-- Importing to simulation tools (SPICE, LTSpice)
-- PCB layout import
-- Custom analysis scripts
-
-### BOM (Bill of Materials) Export
-
+**BOM Export:**
 1. File → Export → BOM
 2. Select BOM format plugin
-3. Configure fields to export
-4. Click "Generate"
+3. Use for component ordering and cost estimation
 
-**Use cases:**
-- Component ordering
-- Cost estimation
-- Inventory management
+**Note:** Production-ready BOM files are available in the Production/ folder.
 
 ---
 
@@ -238,4 +243,3 @@ Wires (nets) connect components:
 
 ---
 
-**Last Updated:** March 7, 2026

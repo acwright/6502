@@ -3,8 +3,6 @@
 
 This folder contains mechanical CAD designs for enclosures, mounting solutions, and 3D models for the 6502 project. Designs are available in multiple formats for 3D printing, CNC machining, or laser cutting.
 
-**Last Updated:** March 7, 2026
-
 ---
 
 ## Table of Contents
@@ -52,37 +50,20 @@ CAD/
 
 ### System Bases
 
-**The COB Base:**
-- 3D model showing complete COB assembly
-- Includes backplane, cards, helpers
-- For visualization and enclosure design reference
-
-**The DEV Base:**
-- Dev Board + Dev Output Board assembly
-- Compact footprint design
-
-**The KIM Base:**
-- Main Board + keypad + LCD arrangement
-- Retro styling inspired by original KIM-1
-
-**The VCS Base:**
-- Main Board + Input Board + Output Board layout
-- Console-style form factor
+- **The COB Base**
+- **The DEV Base**
+- **The KIM Base**
+- **The VCS Base**
 
 ### Enclosures
 
 Enclosure designs (when available) include:
-- Top and bottom shells
+- Top and/or bottom shells
 - Cutouts for connectors (power, video, serial, USB, etc.)
-- Ventilation slots
-- Mounting holes for standoffs
-- Front panel cutouts (keypad, LCD, LEDs)
 
 ### Top Panels
 
-- Acrylic or aluminum top panels with:
-  - Card slot labels
-  - Status LED windows
+- Acrylic top panels with:
   - Button cutouts
   - Connector access
 
@@ -122,17 +103,6 @@ Enclosure designs (when available) include:
 - **Perimeters**: 3-4 walls (for strength)
 - **Print Speed**: 50-60mm/s (PLA), 40-50mm/s (PETG)
 
-**Mounting Brackets:**
-- **Material**: PETG or ABS (stronger than PLA)
-- **Layer Height**: 0.15-0.2mm
-- **Infill**: 30-50% (more strength needed)
-- **Perimeters**: 4-5 walls
-
-**Standoffs:**
-- **Material**: PETG (strong, slightly flexible)
-- **Infill**: 50-100% (solid for threaded inserts)
-- **Print Orientation**: Vertical (for threaded inserts)
-
 ### Post-Processing
 
 **Remove Supports:**
@@ -140,7 +110,7 @@ Enclosure designs (when available) include:
 - Sand support contact areas if needed
 
 **Threaded Inserts:**
-- Many designs include holes for M2.5 or M3 threaded inserts
+- Future designs may include holes for M2.5 or M3 threaded inserts
 - Heat insert with soldering iron (set to 200-230°C)
 - Press gently into plastic until flush
 
@@ -228,5 +198,3 @@ We welcome community contributions of enclosures and mechanical designs!
 - [Hardware README](../Hardware/README.md) - PCB dimensions and specifications
 
 ---
-
-**Last Updated:** March 7, 2026

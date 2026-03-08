@@ -248,8 +248,6 @@ The COB is the most versatile and expandable system configuration, featuring a b
 - Real-time clock for timestamped operations
 - Serial terminal connectivity
 
-**Estimated Build Cost:** $300-500 USD (depending on component choices and assembly options)
-
 ---
 
 ### The DEV (Development Environment Vehicle)
@@ -286,8 +284,6 @@ The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller runn
 - Load programs instantly from SD card or network
 - Monitor memory in real-time via web interface
 - Snapshot (Save memory state)
-
-**Estimated Build Cost:** $150-200 USD
 
 **See Also:** [Firmware/DB Emulator/README.md](./Firmware/DB%20Emulator/README.md) for detailed setup instructions.
 
@@ -328,8 +324,6 @@ A modern homage to the classic KIM-1 computer, the KIM provides a compact, stand
 - Educational demonstrations
 - Portable retro computing experiments
 
-**Estimated Build Cost:** $100-150 USD
-
 ---
 
 ### The VCS (Video Computer System)
@@ -365,8 +359,6 @@ A game-focused configuration designed for playing and developing retro-style gam
 - Developing retro-style games
 - Arcade-style gaming experiences
 - Educational game programming
-
-**Estimated Build Cost:** $150-250 USD
 
 **Note:** The Output Board is currently marked **UNTESTED**. For a tested alternative, consider using the VGA Card + Sound Card in a COB-style configuration.
 
@@ -1394,23 +1386,6 @@ For each board/card/helper:
 - **CPL (Component Placement List)**: Pick-and-place file for SMD assembly
 - **Design rules**: KiCad design rule (.kicad_dru) file optimized for JLCPCB
 
-### Cost Estimates
-
-**PCB Only (no assembly):**
-- 2-layer board (10 pcs): $2-5 USD
-- 4-layer board (10 pcs): $10-30 USD
-- Shipping: $5-25 USD depending on speed
-
-**PCB with SMD Assembly:**
-- Varies greatly based on component count and availability
-- Assembly setup fee: ~$3-8 USD
-- Component costs: varies (check JLCPCB catalog)
-- Typical cost per assembled board: $10-50 USD depending on complexity
-
-**Through-Hole Components:**
-- Generally not assembled by JLCPCB (assemble manually)
-- Some boards support JLCPCB through-hole assembly (check current capabilities)
-
 See the [Production README](./Production/README.md) for detailed ordering guides and quality control checklists.
 
 ---
@@ -2056,8 +2031,5 @@ See the [LICENSE](./LICENSE) file for the complete CERN-OHL-P v2 license text.
 
 **Project Maintainer:** A.C. Wright  
 **Repository:** [https://github.com/acwright/6502](https://github.com/acwright/6502)  
-**Last Updated:** March 7, 2026
 
 ---
-
-*Happy retro computing! 🎮*
