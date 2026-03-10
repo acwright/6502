@@ -11,7 +11,7 @@
 
 using namespace qindesign::network;
 
-Button intButton      = Button();
+Button clkButton      = Button();
 Button stepButton     = Button();
 Button runStopButton  = Button();
 #ifdef DEVBOARD_1
@@ -81,6 +81,10 @@ void initFiles();
 
 void buildMemoryMap();
 
+void startCpuTimer();
+void stopCpuTimer();
+void cpuTimerISR();
+
 time_t syncTime();
 String formattedDateTime();
 time_t lastSnapshot;
@@ -93,7 +97,7 @@ void onServerLoad(AsyncWebServerRequest *request);
 void onServerControl(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
 
-uint8_t freqIndex = FREQ_SIZE - 1;
+volatile uint8_t freqIndex = FREQ_SIZE - 1;
 bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
@@ -130,6 +134,15 @@ static uint8_t cachedFreqIndex = 0xFF;
 static uint32_t cachedCpuFrequency = 1000000;
 static uint8_t cachedCpuFreqIndex = 0xFF;
 
+IntervalTimer cpuTimer;
+volatile bool timerMode = false;
+volatile uint8_t busPhase = 0;
+
+// Use IntervalTimer for slow frequencies where blocking delays would freeze loop().
+// At period >= TIMER_FREQ_THRESHOLD (µs), the ISR completes well within each half-cycle.
+// Above that frequency, tight-loop with inline delays is used (loop() stays responsive).
+#define TIMER_FREQ_THRESHOLD 32
+
 enum MemoryRegion : uint8_t {
   REGION_CART_CODE,
   REGION_ROM,
@@ -165,12 +178,10 @@ void setup() {
   SerialUSB1.begin(9600);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
   #ifdef HW_SERIAL
   #ifdef DEVBOARD_0
-  Serial4.begin(2000000);
-  Serial4.addMemoryForWrite(serialData, 1024);
+  Serial4.begin(115200);
   #endif
   #ifdef DEVBOARD_1
-  Serial7.begin(2000000);
-  Serial7.addMemoryForWrite(serialData, 1024);
+  Serial7.begin(115200);
   #endif
   #endif
 
@@ -213,15 +224,15 @@ void setup() {
 void loop() {
   usb.Task();
 
-  intButton.update();
+  clkButton.update();
   stepButton.update();
   runStopButton.update();
   #ifdef DEVBOARD_1
   resetButton.update();
   #endif
 
-  if (intButton.pressed()) {
-    increaseFrequency();
+  if (clkButton.pressed()) {
+    decreaseFrequency();
   }
   if (stepButton.pressed()) {
     step();
@@ -242,7 +253,7 @@ void loop() {
     onCommand(Serial.read());
   }
 
-  if (isRunning) {
+  if (isRunning && !timerMode) {
     tick();
   }
 }
@@ -687,6 +698,77 @@ void tick() {
   }
 }
 
+void startCpuTimer() {
+  double period = FREQ_PERIODS[freqIndex];
+  if (period >= TIMER_FREQ_THRESHOLD) {
+    busPhase = 0;
+    timerMode = true;
+    cpuTimer.begin(cpuTimerISR, period / 2.0);
+  } else {
+    timerMode = false;
+  }
+}
+
+void stopCpuTimer() {
+  if (timerMode) {
+    cpuTimer.end();
+    timerMode = false;
+    digitalWriteFast(PHI2, HIGH); // Leave PHI2 in known idle state
+  }
+}
+
+FASTRUN void cpuTimerISR() {
+  if (busPhase == 0) {
+    // PHI1 phase: PHI2 LOW, set up bus, execute CPU tick
+    digitalWriteFast(PHI2, LOW);
+    delayNanoseconds(20); // tADS: Address setup time
+
+    if (cpu.opcodeCycle() == 0) {
+      digitalWriteFast(SYNC, HIGH);
+    } else {
+      digitalWriteFast(SYNC, LOW);
+    }
+
+    if (freqIndex != cachedCpuFreqIndex) {
+      cachedCpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
+      cachedCpuFreqIndex = freqIndex;
+    }
+
+    // RDY handling: if RDY is LOW, skip this tick (CPU halted)
+    if (digitalReadFast(RDY) == LOW) {
+      busPhase = 1;
+      return;
+    }
+
+    cpu.tick();
+
+    // Tick IO cards and accumulate interrupts
+    uint8_t interrupt = 0x00;
+    if (digitalReadFast(IRQB) == LOW) interrupt |= 0x80;
+    if (digitalReadFast(NMIB) == LOW) interrupt |= 0x40;
+
+    interrupt |= rtcCard.tick(cachedCpuFrequency);
+    interrupt |= storageCard.tick(cachedCpuFrequency);
+    interrupt |= serialCard.tick(cachedCpuFrequency);
+    interrupt |= gpioCard.tick(cachedCpuFrequency);
+
+    if (interrupt & 0x40) {
+      cpu.nmiTrigger();
+    }
+    if (interrupt & 0x80) {
+      cpu.irqTrigger();
+    } else {
+      cpu.irqClear();
+    }
+
+    busPhase = 1;
+  } else {
+    // PHI2 phase: PHI2 HIGH
+    digitalWriteFast(PHI2, HIGH);
+    busPhase = 0;
+  }
+}
+
 void step() {
   // Execute one complete instruction and handle ticks/interrupts
   uint8_t ticks = cpu.step();
@@ -790,23 +872,37 @@ void snapshot() {
 }
 
 void decreaseFrequency() {
+  if (isRunning) stopCpuTimer();
+
   if (freqIndex > 0) {
     freqIndex--;
   } else {
     freqIndex = FREQ_SIZE - 1;
   }
+
+  if (isRunning) startCpuTimer();
 }
 
 void increaseFrequency() {
+  if (isRunning) stopCpuTimer();
+
   if (freqIndex < (FREQ_SIZE - 1)) {
     freqIndex++;
   } else {
     freqIndex = 0;
   }
+
+  if (isRunning) startCpuTimer();
 }
 
 void toggleRunStop() {
-  isRunning = !isRunning;
+  if (isRunning) {
+    stopCpuTimer();
+    isRunning = false;
+  } else {
+    isRunning = true;
+    startCpuTimer();
+  }
 }
 
 void toggleRAM() {
@@ -1246,35 +1342,43 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   data = 0x00;
   readWrite = HIGH;
 
-  if (cachedFreqIndex != freqIndex) {
-    cachedFreqIndex = freqIndex;
-    cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
-                  (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
-                  FREQ_PERIODS[freqIndex] / 2;
-  }
-  
-  // WDC 65C02 read cycle timing:
-  // - Address and R/W̅ must be stable before PHI2 rises
-  // - Data is valid during PHI2 high
-  digitalWriteFast(PHI2, LOW);
-  delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
-  writeAddress(address);
-  digitalWriteFast(RWB, readWrite);
-  setDataDirIn();
-  
-  // RDY handling: 65C02 samples RDY during PHI1 (PHI2 LOW) on read cycles only
-  // If RDY is LOW, wait here until it goes HIGH before continuing
-  // This allows external hardware to stretch the read cycle
-  if (!isDbg) {
-    while (digitalReadFast(RDY) == LOW) {
-      // Wait for RDY to go HIGH - CPU is halted during read cycle
-      // Write cycles are not affected by RDY (handled elsewhere)
+  if (!timerMode) {
+    // Blocking bus timing for tight-loop mode and manual stepping
+    if (cachedFreqIndex != freqIndex) {
+      cachedFreqIndex = freqIndex;
+      cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
+                    (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
+                    FREQ_PERIODS[freqIndex] / 2;
     }
+    
+    // WDC 65C02 read cycle timing:
+    // - Address and R/W̅ must be stable before PHI2 rises
+    // - Data is valid during PHI2 high
+    digitalWriteFast(PHI2, LOW);
+    delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
+    writeAddress(address);
+    digitalWriteFast(RWB, readWrite);
+    setDataDirIn();
+    
+    // RDY handling: 65C02 samples RDY during PHI1 (PHI2 LOW) on read cycles only
+    // If RDY is LOW, wait here until it goes HIGH before continuing
+    // This allows external hardware to stretch the read cycle
+    if (!isDbg) {
+      while (digitalReadFast(RDY) == LOW) {
+        // Wait for RDY to go HIGH - CPU is halted during read cycle
+        // Write cycles are not affected by RDY (handled elsewhere)
+      }
+    }
+    
+    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
+    digitalWriteFast(PHI2, HIGH);
+    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
+  } else {
+    // Timer mode: ISR handles PHI2 and timing, just drive bus signals
+    writeAddress(address);
+    digitalWriteFast(RWB, readWrite);
+    setDataDirIn();
   }
-  
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
-  digitalWriteFast(PHI2, HIGH);
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
 
   // Priority: Cart overrides ROM from $C000-$FFFF when enabled
   if (addr >= CART_CODE && addr <= CART_END && cart.enabled) {
@@ -1335,25 +1439,34 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   data = val;
   readWrite = LOW;
 
-  if (cachedFreqIndex != freqIndex) {
-    cachedFreqIndex = freqIndex;
-    cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
-                  (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
-                  FREQ_PERIODS[freqIndex] / 2;
-  }
+  if (!timerMode) {
+    // Blocking bus timing for tight-loop mode and manual stepping
+    if (cachedFreqIndex != freqIndex) {
+      cachedFreqIndex = freqIndex;
+      cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
+                    (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
+                    FREQ_PERIODS[freqIndex] / 2;
+    }
 
-  // WDC 65C02 write cycle timing:
-  // - Address and R/W̅ must be stable before PHI2 rises
-  // - Data must be valid during PHI2 high
-  digitalWriteFast(PHI2, LOW);
-  delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
-  writeAddress(address);
-  digitalWriteFast(RWB, readWrite);
-  setDataDirOut(); // Set data direction to output before driving bus
-  writeData(data);     // Data ready before PHI2 goes high
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
-  digitalWriteFast(PHI2, HIGH);
-  FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
+    // WDC 65C02 write cycle timing:
+    // - Address and R/W̅ must be stable before PHI2 rises
+    // - Data must be valid during PHI2 high
+    digitalWriteFast(PHI2, LOW);
+    delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
+    writeAddress(address);
+    digitalWriteFast(RWB, readWrite);
+    setDataDirOut(); // Set data direction to output before driving bus
+    writeData(data);     // Data ready before PHI2 goes high
+    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
+    digitalWriteFast(PHI2, HIGH);
+    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
+  } else {
+    // Timer mode: ISR handles PHI2 and timing, just drive bus signals
+    writeAddress(address);
+    digitalWriteFast(RWB, readWrite);
+    setDataDirOut();
+    writeData(data);
+  }
 
   // Priority: Cart overrides ROM from $C000-$FFFF when enabled
   if (addr >= CART_CODE && addr <= CART_END && cart.enabled) {
@@ -1480,9 +1593,9 @@ void initPins() {
 }
 
 void initButtons() {
-  intButton.attach(CLK_SWB, INPUT_PULLUP);
-  intButton.interval(DEBOUNCE);
-  intButton.setPressedState(LOW);
+  clkButton.attach(CLK_SWB, INPUT_PULLUP);
+  clkButton.interval(DEBOUNCE);
+  clkButton.setPressedState(LOW);
 
   stepButton.attach(STEP_SWB, INPUT_PULLUP);
   stepButton.interval(DEBOUNCE);
