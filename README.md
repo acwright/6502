@@ -106,7 +106,7 @@ Documentation, schematics, and code are written with clarity in mind. The projec
 ### Recommended First Build: The "KIM" System
 
 The **KIM (Keypad Input Monitor)** is the ideal starting point because:
-- Fewer boards required (4 boards total)
+- Fewer boards required (4-6 boards total)
 - Simpler assembly with minimal card stacking
 - Educational focus similar to the classic KIM-1
 - Complete standalone system with display and input
@@ -128,16 +128,6 @@ The **KIM (Keypad Input Monitor)** is the ideal starting point because:
 5. Load test programs and start experimenting!
 
 **Note:** The KIM build uses real hardware chips (6502, 6522 VIA, 6551 ACIA) and requires no firmware flashing.
-
-**Alternative First Build: The "DEV" System**
-
-For software developers or those who prefer emulation:
-- Only 2 boards required (Dev Board + Output Board or Dev Output Board or LCD Board)
-- Teensy 4.1-based emulation (no real 65(c)02 chip needed)
-- Networking support with web-based control interface
-- Easier debugging and development workflow
-
-See [Firmware/DB Emulator/README.md](./Firmware/DB%20Emulator/README.md) for detailed DEV setup instructions.
 
 ---
 
@@ -190,16 +180,16 @@ The COB is the most versatile and expandable system configuration, featuring a b
 ![The DEV](./CAD/Bases/The%20DEV/The%20DEV.png?raw=true)
 ![The DEV](./Assets/Images/DEV.png?raw=true)
 
-The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller running cycle-accurate emulation via [vrEmu6502](https://github.com/visrealm/vrEmu6502). This enables advanced debugging features, network connectivity, and faster development iterations.
+The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller running cycle-accurate emulation via [vrEmu6502](https://github.com/visrealm/vrEmu6502).
 
 **Required Components:**
   * 1x Dev Board (Teensy 4.1-based 65c02 emulator)
-  * 1x Output Board (VGA + audio, **UNTESTED**) or Dev Output Board (2.4" LCD with [VT-AC](https://github.com/acwright/VT-AC) terminal protocol) or LCD Board (2.8" LCD)
+  * 1x Dev Output Board (2.4" LCD with [VT-AC](https://github.com/acwright/VT-AC) terminal protocol) or LCD Board (2.8" LCD)
 
 **Key Features:**
 - Cycle-accurate 65C02 emulation (no physical CPU needed)
 - Teensy 4.1 platform (600 MHz ARM Cortex-M7)
-- Variable CPU speed from very slow to maximum (possibly far exceeding real 65c02)
+- Variable CPU speed
 - Ethernet connectivity via QNEthernet library
 - Web-based control interface (DB Control) accessible at `http://6502.local`
 - SD card support for loading ROMs, programs, and saving snapshots
@@ -214,9 +204,16 @@ The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller runn
 - Step through code cycle-by-cycle
 - Load programs instantly from SD card or network
 - Monitor memory in real-time via web interface
-- Snapshot (Save memory state)
+- Snapshot memory (Save memory state to SD card)
 
 **See Also:** [Firmware/DB Emulator/README.md](./Firmware/DB%20Emulator/README.md) for detailed setup instructions.
+
+**IMPORTANT:**
+
+The DEV works with *some* 6502 project boards and helpers (see compatibility chart) due to emulation bus outputs not strictly following 6502 bus timing. 
+I have made every attempt to make the bus signals as compatible with real hardware as possible but some incompatibility does exist. I have marked boards, cards and helpers in the compatibility chart that I have used successfully.
+The DEV has one bus connector and one card slot with IO 7 ($9800) not being used by the emulation and available for external hardware.
+If you build the DEV and try it with real hardware please share your results!
 
 ---
 
@@ -271,7 +268,7 @@ A game-focused configuration designed for playing and developing retro-style gam
 **Required Components:**
   * 1x Main Board (65c02 CPU + 32KB RAM + 32KB ROM)
   * 1x Input Board (PS/2 keyboard, mouse, SNES controller ports)
-  * 1x Output Board (VGA video via Pico9918 + ARMSID audio, **UNTESTED**)
+  * 1x Output Board (VGA video via Pico9918 + ARMSID audio)
   * 1x ROM Cart (cartridge for game ROM images)
 
 **Key Features:**
@@ -290,8 +287,6 @@ A game-focused configuration designed for playing and developing retro-style gam
 - Developing retro-style games
 - Arcade-style gaming experiences
 - Educational game programming
-
-**Note:** The Output Board is currently marked **UNTESTED**. For a tested alternative, consider using the VGA Card + Sound Card in a COB-style configuration.
 
 ---
 
@@ -343,8 +338,8 @@ This matrix shows which boards, cards, and helpers are compatible with each syst
 | Dev Board | — | ✓ | — | — | DEV system only |
 | Dev Output Board | — | ✓ | — | — | Pairs with Dev Board for [VT-AC](https://github.com/acwright/VT-AC) serial output display |
 | Input Board | ○ | — | — | ✓ | VCS primary; can be used with COB |
-| Output Board | ○ | ○ | — | ✓ | **UNTESTED**; VCS primary |
-| LCD Board | ○ | ○ | — | — | **UNTESTED**; COB optional |
+| Output Board | ○ | — | — | ✓ | VCS primary |
+| LCD Board | ○ | ○ | — | — | **UNTESTED**; COB optional, DEV alternative |
 | Backplane | ✓ | — | ○ | ○ | COB primary |
 | Backplane Pro | ✓ | — | ○ | — | COB primary (enhanced backplane), KIM alternative |
 | **CARDS** |
@@ -352,32 +347,32 @@ This matrix shows which boards, cards, and helpers are compatible with each syst
 | CPU Card | ✓ | — | ○ | — | COB primary (hosts CPU) |
 | CPU Card Pro | ○ | — | ○ | — | COB primary; 65816 CPU; **UNTESTED** |
 | Memory Card | ✓ | — | ○ | — | COB primary (32K RAM + 32K ROM) |
-| RAM Card | ✓ | — | ○ | ○ | COB optional (512KB banked RAM) |
+| RAM Card | ✓ | ○ | ○ | ○ | COB optional (512KB banked RAM) |
 | RTC Card | ✓ | — | ○ | ○ | COB optional (real-time clock) |
-| GPIO Card | ✓ | — | ✓ | — | KIM required; COB required |
-| Serial Card | ✓ | — | ✓ | ○ | COB/KIM communication |
-| Serial Card Pro | ✓ | — | ✓ | ○ | Enhanced serial; COB/KIM |
-| Video Card | ✓ | ○ | ○ | — | COB option (TMS9918A composite) |
-| Video Card Pro | ○ | ○ | ○ | — | COB option; **UNTESTED** |
+| GPIO Card | ✓ | ○ | ✓ | — | KIM required; COB required |
+| Serial Card | ✓ | ○ | ✓ | ○ | COB/KIM communication |
+| Serial Card Pro | ✓ | ○ | ✓ | ○ | Enhanced serial; COB/KIM |
+| Video Card | ✓ | — | ○ | — | COB option (TMS9918A composite) |
+| Video Card Pro | ○ | — | ○ | — | COB option; **UNTESTED** |
 | VGA Card | ✓ | ○ | ○ | — | COB option (Pico9918 VGA) |
-| VGA Card Pro | ○ | ○ | ○ | — | COB option; **UNTESTED** |
-| Sound Card | ✓ | ○ | ○ | — | COB (ARMSID) |
+| VGA Card Pro | ○ | — | ○ | — | COB option; **UNTESTED** |
+| Sound Card | ✓ | — | ○ | — | COB (ARMSID) |
 | Storage Card | ✓ | ○ | ○ | ○ | COB (CompactFlash) |
 | Storage Card Pro | ○ | ○ | ○ | ○ | SD card; **UNTESTED** |
 | LCD Card | ○ | ○ | ○ | — | COB optional (16×2 LCD) |
 | Blinkenlights Card | ○ | ○ | ○ | ○ | Debug/visual output; any backplane system |
 | Prototype Card | ○ | ○ | ○ | ○ | Custom circuits; any backplane system |
 | **HELPERS** |
-| Keyboard Encoder Helper | ✓ | — | ○ | — | COB GPIO keyboard input (ATmega1284p) |
-| PS2 Helper | ✓ | — | ○ | — | COB GPIO PS/2 keyboard (ATmega328p) |
-| Keyboard Helper | ✓ | — | ○ | — | COB 64-key matrix + joysticks |
-| Keypad Helper | — | — | ✓ | — | KIM keypad input (4×4 + 2×4) |
-| Keypad LCD Helper | — | — | ✓ | — | KIM LCD display |
-| GPIO Helper | ✓ | — | ○ | ○ | 8 buttons + 8 LEDs; testing/debug |
-| GPIO Breadboard Helper | ✓ | — | ○ | — | Breadboard interface for GPIO |
-| Joystick Helper | ✓ | — | ○ | ○ | Atari 2600-style joystick |
+| Keyboard Encoder Helper | ✓ | ○ | ○ | — | COB GPIO keyboard input (ATmega1284p) |
+| PS2 Helper | ✓ | ○ | ○ | — | COB GPIO PS/2 keyboard (ATmega328p) |
+| Keyboard Helper | ✓ | ○ | ○ | — | COB 64-key matrix + joysticks |
+| Keypad Helper | — | ○ | ✓ | — | KIM keypad input (4×4 + 2×4) |
+| Keypad LCD Helper | — | ○ | ✓ | — | KIM LCD display |
+| GPIO Helper | ✓ | ○ | ○ | ○ | 8 buttons + 8 LEDs; testing/debug |
+| GPIO Breadboard Helper | ✓ | ○ | ○ | — | Breadboard interface for GPIO |
+| Joystick Helper | ✓ | ○ | ○ | ○ | Atari 2600-style joystick |
 | Clock Helper | ✓ | — | ✓ | ✓ | Manual clock control; any real CPU system |
-| DB25 Helper | ✓ | — | ○ | — | GPIO to DB25 connector |
+| DB25 Helper | ✓ | ○ | ○ | — | GPIO to DB25 connector |
 | Breadboard Helper | ✓ | ✓ | ✓ | ✓ | Bus to breadboard; prototyping |
 | Mega Helper | ✓ | — | ○ | — | Arduino Mega 2560 interface |
 | VERA Helper | ○ | ○ | ○ | — | VERA module adapter |
@@ -636,10 +631,10 @@ The Main Board is a self-contained 6502 computer suitable for standalone use or 
 **Video:** VGA 640×480 via [Pico9918](https://github.com/visrealm/pico9918)  
 **Audio:** ARMSID (SID chip emulation)  
 **Interface:** Memory-mapped I/O to 6502 bus  
-**Status:** ⚠️ **UNTESTED**  
+**Status:** ✓ Tested  
 **Used In:** VCS (primary), DEV (alternative), COB (alternative)
 
-Combines video and audio output on a single board for compact gaming console configurations. Not yet fully tested in all configurations.
+Combines video and audio output on a single board for compact gaming console configurations.
 
 ---
 
@@ -976,13 +971,13 @@ Leverages the Arduino ecosystem for easy peripheral development.
 Simpler alternative to Keyboard Encoder Helper when only PS/2 input is needed.
 
 #### VERA Helper
-**Purpose:** Adapts the VERA video module to 6502 bus  
+**Purpose:** Adapts the VERA module to 6502 bus  
 **Key Components:** VERA module (from Commander X16 project), level shifters, bus interface  
 **Video:** VERA capabilities (see [Commander X16 VERA](https://github.com/commanderx16/x16-docs/blob/master/VERA%20Programmer's%20Reference.md))  
 **Interface:** Memory-mapped I/O (VERA register interface)  
-**Status:** ⚠️ **Experimental** (VERA module availability varies)  
+**Status:** ✓ Tested
 
-Experimental adapter for the powerful VERA graphics module from the Commander X16 project.
+Adapter for the powerful VERA module from the Commander X16 project.
 
 ---
 
@@ -1418,7 +1413,6 @@ The following table indicates the current testing status of all boards, cards, a
 
 **Boards:**
 - LCD Board (ILI9341 via 6522 VIA)
-- Output Board (Pico9918 + ARMSID combined board for VCS)
 
 **Cards:**
 - CPU Card Pro (65816 CPU - requires compatible software and memory management)
@@ -1432,11 +1426,6 @@ The following table indicates the current testing status of all boards, cards, a
 - **Concern**: Performance may be poor due to overhead of parallel VIA interface for pixel operations
 - **Status**: Hardware exists but not tested with display-intensive software
 - **Recommendation**: Use VGA Card, or Video Card for better graphics performance
-
-**Output Board (UNTESTED):**
-- **Concern**: Combines Pico9918 and ARMSID which are individually tested in separate cards
-- **Status**: Integration testing incomplete; Probably works
-- **Recommendation**: For VCS builds, consider using tested VGA Card + Sound Card combination instead
 
 **CPU Card Pro (UNTESTED):**
 - **Concern**: 65816 CPU requires 16-bit aware software and extended memory mapping
