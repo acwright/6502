@@ -316,7 +316,6 @@ Detailed specifications for each system configuration:
 | **Power Requirement** | 5V DC, 2-3A | 5V DC, 2A | 5V DC, 1-2A | 5V DC, 1-2A |
 | **Board Count** | 12+ boards/cards | 2 boards | 4 boards + helpers | 4 boards |
 | **Complexity** | Advanced | Intermediate | Beginner-Intermediate | Intermediate |
-| **Estimated Cost** | $300-500 | $150-200 | $100-150 | $150-250 |
 
 **Legend:**
 - `*` = UNTESTED component or configuration
