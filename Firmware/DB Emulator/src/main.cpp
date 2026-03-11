@@ -125,8 +125,11 @@ __attribute__((aligned(32))) uint8_t ramData1[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 __attribute__((aligned(32))) uint8_t ramData2[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 #endif
 
-#ifdef HW_SERIAL
-uint8_t serialData[1024];
+#ifdef DEVBOARD_0
+#define HWSERIAL Serial4
+#endif
+#ifdef DEVBOARD_1
+#define HWSERIAL Serial7
 #endif
 
 static uint32_t cachedDelay = 0;
@@ -162,6 +165,7 @@ RAMCard ramCard2 = RAMCard(ramData2);
 RTCCard rtcCard = RTCCard();
 StorageCard storageCard = StorageCard();
 SerialCard serialCard = SerialCard();
+DevOutputBoard devOutputBoard = DevOutputBoard();
 GPIOCard gpioCard = GPIOCard();
 
 // GPIO Attachments
@@ -174,16 +178,9 @@ GPIOJoystickAttachment joystickAttachment = GPIOJoystickAttachment(false, 100); 
 //
 
 void setup() {
-  Serial.begin(9600);       // Ignored by Teensy; Baud rate is USB rate 480Mbps
-  SerialUSB1.begin(9600);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
-  #ifdef HW_SERIAL
-  #ifdef DEVBOARD_0
-  Serial4.begin(115200);
-  #endif
-  #ifdef DEVBOARD_1
-  Serial7.begin(115200);
-  #endif
-  #endif
+  Serial.begin(115200);       // Ignored by Teensy; Baud rate is USB rate 480Mbps
+  SerialUSB1.begin(115200);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
+  HWSERIAL.begin(115200);
 
   setSyncProvider(syncTime);
   buildMemoryMap();
@@ -1419,8 +1416,12 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
         case 5: // IO 6 - GPIO Card
           data = gpioCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
           break;
-        case 6: // IO 7 - Sound Card
-        case 7: // IO 8 - Video Card
+        case 6: // IO 7 - Unused (External card slot)
+          data = readData();
+          break;
+        case 7: // IO 8 - Dev Output Board
+          data = devOutputBoard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+          break;
         default:
           data = readData();
           break;
@@ -1507,8 +1508,11 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
         case 5: // IO 6 - GPIO Card
           gpioCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
           break;
-        case 6: // IO 7 - Sound Card
-        case 7: // IO 8 - Video Card
+        case 6: // IO 7 - Unused (External card slot)
+          break;
+        case 7: // IO 8 - Dev Output Board
+          devOutputBoard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+          break;
         default:
           break;
       }
@@ -1568,10 +1572,10 @@ void initPins() {
   pinMode(OE2, OUTPUT);
   pinMode(OE3, OUTPUT);
 
+  // These pins are currently unused on the dev board but 
+  // should be set to inputs to avoid floating and potential interference
   pinMode(GPIO0, INPUT);
   pinMode(GPIO1, INPUT);
-  pinMode(GPIO2, INPUT);
-  pinMode(GPIO3, INPUT);
 
   digitalWriteFast(OE1, HIGH);
   digitalWriteFast(OE2, HIGH);
@@ -1587,8 +1591,6 @@ void initPins() {
   pinMode(MISO1, INPUT);
   pinMode(SCK1, INPUT);
   pinMode(CS, INPUT);
-  pinMode(RX, INPUT);
-  pinMode(TX, INPUT);
   #endif
 }
 

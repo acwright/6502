@@ -8,7 +8,7 @@ DOB Terminal is a hardware terminal emulator designed for the DOB (Dev Output Bo
 - **40x30 Character Grid** - 8x8 pixel character cells supporting text and graphics modes
 - **Dual Serial Interfaces** - USB and hardware UART (2Mbps) for flexible connectivity
 - **Audio Bell System** - Queue-based tone generator supporting musical note playback
-- **VT-AC Protocol** - Custom serial command protocol for display control
+- **VT-AC Protocol** - [VT-AC](https://github.com/acwright/VT-AC) serial command protocol for display control
 
 ## Hardware
 

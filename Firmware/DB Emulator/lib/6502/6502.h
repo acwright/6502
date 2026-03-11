@@ -1,5 +1,5 @@
-#ifndef _DBEMULATOR_H
-#define _DBEMULATOR_H
+#ifndef _6502_H
+#define _6502_H
 
 #include "constants.h"
 #include "macros.h"
@@ -21,5 +21,6 @@
 #include "IO/RTCCard.h"
 #include "IO/SerialCard.h"
 #include "IO/StorageCard.h"
+#include "IO/DevOutputBoard.h"
 
 #endif

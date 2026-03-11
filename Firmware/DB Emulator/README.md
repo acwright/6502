@@ -132,7 +132,6 @@ You can enable/disable features by uncommenting build flags in `platformio.ini`:
 build_flags = 
     -D DEVBOARD_1           ; Board version
     -D USB_DUAL_SERIAL      ; Enable dual serial ports
-    ; -D HW_SERIAL          ; Enable hardware serial writes to serial header TX pin (Dev Output Board)
     ; -D MOUSE_DEBUG        ; Enable mouse debugging output
     ; -D JOYSTICK_DEBUG     ; Enable joystick debugging output
     ; -D KEYBOARD_DEBUG     ; Enable keyboard debugging output
@@ -275,7 +274,7 @@ Once connected, you'll see the emulator banner and status. Available commands:
 
 If your development board has physical buttons:
 
-- **INT Button**: Increase clock frequency
+- **INT/CLK Button**: Change clock frequency
 - **STEP Button**: Execute one instruction
 - **RUN/STOP Button**: Toggle execution
 - **RESET Button**: Hardware reset (DevBoard 1 only)

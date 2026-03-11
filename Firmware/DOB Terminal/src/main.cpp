@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include <DOBTerminal.h>
 #include <SPI.h>
 #include <ILI9341_t3n.h>
+#include <DOBTerminal.h>
 
 void onCommand(char command);
 
@@ -80,6 +80,7 @@ uint8_t targetFrameTime = 17;  // 60fps = ~16.67ms per frame so 17ms
 
 ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RESET);
 
+#define HWSERIAL Serial1
 uint8_t serialBuffer[1024];
 
 //
@@ -93,8 +94,8 @@ void setup() {
   initPalette();
 
   Serial.begin(115200);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
-  Serial1.begin(2000000);
-  Serial1.addMemoryForRead(&serialBuffer, sizeof(serialBuffer));
+  HWSERIAL.begin(115200);
+  HWSERIAL.addMemoryForRead(&serialBuffer, sizeof(serialBuffer));
 
   info();
 }
@@ -102,10 +103,10 @@ void setup() {
 void loop() {
   processBellQueue();
 
-  if (Serial.available()) {
+  if (HWSERIAL.available()) {
+    onCommand(HWSERIAL.read());
+  } else if (Serial.available()) {
     onCommand(Serial.read());
-  } else if (Serial1.available()) {
-    onCommand(Serial1.read());
   } else {
     // Render at approximately 60fps
     time_t now = millis();
@@ -176,8 +177,9 @@ void drawCursor(uint8_t* renderBuffer) {
 //
 
 void onCommand(char command) {
-  // Echo to the standard serial output (USB Serial)
-  Serial.write(command);
+  #ifdef DEBUG
+  Serial.println(command, HEX); // Echo to the standard serial output (USB Serial)
+  #endif
 
   if (cursorCharNextByte) {
     cursorChar = command;
