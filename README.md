@@ -302,9 +302,9 @@ Detailed specifications for each system configuration:
 | **Banked RAM** | 512KB (RAM Card) | 32KB (default), up to 512KB with PSRAM | N/A | N/A |
 | **Total RAM** | 544KB | 64KB (default), up to 544KB with PSRAM | 32KB | 32KB |
 | **ROM** | 32KB (Memory Card) | N/A (loads from SD/network) | 32KB | 16KB (ROM Cart, swappable) |
-| **Video Output** | Composite (TMS9918A) or VGA (Pico9918) | VGA (Pico9918)* or 2.4" LCD (VT-AC) | Serial terminal only | VGA (Pico9918)* |
+| **Video Output** | Composite (TMS9918A) or VGA (Pico9918) | 2.4" LCD (VT-AC) | Serial terminal only | VGA (Pico9918) |
 | **Video Resolution** | 256×192 (TMS9918A) or 640×480 VGA | 640×480 VGA or 320×240 LCD | Text via serial | 640×480 VGA |
-| **Audio** | ARMSID (SID emulation) | N/A | N/A | ARMSID* |
+| **Audio** | ARMSID (SID emulation) | N/A | N/A | ARMSID |
 | **Storage** | CompactFlash or SD card* | SD card (onboard Teensy 4.1) | Serial load only | ROM cartridges |
 | **Storage Capacity** | Up to 128GB (CF) or 32GB (SD) | Up to 32GB (SD) | N/A | 16KB per cartridge** |
 | **Serial I/O** | 6551 ACIA (RS-232) | USB serial (115200 baud) | 6551 ACIA (RS-232) | N/A |
