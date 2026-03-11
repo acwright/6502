@@ -1124,7 +1124,7 @@ Building a 6502 system requires careful assembly and proper connections between 
 
 ## Firmware
 
-The [Firmware](./Firmware) folder contains source code for firmware running on various microcontrollers used in the project (Teensy 4.1, ATmega328p, ATmega1284p, ATTiny85), as well as BIOS code for the 6502 systems. Firmware is written in C/C++ or Assembly and is developed using **PlatformIO**.
+The [Firmware](./Firmware) folder contains source code for firmware running on various microcontrollers used in the project (Teensy 4.1, ATmega328p, ATmega1284p, ATTiny85). Firmware is written in C/C++ and is developed using **PlatformIO**.
 
 See the [Firmware README](./Firmware/README.md) for detailed information on building and flashing firmware.
 
@@ -1220,13 +1220,18 @@ The following repositories contain 6502 assembly code that runs on the hardware:
 - Sample programs demonstrating hardware features
 - Library routines for common tasks
 
-**[6502-BIOS](https://github.com/acwright/6502-BIOS)**
-- BIOS (Basic Input/Output System) for COB and VCS systems
+**[6502-COBBIOS](https://github.com/acwright/6502-COBBIOS)**
+- BIOS (Basic Input/Output System) for COB system
 - Low-level hardware initialization and I/O routines
 - System ROM code providing fundamental services
 
+**[6502-DEVBIOS](https://github.com/acwright/6502-DEVBIOS)**
+- BIOS (Basic Input/Output System) for DEV system
+- Input and LCD display routines
+- System ROM code providing fundamental services
+
 **[6502-KIMBIOS](https://github.com/acwright/6502-KIMBIOS)**
-- BIOS specifically for the KIM system
+- BIOS (Basic Input/Output System) for KIM system
 - Hexadecimal keypad input and LCD display routines
 - KIM-1 compatible monitor program
 
@@ -1234,6 +1239,11 @@ The following repositories contain 6502 assembly code that runs on the hardware:
 - NOP (No Operation) test program
 - Minimal ROM code for hardware testing
 - Useful for verifying basic CPU and memory operation
+
+**[6502-VCSBIOS](https://github.com/acwright/6502-VCSBIOS)**
+- BIOS (Basic Input/Output System) for VCS system
+- Low-level hardware initialization and I/O routines
+- System ROM code providing fundamental services
 
 **[6502-WOZMON](https://github.com/acwright/6502-WOZMON)**
 - Woz Monitor (Apple I monitor program)
