@@ -1,10 +1,10 @@
 # IB Keyboard Controller
 
-PS/2 Keyboard to Serial Interface Controller firmware for ATTiny85 microcontroller. This firmware bridges a PS/2 keyboard to a custom serial interface designed for the 6502 Input Board.
+PS/2 Keyboard to Serial Interface Controller firmware for ATTiny85 microcontroller. This firmware bridges a PS/2 keyboard to a custom serial interface designed for the 6502 Input Board Rev 0.0.
 
 ## Overview
 
-The IB (Input Board) Keyboard Controller is firmware for an ATTiny85 microcontroller that converts PS/2 keyboard signals into ASCII codes and outputs them via a parallel shift register interface. This allows a modern PS/2 keyboard to be used with the 6502 Input Board.
+The IB (Input Board Rev 0.0) Keyboard Controller is firmware for an ATTiny85 microcontroller that converts PS/2 keyboard signals into ASCII codes and outputs them via a parallel shift register interface. This allows a modern PS/2 keyboard to be used with the 6502 Input Board.
 
 ## Features
 

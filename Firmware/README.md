@@ -31,9 +31,9 @@ The 6502 project uses microcontrollers to provide:
 | Platform | Clock Speed | Flash | RAM | Used In |
 |----------|-------------|-------|-----|---------|
 | Teensy 4.1 | 600 MHz | 8MB | 1MB (+8MB PSRAM) | Dev Board, Dev Output Board |
-| ATmega1284p | 16 MHz | 128KB | 16KB | Keyboard Encoder Helper |
+| ATmega1284p | 16 MHz | 128KB | 16KB | Keyboard Encoder Helper, Input Board Rev 1.0 |
 | ATmega328p | 16 MHz | 32KB | 2KB | PS2 Helper |
-| ATTiny85 | 8 MHz | 8KB | 512 bytes | Input Board (keyboard + mouse) |
+| ATTiny85 | 8 MHz | 8KB | 512 bytes | Input Board Rev 0.0 (keyboard + mouse) |
 
 ---
 
@@ -45,9 +45,9 @@ The 6502 project uses microcontrollers to provide:
 |-----------------|--------------|-----------------|--------|---------|
 | [DB Emulator](./DB%20Emulator/) | Dev Board | Teensy 4.1 | DEV | 65C02 emulation + networking + web control |
 | [DOB Terminal](./DOB%20Terminal/) | Dev Output Board | Teensy 4.0/4.1 | DEV | ASCII terminal on 2.4" LCD display |
-| [IB Keyboard Controller](./IB%20Keyboard%20Controller/) | Input Board | ATTiny85 | VCS | PS/2 keyboard to serial interface |
-| [IB Mouse Controller](./IB%20Mouse%20Controller/) | Input Board | ATTiny85 | VCS | PS/2 mouse interface |
-| [KEH Controller](./KEH%20Controller/) | Keyboard Encoder Helper | ATmega1284p | COB/KIM | PS/2 + matrix keyboard to ASCII |
+| [IB Keyboard Controller](./IB%20Keyboard%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 keyboard to serial interface |
+| [IB Mouse Controller](./IB%20Mouse%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 mouse interface |
+| [KEH Controller](./KEH%20Controller/) | Keyboard Encoder Helper, Input Board 1.0 | ATmega1284p | COB/KIM | PS/2 + matrix keyboard to ASCII |
 | [PS2 Keyboard Controller](./PS2%20Keyboard%20Controller/) | PS2 Helper | ATmega328p | COB/KIM | PS/2 keyboard to matrix emulation |
 | [STP Controller](./STP%20Controller/) | Storage Card Pro | (varies) | COB | SD + Flash storage controller |
 
@@ -241,14 +241,22 @@ pio device monitor -b 115200
 
 ### VCS System Firmware
 
-**[IB Keyboard Controller](./IB%20Keyboard%20Controller/)** (Input Board - ATTiny85 #1):
+**[KEH Controller](./KEH%20Controller/)** (Input Board Rev 1.0):
+- Dual input: PS/2 keyboard + 8×8 keyboard matrix (simultaneous)
+- ASCII conversion (0x00-0xFF extended character set)
+- Full modifier support (Shift, Ctrl, Alt, Fn)
+- Function keys F1-F12
+- Circular buffer (16 bytes)
+- Output via 6522 VIA ports
+
+**[IB Keyboard Controller](./IB%20Keyboard%20Controller/)** (Input Board Rev 0.0 - ATTiny85 #1):
 - PS/2 keyboard protocol decoding
 - ASCII conversion
 - Shift register output (serial)
 - Circular buffer (16 bytes)
 - Interrupt-driven (low latency)
 
-**[IB Mouse Controller](./IB%20Mouse%20Controller/)** (Input Board - ATTiny85 #2):
+**[IB Mouse Controller](./IB%20Mouse%20Controller/)** (Input Board Rev 0.0 - ATTiny85 #2):
 - PS/2 mouse protocol decoding
 - X/Y coordinate tracking
 - Button state (left, right, middle)

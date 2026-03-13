@@ -1,6 +1,6 @@
 # IB Mouse Controller
 
-PS/2 Mouse to Serial Interface Controller firmware for ATTiny85 microcontroller. This firmware bridges a PS/2 mouse to a custom serial interface designed for the 6502 Input Board.
+PS/2 Mouse to Serial Interface Controller firmware for ATTiny85 microcontroller. This firmware bridges a PS/2 mouse to a custom serial interface designed for the 6502 Input Board Rev 0.0.
 
 ## Overview
 

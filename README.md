@@ -267,7 +267,7 @@ A game-focused configuration designed for playing and developing retro-style gam
 
 **Required Components:**
   * 1x Main Board (65c02 CPU + 32KB RAM + 32KB ROM)
-  * 1x Input Board (PS/2 keyboard, mouse, SNES controller ports)
+  * 1x Input Board (Matrix keyboard, PS/2 keyboard, controller ports)
   * 1x Output Board (VGA video via Pico9918 + ARMSID audio)
   * 1x ROM Cart (cartridge for game ROM images)
 
@@ -275,10 +275,9 @@ A game-focused configuration designed for playing and developing retro-style gam
 - Real 65c02 CPU
 - Cartridge-based game loading (swappable ROM carts)
 - Multiple input options:
+  - Matrix keyboard
   - PS/2 keyboard
-  - PS/2 mouse
-  - SNES controller (2 ports) or
-  - Atari 2600 compatible joystick (via Joystick header and Joystick Helper)
+  - Atari 2600 compatible joysticks (via port header and Joystick Helper)
 - VGA video output (via Pico9918)
 - Audio output via ARMSID
 
@@ -309,8 +308,8 @@ Detailed specifications for each system configuration:
 | **Storage Capacity** | Up to 128GB (CF) or 32GB (SD) | Up to 32GB (SD) | N/A | 16KB per cartridge** |
 | **Serial I/O** | 6551 ACIA (RS-232) | USB serial (115200 baud) | 6551 ACIA (RS-232) | N/A |
 | **Network** | N/A | Ethernet (10/100 Mbps) | N/A | N/A |
-| **GPIO Ports** | 6522 VIA (Keyboard / Joystick) | USB (keyboard/joystick) | 6522 VIA (for keypad/LCD) | Input Board (PS/2 + SNES) |
-| **Input Methods** | PS/2 keyboard or matrix keyboard | USB keyboard, USB joystick | Keypad (4×4 + 2×4), serial | PS/2 keyboard/mouse, SNES controllers (×2) |
+| **GPIO Ports** | 6522 VIA (Keyboard / Joystick) | USB (Keyboard / Joystick) | 6522 VIA (for keypad/LCD) | Input Board (Keyboard / Joystick) |
+| **Input Methods** | PS/2 keyboard or matrix keyboard, joysticks | USB keyboard, USB joystick | Keypad (4×4 + 2×4), serial | PS/2 keyboard or matrix keyboard, joysticks |
 | **Real-time Clock** | DS1511Y (Y2K compliant) | TimeLib software RTC | N/A | N/A |
 | **Expansion Slots** | 9 slots (12 available with full backplane configuration) | N/A | 1 slot (via Backplane Helper) | N/A |
 | **Power Requirement** | 5V DC, 2-3A | 5V DC, 2A | 5V DC, 1-2A | 5V DC, 1-2A |
@@ -593,11 +592,11 @@ The Dev Board eliminates the need for a physical 65C02 CPU by providing accurate
 Provides a dedicated display for the DEV system, rendering terminal output in a compact form factor ideal for development setups.
 
 #### Input Board
-**Purpose:** Unified input board for PS/2 keyboard, PS/2 mouse, and SNES controllers  
-**Key Components:** ATTiny85 (PS/2 keyboard controller), ATTiny85 (PS/2 mouse controller), SNES controller ports (×2)  
-**Inputs:** PS/2 keyboard, PS/2 mouse, SNES controller ×2  
+**Purpose:** Unified input board for matrix keyboard, PS/2 keyboard, and joysticks
+**Key Components:** 6522 VIA (Versatile Interface Adapter), ATmega1284p microcontroller
+**Inputs:** Matrix keyboard, PS/2 keyboard, and joysticks  
 **Interface:** Parallel I/O to 6502 bus (memory-mapped registers)  
-**Firmware:** [IB Keyboard Controller](./Firmware/IB%20Keyboard%20Controller/), [IB Mouse Controller](./Firmware/IB%20Mouse%20Controller/)  
+**Firmware:** [KEH Controller](./Firmware/KEH%20Controller/)   
 **Status:** ✓ Tested  
 
 Consolidates multiple input devices onto a single board, providing input for gaming and general use.
@@ -1064,12 +1063,12 @@ Building a 6502 system requires careful assembly and proper connections between 
 
 **VCS System:**
 1. Assemble Main Board
-2. Assemble Input Board (flash firmware to ATTiny85 controllers)
+2. Assemble Input Board (flash firmware to ATmega1284P controller)
 3. Assemble Output Board
 4. Assemble ROM Cart with game ROM
 5. Connect Input and Output Boards to Main Board via ribbon cable
 6. Insert ROM Cart into Main Board cart slot
-7. Connect PS/2 keyboard, mouse, and/or SNES controllers to Input Board
+7. Connect matrix keyboard, PS/2 keyboard, and/or joystick controllers to Input Board
 8. Connect VGA cable and audio cable from Output Board to monitor/speakers
 9. Connect power supply (5V DC, 2A) to Main Board
 
@@ -1134,10 +1133,10 @@ See the [Firmware README](./Firmware/README.md) for detailed information on buil
 |-----------------|-----------------|-----------------|--------|-------------|
 | [DB Emulator](./Firmware/DB%20Emulator/) | Dev Board | Teensy 4.1 | DEV | 65C02 emulator with networking, USB I/O, and web control |
 | [DOB Terminal](./Firmware/DOB%20Terminal/) | Dev Output Board | Teensy 4.0/4.1 | DEV | [VT-AC](https://github.com/acwright/VT-AC) terminal display on ILI9341 LCD |
-| [IB Keyboard Controller](./Firmware/IB%20Keyboard%20Controller/) | Input Board | ATTiny85 | VCS | PS/2 keyboard to serial interface |
-| [IB Mouse Controller](./Firmware/IB%20Mouse%20Controller/) | Input Board | ATTiny85 | VCS | PS/2 mouse interface |
-| [KEH Controller](./Firmware/KEH%20Controller/) | Keyboard Encoder Helper | ATmega1284p | COB/KIM | Dual keyboard (PS/2 + matrix) to ASCII converter |
-| [PS2 Keyboard Controller](./Firmware/PS2%20Keyboard%20Controller/) | PS2 Helper | ATmega328p | COB/KIM | PS/2 keyboard to matrix interface |
+| [IB Keyboard Controller](./Firmware/IB%20Keyboard%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 keyboard to serial interface |
+| [IB Mouse Controller](./Firmware/IB%20Mouse%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 mouse interface |
+| [KEH Controller](./Firmware/KEH%20Controller/) | Keyboard Encoder Helper, Input Board Rev 1.0 | ATmega1284p | COB/VCS | Dual keyboard (PS/2 + matrix) to ASCII converter |
+| [PS2 Keyboard Controller](./Firmware/PS2%20Keyboard%20Controller/) | PS2 Helper | ATmega328p | COB | PS/2 keyboard to matrix interface |
 | [STP Controller](./Firmware/STP%20Controller/) | Storage Card Pro | ATmega328p | COB | SD card and SPI flash storage controller |
 
 ### Key Firmware Features
