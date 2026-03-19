@@ -1205,7 +1205,7 @@ The 6502 project has several companion repositories containing software that run
 
 ### Emulator
 
-**[6502-Emulator](https://github.com/acwright/6502-Emulator)**
+**[6502-EMULATOR](https://github.com/acwright/6502-EMULATOR)**
 - Software emulator for the 6502 computer systems
 - Allows running and testing 6502 programs without physical hardware
 - Useful for software development and debugging
