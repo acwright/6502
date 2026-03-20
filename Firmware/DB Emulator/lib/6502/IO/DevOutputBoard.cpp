@@ -16,11 +16,11 @@ uint8_t DevOutputBoard::read(uint16_t address) {
   if ((address & 0x1) == 0x00) {
     // Check if HWSERIAL is available for writing
     // If availableForWrite() returns 0, set bit 7 (busy flag)
-    // if (HWSERIAL.availableForWrite() == 0) {
-    //   return DOB_STATUS_BUSY;
-    // } else {
-    //   return 0x00;
-    // }
+    if (HWSERIAL.availableForWrite() == 0) {
+      return DOB_STATUS_BUSY;
+    } else {
+      return 0x00;
+    }
   }
   
   return 0x00;

@@ -12,7 +12,6 @@ class Cart {
     Cart();
     ~Cart();
     
-    bool enabled = false;
     String file = "None";
 
     uint8_t read(uint16_t index);

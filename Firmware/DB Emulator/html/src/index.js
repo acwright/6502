@@ -82,9 +82,6 @@ function cacheDom() {
 
   // Emulator panel
   dom.isRunning          = $('is-running');
-  dom.ramEnabled         = $('ram-enabled');
-  dom.romEnabled         = $('rom-enabled');
-  dom.cartEnabled        = $('cart-enabled');
   dom.programFile        = $('program-file');
   dom.romFile            = $('rom-file');
   dom.cartFile           = $('cart-file');
@@ -93,9 +90,7 @@ function cacheDom() {
   dom.ipAddress          = $('ip-address');
   dom.rtc                = $('rtc');
   dom.lastSnapshot       = $('last-snapshot');
-  dom.toggleRam          = $('toggle-ram');
-  dom.toggleRom          = $('toggle-rom');
-  dom.toggleCart         = $('toggle-cart');
+  dom.unloadCart         = $('unload-cart');
 
   // CPU panel
   dom.cpuAccHex          = $('cpu-accumulator-hex');
@@ -175,9 +170,6 @@ function updateInfo(info) {
   dom.snapshot.disabled = running;
 
   // Emulator info rows
-  setEnabledSpan(dom.ramEnabled,  info.ramEnabled);
-  setEnabledSpan(dom.romEnabled,  info.romEnabled);
-  setEnabledSpan(dom.cartEnabled, info.cartEnabled);
   dom.programFile.textContent = info.programFile || 'None';
   dom.romFile.textContent     = info.romFile || 'None';
   dom.cartFile.textContent    = info.cartFile || 'None';
@@ -193,10 +185,8 @@ function updateInfo(info) {
   // Last snapshot
   dom.lastSnapshot.textContent = info.lastSnapshot ? info.lastSnapshot : 'None';
 
-  // Toggle checkboxes (sync silently)
-  dom.toggleRam.checked  = info.ramEnabled;
-  dom.toggleRom.checked  = info.romEnabled;
-  dom.toggleCart.checked = info.cartEnabled;
+  // Unload Cart button: disabled while running or no cart loaded
+  dom.unloadCart.disabled = running || !info.cartEnabled;
 
   // CPU registers
   dom.cpuAccHex.textContent    = hex8(info.cpuAccumulator);
@@ -490,10 +480,8 @@ function bindEvents() {
   dom.increaseFreq.addEventListener('click',   () => controlAndRefresh('+'));
   dom.refresh.addEventListener('click',        () => refreshAll());
 
-  // Emulator toggle checkboxes
-  dom.toggleRam.addEventListener('change', () => controlAndRefresh('a'));
-  dom.toggleRom.addEventListener('change', () => controlAndRefresh('o'));
-  dom.toggleCart.addEventListener('change', () => controlAndRefresh('l'));
+  // Unload Cart button
+  dom.unloadCart.addEventListener('click', () => controlAndRefresh('u'));
 
   // Memory tabs
   initTabs(dom.memoryTabs, (target) => {

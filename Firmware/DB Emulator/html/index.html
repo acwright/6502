@@ -34,15 +34,15 @@
             <div class="emulator-info">
               <div class="emulator-info-row">
                 <span class="emulator-info-label">RAM:</span>
-                <span id="ram-enabled">DISABLED</span> (<span id="program-file">None</span>)
+                <span id="program-file">None</span>
               </div>
               <div class="emulator-info-row">
                 <span class="emulator-info-label">ROM:</span>
-                <span id="rom-enabled">DISABLED</span> (<span id="rom-file">None</span>)
+                <span id="rom-file">None</span>
               </div>
               <div class="emulator-info-row">
                 <span class="emulator-info-label">Cart:</span>
-                <span id="cart-enabled">DISABLED</span> (<span id="cart-file">None</span>)
+                <span id="cart-file">None</span>
               </div>
               <div class="emulator-info-row">
                 <span class="emulator-info-label">Frequency:</span>
@@ -63,18 +63,7 @@
             </div>
 
             <div class="emulator-toggle-buttons">
-              <span class="emulator-toggle-buttons-group">
-                <label for="toggle-ram">RAM Enabled:</label>
-                <input id="toggle-ram" type="checkbox">
-              </span>
-              <span class="emulator-toggle-buttons-group">
-                <label for="toggle-rom">ROM Enabled:</label>
-                <input id="toggle-rom" type="checkbox">
-              </span>
-              <span class="emulator-toggle-buttons-group">
-                <label for="toggle-cart">Cart Enabled:</label>
-                <input id="toggle-cart" type="checkbox">
-              </span>
+              <button id="unload-cart" class="button button-red">Unload Cart</button>
             </div>
         </div>
       </div>

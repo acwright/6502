@@ -46,9 +46,7 @@ void snapshot();
 void decreaseFrequency();
 void increaseFrequency();
 void toggleRunStop();
-void toggleRAM();
-void toggleROM();
-void toggleCart();
+void unloadCart();
 void readROMs();
 void listROMs();
 void loadROM(uint index);
@@ -294,9 +292,9 @@ void onCommand(char command) {
     }
     case 'a':
     case 'A':
-      toggleRAM();
-      Serial.print("RAM: ");
-      Serial.println(ram.enabled ? "Enabled" : "Disabled");
+      if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
+      readPrograms();
+      listPrograms();
       break;
     case 'c':
     case 'C':
@@ -321,24 +319,14 @@ void onCommand(char command) {
       tick();
       log();
       break;
-    case 'l':
-    case 'L':
-      toggleCart();
-      Serial.print("Cart: ");
-      Serial.println(cart.enabled ? "Enabled" : "Disabled");
-      break;
+
     case 'm':
     case 'M':
       if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
       readROMs();
       listROMs();
       break;
-    case 'o':
-    case 'O':
-      toggleROM();
-      Serial.print("ROM: ");
-      Serial.println(rom.enabled ? "Enabled" : "Disabled");
-      break;
+
     case 'p':
     case 'P':
       if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
@@ -370,9 +358,9 @@ void onCommand(char command) {
       break;
     case 'u':
     case 'U':
-      if (!SD.mediaPresent()) { Serial.println("SD Card Not Detected!"); break; }
-      readPrograms();
-      listPrograms();
+      unloadCart();
+      Serial.print("Cart: ");
+      Serial.println(cart.file);
       break;
     case '-':
       decreaseFrequency();
@@ -588,20 +576,11 @@ void info() {
   Serial.println("---------------------------------");
   Serial.println();
   Serial.print("RAM: ");
-  Serial.print(ram.enabled ? "Enabled" : "Disabled");
-  Serial.print(" (");
-  Serial.print(ram.file);
-  Serial.println(")");
+  Serial.println(ram.file);
   Serial.print("ROM: ");
-  Serial.print(rom.enabled ? "Enabled" : "Disabled");
-  Serial.print(" (");
-  Serial.print(rom.file);
-  Serial.println(")");
+  Serial.println(rom.file);
   Serial.print("Cart: ");
-  Serial.print(cart.enabled ? "Enabled" : "Disabled");
-  Serial.print(" (");
-  Serial.print(cart.file);
-  Serial.println(")");
+  Serial.println(cart.file);
   Serial.print("Frequency: ");
   Serial.println(FREQ_LABELS[freqIndex]);
   Serial.print("IP Address: ");
@@ -612,11 +591,9 @@ void info() {
   Serial.println("--------------------------------------------------------------");
   Serial.println("| (R)un / Stop       | (S)tep / Tic(K)     | Rese(T)         |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("| Toggle R(A)M       | Toggle R(O)M        | Toggle Cart (L) |");
-  Serial.println("--------------------------------------------------------------");
   Serial.println("| (+/-) Clk Freq     | (D)ump / Sna(P)shot | In(F)o / Lo(G)  |");
   Serial.println("--------------------------------------------------------------");
-  Serial.println("|          List RO(M)s / (C)arts / (U)ser Programs           |");
+  Serial.println("| Unload Cart (U)    | List RO(M)s / (C)arts / Progr(A)ms    |");
   Serial.println("--------------------------------------------------------------");
   Serial.println();
 }
@@ -902,16 +879,8 @@ void toggleRunStop() {
   }
 }
 
-void toggleRAM() {
-  ram.enabled = !ram.enabled;
-}
-
-void toggleROM() {
-  rom.enabled = !rom.enabled;
-}
-
-void toggleCart() {
-  cart.enabled = !cart.enabled;
+void unloadCart() {
+  cart.file = "None";
 }
 
 void readROMs() {
@@ -1377,8 +1346,8 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
     setDataDirIn();
   }
 
-  // Priority: Cart overrides ROM from $C000-$FFFF when enabled
-  if (addr >= CART_CODE && addr <= CART_END && cart.enabled) {
+  // Priority: Cart overrides ROM from $C000-$FFFF when loaded
+  if (addr >= CART_CODE && addr <= CART_END && cart.file != "None") {
     data = cart.read(addr - CART_START);
     return data;
   }
@@ -1386,14 +1355,10 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   // Fast lookup based on high byte for other regions
   switch (memoryMap[addr >> 8]) {
     case REGION_ROM:
-      if (rom.enabled) {
-        data = rom.read(addr - ROM_START);
-      }
+      data = rom.read(addr - ROM_START);
       break;
     case REGION_RAM:
-      if (ram.enabled) {
-        data = ram.read(addr - RAM_START);
-      }
+      data = ram.read(addr - RAM_START);
       break;
     case REGION_IO: {
       uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
@@ -1469,8 +1434,8 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
     writeData(data);
   }
 
-  // Priority: Cart overrides ROM from $C000-$FFFF when enabled
-  if (addr >= CART_CODE && addr <= CART_END && cart.enabled) {
+  // Priority: Cart overrides ROM from $C000-$FFFF when loaded
+  if (addr >= CART_CODE && addr <= CART_END && cart.file != "None") {
     cart.write(addr - CART_START, data);
     return;
   }
@@ -1478,14 +1443,10 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   // Fast lookup based on high byte for other regions
   switch (memoryMap[addr >> 8]) {
     case REGION_ROM:
-      if (rom.enabled) {
-        rom.write(addr - ROM_START, data);
-      }
+      rom.write(addr - ROM_START, data);
       break;
     case REGION_RAM:
-      if (ram.enabled) {
-        ram.write(addr - RAM_START, data);
-      }
+      ram.write(addr - RAM_START, data);
       break;
     case REGION_IO: {
       uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
@@ -1760,7 +1721,7 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   JsonDocument doc;
 
   doc["address"]            = address;
-  doc["cartEnabled"]        = cart.enabled;
+  doc["cartEnabled"]        = cart.file != "None";
   doc["cartFile"]           = cart.file;
   doc["cpuAccumulator"]     = cpu.accumulator();
   doc["cpuOpcodeCycle"]     = cpu.opcodeCycle();
@@ -1776,8 +1737,6 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   doc["isRunning"]          = isRunning;
   doc["lastSnapshot"]       = lastSnapshot;
   doc["programFile"]        = ram.file;
-  doc["ramEnabled"]         = ram.enabled;
-  doc["romEnabled"]         = rom.enabled;
   doc["romFile"]            = rom.file;
   doc["rtc"]                = now();
   doc["rw"]                 = readWrite ? 1 : 0;
@@ -1942,14 +1901,8 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
     return;
   }
 
-  if (command == "a" || command == "A") {         // Toggle RAM
-    toggleRAM();
-  } else if (command == "k" || command == "K") {  // Tick
+  if (command == "k" || command == "K") {         // Tick
     tick();
-  } else if (command == "l" || command == "L") {  // Toggle Cart
-    toggleCart();
-  } else if (command == "o" || command == "O") {  // Toggle ROM
-    toggleROM();
   } else if (command == "p" || command == "P") {  // Snapshot
     snapshot();
   } else if (command == "r" || command == "R") {  // Run / Stop
@@ -1958,6 +1911,8 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
     step();
   } else if (command == "t" || command == "T") {  // Reset
     reset();
+  } else if (command == "u" || command == "U") {  // Unload Cart
+    unloadCart();
   } else if (command == "-") {                    // Decrease Frequency
     decreaseFrequency();
   } else if (command == "+") {                    // Increase Frequency
