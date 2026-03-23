@@ -52,8 +52,8 @@ Used for column scanning (matrix mode) or ASCII output (matrix output):
 ### PS/2 Keyboard Interface
 
 Connect a PS/2 keyboard to:
-- **CLK**: Pin 10 (PS2CLK) with pull-up resistor
-- **DATA**: Pin 11 (PS2DATA) with pull-up resistor
+- **CLK**: Pin 10 (PS2CLK)
+- **DATA**: Pin 11 (PS2DATA)
 - **VCC**: +5V
 - **GND**: Ground
 
