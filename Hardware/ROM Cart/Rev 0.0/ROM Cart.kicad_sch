@@ -6,8 +6,8 @@
 	(paper "USLetter")
 	(title_block
 		(title "6502 ROM Cart")
-		(date "2026-03-22")
-		(rev "1.0")
+		(date "2025-09-17")
+		(rev "0.0")
 		(company "A.C. Wright Design")
 	)
 	(lib_symbols
@@ -797,7 +797,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "6502 Parts:AT27C256"
+		(symbol "6502 Parts:AT28C256"
 			(pin_names
 				(offset 1.016)
 			)
@@ -813,7 +813,7 @@
 					(justify left)
 				)
 			)
-			(property "Value" "AT27C256"
+			(property "Value" "AT28C256"
 				(at 4.826 4.318 0)
 				(effects
 					(font
@@ -849,11 +849,11 @@
 					(hide yes)
 				)
 			)
-			(symbol "AT27C256_1_0"
-				(pin power_in line
+			(symbol "AT28C256_1_0"
+				(pin bidirectional line
 					(at 0 0 0)
 					(length 5.08)
-					(name "VPP"
+					(name "A14"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1123,7 +1123,7 @@
 				(pin bidirectional line
 					(at 27.94 -2.54 180)
 					(length 5.08)
-					(name "A14"
+					(name "~{WE}"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1355,7 +1355,7 @@
 					)
 				)
 			)
-			(symbol "AT27C256_1_1"
+			(symbol "AT28C256_1_1"
 				(rectangle
 					(start 5.08 2.54)
 					(end 22.86 -35.56)
@@ -2120,6 +2120,12 @@
 		(uuid "3a8b5e04-8aae-4c85-ab02-4cf7b3bc080a")
 	)
 	(junction
+		(at 185.42 58.42)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6f85ca53-b15c-4a30-be93-81f9c1daa1cc")
+	)
+	(junction
 		(at 80.01 138.43)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -2160,10 +2166,6 @@
 	(no_connect
 		(at 64.77 53.34)
 		(uuid "09b6d730-5c67-4b6a-beb4-8e9b2d4820c5")
-	)
-	(no_connect
-		(at 154.94 55.88)
-		(uuid "0c56773b-b878-449e-b541-fcf8f61e9df3")
 	)
 	(no_connect
 		(at 90.17 149.86)
@@ -2212,6 +2214,16 @@
 	(no_connect
 		(at 90.17 154.94)
 		(uuid "e8655db6-17b8-4d90-8dbd-dbb0ee493613")
+	)
+	(wire
+		(pts
+			(xy 152.4 55.88) (xy 154.94 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "020a07b0-e91e-4ce3-ad6e-b7c05dc262d8")
 	)
 	(wire
 		(pts
@@ -2305,7 +2317,7 @@
 	)
 	(wire
 		(pts
-			(xy 185.42 55.88) (xy 185.42 99.06)
+			(xy 185.42 99.06) (xy 185.42 58.42)
 		)
 		(stroke
 			(width 0)
@@ -2595,13 +2607,13 @@
 	)
 	(wire
 		(pts
-			(xy 182.88 58.42) (xy 190.5 58.42)
+			(xy 182.88 58.42) (xy 185.42 58.42)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "5ea80eb2-a759-4477-8247-4015843daf28")
+		(uuid "65a97d93-6462-47ea-a855-3f5ccb392a8a")
 	)
 	(wire
 		(pts
@@ -2832,6 +2844,16 @@
 			(type default)
 		)
 		(uuid "9b5b08d6-b6a1-45a7-941a-634f43db5b0f")
+	)
+	(wire
+		(pts
+			(xy 185.42 58.42) (xy 185.42 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9c31d145-fd33-4cb4-88ca-a5cc818f7265")
 	)
 	(wire
 		(pts
@@ -3263,6 +3285,26 @@
 			)
 		)
 	)
+	(global_label "A14"
+		(shape input)
+		(at 152.4 55.88 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "4791377d-28c3-41ea-9602-2fb0dadd96d5")
+		(property "Intersheetrefs" "${INTERSHEET_REFS}"
+			(at 152.4 55.88 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+	)
 	(global_label "A4"
 		(shape output)
 		(at 100.33 86.36 0)
@@ -3583,7 +3625,7 @@
 			)
 		)
 	)
-	(global_label "REB"
+	(global_label "RB"
 		(shape input)
 		(at 187.96 48.26 90)
 		(effects
@@ -3795,26 +3837,6 @@
 		(uuid "963c4b15-57db-435a-8144-7483a9e58c9a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 190.5 60.96 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "A14"
-		(shape input)
-		(at 190.5 58.42 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "a0d7e591-1e65-4881-a87b-24a1d5b52731")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 190.5 58.42 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -4263,7 +4285,7 @@
 			)
 		)
 	)
-	(global_label "REB"
+	(global_label "RB"
 		(shape output)
 		(at 95.25 167.64 0)
 		(effects
@@ -4466,11 +4488,11 @@
 		)
 	)
 	(symbol
-		(lib_id "6502 Parts:AT27C256")
+		(lib_id "6502 Parts:AT28C256")
 		(at 154.94 55.88 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom yes)
+		(in_bom no)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-0000606279c8")
@@ -4482,7 +4504,7 @@
 				)
 			)
 		)
-		(property "Value" "AT27C256"
+		(property "Value" "AT28C256"
 			(at 165.354 51.562 0)
 			(effects
 				(font
