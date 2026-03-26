@@ -126,12 +126,6 @@ __attribute__((aligned(32))) uint8_t ramData1[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 __attribute__((aligned(32))) uint8_t ramData2[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 #endif
 
-#ifdef DEVBOARD_0
-#define HWSERIAL Serial4
-#endif
-#ifdef DEVBOARD_1
-#define HWSERIAL Serial7
-#endif
 
 static uint32_t cachedCpuFrequency = 1000000;
 static uint8_t cachedCpuFreqIndex = 0xFF;
@@ -181,7 +175,7 @@ void setup() {
   Serial.begin(115200);       // Ignored by Teensy; Baud rate is USB data rate 480Mbps
   SerialUSB1.begin(115200);   // Ignored by Teensy; Baud rate is USB data rate 480Mbps
   SerialUSB2.begin(115200);   // Ignored by Teensy; Baud rate is USB data rate 480Mbps
-  HWSERIAL.begin(115200);
+  HWSERIAL.begin(6000000);    // 6 Mbit/sec — maximum on Teensy 4.1 without clock reconfiguration
 
   setSyncProvider(syncTime);
   buildMemoryMap();

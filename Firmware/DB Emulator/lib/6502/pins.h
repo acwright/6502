@@ -49,6 +49,8 @@
 #define CLK_SWB   21  // CLOCK SWITCH
 #define STEP_SWB  20  // STEP SWITCH    
 #define RS_SWB    19  // RUN/STOP SWITCH
+
+#define HWSERIAL  Serial4
 #endif
 
 #ifdef DEVBOARD_1
@@ -98,6 +100,8 @@
 #define CLK_SWB   22  // CLOCK SWITCH
 #define STEP_SWB  21  // STEP SWITCH    
 #define RS_SWB    20  // RUN/STOP SWITCH
+
+#define HWSERIAL  Serial7
 #endif
 
 #endif
