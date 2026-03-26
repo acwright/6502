@@ -53,15 +53,8 @@ class SerialCard: public IO {
     uint8_t ctrl;
     uint8_t status;
 
-    // Timing for baud rate emulation
-    uint32_t txCycleCounter;
-    uint32_t rxCycleCounter;
+    // Pending transmit flag
     bool txPending;
-
-    // Helper methods
-    uint32_t getBaudRate();
-    uint32_t getBitsPerByte();
-    uint32_t getCyclesPerByte(uint32_t cpuFrequency);
 
   public:
     SerialCard();

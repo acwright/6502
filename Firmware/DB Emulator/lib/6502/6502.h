@@ -12,6 +12,7 @@
 #include "ROM/ROM.h"
 
 #include "IO/IO.h"
+#include "IO/AVStream.h"
 #include "IO/GPIOCard.h"
 #include "IO/GPIOAttachments/GPIOAttachment.h"
 #include "IO/GPIOAttachments/GPIOKeyboardMatrixAttachment.h"
@@ -20,7 +21,8 @@
 #include "IO/RAMCard.h"
 #include "IO/RTCCard.h"
 #include "IO/SerialCard.h"
+#include "IO/SoundCard.h"
 #include "IO/StorageCard.h"
-#include "IO/DevOutputBoard.h"
+#include "IO/VideoCard.h"
 
 #endif

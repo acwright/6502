@@ -41,6 +41,7 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     bool ctrlPressed;        // Ctrl modifier active
     bool altPressed;         // Alt modifier active
     bool menuPressed;        // Menu modifier active
+    bool capsLockActive;     // Caps Lock toggle state
     
     /**
      * @brief Map USB HID keycode with modifiers to hex value
@@ -124,11 +125,32 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     void clearInterrupts(bool ca1, bool ca2, bool cb1, bool cb2) override;
     
     /**
-     * @brief Update keyboard with new key event
+     * @brief Update Port A (PS/2 keyboard interface) with a key event
      * 
-     * Converts USB HID keycode to ASCII and buffers it, triggering interrupt on both ports if enabled.
-     * Only processes key press events (ignores key releases).
-     * This allows the same keyboard data to be available on both Port A and Port B.
+     * Routes a keystroke to Port A only. Use for a physical PS/2 keyboard source.
+     * 
+     * @param usbHidKeycode USB HID keycode
+     * @param pressed True if key is pressed, false if released
+     */
+    void updateKeyPortA(uint8_t usbHidKeycode, bool pressed);
+
+    /**
+     * @brief Update Port B (matrix keyboard encoder) with a key event
+     * 
+     * Routes a keystroke to Port B only. Use for USB or browser keyboard sources.
+     * 
+     * @param usbHidKeycode USB HID keycode
+     * @param pressed True if key is pressed, false if released
+     */
+    void updateKeyPortB(uint8_t usbHidKeycode, bool pressed);
+
+    /**
+     * @brief Update keyboard with new key event (both ports)
+     * 
+     * Converts USB HID keycode to ASCII and buffers it on both Port A and Port B.
+     * Use this when the same keyboard source should feed both ports simultaneously
+     * (e.g. a device acting as both PS/2 and matrix encoder).
+     * For source-specific routing use updateKeyPortA() or updateKeyPortB().
      * 
      * @param usbHidKeycode USB HID keycode (raw keycode from USB keyboard)
      * @param pressed True if key is pressed, false if released

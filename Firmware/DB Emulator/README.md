@@ -4,7 +4,7 @@ A 65C02 CPU emulator firmware for the Teensy 4.1 microcontroller. This project p
 
 ## Overview
 
-DB Emulator transforms a Teensy 4.1 into a powerful 65C02 computer system emulator. It emulates the complete 65C02 CPU instruction set, memory management, and provides hardware interfaces for keyboards, joysticks, and network connectivity. The emulator can be controlled via serial terminal or through the web-based [DB Control](../DB%20Control/README.md) interface.
+DB Emulator transforms a Teensy 4.1 into a powerful 65C02 computer system emulator. It emulates the complete 65C02 CPU instruction set, memory management, and provides hardware interfaces for keyboards, joysticks, and network connectivity. The emulator can be controlled via serial terminal or through the embedded [web interface](html/README.md). Audio (SID) and video (TMS9918A) are streamed over USB to the browser for real-time rendering.
 
 ### Features
 
@@ -17,6 +17,8 @@ DB Emulator transforms a Teensy 4.1 into a powerful 65C02 computer system emulat
 - **I/O Support**:
   - USB Keyboard input
   - USB Joystick support (Xbox 360/One controllers)
+  - Sound Card (SID — MOS 6581 emulation, streamed to web interface)
+  - Video Card (TMS9918A emulation, streamed to web interface)
 - **Storage**:
   - SD card support for loading ROMs, cartridges, and programs
   - Memory snapshot functionality
@@ -24,7 +26,12 @@ DB Emulator transforms a Teensy 4.1 into a powerful 65C02 computer system emulat
   - Ethernet connectivity via [QNEthernet](https://github.com/ssilverman/QNEthernet)
   - mDNS discovery (hostname: `6502.local`)
   - Embedded web server with REST API
-  - Compatible with DB Control web interface
+  - Embedded web control interface (served from SD card)
+- **Audio/Video Streaming**:
+  - SID register writes streamed over USB to browser for Web Audio API synthesis
+  - TMS9918A register writes streamed over USB to browser for canvas rendering
+  - Real-time AV via Web Serial API (Chrome or Edge required)
+- **Browser Keyboard Input**: Forwards keyboard events from the web interface to the emulator via REST API
 - **Control Options**:
   - Serial terminal interface (115200 baud)
   - Physical buttons (Run/Stop, Step, Reset, Frequency)
@@ -58,6 +65,7 @@ The firmware supports two development board configurations:
 - **PlatformIO Core** or **PlatformIO IDE** (VS Code extension)
 - **Python 3.x** (usually installed with PlatformIO)
 - **Git** (for cloning dependencies)
+- **Chromium-based browser** (Chrome or Edge) required for audio/video streaming via Web Serial API
 - **Serial terminal software** (optional):
   - CoolTerm (recommended)
   - Arduino Serial Monitor
@@ -131,7 +139,7 @@ You can enable/disable features by uncommenting build flags in `platformio.ini`:
 ```ini
 build_flags = 
     -D DEVBOARD_1           ; Board version
-    -D USB_DUAL_SERIAL      ; Enable dual serial ports
+    -D USB_TRIPLE_SERIAL    ; Enable triple serial ports (SerialUSB1 + SerialUSB2 for AV streaming)
     ; -D MOUSE_DEBUG        ; Enable mouse debugging output
     ; -D JOYSTICK_DEBUG     ; Enable joystick debugging output
     ; -D KEYBOARD_DEBUG     ; Enable keyboard debugging output
@@ -268,7 +276,17 @@ Once connected, you'll see the emulator banner and status. Available commands:
    http://192.168.1.XXX/
    ```
 
-5. **Use DB Control** web application (see [DB Control documentation](../DB%20Control/README.md))
+5. **Use the web interface** to control the emulator (see [Web Interface documentation](html/README.md))
+
+#### Audio/Video Streaming
+
+The Teensy streams SID and TMS9918A register writes over USB (SerialUSB2) to the browser for real-time audio synthesis and video rendering.
+
+- The Teensy must be USB-connected to the same machine running the browser
+- Click **Connect AV** in the VIDEO panel to open the USB serial link
+- Requires **Chrome or Edge** (Web Serial API); requires HTTPS or localhost
+- Audio and video are rendered entirely in the browser; the Teensy streams register writes only
+- Click **Mute** to toggle audio output
 
 ### Physical Controls
 
@@ -300,17 +318,17 @@ Returns system information and CPU state in JSON format:
   "data": 234,
   "freqLabel": "1 MHz",
   "freqPeriod": 1,
-  "inputCtx": 0,
   "ipAddress": "192.168.1.100",
   "isRunning": false,
   "lastSnapshot": 1234567890,
   "programFile": "",
-  "ramEnabled": true,
-  "romEnabled": true,
   "romFile": "BIOS.bin",
   "rtc": 1737590400,
   "rw": 1,
-  "version": "1.0.0"
+  "soundEnabled": true,
+  "version": "1.0",
+  "videoEnabled": true,
+  "avStreamConnected": false
 }
 ```
 
@@ -335,6 +353,14 @@ Loads a file from SD card:
 Executes control command:
 - `command`: Single letter command (same as serial commands)
 - Examples: `r` (run/stop), `s` (step), `t` (reset), `+` (inc freq)
+
+### GET /keyboard?action={down|up}&keycode={XX}
+Forwards browser keyboard events to the emulator:
+- `action`: `down` or `up` (required; returns 400 if missing or invalid)
+- `keycode`: 1–2 character hex string representing a USB HID keycode (e.g. `04` for 'a') (required; returns 400 if missing)
+- Returns 200 on success
+
+**Note:** Audio/video data flows via Web Serial API (USB SerialUSB2), not REST. See the Audio/Video Streaming section above.
 
 ## Troubleshooting
 
@@ -406,6 +432,39 @@ Executes control command:
 - Files should have `.bin` extension
 - Try reinserting SD card
 
+### AV Streaming Issues
+
+**Problem**: Connect AV button not visible
+
+**Solutions**:
+- Must use Chrome or Edge (Web Serial API is not supported in Firefox or Safari)
+- The Web Serial API requires a **secure context**. When accessing via `http://6502.local` (plain HTTP), Chrome hides the API even though your browser supports it. Choose one of the following workarounds:
+
+  **Option 1 — Chrome flag (easiest, for local development)**
+  1. In Chrome, navigate to `chrome://flags/#unsafely-treat-insecure-origin-as-secure`
+  2. Add `http://6602.local` to the list and set it to **Enabled**
+  3. Relaunch Chrome
+
+  **Option 2 — Serve over HTTPS**
+  Configure the Teensy's web server with a self-signed TLS certificate. The browser will show a certificate warning; accept it once and the API will become available.
+
+  **Option 3 — Local proxy via localhost**
+  Run a local reverse proxy (e.g. `nginx` or `caddy`) that forwards `http://localhost` to `http://6602.local`. Because `localhost` is always treated as a secure context, the Web Serial API will be available.
+
+**Problem**: No video or audio after connecting
+
+**Solutions**:
+- Verify USB cable supports data (not charge-only)
+- Check `SerialUSB2` is initialized (`USB_TRIPLE_SERIAL` build flag must be set)
+- Try disconnecting and reconnecting
+
+**Problem**: Audio glitches or dropouts
+
+**Solutions**:
+- Lower the CPU frequency
+- Ensure the browser tab is not throttled or backgrounded
+- Close other audio-intensive applications
+
 ## Development
 
 ### Project Structure
@@ -418,13 +477,15 @@ DB Emulator/
 │       ├── constants.h       # System constants
 │       ├── macros.h          # Utility macros
 │       ├── pins.h            # Pin definitions
-│       ├── html.h            # Embedded web interface
 │       ├── CPU/              # CPU emulator wrapper
 │       │   └── [vrEmu6502](https://github.com/visrealm/vrEmu6502)/        # Core 6502 emulator
 │       ├── RAM/              # RAM emulation
 │       ├── ROM/              # ROM emulation
 │       ├── Cart/             # Cartridge support
 │       └── IO/               # I/O device emulation
+│           ├── AVStream.h    # AV streaming protocol (SerialUSB2)
+│           ├── SoundCard.*   # SID (MOS 6581) emulation
+│           └── VideoCard.*   # TMS9918A emulation
 ├── src/
 │   └── main.cpp              # Main firmware code
 ├── include/                  # Additional headers
@@ -455,8 +516,8 @@ $8800 - $8BFF : I/O Slot 2 (1KB) - RTC Card
 $8C00 - $8FFF : I/O Slot 3 (1KB) - Storage Card
 $9000 - $93FF : I/O Slot 4 (1KB) - Serial Card
 $9400 - $97FF : I/O Slot 5 (1KB) - GPIO Card
-$9800 - $9BFF : I/O Slot 6 (1KB) - Sound Card (Not emulated)
-$9C00 - $9FFF : I/O Slot 7 (1KB) - Video Card (Not emulated)
+$9800 - $9BFF : I/O Slot 6 (1KB) - Sound Card (SID)
+$9C00 - $9FFF : I/O Slot 7 (1KB) - Video Card (TMS9918A)
 $A000 - $BFFF : ROM (8KB)
 $C000 - $FFFF : ROM/Cartridge (16KB)
 ```
@@ -474,14 +535,14 @@ Enable debug flags in `platformio.ini` for verbose logging:
 
 ## Performance
 
-- **Maximum Emulation Speed**: ~2 MHz (Teensy 4.1 @ 600 MHz)
+- **Maximum Emulation Speed**: 1 MHz (Teensy 4.1 @ 600 MHz)
 - **Accurate Timing**: Down to microsecond precision
 - **Memory**: 32KB base RAM + 32KB banked RAM (default), up to 544KB total with PSRAM (32KB base + 512KB banked)
 - **Storage**: Limited only by SD card size
 
 ## Related Documentation
 
-- [DB Control Web Interface](../DB%20Control/README.md)
+- [Web Interface (html/)](html/README.md)
 - [PlatformIO Documentation](https://docs.platformio.org/)
 - [Teensy 4.1 Documentation](https://www.pjrc.com/store/teensy41.html)
 - [6502 CPU Reference](http://www.6502.org/)

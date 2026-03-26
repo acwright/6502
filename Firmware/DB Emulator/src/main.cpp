@@ -4,6 +4,7 @@
 #include <Bounce2.h>
 #include <SD.h>
 #include <EEPROM.h>
+#include <map>
 #include <USBHost_t36.h>
 #include <QNEthernet.h>
 #include <AsyncWebServer_Teensy41.h>
@@ -76,6 +77,7 @@ void initUSB();
 void initEthernet();
 void initServer();
 void initFiles();
+void initWWWCache();
 
 void buildMemoryMap();
 
@@ -93,6 +95,7 @@ void onServerMemory(AsyncWebServerRequest *request);
 void onServerStorage(AsyncWebServerRequest *request);
 void onServerLoad(AsyncWebServerRequest *request);
 void onServerControl(AsyncWebServerRequest *request);
+void onServerKeyboard(AsyncWebServerRequest *request);
 void onServerNotFound(AsyncWebServerRequest *request);
 
 volatile uint8_t freqIndex = FREQ_SIZE - 1;
@@ -130,8 +133,6 @@ __attribute__((aligned(32))) uint8_t ramData2[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 #define HWSERIAL Serial7
 #endif
 
-static uint32_t cachedDelay = 0;
-static uint8_t cachedFreqIndex = 0xFF;
 static uint32_t cachedCpuFrequency = 1000000;
 static uint8_t cachedCpuFreqIndex = 0xFF;
 
@@ -163,8 +164,9 @@ RAMCard ramCard2 = RAMCard(ramData2);
 RTCCard rtcCard = RTCCard();
 StorageCard storageCard = StorageCard();
 SerialCard serialCard = SerialCard();
-DevOutputBoard devOutputBoard = DevOutputBoard();
 GPIOCard gpioCard = GPIOCard();
+SoundCard soundCard = SoundCard();
+VideoCard videoCard = VideoCard();
 
 // GPIO Attachments
 GPIOKeyboardMatrixAttachment keyboardMatrixAttachment = GPIOKeyboardMatrixAttachment(10);     // Priority 10
@@ -176,8 +178,9 @@ GPIOJoystickAttachment joystickAttachment = GPIOJoystickAttachment(false, 100); 
 //
 
 void setup() {
-  Serial.begin(115200);       // Ignored by Teensy; Baud rate is USB rate 480Mbps
-  SerialUSB1.begin(115200);   // Ignored by Teensy; Baud rate is USB rate 480Mbps
+  Serial.begin(115200);       // Ignored by Teensy; Baud rate is USB data rate 480Mbps
+  SerialUSB1.begin(115200);   // Ignored by Teensy; Baud rate is USB data rate 480Mbps
+  SerialUSB2.begin(115200);   // Ignored by Teensy; Baud rate is USB data rate 480Mbps
   HWSERIAL.begin(115200);
 
   setSyncProvider(syncTime);
@@ -198,6 +201,7 @@ void setup() {
   initPins();
   initButtons();
   initSD();
+  initWWWCache();
   initUSB();
   initEthernet();
   initServer();
@@ -448,8 +452,8 @@ void onKeyDown(uint8_t keycode) {
   }
 
   // Route keyboard input to attachments
-  keyboardMatrixAttachment.updateKey(keycode, true);   // Update keyboard matrix
-  keyboardEncoderAttachment.updateKey(keycode, true);  // Updaate keyboard encoder
+  keyboardMatrixAttachment.updateKey(keycode, true);      // Update keyboard matrix
+  keyboardEncoderAttachment.updateKeyPortB(keycode, true); // USB/browser keyboard → Port B (matrix encoder)
   
   #ifdef KEYBOARD_DEBUG
   Serial.print("Key pressed: 0x");
@@ -491,8 +495,8 @@ void onKeyUp(uint8_t keycode) {
   }
 
   // Release key from keyboard matrix
-  keyboardMatrixAttachment.updateKey(keycode, false);  // Update keyboard matrix
-  keyboardEncoderAttachment.updateKey(keycode, false); // Update keyboard encoder
+  keyboardMatrixAttachment.updateKey(keycode, false);       // Update keyboard matrix
+  keyboardEncoderAttachment.updateKeyPortB(keycode, false); // USB/browser keyboard → Port B (matrix encoder)
   
   #ifdef KEYBOARD_DEBUG
   Serial.print("Key Released: 0x");
@@ -623,11 +627,8 @@ void reset() {
   }
 
   cpu.reset();
-
-  digitalWriteFast(RESB, LOW);
-  delay(100);
-  digitalWriteFast(RESB, HIGH);
-  delay(100);
+  soundCard.reset();
+  videoCard.reset();
 
   if (isCurrentlyRunning) {
     toggleRunStop();
@@ -635,23 +636,12 @@ void reset() {
 }
 
 void tick() {
-  // SYNC signal indicates opcode fetch cycle (65C02 behavior)
-  // SYNC goes HIGH during opcode fetch (when step == 0)
-  // Set SYNC before the tick to match hardware timing
-  if (cpu.opcodeCycle() == 0) {
-    digitalWriteFast(SYNC, HIGH);
-  } else {
-    digitalWriteFast(SYNC, LOW);
-  }
-
   if (freqIndex != cachedCpuFreqIndex) {
     cachedCpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
     cachedCpuFreqIndex = freqIndex;
   }
 
   uint8_t interrupt = 0x00;
-  if (digitalReadFast(IRQB) == LOW) interrupt |= 0x80;
-  if (digitalReadFast(NMIB) == LOW) interrupt |= 0x40;
 
   cpu.tick();
 
@@ -660,6 +650,8 @@ void tick() {
   interrupt |= storageCard.tick(cachedCpuFrequency);
   interrupt |= serialCard.tick(cachedCpuFrequency);
   interrupt |= gpioCard.tick(cachedCpuFrequency);
+  interrupt |= soundCard.tick(cachedCpuFrequency);
+  interrupt |= videoCard.tick(cachedCpuFrequency);
   
   // Single interrupt processing
   if (interrupt & 0x40) {
@@ -687,44 +679,27 @@ void stopCpuTimer() {
   if (timerMode) {
     cpuTimer.end();
     timerMode = false;
-    digitalWriteFast(PHI2, HIGH); // Leave PHI2 in known idle state
   }
 }
 
 FASTRUN void cpuTimerISR() {
   if (busPhase == 0) {
-    // PHI1 phase: PHI2 LOW, set up bus, execute CPU tick
-    digitalWriteFast(PHI2, LOW);
-    delayNanoseconds(20); // tADS: Address setup time
-
-    if (cpu.opcodeCycle() == 0) {
-      digitalWriteFast(SYNC, HIGH);
-    } else {
-      digitalWriteFast(SYNC, LOW);
-    }
-
     if (freqIndex != cachedCpuFreqIndex) {
       cachedCpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
       cachedCpuFreqIndex = freqIndex;
-    }
-
-    // RDY handling: if RDY is LOW, skip this tick (CPU halted)
-    if (digitalReadFast(RDY) == LOW) {
-      busPhase = 1;
-      return;
     }
 
     cpu.tick();
 
     // Tick IO cards and accumulate interrupts
     uint8_t interrupt = 0x00;
-    if (digitalReadFast(IRQB) == LOW) interrupt |= 0x80;
-    if (digitalReadFast(NMIB) == LOW) interrupt |= 0x40;
 
     interrupt |= rtcCard.tick(cachedCpuFrequency);
     interrupt |= storageCard.tick(cachedCpuFrequency);
     interrupt |= serialCard.tick(cachedCpuFrequency);
     interrupt |= gpioCard.tick(cachedCpuFrequency);
+    interrupt |= soundCard.tick(cachedCpuFrequency);
+    interrupt |= videoCard.tick(cachedCpuFrequency);
 
     if (interrupt & 0x40) {
       cpu.nmiTrigger();
@@ -737,8 +712,6 @@ FASTRUN void cpuTimerISR() {
 
     busPhase = 1;
   } else {
-    // PHI2 phase: PHI2 HIGH
-    digitalWriteFast(PHI2, HIGH);
     busPhase = 0;
   }
 }
@@ -747,26 +720,9 @@ void step() {
   // Execute one complete instruction and handle ticks/interrupts
   uint8_t ticks = cpu.step();
 
-  // SYNC signal indicates opcode fetch cycle (65C02 behavior)
-  // After step() completes, we're at the start of the next instruction
-  // Set SYNC HIGH for the next opcode fetch
-  if (cpu.opcodeCycle() == 0) {
-    digitalWriteFast(SYNC, HIGH);
-  } else {
-    digitalWriteFast(SYNC, LOW);
-  }
-
   // Process interrupts for each tick of the instruction
   for(uint i = 0; i < ticks; i++) {
     uint8_t interrupt = 0x00;
-
-    // Check for external interrupt
-    if (digitalReadFast(IRQB) == LOW) {
-      interrupt |= 0x80;
-    }
-    if (digitalReadFast(NMIB) == LOW) {
-      interrupt |= 0x40;
-    }
 
     // Calculate CPU frequency from the period (period is in microseconds)
     uint32_t cpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
@@ -776,6 +732,8 @@ void step() {
     interrupt |= storageCard.tick(cpuFrequency);
     interrupt |= serialCard.tick(cpuFrequency);
     interrupt |= gpioCard.tick(cpuFrequency);
+    interrupt |= soundCard.tick(cpuFrequency);
+    interrupt |= videoCard.tick(cpuFrequency);
 
     if ((interrupt & 0x40) != 0x00) {
       cpu.nmiTrigger();
@@ -1231,75 +1189,6 @@ void nextPage() {
 }
 
 //
-// UTILITIES
-//
-
-static inline __attribute__((always_inline)) void setDataDirIn() {
-  pinMode(D0, INPUT_PULLUP);
-  pinMode(D1, INPUT_PULLUP);
-  pinMode(D2, INPUT_PULLUP);
-  pinMode(D3, INPUT_PULLUP);
-  pinMode(D4, INPUT_PULLUP);
-  pinMode(D5, INPUT_PULLUP);
-  pinMode(D6, INPUT_PULLUP);
-  pinMode(D7, INPUT_PULLUP);
-}
-
-static inline __attribute__((always_inline)) void setDataDirOut() {
-  pinMode(D0, OUTPUT);
-  pinMode(D1, OUTPUT);
-  pinMode(D2, OUTPUT);
-  pinMode(D3, OUTPUT);
-  pinMode(D4, OUTPUT);
-  pinMode(D5, OUTPUT);
-  pinMode(D6, OUTPUT);
-  pinMode(D7, OUTPUT);
-}
-
-static inline __attribute__((always_inline)) void writeAddress(uint16_t address) {
-  digitalWriteFast(A0,  (address >> 0)  & 1);
-  digitalWriteFast(A1,  (address >> 1)  & 1);
-  digitalWriteFast(A2,  (address >> 2)  & 1);
-  digitalWriteFast(A3,  (address >> 3)  & 1);
-  digitalWriteFast(A4,  (address >> 4)  & 1);
-  digitalWriteFast(A5,  (address >> 5)  & 1);
-  digitalWriteFast(A6,  (address >> 6)  & 1);
-  digitalWriteFast(A7,  (address >> 7)  & 1);
-  digitalWriteFast(A8,  (address >> 8)  & 1);
-  digitalWriteFast(A9,  (address >> 9)  & 1);
-  digitalWriteFast(A10, (address >> 10) & 1);
-  digitalWriteFast(A11, (address >> 11) & 1);
-  digitalWriteFast(A12, (address >> 12) & 1);
-  digitalWriteFast(A13, (address >> 13) & 1);
-  digitalWriteFast(A14, (address >> 14) & 1);
-  digitalWriteFast(A15, (address >> 15) & 1);
-}
-
-static inline __attribute__((always_inline)) uint8_t readData() {
-  uint8_t data = 0;
-  data |= digitalReadFast(D0) << 0;
-  data |= digitalReadFast(D1) << 1;
-  data |= digitalReadFast(D2) << 2;
-  data |= digitalReadFast(D3) << 3;
-  data |= digitalReadFast(D4) << 4;
-  data |= digitalReadFast(D5) << 5;
-  data |= digitalReadFast(D6) << 6;
-  data |= digitalReadFast(D7) << 7;
-  return data;
-}
-
-static inline __attribute__((always_inline)) void writeData(uint8_t data) {
-  digitalWriteFast(D0, (data >> 0) & 1);
-  digitalWriteFast(D1, (data >> 1) & 1);
-  digitalWriteFast(D2, (data >> 2) & 1);
-  digitalWriteFast(D3, (data >> 3) & 1);
-  digitalWriteFast(D4, (data >> 4) & 1);
-  digitalWriteFast(D5, (data >> 5) & 1);
-  digitalWriteFast(D6, (data >> 6) & 1);
-  digitalWriteFast(D7, (data >> 7) & 1);
-}
-
-//
 // READ / WRITE
 //
 
@@ -1307,44 +1196,6 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   address = addr;
   data = 0x00;
   readWrite = HIGH;
-
-  if (!timerMode) {
-    // Blocking bus timing for tight-loop mode and manual stepping
-    if (cachedFreqIndex != freqIndex) {
-      cachedFreqIndex = freqIndex;
-      cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
-                    (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
-                    FREQ_PERIODS[freqIndex] / 2;
-    }
-    
-    // WDC 65C02 read cycle timing:
-    // - Address and R/W̅ must be stable before PHI2 rises
-    // - Data is valid during PHI2 high
-    digitalWriteFast(PHI2, LOW);
-    delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
-    writeAddress(address);
-    digitalWriteFast(RWB, readWrite);
-    setDataDirIn();
-    
-    // RDY handling: 65C02 samples RDY during PHI1 (PHI2 LOW) on read cycles only
-    // If RDY is LOW, wait here until it goes HIGH before continuing
-    // This allows external hardware to stretch the read cycle
-    if (!isDbg) {
-      while (digitalReadFast(RDY) == LOW) {
-        // Wait for RDY to go HIGH - CPU is halted during read cycle
-        // Write cycles are not affected by RDY (handled elsewhere)
-      }
-    }
-    
-    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
-    digitalWriteFast(PHI2, HIGH);
-    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
-  } else {
-    // Timer mode: ISR handles PHI2 and timing, just drive bus signals
-    writeAddress(address);
-    digitalWriteFast(RWB, readWrite);
-    setDataDirIn();
-  }
 
   // Priority: Cart overrides ROM from $C000-$FFFF when loaded
   if (addr >= CART_CODE && addr <= CART_END && cart.file != "None") {
@@ -1381,14 +1232,13 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
         case 5: // IO 6 - GPIO Card
           data = gpioCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
           break;
-        case 6: // IO 7 - Unused (External card slot)
-          data = readData();
+        case 6: // IO 7 - Sound Card
+          data = soundCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
           break;
-        case 7: // IO 8 - Dev Output Board
-          data = devOutputBoard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
+        case 7: // IO 8 - Video Card
+          data = videoCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
           break;
         default:
-          data = readData();
           break;
       }
       break;
@@ -1404,35 +1254,6 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   address = addr;
   data = val;
   readWrite = LOW;
-
-  if (!timerMode) {
-    // Blocking bus timing for tight-loop mode and manual stepping
-    if (cachedFreqIndex != freqIndex) {
-      cachedFreqIndex = freqIndex;
-      cachedDelay = FREQ_PERIODS[freqIndex] <= 1 ? 
-                    (FREQ_PERIODS[freqIndex] * 1000) / 2 : 
-                    FREQ_PERIODS[freqIndex] / 2;
-    }
-
-    // WDC 65C02 write cycle timing:
-    // - Address and R/W̅ must be stable before PHI2 rises
-    // - Data must be valid during PHI2 high
-    digitalWriteFast(PHI2, LOW);
-    delayNanoseconds(20); // tADS: Address setup time before PHI2 rise
-    writeAddress(address);
-    digitalWriteFast(RWB, readWrite);
-    setDataDirOut(); // Set data direction to output before driving bus
-    writeData(data);     // Data ready before PHI2 goes high
-    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
-    digitalWriteFast(PHI2, HIGH);
-    FREQ_PERIODS[freqIndex] <= 1 ? delayNanoseconds(cachedDelay) : delayMicroseconds(cachedDelay);
-  } else {
-    // Timer mode: ISR handles PHI2 and timing, just drive bus signals
-    writeAddress(address);
-    digitalWriteFast(RWB, readWrite);
-    setDataDirOut();
-    writeData(data);
-  }
 
   // Priority: Cart overrides ROM from $C000-$FFFF when loaded
   if (addr >= CART_CODE && addr <= CART_END && cart.file != "None") {
@@ -1469,10 +1290,11 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
         case 5: // IO 6 - GPIO Card
           gpioCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
           break;
-        case 6: // IO 7 - Unused (External card slot)
+        case 6: // IO 7 - Sound Card
+          soundCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
           break;
-        case 7: // IO 8 - Dev Output Board
-          devOutputBoard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
+        case 7: // IO 8 - Video Card
+          videoCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
           break;
         default:
           break;
@@ -1489,65 +1311,57 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
 //
 
 void initPins() {
-  pinMode(A0, OUTPUT);
-  pinMode(A1, OUTPUT);
-  pinMode(A2, OUTPUT);
-  pinMode(A3, OUTPUT);
-  pinMode(A4, OUTPUT);
-  pinMode(A5, OUTPUT);
-  pinMode(A6, OUTPUT);
-  pinMode(A7, OUTPUT);
-  pinMode(A8, OUTPUT);
-  pinMode(A9, OUTPUT);
-  pinMode(A10, OUTPUT);
-  pinMode(A11, OUTPUT);
-  pinMode(A12, OUTPUT);
-  pinMode(A13, OUTPUT);
-  pinMode(A14, OUTPUT);
-  pinMode(A15, OUTPUT);
-  
-  writeAddress(0xFFFF);
-  setDataDirIn();
+  // 6502 bus pins — unused in emulation-only mode, set as inputs
+  pinMode(A0, INPUT);
+  pinMode(A1, INPUT);
+  pinMode(A2, INPUT);
+  pinMode(A3, INPUT);
+  pinMode(A4, INPUT);
+  pinMode(A5, INPUT);
+  pinMode(A6, INPUT);
+  pinMode(A7, INPUT);
+  pinMode(A8, INPUT);
+  pinMode(A9, INPUT);
+  pinMode(A10, INPUT);
+  pinMode(A11, INPUT);
+  pinMode(A12, INPUT);
+  pinMode(A13, INPUT);
+  pinMode(A14, INPUT);
+  pinMode(A15, INPUT);
 
-  pinMode(RESB, OUTPUT);
-  pinMode(SYNC, OUTPUT);
-  pinMode(RWB, OUTPUT);
-  pinMode(PHI2, OUTPUT);
+  pinMode(D0, INPUT);
+  pinMode(D1, INPUT);
+  pinMode(D2, INPUT);
+  pinMode(D3, INPUT);
+  pinMode(D4, INPUT);
+  pinMode(D5, INPUT);
+  pinMode(D6, INPUT);
+  pinMode(D7, INPUT);
 
-  digitalWriteFast(RESB, HIGH);
-  digitalWriteFast(SYNC, HIGH);
-  digitalWriteFast(RWB, HIGH);
-  digitalWriteFast(PHI2, HIGH);
-  
-  pinMode(IRQB, INPUT_PULLUP);
-  pinMode(NMIB, INPUT_PULLUP);
-  pinMode(RDY, INPUT_PULLUP);
-  pinMode(BE, INPUT_PULLUP); // Unused but set to input with pullup to prevent floating
+  pinMode(RESB, INPUT);
+  pinMode(SYNC, INPUT);
+  pinMode(RWB, INPUT);
+  pinMode(PHI2, INPUT);
+  pinMode(IRQB, INPUT);
+  pinMode(NMIB, INPUT);
+  pinMode(RDY, INPUT);
+  pinMode(BE, INPUT);
 
+  // Switch inputs
   pinMode(CLK_SWB, INPUT_PULLUP);
   pinMode(STEP_SWB, INPUT_PULLUP);
   pinMode(RS_SWB, INPUT_PULLUP);
 
   #ifdef DEVBOARD_0
-  pinMode(OE1, OUTPUT);
-  pinMode(OE2, OUTPUT);
-  pinMode(OE3, OUTPUT);
-
-  // These pins are currently unused on the dev board but 
-  // should be set to inputs to avoid floating and potential interference
+  pinMode(OE1, INPUT);
+  pinMode(OE2, INPUT);
+  pinMode(OE3, INPUT);
   pinMode(GPIO0, INPUT);
   pinMode(GPIO1, INPUT);
-
-  digitalWriteFast(OE1, HIGH);
-  digitalWriteFast(OE2, HIGH);
-  digitalWriteFast(OE3, HIGH);
   #endif
 
   #ifdef DEVBOARD_1
   pinMode(RESET_SWB, INPUT_PULLUP);
-
-  // These pins are currently unused on the dev board but 
-  // should be set to inputs to avoid floating and potential interference
   pinMode(MOSI1, INPUT);
   pinMode(MISO1, INPUT);
   pinMode(SCK1, INPUT);
@@ -1610,6 +1424,7 @@ void initServer() {
   server.on("/storage", HTTP_GET, onServerStorage);
   server.on("/load", HTTP_GET, onServerLoad);
   server.on("/control", HTTP_GET, onServerControl);
+  server.on("/keyboard", HTTP_GET, onServerKeyboard);
   server.onNotFound(onServerNotFound);
   server.begin();
 }
@@ -1677,43 +1492,82 @@ String getContentType(String path) {
   return "application/octet-stream";
 }
 
+// ---------------------------------------------------------------------------
+// WWW file cache — all files from WWW/ are loaded into RAM at startup so that
+// HTTP serving never touches the SD card (SD is not safe for concurrent access
+// from multiple async request handlers).
+// ---------------------------------------------------------------------------
+
+struct CachedFile {
+  uint8_t* data;
+  size_t   size;
+  String   contentType;
+};
+
+static std::map<String, CachedFile> wwwCache;
+
+static void cacheDir(const String& sdPath, const String& uriPrefix) {
+  File dir = SD.open(sdPath.c_str());
+  if (!dir || !dir.isDirectory()) return;
+
+  File entry = dir.openNextFile();
+  while (entry) {
+    String name = String(entry.name());
+    String fullPath = sdPath + "/" + name;
+    String uri      = uriPrefix + "/" + name;
+
+    if (entry.isDirectory()) {
+      entry.close();
+      cacheDir(fullPath, uri);
+    } else {
+      size_t sz = entry.size();
+      uint8_t* buf = new(std::nothrow) uint8_t[sz];
+      if (buf) {
+        size_t got = 0;
+        while (got < sz) {
+          int n = entry.read(buf + got, sz - got);
+          if (n <= 0) break;
+          got += n;
+        }
+        if (got == sz) {
+          wwwCache[uri] = { buf, sz, getContentType(fullPath) };
+        } else {
+          delete[] buf;
+        }
+      }
+      entry.close();
+    }
+    entry = dir.openNextFile();
+  }
+  dir.close();
+}
+
+void initWWWCache() {
+  if (!SD.mediaPresent()) return;
+  cacheDir("WWW", "");
+}
+
 void sendSDFile(AsyncWebServerRequest *request, String path) {
-  if (!SD.mediaPresent() || !SD.exists(path.c_str())) {
+  // Derive the URI key from the path: strip the leading "WWW" prefix.
+  String uri = path.substring(3); // "WWW/assets/main.js" -> "/assets/main.js"
+
+  auto it = wwwCache.find(uri);
+  if (it == wwwCache.end()) {
     request->send(404);
     return;
   }
 
-  File file = SD.open(path.c_str());
-  if (!file) {
-    request->send(500);
-    return;
-  }
+  const uint8_t* data      = it->second.data;
+  const size_t   totalSize = it->second.size;
+  const String&  ct        = it->second.contentType;
 
-  size_t fileSize = file.size();
-  file.close();
-
-  String contentType = getContentType(path);
-
-  // Use chunked callback to stream from SD card
-  request->send(
-    contentType,
-    fileSize,
-    [path](uint8_t *buffer, size_t maxLen, size_t index) -> size_t
-  {
-    File f = SD.open(path.c_str());
-    if (!f) return 0;
-
-    f.seek(index);
-    size_t toRead = min(maxLen, f.size() - index);
-    size_t bytesRead = f.read(buffer, toRead);
-    f.close();
-
-    return bytesRead;
-  });
+  // Serve directly from the in-memory cache using AsyncProgmemResponse.
+  // The data pointer remains valid for the lifetime of the program.
+  request->send(request->beginResponse(200, ct, data, totalSize));
 }
 
 FASTRUN void onServerRoot(AsyncWebServerRequest *request) {
-  sendSDFile(request, "WWW/index.html");
+  sendSDFile(request, "WWW/index.html"); // key: "/index.html"
 }
 
 FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
@@ -1741,17 +1595,14 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   doc["rtc"]                = now();
   doc["rw"]                 = readWrite ? 1 : 0;
   doc["version"]            = VERSION;
+  doc["soundEnabled"]       = true;
+  doc["videoEnabled"]       = true;
+  doc["avStreamConnected"]  = (bool)SerialUSB2.dtr();
   
   serializeJson(doc, response);
 
   request->send(200, "application/json", response);
 }
-
-/* Notes: We are paginating RAM/ROM responses due to limitations in the AsyncWebServer_Teensy41 lib.              */
-/* There is a bug in the implementation of beginChunkedResponse() (improper formatting) and all other response    */
-/* types besides beginResponseStream() will corrupt or add garbage to the data. So we are limited to 1024 byte    */
-/* blocks.                                                                                                        */
-/* All 32 blocks of ROM can be inspected but only top 24k is valid ROM space.                                     */
 
 FASTRUN void onServerMemory(AsyncWebServerRequest *request) {
   String target;
@@ -1925,12 +1776,35 @@ FASTRUN void onServerControl(AsyncWebServerRequest *request) {
   request->send(200);
 }
 
+FASTRUN void onServerKeyboard(AsyncWebServerRequest *request) {
+  if (!request->hasParam("action") || !request->hasParam("keycode")) {
+    request->send(400);
+    return;
+  }
+
+  String action = request->getParam("action")->value();
+  if (action != "down" && action != "up") {
+    request->send(400);
+    return;
+  }
+
+  uint8_t kc = (uint8_t)strtoul(request->getParam("keycode")->value().c_str(), nullptr, 16);
+
+  if (action == "down") {
+    onKeyDown(kc);
+  } else {
+    onKeyUp(kc);
+  }
+
+  request->send(200);
+}
+
 FASTRUN void onServerNotFound(AsyncWebServerRequest *request) {
-  // Attempt to serve static files from SD card WWW folder
+  // Serve static files from the in-RAM WWW cache (loaded at startup from SD).
   String uri = request->url();
   String path = "WWW" + uri;
 
-  if (SD.mediaPresent() && SD.exists(path.c_str())) {
+  if (wwwCache.count(uri)) {
     sendSDFile(request, path);
     return;
   }

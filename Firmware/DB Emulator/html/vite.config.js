@@ -12,10 +12,15 @@ export default defineConfig({
       '/memory': { target: '' },
       '/storage': { target: '' },
       '/load': { target: '' },
+      '/keyboard': { target: '' },
     },
   },
   build: {
     rollupOptions: {
+      input: {
+        main: './index.html',
+        'sound-worklet': './src/sound-worklet.js',
+      },
       output: {
         // Control the naming of entry chunks (main JS/CSS files)
         entryFileNames: `assets/[name].js`,

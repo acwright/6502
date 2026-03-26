@@ -165,14 +165,38 @@ input[type="checkbox"] {
   font-weight: bold;
   font-size: 18px;
 }
+.emulator-status.red { color: #ff0000; }
+
+.system-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.system-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.system-col-cpu .cpu-registers {
+  gap: 6px;
+}
+
+.system-col-buses .cpu-bus {
+  margin-bottom: 8px;
+}
 
 .emulator-info-row {
-  padding: 4px 0px;
-  text-align: center;
+  padding: 3px 0px;
+  text-align: left;
 }
 
 .emulator-info-label {
   display: inline-block;
+  color: gray;
+  margin-right: 4px;
 }
 
 .emulator-toggle-buttons {
@@ -185,12 +209,47 @@ input[type="checkbox"] {
   gap: 4px;
 }
 
+/* Video Panel Styles */
+.video-canvas-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+}
+
+#video-canvas {
+  image-rendering: pixelated;
+  width: 100%;
+  height: auto;
+  max-height: 100%;
+}
+
+.av-status-disconnected {
+  color: #ff0000;
+  font-weight: bold;
+  text-align: center;
+}
+
+.av-status-connected {
+  color: #00ff00;
+  font-weight: bold;
+  text-align: center;
+}
+
+.av-controls {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
 /* CPU Panel Styles */
 .cpu-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 8px;
-  padding: 24px 48px;
+  padding: 8px;
 }
 
 .cpu-registers {

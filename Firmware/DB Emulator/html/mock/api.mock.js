@@ -84,6 +84,9 @@ export default defineMock([
       rtc:              Math.floor(Date.now() / 1000),
       rw:               state.rw,
       version:          '1.0',
+      soundEnabled:     true,
+      videoEnabled:     true,
+      avStreamConnected: false,
     }),
   },
 
@@ -203,5 +206,14 @@ export default defineMock([
 
       return ''
     },
+  },
+
+  // ---------------------------------------------------------------------------
+  // GET /keyboard?action=down|up&keycode=XX
+  // ---------------------------------------------------------------------------
+  {
+    url: '/keyboard',
+    method: 'GET',
+    body: () => '',
   },
 ])

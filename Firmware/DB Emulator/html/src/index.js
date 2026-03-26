@@ -1,4 +1,7 @@
 import './index.css'
+import * as avStream from './av-stream.js'
+import * as videoRenderer from './video-renderer.js'
+import * as soundEmulator from './sound-emulator.js'
 // ---------------------------------------------------------------------------
 // Configuration
 // ---------------------------------------------------------------------------
@@ -131,6 +134,13 @@ function cacheDom() {
   dom.fileList           = $('file-list');
   dom.storagePagination  = $('storage-pagination');
 
+  // Video / AV panel
+  dom.videoCanvas        = $('video-canvas');
+  dom.avStatus           = $('av-status');
+  dom.avConnect          = $('av-connect');
+  dom.avDisconnect       = $('av-disconnect');
+  dom.soundMute          = $('sound-mute');
+
   // Footer
   dom.version            = $('version');
 }
@@ -166,8 +176,6 @@ function updateInfo(info) {
   dom.stop.disabled     = !running;
   dom.step.disabled     = running;
   dom.tick.disabled     = running;
-  dom.refresh.disabled  = running;
-  dom.snapshot.disabled = running;
 
   // Emulator info rows
   dom.programFile.textContent = info.programFile || 'None';
@@ -185,8 +193,8 @@ function updateInfo(info) {
   // Last snapshot
   dom.lastSnapshot.textContent = info.lastSnapshot ? info.lastSnapshot : 'None';
 
-  // Unload Cart button: disabled while running or no cart loaded
-  dom.unloadCart.disabled = running || !info.cartEnabled;
+  // Unload Cart button: hidden when no cart loaded, always enabled when visible
+  dom.unloadCart.style.display = info.cartEnabled ? '' : 'none';
 
   // CPU registers
   dom.cpuAccHex.textContent    = hex8(info.cpuAccumulator);
@@ -496,6 +504,97 @@ function bindEvents() {
     state.storagePage = 0;
     refreshStorage();
   });
+
+  // AV stream controls
+  if (!avStream.isSupported()) {
+    dom.avConnect.style.display = 'none';
+    if (avStream.isSupportedBrowser() && !avStream.isSecureContext()) {
+      dom.avStatus.textContent = 'Requires HTTPS or localhost (Web Serial needs a secure context)';
+    } else {
+      dom.avStatus.textContent = 'Requires Chrome or Edge';
+    }
+    dom.avStatus.className = 'av-status-disconnected';
+  }
+
+  dom.avConnect.addEventListener('click', async () => {
+    try {
+      await avStream.connect();
+      videoRenderer.init(dom.videoCanvas);
+      soundEmulator.init();
+      updateAvStatus(true);
+      avStream.startReading({
+        onSoundWrite: (reg, val) => soundEmulator.onRegWrite(reg, val),
+        onVideoDataWrite: (val) => videoRenderer.onDataWrite(val),
+        onVideoRegWrite: (reg, val) => videoRenderer.onRegWrite(reg, val),
+        onVideoAddrSet: (hi, lo) => videoRenderer.onAddrSet(hi, lo),
+        onReset: () => { videoRenderer.onReset(); soundEmulator.onReset(); },
+      });
+    } catch (e) {
+      console.error('AV connect error:', e);
+    }
+  });
+
+  dom.avDisconnect.addEventListener('click', async () => {
+    try {
+      await avStream.disconnect();
+      updateAvStatus(false);
+    } catch (e) {
+      console.error('AV disconnect error:', e);
+    }
+  });
+
+  dom.soundMute.addEventListener('click', () => {
+    soundEmulator.setMuted(!soundEmulator.getMuted());
+    dom.soundMute.textContent = soundEmulator.getMuted() ? 'Unmute' : 'Mute';
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Keyboard input — USB HID keycode mapping
+// ---------------------------------------------------------------------------
+
+const USB_HID_KEYMAP = {
+  KeyA: 0x04, KeyB: 0x05, KeyC: 0x06, KeyD: 0x07, KeyE: 0x08, KeyF: 0x09,
+  KeyG: 0x0A, KeyH: 0x0B, KeyI: 0x0C, KeyJ: 0x0D, KeyK: 0x0E, KeyL: 0x0F,
+  KeyM: 0x10, KeyN: 0x11, KeyO: 0x12, KeyP: 0x13, KeyQ: 0x14, KeyR: 0x15,
+  KeyS: 0x16, KeyT: 0x17, KeyU: 0x18, KeyV: 0x19, KeyW: 0x1A, KeyX: 0x1B,
+  KeyY: 0x1C, KeyZ: 0x1D,
+  Digit1: 0x1E, Digit2: 0x1F, Digit3: 0x20, Digit4: 0x21, Digit5: 0x22,
+  Digit6: 0x23, Digit7: 0x24, Digit8: 0x25, Digit9: 0x26, Digit0: 0x27,
+  Enter: 0x28, Escape: 0x29, Backspace: 0x2A, Tab: 0x2B, Space: 0x2C,
+  Minus: 0x2D, Equal: 0x2E, BracketLeft: 0x2F, BracketRight: 0x30,
+  Backslash: 0x31, Semicolon: 0x33, Quote: 0x34, Backquote: 0x35,
+  Comma: 0x36, Period: 0x37, Slash: 0x38, CapsLock: 0x39,
+  F1: 0x3A, F2: 0x3B, F3: 0x3C, F4: 0x3D, F5: 0x3E, F6: 0x3F,
+  F7: 0x40, F8: 0x41, F9: 0x42, F10: 0x43, F11: 0x44, F12: 0x45,
+  ArrowRight: 0x4F, ArrowLeft: 0x50, ArrowDown: 0x51, ArrowUp: 0x52,
+  ShiftLeft: 0xE1, ShiftRight: 0xE5,
+  ControlLeft: 0xE0, ControlRight: 0xE4,
+  AltLeft: 0xE2, AltRight: 0xE6,
+  MetaLeft: 0xE3, MetaRight: 0xE7,
+};
+
+const PREVENT_DEFAULT_CODES = new Set([
+  'Tab', 'Backspace', 'Space', 'Escape', 'CapsLock',
+  'F1', 'F2', 'F3', 'F4', 'F5', 'F6', 'F7', 'F8', 'F9', 'F10', 'F11', 'F12',
+  'ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp',
+]);
+
+function sendKeyEvent(action, code) {
+  const hid = USB_HID_KEYMAP[code];
+  if (hid === undefined) return;
+  fetch('/keyboard?action=' + encodeURIComponent(action) + '&keycode=' + hid.toString(16).padStart(2, '0'));
+}
+
+// ---------------------------------------------------------------------------
+// AV status helper
+// ---------------------------------------------------------------------------
+
+function updateAvStatus(connected) {
+  dom.avStatus.textContent = connected ? 'CONNECTED' : 'DISCONNECTED';
+  dom.avStatus.className = connected ? 'av-status-connected' : 'av-status-disconnected';
+  dom.avConnect.disabled = connected;
+  dom.avDisconnect.disabled = !connected;
 }
 
 // ---------------------------------------------------------------------------
@@ -506,4 +605,26 @@ document.addEventListener('DOMContentLoaded', () => {
   cacheDom();
   bindEvents();
   refreshAll();
+
+  // Keyboard forwarding
+  document.addEventListener('keydown', (event) => {
+    // CapsLock: send a complete press+release on keydown so the firmware
+    // sees exactly one toggle per physical key press on all platforms
+    // (macOS fires keydown on lock-on and keyup on lock-off, not symmetrically).
+    if (event.code === 'CapsLock') {
+      sendKeyEvent('down', 'CapsLock');
+      sendKeyEvent('up',   'CapsLock');
+      event.preventDefault();
+      return;
+    }
+    sendKeyEvent('down', event.code);
+    if (PREVENT_DEFAULT_CODES.has(event.code)) {
+      event.preventDefault();
+    }
+  });
+
+  document.addEventListener('keyup', (event) => {
+    if (event.code === 'CapsLock') return; // already handled on keydown
+    sendKeyEvent('up', event.code);
+  });
 });

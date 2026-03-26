@@ -5,7 +5,8 @@ GPIOKeyboardEncoderAttachment::GPIOKeyboardEncoderAttachment(uint8_t priority)
   : GPIOAttachment(priority, true, true, true, true),  // Uses CA1, CA2, CB1, CB2
     asciiDataA(0x00), dataReadyA(false), interruptPendingA(false), enabledA(false),
     asciiDataB(0x00), dataReadyB(false), interruptPendingB(false), enabledB(false),
-    shiftPressed(false), ctrlPressed(false), altPressed(false), menuPressed(false) {
+    shiftPressed(false), ctrlPressed(false), altPressed(false), menuPressed(false),
+    capsLockActive(false) {
   reset();
 }
 
@@ -23,6 +24,7 @@ void GPIOKeyboardEncoderAttachment::reset() {
   ctrlPressed = false;
   altPressed = false;
   menuPressed = false;
+  capsLockActive = false;
 }
 
 uint8_t GPIOKeyboardEncoderAttachment::readPortA(uint8_t ddrA, uint8_t orA) {
@@ -250,9 +252,9 @@ uint8_t GPIOKeyboardEncoderAttachment::mapKeyWithModifiers(uint8_t usbHidKeycode
   
   // Handle Shift combinations - uppercase and shifted symbols
   if (shiftPressed && !ctrlPressed && !altPressed) {
-    // Letters become uppercase
+    // Caps Lock XOR Shift for letters: Caps+Shift = lowercase, Shift alone = uppercase
     if (baseChar >= 'a' && baseChar <= 'z') {
-      return baseChar - 'a' + 'A';
+      return capsLockActive ? baseChar : (uint8_t)(baseChar - 'a' + 'A');
     }
     
     // Shifted symbols
@@ -282,64 +284,88 @@ uint8_t GPIOKeyboardEncoderAttachment::mapKeyWithModifiers(uint8_t usbHidKeycode
     }
   }
   
-  // No modifiers or unhandled combination - return base character
+  // No modifiers (or unhandled combination) - apply Caps Lock for letters
+  if (capsLockActive && baseChar >= 'a' && baseChar <= 'z') {
+    return baseChar - 'a' + 'A';
+  }
   return baseChar;
 }
 
 void GPIOKeyboardEncoderAttachment::updateKey(uint8_t usbHidKeycode, bool pressed) {
-  // Handle modifier keys - update state
+  updateKeyPortA(usbHidKeycode, pressed);
+  updateKeyPortB(usbHidKeycode, pressed);
+}
+
+void GPIOKeyboardEncoderAttachment::updateKeyPortA(uint8_t usbHidKeycode, bool pressed) {
+  // Handle modifier keys - update shared state
   switch (usbHidKeycode) {
+    case 0x39:  // Caps Lock - toggle active state on key press
+      if (pressed) capsLockActive = !capsLockActive;
+      return;
     case 0xE0:  // Left Ctrl
     case 0xE4:  // Right Ctrl
       ctrlPressed = pressed;
-      return;  // Don't generate output for modifier keys alone
-      
+      return;
     case 0xE1:  // Left Shift
     case 0xE5:  // Right Shift
       shiftPressed = pressed;
       return;
-      
     case 0xE2:  // Left Alt
     case 0xE6:  // Right Alt
       altPressed = pressed;
       return;
-      
     case 0xE3:  // Left GUI (MENU)
     case 0xE7:  // Right GUI (MENU)
       menuPressed = pressed;
-      // MENU key generates output, so don't return - fall through
-      break;
-      
+      break;  // MENU key generates output
     default:
       break;
   }
-  
-  // Only process key presses, not releases (encoder only reports keypress events)
-  if (!pressed) {
-    return;
-  }
-  
-  // Map the key with active modifiers
+
+  if (!pressed) return;
+
   uint8_t mappedValue = mapKeyWithModifiers(usbHidKeycode);
-  
-  // Ignore keys with no mapping (0x00 unless it's a valid control code)
-  if (mappedValue == 0x00 && usbHidKeycode != 0x28) {  // 0x28 is Enter which maps to 0x0D, not 0x00
-    return;
-  }
-  
-  // Update both ports with the mapped data
+  if (mappedValue == 0x00 && usbHidKeycode != 0x28) return;
+
   asciiDataA = mappedValue;
-  asciiDataB = mappedValue;
   dataReadyA = true;
+  if (enabledA) interruptPendingA = true;
+}
+
+void GPIOKeyboardEncoderAttachment::updateKeyPortB(uint8_t usbHidKeycode, bool pressed) {
+  // Handle modifier keys - update shared state
+  switch (usbHidKeycode) {
+    case 0x39:  // Caps Lock - toggle active state on key press
+      if (pressed) capsLockActive = !capsLockActive;
+      return;
+    case 0xE0:  // Left Ctrl
+    case 0xE4:  // Right Ctrl
+      ctrlPressed = pressed;
+      return;
+    case 0xE1:  // Left Shift
+    case 0xE5:  // Right Shift
+      shiftPressed = pressed;
+      return;
+    case 0xE2:  // Left Alt
+    case 0xE6:  // Right Alt
+      altPressed = pressed;
+      return;
+    case 0xE3:  // Left GUI (MENU)
+    case 0xE7:  // Right GUI (MENU)
+      menuPressed = pressed;
+      break;  // MENU key generates output
+    default:
+      break;
+  }
+
+  if (!pressed) return;
+
+  uint8_t mappedValue = mapKeyWithModifiers(usbHidKeycode);
+  if (mappedValue == 0x00 && usbHidKeycode != 0x28) return;
+
+  asciiDataB = mappedValue;
   dataReadyB = true;
-  
-  // Trigger interrupts on both ports if enabled
-  if (enabledA) {
-    interruptPendingA = true;
-  }
-  if (enabledB) {
-    interruptPendingB = true;
-  }
+  if (enabledB) interruptPendingB = true;
 }
 
 bool GPIOKeyboardEncoderAttachment::hasDataReadyA() const {
