@@ -184,7 +184,7 @@ The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller runn
 
 **Required Components:**
   * 1x Dev Board (Teensy 4.1-based 65c02 emulator)
-  * 1x Dev Output Board (2.4" LCD with [VT-AC](https://github.com/acwright/VT-AC) terminal protocol) or LCD Board (2.8" LCD)
+  * 1x Dev Output Board (2.4" LCD with TMS9918A VDP and SID audio emulation)
 
 **Key Features:**
 - Cycle-accurate 65C02 emulation (no physical CPU needed)
@@ -334,10 +334,10 @@ This matrix shows which boards, cards, and helpers are compatible with each syst
 | **BOARDS** |
 | Main Board | ✓ | — | ✓ | ✓ | Required for COB/KIM/VCS (not DEV) |
 | Dev Board | — | ✓ | — | — | DEV system only |
-| Dev Output Board | — | ✓ | — | — | Pairs with Dev Board for [VT-AC](https://github.com/acwright/VT-AC) serial output display |
+| Dev Output Board | — | ✓ | — | — | Pairs with Dev Board for TMS9918A VDP and SID audio output |
 | Input Board | ○ | — | — | ✓ | VCS primary; can be used with COB |
 | Output Board | ○ | — | — | ✓ | VCS primary |
-| LCD Board | ○ | ○ | — | — | **UNTESTED**; COB optional, DEV alternative |
+| LCD Board | ○ | — | — | — | **UNTESTED**; COB optional |
 | Backplane | ✓ | — | ○ | ○ | COB primary |
 | Backplane Pro | ✓ | — | ○ | — | COB primary (enhanced backplane), KIM alternative |
 | **CARDS** |
@@ -580,16 +580,16 @@ An active backplane that not only interconnects cards but also provides centrali
 The Dev Board eliminates the need for a physical 65C02 CPU by providing accurate emulation with enhanced debugging capabilities, network control, and instant program loading.
 
 #### Dev Output Board
-**Purpose:** 2.4" LCD display module providing [VT-AC](https://github.com/acwright/VT-AC) compatible terminal output for Dev Board  
+**Purpose:** 2.4" LCD display module providing TMS9918A VDP and SID audio emulation for the Dev Board  
 **Key Components:** ILI9341 TFT display (320×240), level shifters  
-**Display:** 2.4" TFT LCD, 320×240 resolution, 262K colors  
-**Protocol:** [VT-AC](https://github.com/acwright/VT-AC) ASCII terminal emulation  
+**Display:** 2.4" TFT LCD, 320×240 resolution, 262K colors (256×192 active area with TMS9918A color borders)  
+**Protocol:** AV packet stream (4-byte packets at 6 Mbps via hardware UART) from DB Emulator  
 **Connection:** SPI interface to Dev Board  
-**Firmware:** [DOB Terminal](./Firmware/DOB%20Terminal/) (PlatformIO project)  
-**Character Set:** ASCII text mode with color support  
+**Firmware:** [DOB Video Display](./Firmware/DOB%20Video%20Display/) (PlatformIO project)  
+**Audio:** 3-voice SID 6581 synthesis via 8-bit PWM at 44.1 kHz  
 **Status:** ✓ Tested 
 
-Provides a dedicated display for the DEV system, rendering terminal output in a compact form factor ideal for development setups.
+Provides dedicated video and audio output for the DEV system, emulating the TMS9918A VDP and MOS 6581 SID in real time at ~60 FPS.
 
 #### Input Board
 **Purpose:** Unified input board for matrix keyboard, PS/2 keyboard, and joysticks
@@ -1041,7 +1041,7 @@ Building a 6502 system requires careful assembly and proper connections between 
 1. Assemble Dev Board with Teensy 4.1 installed
 2. Flash [DB Emulator firmware](./Firmware/DB%20Emulator/) to Teensy 4.1
 3. Assemble Dev Output Board (if using)
-4. Flash [DOB Terminal firmware](./Firmware/DOB%20Terminal/) to Dev Output Board
+4. Flash [DOB Video Display firmware](./Firmware/DOB%20Video%20Display/) to Dev Output Board
 5. Connect Dev Output Board to Dev Board via ribbon cable
 6. Insert microSD card (formatted FAT32) with ROMs/programs
 7. Connect Ethernet cable (optional, for web interface)
@@ -1132,7 +1132,7 @@ See the [Firmware README](./Firmware/README.md) for detailed information on buil
 | Firmware Project | Target Hardware | Microcontroller | System | Description |
 |-----------------|-----------------|-----------------|--------|-------------|
 | [DB Emulator](./Firmware/DB%20Emulator/) | Dev Board | Teensy 4.1 | DEV | 65C02 emulator with networking, USB I/O, and web control |
-| [DOB Terminal](./Firmware/DOB%20Terminal/) | Dev Output Board | Teensy 4.0/4.1 | DEV | [VT-AC](https://github.com/acwright/VT-AC) terminal display on ILI9341 LCD |
+| [DOB Video Display](./Firmware/DOB%20Video%20Display/) | Dev Output Board | Teensy 4.0 | DEV | TMS9918A VDP + SID audio emulation on ILI9341 LCD |
 | [IB Keyboard Controller](./Firmware/IB%20Keyboard%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 keyboard to serial interface |
 | [IB Mouse Controller](./Firmware/IB%20Mouse%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 mouse interface |
 | [KEH Controller](./Firmware/KEH%20Controller/) | Keyboard Encoder Helper, Input Board Rev 1.0 | ATmega1284p | COB/VCS | Dual keyboard (PS/2 + matrix) to ASCII converter |
@@ -1152,11 +1152,12 @@ See the [Firmware README](./Firmware/README.md) for detailed information on buil
 - Serial terminal interface (115200 baud)
 - Real-time clock support
 
-**DOB Terminal (Dev Output Board):**
-- [VT-AC protocol](https://github.com/acwright/VT-AC) ASCII terminal emulation
-- 320×240 color LCD display (2.4" ILI9341)
-- Color text modes
-- Cursor control and attribute support
+**DOB Video Display (Dev Output Board):**
+- TMS9918A VDP emulation (Graphics I/II, Text, and Multicolor modes)
+- SID 6581 3-voice audio synthesis (triangle, sawtooth, pulse, noise + full ADSR)
+- 320×240 color LCD display (2.4" ILI9341) with 256×192 active area and TMS9918A color borders
+- ~60 FPS rendering from VRAM state
+- AV packet protocol at 6 Mbps via hardware UART from DB Emulator
 
 **KEH Controller (Keyboard Encoder Helper):**
 - Dual input support (PS/2 + keyboard matrix simultaneously)

@@ -288,6 +288,10 @@ The Teensy streams SID and TMS9918A register writes over USB (SerialUSB2) to the
 - Audio and video are rendered entirely in the browser; the Teensy streams register writes only
 - Click **Mute** to toggle audio output
 
+**Alternative: External Hardware Rendering**
+
+In addition to browser-based AV streaming via USB, the emulator supports streaming AV data to external hardware devices via the **HWSERIAL** interface. This allows connecting dedicated hardware (such as external sound synthesizers or video display units) for rendering audio and video output. The HWSERIAL port uses the same AV streaming protocol as SerialUSB2, enabling hardware devices to receive SID and TMS9918A register writes for real-time rendering.
+
 ### Physical Controls
 
 If your development board has physical buttons:

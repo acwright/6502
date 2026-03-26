@@ -176,6 +176,8 @@ void setup() {
   SerialUSB1.begin(115200);   // Ignored by Teensy; Baud rate is USB data rate 480Mbps
   SerialUSB2.begin(115200);   // Ignored by Teensy; Baud rate is USB data rate 480Mbps
   HWSERIAL.begin(6000000);    // 6 Mbit/sec — maximum on Teensy 4.1 without clock reconfiguration
+  static uint8_t hwSerialWriteBuffer[8192];
+  HWSERIAL.addMemoryForWrite(hwSerialWriteBuffer, sizeof(hwSerialWriteBuffer));
 
   setSyncProvider(syncTime);
   buildMemoryMap();
@@ -1335,7 +1337,8 @@ void initPins() {
   pinMode(RESB, INPUT);
   pinMode(SYNC, INPUT);
   pinMode(RWB, INPUT);
-  pinMode(PHI2, INPUT);
+  pinMode(PHI2, OUTPUT);
+  digitalWrite(PHI2, HIGH);  // Set high to turn on onboard LED
   pinMode(IRQB, INPUT);
   pinMode(NMIB, INPUT);
   pinMode(RDY, INPUT);

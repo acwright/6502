@@ -1285,6 +1285,148 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Connector_Generic:Conn_01x02"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02"
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Conn_01x02_1_1"
+				(rectangle
+					(start -1.27 1.27)
+					(end 1.27 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -2.54 0)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Connector_Generic:Conn_01x04"
 			(pin_names
 				(offset 1.016)
@@ -1485,16 +1627,18 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Device:Buzzer"
-			(pin_names
-				(offset 0.0254)
+		(symbol "Device:C"
+			(pin_numbers
 				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
 			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
-			(property "Reference" "BZ"
-				(at 3.81 1.27 0)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1502,8 +1646,8 @@
 					(justify left)
 				)
 			)
-			(property "Value" "Buzzer"
-				(at 3.81 -1.27 0)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1512,7 +1656,7 @@
 				)
 			)
 			(property "Footprint" ""
-				(at -0.635 2.54 90)
+				(at 0.9652 -3.81 0)
 				(effects
 					(font
 						(size 1.27 1.27)
@@ -1521,15 +1665,6 @@
 				)
 			)
 			(property "Datasheet" "~"
-				(at -0.635 2.54 90)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(hide yes)
-				)
-			)
-			(property "Description" "Buzzer, polarized"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1538,7 +1673,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_keywords" "quartz resonator ceramic"
+			(property "Description" "Unpolarized capacitor"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1547,7 +1682,7 @@
 					(hide yes)
 				)
 			)
-			(property "ki_fp_filters" "*Buzzer*"
+			(property "ki_keywords" "cap capacitor"
 				(at 0 0 0)
 				(effects
 					(font
@@ -1556,13 +1691,22 @@
 					(hide yes)
 				)
 			)
-			(symbol "Buzzer_0_1"
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "C_0_1"
 				(polyline
 					(pts
-						(xy -1.651 1.905) (xy -1.143 1.905)
+						(xy -2.032 0.762) (xy 2.032 0.762)
 					)
 					(stroke
-						(width 0)
+						(width 0.508)
 						(type default)
 					)
 					(fill
@@ -1571,34 +1715,10 @@
 				)
 				(polyline
 					(pts
-						(xy -1.397 2.159) (xy -1.397 1.651)
+						(xy -2.032 -0.762) (xy 2.032 -0.762)
 					)
 					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(arc
-					(start 0 3.175)
-					(mid 3.1612 0)
-					(end 0 -3.175)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 3.175) (xy 0 -3.175)
-					)
-					(stroke
-						(width 0)
+						(width 0.508)
 						(type default)
 					)
 					(fill
@@ -1606,11 +1726,11 @@
 					)
 				)
 			)
-			(symbol "Buzzer_1_1"
+			(symbol "C_1_1"
 				(pin passive line
-					(at -2.54 2.54 0)
-					(length 2.54)
-					(name "+"
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "~"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1626,9 +1746,9 @@
 					)
 				)
 				(pin passive line
-					(at -2.54 -2.54 0)
-					(length 2.54)
-					(name "-"
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "~"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1770,6 +1890,133 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:Speaker"
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "LS"
+				(at 1.27 5.715 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Value" "Speaker"
+				(at 1.27 3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at -0.254 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Speaker"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "speaker sound"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Speaker_0_0"
+				(rectangle
+					(start -2.54 1.27)
+					(end 1.016 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.016 1.27) (xy 3.556 3.81) (xy 3.556 -6.35) (xy 1.016 -3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Speaker_1_1"
+				(pin input line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -5.08 -2.54 0)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "power:GND"
 			(power)
 			(pin_numbers
@@ -1873,6 +2120,18 @@
 		)
 	)
 	(junction
+		(at 209.55 127)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3cdf03d5-1d13-4fc2-97f2-62feac99d2b8")
+	)
+	(junction
+		(at 196.85 127)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "67e3cfdf-414a-4787-bc3e-a38a8255b724")
+	)
+	(junction
 		(at 111.76 113.03)
 		(diameter 0)
 		(color 0 0 0 0)
@@ -1883,6 +2142,18 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "d140f27d-6510-4481-91dd-d2ecef86eb5a")
+	)
+	(junction
+		(at 196.85 140.97)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d9f3b3cc-f393-4b67-8e15-efefc605fe97")
+	)
+	(junction
+		(at 207.01 129.54)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "f215f692-1366-4b86-92e2-10911cb823a5")
 	)
 	(no_connect
 		(at 53.34 81.28)
@@ -2050,16 +2321,6 @@
 	)
 	(wire
 		(pts
-			(xy 194.31 127) (xy 198.12 127)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "01b68e68-22ac-463d-a23f-cda8356e756c")
-	)
-	(wire
-		(pts
 			(xy 182.88 127) (xy 186.69 127)
 		)
 		(stroke
@@ -2080,6 +2341,16 @@
 	)
 	(wire
 		(pts
+			(xy 196.85 127) (xy 196.85 130.81)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11f5d738-21c4-437a-b912-220c40ec6bf8")
+	)
+	(wire
+		(pts
 			(xy 205.74 76.2) (xy 212.09 76.2)
 		)
 		(stroke
@@ -2087,6 +2358,16 @@
 			(type default)
 		)
 		(uuid "17eded83-9a1a-4c29-b34f-51d7d2dd8e4d")
+	)
+	(wire
+		(pts
+			(xy 200.66 129.54) (xy 200.66 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "19caca08-8866-4b06-845d-55fabddc517d")
 	)
 	(wire
 		(pts
@@ -2117,6 +2398,16 @@
 			(type default)
 		)
 		(uuid "2bc436b6-29e5-4ba2-83aa-1591876113a7")
+	)
+	(wire
+		(pts
+			(xy 207.01 146.05) (xy 207.01 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "39afec5e-2535-45d6-b1df-0d042d521a9f")
 	)
 	(wire
 		(pts
@@ -2280,6 +2571,16 @@
 	)
 	(wire
 		(pts
+			(xy 212.09 129.54) (xy 207.01 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8df7b62e-d88c-4fe8-81c0-f95551e5304a")
+	)
+	(wire
+		(pts
 			(xy 45.72 88.9) (xy 53.34 88.9)
 		)
 		(stroke
@@ -2300,6 +2601,26 @@
 	)
 	(wire
 		(pts
+			(xy 209.55 143.51) (xy 209.55 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9d6cf703-2570-4d81-97d4-8e6cde0564f6")
+	)
+	(wire
+		(pts
+			(xy 196.85 127) (xy 209.55 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a12acd17-58a9-4235-a5c3-1cf4e57bcaf3")
+	)
+	(wire
+		(pts
 			(xy 205.74 73.66) (xy 212.09 73.66)
 		)
 		(stroke
@@ -2317,6 +2638,26 @@
 			(type default)
 		)
 		(uuid "a343dadc-ad19-49c2-88c8-9d3046667f83")
+	)
+	(wire
+		(pts
+			(xy 207.01 129.54) (xy 200.66 129.54)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a687e463-aa4c-497c-9267-b945a69edae2")
+	)
+	(wire
+		(pts
+			(xy 209.55 127) (xy 212.09 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a99a0d0c-db09-43dd-9a5e-05346e7a2733")
 	)
 	(wire
 		(pts
@@ -2350,6 +2691,16 @@
 	)
 	(wire
 		(pts
+			(xy 213.36 143.51) (xy 209.55 143.51)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b7d64716-34c9-4393-b900-3057b6713c23")
+	)
+	(wire
+		(pts
 			(xy 109.22 101.6) (xy 115.57 101.6)
 		)
 		(stroke
@@ -2357,6 +2708,16 @@
 			(type default)
 		)
 		(uuid "bc789747-eb67-447e-af00-3d923129a58d")
+	)
+	(wire
+		(pts
+			(xy 196.85 138.43) (xy 196.85 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "bdf6d2cd-9d67-41b1-8062-944e0454922d")
 	)
 	(wire
 		(pts
@@ -2370,13 +2731,13 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 134.62) (xy 195.58 132.08)
+			(xy 196.85 140.97) (xy 196.85 142.24)
 		)
 		(stroke
 			(width 0)
 			(type default)
 		)
-		(uuid "c236a2d7-384c-4fe5-893e-354babb09944")
+		(uuid "bf0c3484-ca60-4f25-a98c-db3be0d6719e")
 	)
 	(wire
 		(pts
@@ -2410,16 +2771,6 @@
 	)
 	(wire
 		(pts
-			(xy 195.58 132.08) (xy 198.12 132.08)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "d613f44b-862f-4e4a-ae65-83cd32c3523c")
-	)
-	(wire
-		(pts
 			(xy 74.93 163.83) (xy 77.47 163.83)
 		)
 		(stroke
@@ -2450,6 +2801,16 @@
 	)
 	(wire
 		(pts
+			(xy 213.36 146.05) (xy 207.01 146.05)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e603a583-7a2c-415b-be5f-9f4035d274d0")
+	)
+	(wire
+		(pts
 			(xy 45.72 86.36) (xy 53.34 86.36)
 		)
 		(stroke
@@ -2470,6 +2831,16 @@
 	)
 	(wire
 		(pts
+			(xy 200.66 140.97) (xy 196.85 140.97)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f26e5483-a6dd-4800-8b45-b0fa8d6d9de5")
+	)
+	(wire
+		(pts
 			(xy 154.94 72.39) (xy 161.29 72.39)
 		)
 		(stroke
@@ -2477,6 +2848,16 @@
 			(type default)
 		)
 		(uuid "f4e4d2ab-3d42-42f6-8940-1cf458373ccc")
+	)
+	(wire
+		(pts
+			(xy 194.31 127) (xy 196.85 127)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fe82d004-bc41-4b21-b4f9-3bc9002fc5ec")
 	)
 	(global_label "LCD_CLK"
 		(shape input)
@@ -2588,7 +2969,7 @@
 			)
 		)
 	)
-	(global_label "BELL"
+	(global_label "SPEAKER"
 		(shape input)
 		(at 182.88 127 180)
 		(effects
@@ -2784,7 +3165,7 @@
 			)
 		)
 	)
-	(global_label "BELL"
+	(global_label "SPEAKER"
 		(shape output)
 		(at 45.72 88.9 180)
 		(fields_autoplaced yes)
@@ -2796,7 +3177,7 @@
 		)
 		(uuid "a297bb13-4f7c-41c5-89da-1562d1af0d1a")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 38.2596 88.9 0)
+			(at 34.3287 88.9 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3093,6 +3474,76 @@
 		)
 	)
 	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 218.44 143.51 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "106b1c9b-a11d-40d4-bb90-6dc8acb804e2")
+		(property "Reference" "J1"
+			(at 220.98 143.5099 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SPEAKER"
+			(at 220.98 146.0499 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 218.44 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 218.44 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 218.44 143.51 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "5a2e021b-ed61-4922-ac29-2468015eee99")
+		)
+		(pin "2"
+			(uuid "0655ed41-a827-449a-ad6b-eee58a249417")
+		)
+		(instances
+			(project ""
+				(path "/5d95bc66-f610-41ca-b1ae-73f5b5edc5a7"
+					(reference "J1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "6502 Parts:Waveshare 2.4in LCD")
 		(at 220.98 72.39 0)
 		(unit 1)
@@ -3324,35 +3775,32 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:Buzzer")
-		(at 200.66 129.54 0)
+		(lib_id "Device:C")
+		(at 196.85 134.62 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
-		(uuid "549e34b3-0297-4708-94c6-27404ae23d9c")
-		(property "Reference" "LS1"
-			(at 204.47 128.2699 0)
+		(uuid "3e492b10-83fa-46dc-8781-5d22953f1776")
+		(property "Reference" "C1"
+			(at 192.0494 134.366 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Value" "BELL"
-			(at 204.47 130.8099 0)
+		(property "Value" "3.3nF"
+			(at 189.738 134.366 90)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(justify left)
 			)
 		)
-		(property "Footprint" "Buzzer_Beeper:Buzzer_12x9.5RM7.6"
-			(at 200.025 127 90)
+		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P2.50mm"
+			(at 197.8152 138.43 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3361,7 +3809,7 @@
 			)
 		)
 		(property "Datasheet" "~"
-			(at 200.025 127 90)
+			(at 196.85 134.62 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3369,8 +3817,78 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Buzzer, polarized"
-			(at 200.66 129.54 0)
+		(property "Description" ""
+			(at 196.85 134.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3717322b-cb1a-4b2a-8603-f90a2c84f0d6")
+		)
+		(pin "2"
+			(uuid "0d46715d-ee47-4503-8750-866e194f8c25")
+		)
+		(instances
+			(project "Dev Output Board"
+				(path "/5d95bc66-f610-41ca-b1ae-73f5b5edc5a7"
+					(reference "C1")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:Speaker")
+		(at 217.17 127 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "549e34b3-0297-4708-94c6-27404ae23d9c")
+		(property "Reference" "LS1"
+			(at 222.25 126.9999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "SPEAKER"
+			(at 222.25 129.5399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 217.17 132.08 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 216.916 128.27 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Speaker"
+			(at 217.17 127 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3411,7 +3929,7 @@
 				)
 			)
 		)
-		(property "Value" "100"
+		(property "Value" "1K"
 			(at 190.5 123.19 90)
 			(effects
 				(font
@@ -3823,7 +4341,7 @@
 	)
 	(symbol
 		(lib_id "power:GND")
-		(at 195.58 134.62 0)
+		(at 196.85 142.24 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -3832,7 +4350,7 @@
 		(fields_autoplaced yes)
 		(uuid "bd75093a-bcf8-4b69-be55-d6d6e31f48dd")
 		(property "Reference" "#PWR06"
-			(at 195.58 140.97 0)
+			(at 196.85 148.59 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3841,7 +4359,7 @@
 			)
 		)
 		(property "Value" "GND"
-			(at 195.58 139.7 0)
+			(at 196.85 147.32 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3849,7 +4367,7 @@
 			)
 		)
 		(property "Footprint" ""
-			(at 195.58 134.62 0)
+			(at 196.85 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3858,7 +4376,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 195.58 134.62 0)
+			(at 196.85 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -3867,7 +4385,7 @@
 			)
 		)
 		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
-			(at 195.58 134.62 0)
+			(at 196.85 142.24 0)
 			(effects
 				(font
 					(size 1.27 1.27)
