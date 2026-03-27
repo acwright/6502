@@ -30,6 +30,7 @@ void initBuffer();
 void initTFT();
 void initPalette();
 void processBellQueue();
+void bellISR();
 
 // Bell queue structure
 struct BellRequest {
@@ -43,6 +44,11 @@ uint8_t bellQueueHead = 0;
 uint8_t bellQueueTail = 0;
 uint8_t bellQueueCount = 0;
 bool bellPlaying = false;
+
+#define BELL_SAMPLE_RATE 44100
+IntervalTimer bellTimer;
+static uint32_t bellPhase = 0;
+static uint32_t bellPhaseInc = 0;
 
 uint8_t buffer[WIDTH * HEIGHT];
 uint16_t palette[256]; // RGB565 color palette for 8-bit colors
@@ -386,7 +392,9 @@ void reset() {
   bellQueueTail = 0;
   bellQueueCount = 0;
   if (bellPlaying) {
-    noTone(BELL);
+    bellTimer.end();
+    analogWrite(BELL, 0);
+    bellPhaseInc = 0;
     bellPlaying = false;
   }
 
@@ -417,7 +425,9 @@ void bell(uint8_t action) {
 void processBellQueue() {
   // Check if current bell has finished playing
   if (bellPlaying && millis() >= bellEnd) {
-    noTone(BELL);
+    bellTimer.end();
+    analogWrite(BELL, 0);
+    bellPhaseInc = 0;
     bellPlaying = false;
   }
   
@@ -425,13 +435,20 @@ void processBellQueue() {
   if (!bellPlaying && bellQueueCount > 0) {
     BellRequest& request = bellQueue[bellQueueHead];
     bellEnd = millis() + (request.duration * (1000 / 60));
-    tone(BELL, FREQUENCIES[request.frequency]);
+    bellPhase = 0;
+    bellPhaseInc = (uint32_t)(FREQUENCIES[request.frequency] * (float)(1ULL << 32) / BELL_SAMPLE_RATE);
+    bellTimer.begin(bellISR, 1000000.0f / BELL_SAMPLE_RATE);
     bellPlaying = true;
     
     // Remove processed request from queue
     bellQueueHead = (bellQueueHead + 1) % BELL_QUEUE_SIZE;
     bellQueueCount--;
   }
+}
+
+FASTRUN void bellISR() {
+  bellPhase += bellPhaseInc;
+  analogWrite(BELL, (bellPhase < 0x80000000u) ? 128 : 0);
 }
 
 void backspace() {
@@ -699,7 +716,8 @@ void initPins() {
   pinMode(TFT_BL, OUTPUT);
   pinMode(TFT_RESET, OUTPUT);
 
-  digitalWriteFast(BELL, LOW);
+  analogWriteResolution(8);  // 8-bit PWM for audio output
+  analogWrite(BELL, 0);
   digitalWriteFast(TFT_BL, HIGH);
   digitalWriteFast(TFT_RESET, HIGH);
 }

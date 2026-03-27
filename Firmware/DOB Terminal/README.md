@@ -1,20 +1,20 @@
 # DOB Terminal
 
-DOB Terminal is a hardware terminal emulator designed for the DOB (Dev Output Board). It provides a high-performance display and audio output system with serial command interface, ideal for retro computing projects and embedded system development.
+DOB Terminal is a hardware terminal emulator designed for the DOB (Dev Output Board). It provides a high-performance display and audio output system with serial command interface, ideal for retro computing projects and embedded system development. This is an alternate to the DOB Video Display firmware.
 
 ## Features
 
 - **320x240 Color Display** - ILI9341-based TFT display with 8-bit RGB332 palette
 - **40x30 Character Grid** - 8x8 pixel character cells supporting text and graphics modes
 - **Dual Serial Interfaces** - USB and hardware UART (2Mbps) for flexible connectivity
-- **Audio Bell System** - Queue-based tone generator supporting musical note playback
+- **Audio Bell System** - Queue-based bell system with PWM speaker output supporting musical note playback
 - **VT-AC Protocol** - [VT-AC](https://github.com/acwright/VT-AC) serial command protocol for display control
 
 ## Hardware
 
 - **MCU**: Teensy 4.0 (600 MHz ARM Cortex-M7)
 - **Display**: ILI9341 320x240 TFT LCD
-- **Audio**: PWM tone output
+- **Audio**: PWM speaker output via IntervalTimer-driven square wave generator
 - **Communication**: USB Serial + UART Serial (Serial1)
 
 ## Installation

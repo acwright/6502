@@ -9,7 +9,7 @@
 #define TFT_MISO      12  // MISO            
 #define TFT_CLOCK     13  // CLOCK
 
-#define BELL          14  // BELL
+#define SPEAKER       14  // SPEAKER
 
 #define RX             0  // RECEIVE
 #define TX             1  // TRANSMIT

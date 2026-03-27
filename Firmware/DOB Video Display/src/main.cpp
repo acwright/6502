@@ -81,7 +81,7 @@ ILI9341_t3n tft = ILI9341_t3n(TFT_CS, TFT_DC, TFT_RESET);
 void setup() {
   pinMode(TFT_BL, OUTPUT);
   pinMode(TFT_RESET, OUTPUT);
-  pinMode(BELL, OUTPUT);
+  pinMode(SPEAKER, OUTPUT);
   analogWriteResolution(8);  // 8-bit PWM DAC for audio output
   digitalWrite(TFT_BL, HIGH);
   digitalWrite(TFT_RESET, HIGH);
@@ -445,7 +445,7 @@ void sidReset() {
   memset(sid,      0, sizeof(sid));
   memset(sidVoice, 0, sizeof(sidVoice));
   for (uint8_t v = 0; v < 3; v++) sidVoice[v].lfsr = 0xACE1;  // non-zero LFSR seed
-  analogWrite(BELL, 0);
+  analogWrite(SPEAKER, 0);
   sidTimer.begin(sidISR, 1000000.0f / SID_SAMPLE_RATE);
 }
 
@@ -525,7 +525,7 @@ FASTRUN void sidISR() {
   }
 
   // Scale by master volume (0-15), average across 3 voices, output 0-255
-  analogWrite(BELL, (uint8_t)((mix * masterVol) / (15 * 3)));
+  analogWrite(SPEAKER, (uint8_t)((mix * masterVol) / (15 * 3)));
 }
 
 //
