@@ -44,7 +44,7 @@ The 6502 project uses microcontrollers to provide:
 | Firmware Project | Target Board | Microcontroller | System | Purpose |
 |-----------------|--------------|-----------------|--------|---------|
 | [DB Emulator](./DB%20Emulator/) | Dev Board | Teensy 4.1 | DEV | 65C02 emulation + networking + web control |
-| [DOB Video Display](./DOB%20Video%20Display/) | Dev Output Board | Teensy 4.0 | DEV | TMS9918A VDP + SID audio emulation on 2.4" LCD |
+| [DOB Display](./DOB%20%20Display/) | Dev Output Board | Teensy 4.0 | DEV | TMS9918A VDP + SID audio emulation on 2.4" LCD |
 | [IB Keyboard Controller](./IB%20Keyboard%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 keyboard to serial interface |
 | [IB Mouse Controller](./IB%20Mouse%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 mouse interface |
 | [KEH Controller](./KEH%20Controller/) | Keyboard Encoder Helper, Input Board 1.0 | ATmega1284p | COB/KIM | PS/2 + matrix keyboard to ASCII |
@@ -215,7 +215,7 @@ pio device monitor -b 115200
 - Serial terminal (115200 baud)
 - Real-time clock
 
-**[DOB Video Display](./DOB%20Video%20Display/)** (Dev Output Board):
+**[DOB Display](./DOB%20%20Display/)** (Dev Output Board):
 - Full TMS9918A VDP emulation (Graphics I/II, Text, Multicolor modes)
 - SID 6581 3-voice audio synthesis (triangle, sawtooth, pulse, noise + full ADSR)
 - ILI9341 2.4" TFT LCD (320×240) with 256×192 active area and TMS9918A color borders
@@ -292,7 +292,7 @@ Firmware projects use these common libraries (managed via PlatformIO):
 - [Bounce2](https://github.com/thomasfredericks/Bounce2): Button debouncing
 - [TimeLib](https://github.com/PaulStoffregen/Time): Time management
 
-**DOB Video Display:**
+**DOB Display:**
 - [ILI9341_t3n](https://github.com/KurtE/ILI9341_t3n): Optimized ILI9341 driver for Teensy (replaces Adafruit_GFX + Adafruit_ILI9341)
 
 **KEH/PS2 Controllers:**
@@ -323,7 +323,7 @@ pio lib install "ArduinoJson"
 Firmware folders use prefixes to indicate target hardware:
 
 - **DB**: Dev Board (e.g., DB Emulator)
-- **DOB**: Dev Output Board (e.g., DOB Video Display)
+- **DOB**: Dev Output Board (e.g., DOB Display)
 - **IB**: Input Board (e.g., IB Keyboard Controller, IB Mouse Controller)
 - **KEH**: Keyboard Encoder Helper (e.g., KEH Controller)
 - **PS2**: PS2 Helper (e.g., PS2 Keyboard Controller)

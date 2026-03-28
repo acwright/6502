@@ -559,7 +559,7 @@ G = Green (RoHS compliant)
 **Step 2: Program Firmware**
 - Before connecting boards, program both
 - Teensy 4.1: Upload DB Emulator firmware
-- Teensy 4.0: Upload DOB Terminal firmware
+- Teensy 4.0: Upload DOB Display firmware
 
 **Step 3: Connect Boards**
 - Verify all connections before powering on

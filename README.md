@@ -585,7 +585,7 @@ The Dev Board eliminates the need for a physical 65C02 CPU by providing accurate
 **Display:** 2.4" TFT LCD, 320×240 resolution, 262K colors (256×192 active area with TMS9918A color borders)  
 **Protocol:** AV packet stream (4-byte packets at 6 Mbps via hardware UART) from DB Emulator  
 **Connection:** SPI interface to Dev Board  
-**Firmware:** [DOB Video Display](./Firmware/DOB%20Video%20Display/) (PlatformIO project)  
+**Firmware:** [DOB Display](./Firmware/DOB%20%20Display/) (PlatformIO project)  
 **Audio:** 3-voice SID 6581 synthesis via 8-bit PWM at 44.1 kHz  
 **Status:** ✓ Tested 
 
@@ -1041,7 +1041,7 @@ Building a 6502 system requires careful assembly and proper connections between 
 1. Assemble Dev Board with Teensy 4.1 installed
 2. Flash [DB Emulator firmware](./Firmware/DB%20Emulator/) to Teensy 4.1
 3. Assemble Dev Output Board (if using)
-4. Flash [DOB Video Display firmware](./Firmware/DOB%20Video%20Display/) to Dev Output Board
+4. Flash [DOB Display firmware](./Firmware/DOB%20%20Display/) to Dev Output Board
 5. Connect Dev Output Board to Dev Board via ribbon cable
 6. Insert microSD card (formatted FAT32) with ROMs/programs
 7. Connect Ethernet cable (optional, for web interface)
@@ -1132,7 +1132,7 @@ See the [Firmware README](./Firmware/README.md) for detailed information on buil
 | Firmware Project | Target Hardware | Microcontroller | System | Description |
 |-----------------|-----------------|-----------------|--------|-------------|
 | [DB Emulator](./Firmware/DB%20Emulator/) | Dev Board | Teensy 4.1 | DEV | 65C02 emulator with networking, USB I/O, and web control |
-| [DOB Video Display](./Firmware/DOB%20Video%20Display/) | Dev Output Board | Teensy 4.0 | DEV | TMS9918A VDP + SID audio emulation on ILI9341 LCD |
+| [DOB Display](./Firmware/DOB%20%20Display/) | Dev Output Board | Teensy 4.0 | DEV | TMS9918A VDP + SID audio emulation on ILI9341 LCD |
 | [IB Keyboard Controller](./Firmware/IB%20Keyboard%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 keyboard to serial interface |
 | [IB Mouse Controller](./Firmware/IB%20Mouse%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 mouse interface |
 | [KEH Controller](./Firmware/KEH%20Controller/) | Keyboard Encoder Helper, Input Board Rev 1.0 | ATmega1284p | COB/VCS | Dual keyboard (PS/2 + matrix) to ASCII converter |
@@ -1152,7 +1152,7 @@ See the [Firmware README](./Firmware/README.md) for detailed information on buil
 - Serial terminal interface (115200 baud)
 - Real-time clock support
 
-**DOB Video Display (Dev Output Board):**
+**DOB Display (Dev Output Board):**
 - TMS9918A VDP emulation (Graphics I/II, Text, and Multicolor modes)
 - SID 6581 3-voice audio synthesis (triangle, sawtooth, pulse, noise + full ADSR)
 - 320×240 color LCD display (2.4" ILI9341) with 256×192 active area and TMS9918A color borders

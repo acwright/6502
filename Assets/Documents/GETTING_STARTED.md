@@ -401,7 +401,7 @@ pio run -t upload
 
 **Teensy 4.0 (Dev Output Board):**
 ```bash
-cd Firmware/DOB\ Terminal/
+cd Firmware/DOB\ Display/
 pio run -t upload
 ```
 

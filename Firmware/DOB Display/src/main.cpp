@@ -534,14 +534,14 @@ FASTRUN void sidISR() {
 
 void info() {
   Serial.println();
-  Serial.println("8eeee8 8eeee8     88   8 8eeee8 8eeee8 ");
-  Serial.println("8    8 8    8     88   8 8    8 8    8 ");
-  Serial.println("8e   8 8eeee8ee   88  e8 8e   8 8eeee8 ");
-  Serial.println("88   8 88     8   e8  8  88   8 88     ");
-  Serial.println("88   8 88     8    8  8  88   8 88     ");
-  Serial.println("88eee8 88eeeee8    8ee8  88eee8 88     ");
+  Serial.println("8eeee8 8eee88 8eeee8     8eeee8 8  8eeee8 8eeee8 8     8eeee8 8    8 ");
+  Serial.println("8    8 8    8 8    8     8    8 8  8      8    8 8     8    8 8    8 ");
+  Serial.println("8e   8 8    8 8eeee8ee   8e   8 8e 8eeeee 8eeee8 8e    8eeee8 8eeee8 ");
+  Serial.println("88   8 8    8 88     8   88   8 88     88 88     88    88   8   88   ");
+  Serial.println("88   8 8    8 88     8   88   8 88 e   88 88     88    88   8   88   ");
+  Serial.println("88eee8 8eeee8 88eeeee8   88eee8 88 8eee88 88     88eee 88   8   88   ");
   Serial.println();
-  Serial.print("DOB Video Display (TMS9918A) | Version: ");
+  Serial.print("DOB Display (TMS9918A) | Version: ");
   Serial.print(VERSION);
   Serial.println();
   Serial.println("--------------------------------------");
