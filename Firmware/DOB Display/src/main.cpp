@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 #include <ILI9341_t3n.h>
-#include <DOBVideoDisplay.h>
+#include <DOBDisplay.h>
 
 void processSerialByte(uint8_t b);
 void dispatch(uint8_t type, uint8_t a, uint8_t b);

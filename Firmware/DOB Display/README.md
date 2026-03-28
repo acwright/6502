@@ -1,6 +1,6 @@
-# DOB Video Display
+# DOB Display
 
-DOB Video Display is the AV output firmware for the DOB (Dev Output Board). It emulates a TMS9918A Video Display Processor and a MOS 6581 SID audio synthesizer, driven in real time by AV packets from the DB Emulator over high-speed hardware serial.
+DOB Display is the AV output firmware for the DOB (Dev Output Board). It emulates a TMS9918A Video Display Processor and a MOS 6581 SID audio synthesizer, driven in real time by AV packets from the DB Emulator over high-speed hardware serial.
 
 ## Features
 
@@ -62,7 +62,7 @@ Sprites are rendered in all modes except Text (up to 32 sprites, max 4 visible p
 
 ### Hardware Setup
 
-Connect the display and speaker to your Teensy 4.0 according to the pin definitions in `lib/DOBVideoDisplay/pins.h`.
+Connect the display and speaker to your Teensy 4.0 according to the pin definitions in `lib/DOBDisplay/pins.h`.
 
 ## Building and Uploading
 
@@ -71,7 +71,7 @@ Connect the display and speaker to your Teensy 4.0 according to the pin definiti
 1. Clone the repository:
    ```bash
    git clone <repository-url>
-   cd "DOB Video Display"
+   cd "DOB Display"
    ```
 
 2. Build the project:
@@ -95,14 +95,14 @@ Connect the display and speaker to your Teensy 4.0 according to the pin definiti
 ## Project Structure
 
 ```
-DOB Video Display/
+DOB Display/
 ├── src/
 │   └── main.cpp              # Main firmware — VDP emulator, SID engine, AV packet processing
 ├── lib/
-│   └── DOBVideoDisplay/
+│   └── DOBDisplay/
 │       ├── constants.h       # AV protocol constants, display geometry, TMS9918A RGB565 palette
 │       ├── pins.h            # Hardware pin assignments
-│       └── DOBVideoDisplay.h # Main library header
+│       └── DOBDisplay.h # Main library header
 ├── platformio.ini            # Build configuration
 └── README.md
 ```
