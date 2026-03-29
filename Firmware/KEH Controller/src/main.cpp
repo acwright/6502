@@ -60,10 +60,8 @@ CircularBuffer<uint8_t, BUFFER_SIZE> matrixBuffer;  // Buffer for matrix keyboar
 
 // PS/2 keyboard state
 bool ps2Enabled = false;
-bool altPressed = false;
 bool shiftPressed = false;
 bool ctrlPressed = false;
-bool capsLockOn = false;
 bool breakCodeNext = false;
 bool extendedCodeNext = false;
 
@@ -71,9 +69,6 @@ bool extendedCodeNext = false;
 bool matrixEnabled = false;
 bool matrixShiftPressed = false;
 bool matrixCtrlPressed = false;
-bool matrixAltPressed = false;
-bool matrixFnPressed = false;
-bool matrixCapsLockOn = false;
 
 // Matrix key debouncing
 uint8_t matrixKeyState[8][8] = {0};  // Current state of each key
@@ -102,17 +97,17 @@ const uint8_t matrixMap[8][8] PROGMEM = {
   // PA1/Row 1
   {             0x38,  0x39,  0x30,  0x2D,  0x3D,  0x08,  0x1B,  0x09 },  // 8 9 0 - = BS ESC TAB
   // PA2/Row 2
-  {             0x71,  0x77,  0x65,  0x72,  0x74,  0x79,  0x75,  0x69 },  // q w e r t y u i
+  {             0x51,  0x57,  0x45,  0x52,  0x54,  0x59,  0x55,  0x49 },  // Q W E R T Y U I
   // PA3/Row 3
-  {             0x6F,  0x70,  0x5B,  0x5D,  0x5C,  0x1A,  0xFE,  0x61 },  // o p [ ] \ INS CAPS a
+  {             0x4F,  0x50,  0x5B,  0x5D,  0x5C,  0x1A,  0xFF,  0x41 },  // O P [ ] \ INS (ign) A
   // PA4/Row 4
-  {             0x73,  0x64,  0x66,  0x67,  0x68,  0x6A,  0x6B,  0x6C },  // s d f g h j k l
+  {             0x53,  0x44,  0x46,  0x47,  0x48,  0x4A,  0x4B,  0x4C },  // S D F G H J K L
   // PA5/Row 5
-  {             0x3B,  0x27,  0x0D,  0x7F,  0xFE,  0x7A,  0x78,  0x63 },  // ; ' ENTER DEL SHIFT z x c
+  {             0x3B,  0x27,  0x0D,  0x7F,  0xFE,  0x5A,  0x58,  0x43 },  // ; ' ENTER DEL SHIFT Z X C
   // PA6/Row 6
-  {             0x76,  0x62,  0x6E,  0x6D,  0x2C,  0x2E,  0x2F,  0x1E },  // v b n m , . / UP
+  {             0x56,  0x42,  0x4E,  0x4D,  0x2C,  0x2E,  0x2F,  0x1E },  // V B N M , . / UP
   // PA7/Row 7
-  {             0xFE,  0x80,  0xFE,  0x20,  0xFE,  0x1C,  0x1F,  0x1D }   // CTRL MENU ALT SPACE FN LEFT DOWN RIGHT
+  {             0xFE,  0xFF,  0xFF,  0x20,  0xFF,  0x1C,  0x1F,  0x1D }   // CTRL (ign) (ign) SPACE (ign) LEFT DOWN RIGHT
 };
 
 void setup() {
@@ -292,9 +287,6 @@ void scanMatrix() {
   // Temporarily save current modifier states
   bool newShift = false;
   bool newCtrl = false;
-  bool newAlt = false;
-  bool newFn = false;
-  bool capsToggled = false;
   
   // Scan each row
   for (uint8_t row = 0; row < 8; row++) {
@@ -355,18 +347,6 @@ void scanMatrix() {
         else if (row == 7 && col == 0) {
           newCtrl = true;
         }
-        // ALT is at VIA_PA7/VIA_PB2
-        else if (row == 7 && col == 2) {
-          newAlt = true;
-        }
-        // FN is at VIA_PA7/VIA_PB4
-        else if (row == 7 && col == 4) {
-          newFn = true;
-        }
-        // CAPS is at VIA_PA3/VIA_PB6 - toggle on key press (not repeat)
-        else if (row == 3 && col == 6 && !keyWasPressed) {
-          capsToggled = true;
-        }
       }
       
       // Detect key press event (transition from not pressed to pressed)
@@ -389,13 +369,6 @@ void scanMatrix() {
   // Update modifier states
   matrixShiftPressed = newShift;
   matrixCtrlPressed = newCtrl;
-  matrixAltPressed = newAlt;
-  matrixFnPressed = newFn;
-  
-  // Toggle caps lock if CAPS was pressed
-  if (capsToggled) {
-    matrixCapsLockOn = !matrixCapsLockOn;
-  }
 }
 
 // Map matrix position to ASCII code based on modifiers
@@ -404,47 +377,13 @@ uint8_t mapMatrixToAscii(uint8_t row, uint8_t col) {
   uint8_t baseKey = pgm_read_byte(&matrixMap[row][col]);
   
   // Handle special keys
-  if (baseKey == 0xFF) return 0xFF;  // No key
+  if (baseKey == 0xFF) return 0xFF;  // No key / ignored
   if (baseKey == 0xFE) return 0xFE;  // Modifier key
   
-  // Handle Fn combinations (0x81-0x9F range)
-  if (matrixFnPressed) {
-    // F1-F10: Fn + number keys 1-0
-    if (baseKey == 0x31) return matrixAltPressed ? 0x91 : 0x81;  // Fn+1 = F1
-    if (baseKey == 0x32) return matrixAltPressed ? 0x92 : 0x82;  // Fn+2 = F2
-    if (baseKey == 0x33) return matrixAltPressed ? 0x93 : 0x83;  // Fn+3 = F3
-    if (baseKey == 0x34) return matrixAltPressed ? 0x94 : 0x84;  // Fn+4 = F4
-    if (baseKey == 0x35) return matrixAltPressed ? 0x95 : 0x85;  // Fn+5 = F5
-    if (baseKey == 0x36) return matrixAltPressed ? 0x96 : 0x86;  // Fn+6 = F6
-    if (baseKey == 0x37) return matrixAltPressed ? 0x97 : 0x87;  // Fn+7 = F7
-    if (baseKey == 0x38) return matrixAltPressed ? 0x98 : 0x88;  // Fn+8 = F8
-    if (baseKey == 0x39) return matrixAltPressed ? 0x99 : 0x89;  // Fn+9 = F9
-    if (baseKey == 0x30) return matrixAltPressed ? 0x9A : 0x8A;  // Fn+0 = F10
-    
-    // F11-F15: Alt+Fn + K, L, M, N, O (from table)
-    if (matrixAltPressed) {
-      if (baseKey == 0x6B) return 0x8B;  // Alt+Fn+K = F11
-      if (baseKey == 0x6C) return 0x8C;  // Alt+Fn+L = F12
-      if (baseKey == 0x6D) return 0x8D;  // Alt+Fn+M = F13
-      if (baseKey == 0x6E) return 0x8E;  // Alt+Fn+N = F14
-      if (baseKey == 0x6F) return 0x8F;  // Alt+Fn+O = F15
-    }
-    
-    // Special Fn combinations with arrow keys
-    if (baseKey == 0x1B) return 0x9B;  // Fn+ESC = F11
-    if (baseKey == 0x1C) return 0x9C;  // Fn+LEFT = F12
-    if (baseKey == 0x1D) return 0x9D;  // Fn+RIGHT = F13
-    if (baseKey == 0x1E) return 0x9E;  // Fn+UP = F14
-    if (baseKey == 0x1F) return 0x9F;  // Fn+DOWN = F15
-  }
-  
-  // Handle Ctrl combinations (0x00-0x1F control codes)
+  // Ctrl takes priority (Shift ignored when Ctrl held)
   if (matrixCtrlPressed) {
     if (baseKey == 0x32) return 0x00;  // Ctrl+2 = NUL
-    if (baseKey >= 0x61 && baseKey <= 0x7A) {  // Ctrl+a-z
-      return baseKey - 0x60;  // Convert to 0x01-0x1A
-    }
-    if (baseKey >= 0x41 && baseKey <= 0x5A) {  // Ctrl+A-Z (same as a-z)
+    if (baseKey >= 0x41 && baseKey <= 0x5A) {  // Ctrl+A-Z
       return baseKey - 0x40;  // Convert to 0x01-0x1A
     }
     if (baseKey == 0x5B) return 0x1B;  // Ctrl+[ = ESC
@@ -452,11 +391,11 @@ uint8_t mapMatrixToAscii(uint8_t row, uint8_t col) {
     if (baseKey == 0x5D) return 0x1D;  // Ctrl+] = GS
     if (baseKey == 0x36) return 0x1E;  // Ctrl+6 = RS
     if (baseKey == 0x2D) return 0x1F;  // Ctrl+- = US
+    return 0xFF;  // Ctrl + unmapped key = no output
   }
   
-  // Handle Shift combinations
+  // Shift only affects numbers and symbols (not letters)
   if (matrixShiftPressed) {
-    // Numbers to symbols
     if (baseKey == 0x31) return 0x21;  // 1 -> !
     if (baseKey == 0x32) return 0x40;  // 2 -> @
     if (baseKey == 0x33) return 0x23;  // 3 -> #
@@ -467,8 +406,6 @@ uint8_t mapMatrixToAscii(uint8_t row, uint8_t col) {
     if (baseKey == 0x38) return 0x2A;  // 8 -> *
     if (baseKey == 0x39) return 0x28;  // 9 -> (
     if (baseKey == 0x30) return 0x29;  // 0 -> )
-    
-    // Other symbols
     if (baseKey == 0x2D) return 0x5F;  // - -> _
     if (baseKey == 0x3D) return 0x2B;  // = -> +
     if (baseKey == 0x5B) return 0x7B;  // [ -> {
@@ -480,87 +417,9 @@ uint8_t mapMatrixToAscii(uint8_t row, uint8_t col) {
     if (baseKey == 0x2C) return 0x3C;  // , -> <
     if (baseKey == 0x2E) return 0x3E;  // . -> >
     if (baseKey == 0x2F) return 0x3F;  // / -> ?
-    
-    // Letters: lowercase to uppercase
-    if (baseKey >= 0x61 && baseKey <= 0x7A) {
-      if (matrixCapsLockOn) {
-        return baseKey;  // Shift+Caps = lowercase
-      } else {
-        return baseKey - 0x20;  // Shift = uppercase
-      }
-    }
   }
   
-  // Handle Alt combinations (0xA0-0xFF range)
-  if (matrixAltPressed && !matrixFnPressed) {
-    // Alt+Shift combinations (0xA1-0xDF range)
-    if (matrixShiftPressed) {
-      if (baseKey == 0x31) return 0xA1;  // Alt+Shift+1
-      if (baseKey == 0x27) return 0xA2;  // Alt+Shift+'
-      if (baseKey == 0x33) return 0xA3;  // Alt+Shift+3
-      if (baseKey == 0x34) return 0xA4;  // Alt+Shift+4
-      if (baseKey == 0x35) return 0xA5;  // Alt+Shift+5
-      if (baseKey == 0x37) return 0xA6;  // Alt+Shift+7
-      if (baseKey == 0x39) return 0xA8;  // Alt+Shift+9
-      if (baseKey == 0x30) return 0xA9;  // Alt+Shift+0
-      if (baseKey == 0x38) return 0xAA;  // Alt+Shift+8
-      if (baseKey == 0x3D) return 0xAB;  // Alt+Shift+=
-      if (baseKey == 0x3B) return 0xBA;  // Alt+Shift+;
-      if (baseKey == 0x2C) return 0xBC;  // Alt+Shift+,
-      if (baseKey == 0x2E) return 0xBE;  // Alt+Shift+.
-      if (baseKey == 0x2F) return 0xBF;  // Alt+Shift+/
-      if (baseKey == 0x32) return 0xC0;  // Alt+Shift+2
-      if (baseKey == 0x36) return 0xDE;  // Alt+Shift+6
-      if (baseKey == 0x2D) return 0xDF;  // Alt+Shift+-
-      
-      // Alt+Shift+letters (0xC1-0xDA)
-      if (baseKey >= 0x61 && baseKey <= 0x7A) {
-        return 0xC1 + (baseKey - 0x61);
-      }
-      
-      // Alt+Shift+brackets (0xFB-0xFE)
-      if (baseKey == 0x5B) return 0xFB;  // Alt+Shift+[
-      if (baseKey == 0x5C) return 0xFC;  // Alt+Shift+backslash
-      if (baseKey == 0x5D) return 0xFD;  // Alt+Shift+]
-      if (baseKey == 0x60) return 0xFE;  // Alt+Shift+`
-    } else {
-      // Alt only (0xA0-0xFF range, no shift)
-      if (baseKey == 0x20) return 0xA0;  // Alt+SPACE
-      if (baseKey == 0x27) return 0xA7;  // Alt+'
-      if (baseKey == 0x2C) return 0xAC;  // Alt+,
-      if (baseKey == 0x2D) return 0xAD;  // Alt+-
-      if (baseKey == 0x2E) return 0xAE;  // Alt+.
-      if (baseKey == 0x2F) return 0xAF;  // Alt+/
-      if (baseKey >= 0x30 && baseKey <= 0x39) {  // Alt+0-9
-        return 0xB0 + (baseKey - 0x30);
-      }
-      if (baseKey == 0x3B) return 0xBB;  // Alt+;
-      if (baseKey == 0x3D) return 0xBD;  // Alt+=
-      if (baseKey == 0x60) return 0xE0;  // Alt+`
-      
-      // Alt+letters (0xE1-0xFA)
-      if (baseKey >= 0x61 && baseKey <= 0x7A) {
-        return 0xE1 + (baseKey - 0x61);
-      }
-      
-      // Alt+brackets (0xDB-0xDD)
-      if (baseKey == 0x5B) return 0xDB;  // Alt+[
-      if (baseKey == 0x5C) return 0xDC;  // Alt+backslash
-      if (baseKey == 0x5D) return 0xDD;  // Alt+]
-      
-      if (baseKey == 0x7F) return 0xFF;  // Alt+DEL
-      if (baseKey == 0x80) return 0x90;  // Alt+MENU
-    }
-  }
-  
-  // Handle Caps Lock for letters (no other modifiers)
-  if (matrixCapsLockOn && !matrixShiftPressed && !matrixCtrlPressed && !matrixAltPressed) {
-    if (baseKey >= 0x61 && baseKey <= 0x7A) {
-      return baseKey - 0x20;  // Convert to uppercase
-    }
-  }
-  
-  // Return base key if no modifiers matched
+  // Return base key (letters are already uppercase in the map)
   return baseKey;
 }
 
@@ -641,9 +500,6 @@ void ps2ToAscii(uint8_t scancode) {
     if (extendedCodeNext) {
       extendedCodeNext = false;
       switch (scancode) {
-        case 0x11: // Right Alt
-          altPressed = false;
-          break;
         case 0x14: // Right Control
           ctrlPressed = false;
           break;
@@ -652,9 +508,6 @@ void ps2ToAscii(uint8_t scancode) {
     }
     
     switch (scancode) {
-      case 0x11: // Alt
-        altPressed = false;
-        break;
       case 0x12: // Left Shift
       case 0x59: // Right Shift
         shiftPressed = false;
@@ -668,52 +521,8 @@ void ps2ToAscii(uint8_t scancode) {
   
   // Handle make codes (key presses)
   switch (scancode) {
-    case 0x05: // F1
-      ps2Buffer.push(altPressed ? 0x91 : 0x81);
-      return;
-    case 0x06: // F2
-      ps2Buffer.push(altPressed ? 0x92 : 0x82);
-      return;
-    case 0x04: // F3
-      ps2Buffer.push(altPressed ? 0x93 : 0x83);
-      return;
-    case 0x0C: // F4
-      ps2Buffer.push(altPressed ? 0x94 : 0x84);
-      return;
-    case 0x03: // F5
-      ps2Buffer.push(altPressed ? 0x95 : 0x85);
-      return;
-    case 0x0B: // F6
-      ps2Buffer.push(altPressed ? 0x96 : 0x86);
-      return;
-    case 0x83: // F7
-      ps2Buffer.push(altPressed ? 0x97 : 0x87);
-      return;
-    case 0x0A: // F8
-      ps2Buffer.push(altPressed ? 0x98 : 0x88);
-      return;
-    case 0x01: // F9
-      ps2Buffer.push(altPressed ? 0x99 : 0x89);
-      return;
-    case 0x09: // F10
-      ps2Buffer.push(altPressed ? 0x9A : 0x8A);
-      return;
-    case 0x78: // F11
-      ps2Buffer.push(altPressed ? 0x9B : 0x8B);
-      return;
-    case 0x07: // F12
-      ps2Buffer.push(altPressed ? 0x9C : 0x8C);
-      return;
     case 0x0D: // Tab
       ps2Buffer.push(0x09);
-      return;
-    case 0x11: // Alt
-      if (extendedCodeNext) {
-        extendedCodeNext = false;
-        altPressed = true; // Right Alt (same as left Alt)
-      } else {
-        altPressed = true;
-      }
       return;
     case 0x12: // Left Shift
     case 0x59: // Right Shift
@@ -722,53 +531,22 @@ void ps2ToAscii(uint8_t scancode) {
     case 0x14: // Control
       if (extendedCodeNext) {
         extendedCodeNext = false;
-        ctrlPressed = true; // Right Control (same as left Control)
-      } else {
-        ctrlPressed = true;
       }
-      return;
-    case 0x1F: // Windows / Menu (Left)
-      if (extendedCodeNext) {
-        extendedCodeNext = false;
-        ps2Buffer.push(altPressed ? 0x90 : 0x80); // Right Windows / Menu
-      } else {
-        ps2Buffer.push(altPressed ? 0x90 : 0x80); // Left Windows / Menu
-      }
-      return;
-    case 0x27: // Windows / Menu (additional scancode)
-    case 0x2F:
-      ps2Buffer.push(altPressed ? 0x90 : 0x80);
-      return;
-    case 0x58: // Caps Lock
-      capsLockOn = !capsLockOn;
+      ctrlPressed = true;
       return;
     case 0x5A: // Enter
       if (extendedCodeNext) {
         extendedCodeNext = false;
-        ps2Buffer.push(0x0D); // Keypad Enter
-      } else {
-        ps2Buffer.push(0x0D); // Main Enter
       }
+      ps2Buffer.push(0x0D);
       return;
     case 0x66: // Backspace
       ps2Buffer.push(0x08);
-      return;
-    case 0x69: // End (E0 69)
-      if (extendedCodeNext) {
-        extendedCodeNext = false;
-        // End key - not in keyboard matrix, ignore
-      }
       return;
     case 0x6B: // Left Arrow (E0 6B)
       if (extendedCodeNext) {
         extendedCodeNext = false;
         ps2Buffer.push(0x1C);
-      }
-      return;
-    case 0x6C: // Home (E0 6C)
-      if (extendedCodeNext) {
-        extendedCodeNext = false;
-        // Home key - not in keyboard matrix, ignore
       }
       return;
     case 0x70: // Insert (E0 70)
@@ -804,14 +582,15 @@ void ps2ToAscii(uint8_t scancode) {
     case 0x76: // Escape
       ps2Buffer.push(0x1B);
       return;
-    case 0x73: // 5
-    case 0x77: // Num Lock
-    case 0x79: // +
-    case 0x7A: // Page Down
-    case 0x7B: // "/"
-    case 0x7C: // *
-    case 0x7D: // Page Up
-    case 0x7E: // Scroll Lock
+    // Ignored keys: F-keys, Alt, GUI, CapsLock, navigation, keypad
+    case 0x01: case 0x03: case 0x04: case 0x05: case 0x06:
+    case 0x07: case 0x09: case 0x0A: case 0x0B: case 0x0C:
+    case 0x11: case 0x1F: case 0x27: case 0x2F:
+    case 0x58: case 0x69: case 0x6C:
+    case 0x73: case 0x77: case 0x78: case 0x79:
+    case 0x7A: case 0x7B: case 0x7C: case 0x7D: case 0x7E:
+    case 0x83:
+      extendedCodeNext = false;
       return;
   }
 
@@ -928,14 +707,14 @@ void ps2ToAscii(uint8_t scancode) {
   static const char unshifted[] = {
     0,   0,   0,   0,   0,   0,   0,   0,     // 0x00-0x07
     0,   0,   0,   0,   0,   0, '`',   0,     // 0x08-0x0F
-    0,   0,   0,   0,   0, 'q', '1',   0,     // 0x10-0x17
-    0,   0, 'z', 's', 'a', 'w', '2',   0,     // 0x18-0x1F
-    0, 'c', 'x', 'd', 'e', '4', '3',   0,     // 0x20-0x27
-    0, ' ', 'v', 'f', 't', 'r', '5',   0,     // 0x28-0x2F
-    0, 'n', 'b', 'h', 'g', 'y', '6',   0,     // 0x30-0x37
-    0,   0, 'm', 'j', 'u', '7', '8',   0,     // 0x38-0x3F
-    0, ',', 'k', 'i', 'o', '0', '9',   0,     // 0x40-0x47
-    0, '.', '/', 'l', ';', 'p', '-',   0,     // 0x48-0x4F
+    0,   0,   0,   0,   0, 'Q', '1',   0,     // 0x10-0x17
+    0,   0, 'Z', 'S', 'A', 'W', '2',   0,     // 0x18-0x1F
+    0, 'C', 'X', 'D', 'E', '4', '3',   0,     // 0x20-0x27
+    0, ' ', 'V', 'F', 'T', 'R', '5',   0,     // 0x28-0x2F
+    0, 'N', 'B', 'H', 'G', 'Y', '6',   0,     // 0x30-0x37
+    0,   0, 'M', 'J', 'U', '7', '8',   0,     // 0x38-0x3F
+    0, ',', 'K', 'I', 'O', '0', '9',   0,     // 0x40-0x47
+    0, '.', '/', 'L', ';', 'P', '-',   0,     // 0x48-0x4F
     0,   0,'\'',   0, '[', '=',   0,   0,     // 0x50-0x57
     0,   0,   0, ']',   0,'\\',   0,   0,     // 0x58-0x5F
   };
@@ -962,24 +741,14 @@ void ps2ToAscii(uint8_t scancode) {
   
   char result;
   
-  // Get base character
+  // Get character (letters are always uppercase in both tables)
   if (shiftPressed) {
     result = shifted[scancode];
   } else {
     result = unshifted[scancode];
   }
   
-  // Apply caps lock to letters only
-  if (result >= 'a' && result <= 'z' && capsLockOn && !shiftPressed) {
-    result = result - 'a' + 'A';
-  } else if (result >= 'A' && result <= 'Z' && capsLockOn && shiftPressed) {
-    result = result - 'A' + 'a';
+  if (result != 0) {
+    ps2Buffer.push(result);
   }
-
-  // Handle Alt
-  if (altPressed) {
-    result |= 0x80; // Extended ASCII
-  }
-  
-  ps2Buffer.push(result);
 }
