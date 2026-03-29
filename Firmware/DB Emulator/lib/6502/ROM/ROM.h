@@ -13,7 +13,8 @@ class ROM {
     String file = "None";
     
     uint8_t read(uint16_t index);
-    void write(uint16_t index, uint8_t value);
+    void write(uint16_t index, uint8_t value);  // No-op (ROM is read-only on bus)
+    void load(uint16_t index, uint8_t value);   // For loading ROM images
 };
 
 #endif

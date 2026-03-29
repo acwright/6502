@@ -6,8 +6,13 @@
 /**
  * @brief Keyboard Encoder Attachment for GPIO Card
  * 
- * Emulates a keyboard encoder that presents ASCII values on Port A or Port B.
- * Can act as a PS/2 keyboard interface (Port A) or keyboard encoder (Port B).
+ * Translates USB HID key events into ASCII bytes. Only key press events
+ * produce output — releases are used solely to track modifier state.
+ * Letters are always uppercase (0x41-0x5A). Only Shift and Ctrl modifiers
+ * are recognized; all others (Alt, Caps Lock, GUI/Menu) are ignored.
+ * 
+ * Modifier priority: Ctrl > Shift > Base.
+ * Shift only affects number and symbol keys (not letters).
  * 
  * Port A (PS/2 Keyboard Interface):
  * - Port A: ASCII character output when enabled
@@ -19,8 +24,9 @@
  * - CB2: Enable/disable control (LOW = enabled, HIGH = disabled)
  * - CB1: Data ready interrupt (triggered when new character available)
  * 
- * When a key is pressed, the ASCII value is buffered and an interrupt
+ * When a key is pressed, the ASCII value is latched and an interrupt
  * is generated on the appropriate port. Reading the port clears the data-ready flag.
+ * There is no input buffer — only the most recent keypress is available.
  */
 class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
   private:
@@ -39,18 +45,15 @@ class GPIOKeyboardEncoderAttachment : public GPIOAttachment {
     // Modifier key states
     bool shiftPressed;       // Shift modifier active
     bool ctrlPressed;        // Ctrl modifier active
-    bool altPressed;         // Alt modifier active
-    bool menuPressed;        // Menu modifier active
-    bool capsLockActive;     // Caps Lock toggle state
     
     /**
-     * @brief Map USB HID keycode with modifiers to hex value
+     * @brief Map USB HID keycode with modifiers to ASCII value
      * 
-     * Maps a key press with active modifiers to the appropriate hex value
-     * according to the keyboard mapping table.
+     * Priority: Ctrl > Shift > Base.
+     * Letters are always uppercase. Shift only affects numbers/symbols.
      * 
      * @param usbHidKeycode USB HID keycode
-     * @return uint8_t Mapped hex value (0x00-0xFF)
+     * @return uint8_t Mapped ASCII value (0x00 for unmapped or Ctrl+2)
      */
     uint8_t mapKeyWithModifiers(uint8_t usbHidKeycode);
     

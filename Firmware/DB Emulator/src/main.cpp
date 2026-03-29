@@ -4,7 +4,6 @@
 #include <Bounce2.h>
 #include <SD.h>
 #include <EEPROM.h>
-#include <map>
 #include <USBHost_t36.h>
 #include <QNEthernet.h>
 #include <AsyncWebServer_Teensy41.h>
@@ -126,7 +125,6 @@ __attribute__((aligned(32))) uint8_t ramData1[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 __attribute__((aligned(32))) uint8_t ramData2[RC_BLOCK_SIZE * RC_BLOCK_COUNT];
 #endif
 
-
 static uint32_t cachedCpuFrequency = 1000000;
 static uint8_t cachedCpuFreqIndex = 0xFF;
 
@@ -165,7 +163,8 @@ VideoCard videoCard = VideoCard();
 // GPIO Attachments
 GPIOKeyboardMatrixAttachment keyboardMatrixAttachment = GPIOKeyboardMatrixAttachment(10);     // Priority 10
 GPIOKeyboardEncoderAttachment keyboardEncoderAttachment = GPIOKeyboardEncoderAttachment(20);  // Priority 20 (supports both Port A and B)
-GPIOJoystickAttachment joystickAttachment = GPIOJoystickAttachment(false, 100);               // Port B, Priority 100
+GPIOJoystickAttachment joystickAttachmentA = GPIOJoystickAttachment(true, 100);              // Port A, Priority 100
+GPIOJoystickAttachment joystickAttachmentB = GPIOJoystickAttachment(false, 100);              // Port B, Priority 100
 
 //
 // MAIN
@@ -191,8 +190,9 @@ void setup() {
   gpioCard.attachToPortA(&keyboardEncoderAttachment);
   gpioCard.attachToPortB(&keyboardEncoderAttachment);
   
-  // Joystick (Port B) - lowest priority, fallback
-  gpioCard.attachToPortB(&joystickAttachment);
+  // Joystick (Port A and Port B) - lowest priority, fallback
+  gpioCard.attachToPortA(&joystickAttachmentA);
+  gpioCard.attachToPortB(&joystickAttachmentB);
   
   initPins();
   initButtons();
@@ -538,7 +538,7 @@ void onJoystick() {
     if (dpadLeft || axisX < -analogThreshold)  mappedButtons |= 0x40;  // LEFT (bit 6)
     if (dpadRight || axisX > analogThreshold)  mappedButtons |= 0x80;  // RIGHT (bit 7)
     
-    joystickAttachment.updateJoystick(mappedButtons);
+    joystickAttachmentB.updateJoystick(mappedButtons);
     
     #ifdef JOYSTICK_DEBUG
     Serial.print("Joystick: Raw=0x");
@@ -914,7 +914,7 @@ void loadROMPath(String path) {
     uint i = 0;
 
     while(file.available()) {
-      rom.write(i, file.read());
+      rom.load(i, file.read());
       i++;
     }
   }
@@ -1496,12 +1496,16 @@ String getContentType(String path) {
 // ---------------------------------------------------------------------------
 
 struct CachedFile {
+  String   uri;
   uint8_t* data;
   size_t   size;
   String   contentType;
+  bool     valid;
 };
 
-static std::map<String, CachedFile> wwwCache;
+#define WWW_CACHE_MAX 64
+static CachedFile wwwCache[WWW_CACHE_MAX];
+static size_t wwwCacheCount = 0;
 
 static void cacheDir(const String& sdPath, const String& uriPrefix) {
   File dir = SD.open(sdPath.c_str());
@@ -1526,8 +1530,13 @@ static void cacheDir(const String& sdPath, const String& uriPrefix) {
           if (n <= 0) break;
           got += n;
         }
-        if (got == sz) {
-          wwwCache[uri] = { buf, sz, getContentType(fullPath) };
+        if (got == sz && wwwCacheCount < WWW_CACHE_MAX) {
+          wwwCache[wwwCacheCount].uri = uri;
+          wwwCache[wwwCacheCount].data = buf;
+          wwwCache[wwwCacheCount].size = sz;
+          wwwCache[wwwCacheCount].contentType = getContentType(fullPath);
+          wwwCache[wwwCacheCount].valid = true;
+          wwwCacheCount++;
         } else {
           delete[] buf;
         }
@@ -1548,15 +1557,23 @@ void sendSDFile(AsyncWebServerRequest *request, String path) {
   // Derive the URI key from the path: strip the leading "WWW" prefix.
   String uri = path.substring(3); // "WWW/assets/main.js" -> "/assets/main.js"
 
-  auto it = wwwCache.find(uri);
-  if (it == wwwCache.end()) {
+  // Find URI in cache
+  CachedFile* found = nullptr;
+  for (size_t i = 0; i < wwwCacheCount; i++) {
+    if (wwwCache[i].valid && wwwCache[i].uri == uri) {
+      found = &wwwCache[i];
+      break;
+    }
+  }
+  
+  if (!found) {
     request->send(404);
     return;
   }
 
-  const uint8_t* data      = it->second.data;
-  const size_t   totalSize = it->second.size;
-  const String&  ct        = it->second.contentType;
+  const uint8_t* data      = found->data;
+  const size_t   totalSize = found->size;
+  const String&  ct        = found->contentType;
 
   // Serve directly from the in-memory cache using AsyncProgmemResponse.
   // The data pointer remains valid for the lifetime of the program.
@@ -1801,7 +1818,16 @@ FASTRUN void onServerNotFound(AsyncWebServerRequest *request) {
   String uri = request->url();
   String path = "WWW" + uri;
 
-  if (wwwCache.count(uri)) {
+  // Check if URI exists in cache
+  bool found = false;
+  for (size_t i = 0; i < wwwCacheCount; i++) {
+    if (wwwCache[i].valid && wwwCache[i].uri == uri) {
+      found = true;
+      break;
+    }
+  }
+  
+  if (found) {
     sendSDFile(request, path);
     return;
   }

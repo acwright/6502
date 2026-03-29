@@ -6,7 +6,7 @@ Cart::Cart() {
   this->data = new uint8_t[size];
 
   for (uint16_t i = 0x0000; i < size; i++) {
-    this->data[i] = 0xEA; // Load with NOPs
+    this->data[i] = 0x00;
   }
 }
 

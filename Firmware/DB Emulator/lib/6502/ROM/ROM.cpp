@@ -6,7 +6,7 @@ ROM::ROM() {
   this->data = new uint8_t[size];
 
   for (uint16_t i = 0x0000; i < size; i++) {
-    this->data[i] = 0xEA; // Load with NOPs
+    this->data[i] = 0x00;
   }
 }
 
@@ -23,6 +23,10 @@ uint8_t ROM::read(uint16_t index) {
 }
 
 void ROM::write(uint16_t index, uint8_t value) {
+  // ROM is read-only from the CPU bus perspective
+}
+
+void ROM::load(uint16_t index, uint8_t value) {
   if (index <= (ROM_END - ROM_START)) {
     this->data[index] = value;
   }
