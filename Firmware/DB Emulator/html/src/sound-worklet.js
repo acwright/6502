@@ -3,6 +3,8 @@
 // ---------------------------------------------------------------------------
 
 const SAMPLE_RATE = 44100;
+const SID_CLOCK   = 1000000; // ~1 MHz SID clock rate
+const CYCLES_PER_SAMPLE = SID_CLOCK / SAMPLE_RATE; // ~22.68
 
 // ADSR envelope states
 const ENV_ATTACK  = 0;
@@ -11,21 +13,31 @@ const ENV_SUSTAIN = 2;
 const ENV_RELEASE = 3;
 const ENV_IDLE    = 4;
 
-// Attack rate table (ms values from SID datasheet, converted to per-sample increments)
+// Rate tables — SID clock cycle thresholds between each envelope step
 const ATTACK_RATES = [
   2, 8, 16, 24, 38, 56, 68, 80,
   100, 250, 500, 800, 1000, 3000, 5000, 8000,
 ];
 
-// Decay/Release rate table (ms)
 const DECAY_RELEASE_RATES = [
   6, 24, 48, 72, 114, 168, 204, 240,
   300, 750, 1500, 2400, 3000, 9000, 15000, 24000,
 ];
 
-function msToIncrement(ms) {
-  if (ms <= 0) return 1.0;
-  return 1.0 / ((ms / 1000) * SAMPLE_RATE);
+// Sustain level lookup: 4-bit register → 8-bit level (matching TS emulator)
+const SUSTAIN_LEVELS = [
+  0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+  0x88, 0x99, 0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF,
+];
+
+// Exponential counter period thresholds for decay/release
+function exponentialPeriod(level) {
+  if (level >= 0x5D) return 1;
+  if (level >= 0x36) return 2;
+  if (level >= 0x1A) return 4;
+  if (level >= 0x0E) return 8;
+  if (level >= 0x06) return 16;
+  return 30;
 }
 
 class Voice {
@@ -39,8 +51,11 @@ class Voice {
     this.sustainRelease = 0;
 
     this.phase = 0;
-    this.envLevel = 0;
+    this.envLevel = 0;          // 0-255 integer (matches TS emulator)
     this.envState = ENV_IDLE;
+    this.envCounter = 0;        // SID cycle counter
+    this.expCounter = 0;        // exponential sub-counter
+    this.expPeriod = 1;
     this.noiseShift = 0x7FFFF8;
     this.prevGate = 0;
   }
@@ -64,47 +79,84 @@ class Voice {
 
   get attackRate()  { return (this.attackDecay >> 4) & 0x0F; }
   get decayRate()   { return this.attackDecay & 0x0F; }
-  get sustainLevel() { return ((this.sustainRelease >> 4) & 0x0F) / 15.0; }
+  get sustainLevelInt() { return SUSTAIN_LEVELS[(this.sustainRelease >> 4) & 0x0F]; }
   get releaseRate() { return this.sustainRelease & 0x0F; }
 
+  // Clock the envelope by the number of SID cycles that one audio sample represents.
+  // This mirrors the TS emulator's clockEnvelope() but batches ~22.68 cycles per call.
   updateEnvelope() {
     const gate = this.gate;
 
     // Gate transition detection
     if (gate && !this.prevGate) {
       this.envState = ENV_ATTACK;
+      this.envCounter = 0;
+      this.expCounter = 0;
+      this.expPeriod = 1;
     } else if (!gate && this.prevGate) {
       this.envState = ENV_RELEASE;
+      this.envCounter = 0;
     }
     this.prevGate = gate;
 
+    // Advance the cycle counter by SID cycles per audio sample
+    this.envCounter += CYCLES_PER_SAMPLE;
+
     switch (this.envState) {
       case ENV_ATTACK: {
-        const inc = msToIncrement(ATTACK_RATES[this.attackRate]);
-        this.envLevel += inc;
-        if (this.envLevel >= 1.0) {
-          this.envLevel = 1.0;
-          this.envState = ENV_DECAY;
+        const rate = ATTACK_RATES[this.attackRate];
+        while (this.envCounter >= rate) {
+          this.envCounter -= rate;
+          this.envLevel++;
+          if (this.envLevel >= 0xFF) {
+            this.envLevel = 0xFF;
+            this.envState = ENV_DECAY;
+            this.envCounter = 0;
+            this.expCounter = 0;
+            this.expPeriod = exponentialPeriod(this.envLevel);
+            break;
+          }
         }
         break;
       }
       case ENV_DECAY: {
-        const dec = msToIncrement(DECAY_RELEASE_RATES[this.decayRate]);
-        this.envLevel -= dec;
-        if (this.envLevel <= this.sustainLevel) {
-          this.envLevel = this.sustainLevel;
-          this.envState = ENV_SUSTAIN;
+        const rate = DECAY_RELEASE_RATES[this.decayRate];
+        const sustain = this.sustainLevelInt;
+        while (this.envCounter >= rate) {
+          this.envCounter -= rate;
+          this.expCounter++;
+          if (this.expCounter >= this.expPeriod) {
+            this.expCounter = 0;
+            if (this.envLevel > sustain) {
+              this.envLevel--;
+              this.expPeriod = exponentialPeriod(this.envLevel);
+            }
+            if (this.envLevel <= sustain) {
+              this.envLevel = sustain;
+              this.envState = ENV_SUSTAIN;
+              break;
+            }
+          }
         }
         break;
       }
       case ENV_SUSTAIN:
-        this.envLevel = this.sustainLevel;
+        this.envLevel = this.sustainLevelInt;
         break;
       case ENV_RELEASE: {
-        const dec = msToIncrement(DECAY_RELEASE_RATES[this.releaseRate]);
-        this.envLevel -= dec;
-        if (this.envLevel <= 0) {
-          this.envLevel = 0;
+        const rate = DECAY_RELEASE_RATES[this.releaseRate];
+        while (this.envCounter >= rate) {
+          this.envCounter -= rate;
+          this.expCounter++;
+          if (this.expCounter >= this.expPeriod) {
+            this.expCounter = 0;
+            if (this.envLevel > 0) {
+              this.envLevel--;
+              this.expPeriod = exponentialPeriod(this.envLevel);
+            }
+          }
+        }
+        if (this.envLevel === 0) {
           this.envState = ENV_IDLE;
         }
         break;
@@ -116,6 +168,9 @@ class Voice {
   }
 
   generate() {
+    // Must update envelope BEFORE the idle check so gate transitions are detected
+    this.updateEnvelope();
+
     if (this.envState === ENV_IDLE) return 0;
 
     // Advance phase: SID uses a 24-bit phase accumulator at ~1 MHz
@@ -161,8 +216,7 @@ class Voice {
 
     if (waveCount > 1) sample /= waveCount;
 
-    this.updateEnvelope();
-    return sample * this.envLevel;
+    return sample * (this.envLevel / 255);
   }
 }
 
@@ -187,6 +241,7 @@ class SoundProcessor extends AudioWorkletProcessor {
         v.attackDecay = 0; v.sustainRelease = 0;
         v.phase = 0; v.envLevel = 0;
         v.envState = ENV_IDLE;
+        v.envCounter = 0; v.expCounter = 0; v.expPeriod = 1;
         v.prevGate = 0;
       });
       this.volume = 15;

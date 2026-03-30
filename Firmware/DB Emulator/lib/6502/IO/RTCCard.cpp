@@ -3,6 +3,9 @@
 
 RTCCard::RTCCard() {
   cpuFrequency = 1000000; // Default 1MHz, will be updated by tick()
+  lastCachedFrequency = 0;
+  cachedTransferCycles = 0;
+  cachedWatchdogCyclesPerCenti = 0;
   initializeWithCurrentTime();
 }
 
@@ -131,8 +134,13 @@ void RTCCard::write(uint16_t address, uint8_t value) {
 }
 
 uint8_t RTCCard::tick(uint32_t cpuFrequency) {
-  // Update the CPU frequency for timing calculations
-  this->cpuFrequency = cpuFrequency;
+  // Update the CPU frequency and cached division results
+  if (cpuFrequency != this->lastCachedFrequency) {
+    this->cpuFrequency = cpuFrequency;
+    this->lastCachedFrequency = cpuFrequency;
+    this->cachedTransferCycles = max(1UL, (cpuFrequency * 366UL) / 1000000UL);
+    this->cachedWatchdogCyclesPerCenti = max(1UL, cpuFrequency / 100UL);
+  }
   
   bool teEnabled = (controlB & 0x80) != 0;
   if (teEnabled != lastTEEnabled) {
@@ -147,7 +155,7 @@ uint8_t RTCCard::tick(uint32_t cpuFrequency) {
   }
 
   bool transferReady = teEnabled &&
-    transferCycleCounter >= getTransferCyclesRequired();
+    transferCycleCounter >= cachedTransferCycles;
 
   if (transferReady && pendingUserToInternal) {
     copyUserToInternal();
@@ -302,7 +310,7 @@ uint32_t RTCCard::getTransferCyclesRequired() {
 void RTCCard::markUserTimeWrite() {
   pendingUserToInternal = true;
   if ((controlB & 0x80) != 0 &&
-      transferCycleCounter >= getTransferCyclesRequired()) {
+      transferCycleCounter >= cachedTransferCycles) {
     copyUserToInternal();
     pendingUserToInternal = false;
     userSyncNeeded = false;
@@ -425,9 +433,8 @@ void RTCCard::stepWatchdog() {
   if ((controlB & 0x02) == 0) return; // WDE disabled
   if (watchdogCounterCentis == 0) return;
 
-  uint32_t cyclesPerCentisecond = max(1UL, cpuFrequency / 100UL);
   watchdogCycleCounter++;
-  if (watchdogCycleCounter < cyclesPerCentisecond) return;
+  if (watchdogCycleCounter < cachedWatchdogCyclesPerCenti) return;
 
   watchdogCycleCounter = 0;
   watchdogCounterCentis--;

@@ -72,14 +72,32 @@ export function startMock({ onSoundWrite, onVideoDataWrite, onVideoRegWrite, onV
     onSoundWrite(0x18, 0x0F);                // Max volume
   };
 
+  // BIOS-style beep: mirrors the exact register writes from BeepImpl/SidPlayNote
+  const biosBeep = () => {
+    console.log('[MOCK] Playing BIOS-style beep');
+    onSoundWrite(0x18, 0x0F);                // Volume = max (InitSIDImpl)
+    onSoundWrite(0x00, 0x20);                // Voice 1 Freq Lo ($1F20 ≈ 1000 Hz)
+    onSoundWrite(0x01, 0x1F);                // Voice 1 Freq Hi
+    onSoundWrite(0x05, 0x09);                // Attack=0, Decay=9
+    onSoundWrite(0x06, 0x00);                // Sustain=0, Release=0 (beep override)
+    onSoundWrite(0x04, 0x11);                // Triangle + Gate ON
+
+    // Gate off after ~200ms (simulates BIOS delay loop)
+    setTimeout(() => {
+      onSoundWrite(0x04, 0x10);              // Triangle, Gate OFF (SidSilence)
+      onSoundWrite(0x00, 0x00);              // Freq Lo = 0
+      onSoundWrite(0x01, 0x00);              // Freq Hi = 0
+      console.log('[MOCK] Beep ended');
+    }, 200);
+  };
+
   setupVideo();
   writeTestPattern();
-  writeSoundTone();
+  biosBeep();                   // Immediate one-shot beep for sound debugging
 
   const intervalId = setInterval(() => {
     frame++;
     writeTestPattern();
-    if (frame % 30 === 0) writeSoundTone();
   }, 1000 / 60);
 
   return function stop() {

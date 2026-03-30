@@ -17,6 +17,9 @@
 
 #if PICO_BUILD
 #include "pico/stdlib.h"
+#elif defined(ARDUINO_TEENSY41)
+#define __not_in_flash(x)
+#define __time_critical_func(fn) __attribute__((section(".fastrun"))) fn
 #else
 #define __not_in_flash(x)
 #define __time_critical_func(fn) fn

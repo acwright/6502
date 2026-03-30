@@ -520,7 +520,7 @@ function bindEvents() {
     try {
       await avStream.connect();
       videoRenderer.init(dom.videoCanvas);
-      soundEmulator.init();
+      await soundEmulator.init();
       updateAvStatus(true);
       avStream.startReading({
         onSoundWrite: (reg, val) => soundEmulator.onRegWrite(reg, val),
@@ -543,9 +543,39 @@ function bindEvents() {
     }
   });
 
-  dom.soundMute.addEventListener('click', () => {
+  // Start with correct muted label
+  dom.soundMute.textContent = 'Unmute';
+
+  let firstInit = true;
+
+  dom.soundMute.addEventListener('click', async () => {
+    // Ensure AudioContext is initialized (needs user gesture)
+    await soundEmulator.init();
     soundEmulator.setMuted(!soundEmulator.getMuted());
     dom.soundMute.textContent = soundEmulator.getMuted() ? 'Unmute' : 'Mute';
+
+    // Fire a test beep on unmute so we can verify sound works
+    if (!soundEmulator.getMuted()) {
+      // On first init the worklet needs time to start processing after
+      // being connected to the audio destination.
+      if (firstInit) {
+        firstInit = false;
+        await new Promise(r => setTimeout(r, 500));
+      }
+      console.log('[DEBUG] Test beep fired from Mute button');
+      soundEmulator.onRegWrite(0x18, 0x0F); // Volume max
+      soundEmulator.onRegWrite(0x00, 0x20); // Freq Lo
+      soundEmulator.onRegWrite(0x01, 0x1F); // Freq Hi
+      soundEmulator.onRegWrite(0x05, 0x09); // Attack=0, Decay=9
+      soundEmulator.onRegWrite(0x06, 0x00); // Sustain=0, Release=0
+      soundEmulator.onRegWrite(0x04, 0x11); // Triangle + Gate ON
+      setTimeout(() => {
+        soundEmulator.onRegWrite(0x04, 0x10); // Gate OFF
+        soundEmulator.onRegWrite(0x00, 0x00);
+        soundEmulator.onRegWrite(0x01, 0x00);
+        console.log('[DEBUG] Test beep ended');
+      }, 200);
+    }
   });
 }
 
@@ -601,10 +631,47 @@ function updateAvStatus(connected) {
 // Bootstrap
 // ---------------------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   cacheDom();
   bindEvents();
   refreshAll();
+
+  // --- DEV MOCK: auto-start sound + video mock when running under Vite dev server ---
+  if (import.meta.env.DEV) {
+    const { startMock } = await import('../mock/av-stream-mock.js');
+    videoRenderer.init(dom.videoCanvas);
+
+    // Browser requires a user gesture before AudioContext can start.
+    // Start the mock immediately for video, but defer sound until first click.
+    let soundReady = false;
+    const mockCallbacks = {
+      onSoundWrite: (reg, val) => soundEmulator.onRegWrite(reg, val),
+      onVideoDataWrite: (val) => videoRenderer.onDataWrite(val),
+      onVideoRegWrite: (reg, val) => videoRenderer.onRegWrite(reg, val),
+      onVideoAddrSet: (hi, lo) => videoRenderer.onAddrSet(hi, lo),
+      onReset: () => { videoRenderer.onReset(); soundEmulator.onReset(); },
+    };
+    startMock(mockCallbacks);
+    updateAvStatus(true);
+    console.log('[DEV] AV mock started — click anywhere to enable sound');
+
+    document.addEventListener('click', async () => {
+      if (soundReady) return;
+      soundReady = true;
+      await soundEmulator.init();
+      // Re-fire a test beep now that AudioContext is live
+      mockCallbacks.onSoundWrite(0x18, 0x0F); // Volume max
+      mockCallbacks.onSoundWrite(0x00, 0x20); // Freq Lo
+      mockCallbacks.onSoundWrite(0x01, 0x1F); // Freq Hi
+      mockCallbacks.onSoundWrite(0x05, 0x09); // AD
+      mockCallbacks.onSoundWrite(0x06, 0x00); // SR
+      mockCallbacks.onSoundWrite(0x04, 0x11); // Triangle + Gate
+      setTimeout(() => {
+        mockCallbacks.onSoundWrite(0x04, 0x10); // Gate off
+      }, 200);
+      console.log('[DEV] Sound enabled after user gesture');
+    }, { once: true });
+  }
 
   // Keyboard forwarding
   document.addEventListener('keydown', (event) => {

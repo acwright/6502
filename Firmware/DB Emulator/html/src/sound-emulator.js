@@ -4,7 +4,7 @@
 
 let audioCtx = null;
 let workletNode = null;
-let _muted = false;
+let _muted = true;
 
 export async function init() {
   if (audioCtx) return;
@@ -12,8 +12,9 @@ export async function init() {
   audioCtx = new AudioContext({ sampleRate: 44100 });
 
   // AudioWorklet must load from a separate file (not bundled)
-  // Use absolute path so it resolves correctly when served from Teensy
-  await audioCtx.audioWorklet.addModule('/assets/sound-worklet.js');
+  // Dev server serves source directly; production build outputs to /assets/
+  const workletUrl = import.meta.env.DEV ? '/src/sound-worklet.js' : '/assets/sound-worklet.js';
+  await audioCtx.audioWorklet.addModule(workletUrl);
   workletNode = new AudioWorkletNode(audioCtx, 'sound-processor');
 
   if (!_muted) {

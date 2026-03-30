@@ -55,6 +55,7 @@ class SerialCard: public IO {
 
     // Pending transmit flag
     bool txPending;
+    uint8_t rxPollCounter;
 
   public:
     SerialCard();

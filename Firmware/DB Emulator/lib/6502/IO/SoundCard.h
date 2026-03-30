@@ -42,6 +42,8 @@
 class SoundCard: public IO {
   private:
     uint8_t registers[32];
+    uint32_t v3Accumulator;
+    uint32_t v3NoiseShift;
 
   public:
     SoundCard();

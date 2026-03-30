@@ -47,23 +47,26 @@ void SerialCard::write(uint16_t address, uint8_t value) {
 }
 
 uint8_t SerialCard::tick(uint32_t cpuFrequency) {
-  // Handle receiving data immediately (no baud rate delay)
-  if (SerialUSB1.available()) {
-    if ((this->status & SC_STATUS_RX_REG_FULL) != 0x00) {
-      // Overrun: new data arrived before previous data was read
-      this->status |= SC_STATUS_OVERRUN;
-    } else {
-      this->rx = SerialUSB1.read();
-      this->status |= SC_STATUS_RX_REG_FULL;
+  // Rate-limit RX polling: check every 64 cycles (~15,625 checks/sec at 1MHz)
+  if (++rxPollCounter >= 64) {
+    rxPollCounter = 0;
+    if (SerialUSB1.available()) {
+      if ((this->status & SC_STATUS_RX_REG_FULL) != 0x00) {
+        // Overrun: new data arrived before previous data was read
+        this->status |= SC_STATUS_OVERRUN;
+      } else {
+        this->rx = SerialUSB1.read();
+        this->status |= SC_STATUS_RX_REG_FULL;
 
-      // Receiver Echo Mode
-      if ((this->cmd & SC_CMD_REM) != 0x00) {
-        SerialUSB1.write(this->rx);
-      }
+        // Receiver Echo Mode
+        if ((this->cmd & SC_CMD_REM) != 0x00) {
+          SerialUSB1.write(this->rx);
+        }
 
-      // Receiver Interrupt (if not disabled)
-      if ((this->cmd & SC_CMD_IRD) == 0x00) {
-        this->status |= SC_STATUS_IRQ;
+        // Receiver Interrupt (if not disabled)
+        if ((this->cmd & SC_CMD_IRD) == 0x00) {
+          this->status |= SC_STATUS_IRQ;
+        }
       }
     }
   }
@@ -98,4 +101,5 @@ void SerialCard::reset() {
   this->status = 0x00 | SC_STATUS_TX_REG_EMPTY;
   
   this->txPending = false;
+  this->rxPollCounter = 0;
 }

@@ -88,6 +88,11 @@ class RTCCard: public IO {
     bool userSyncNeeded;
     bool lastTEEnabled;
 
+    // Cached division results (recomputed when cpuFrequency changes)
+    uint32_t cachedTransferCycles;
+    uint32_t cachedWatchdogCyclesPerCenti;
+    uint32_t lastCachedFrequency;
+
     // Helper methods
     void initializeWithCurrentTime();
     uint8_t decimalToBCD(uint8_t decimal);

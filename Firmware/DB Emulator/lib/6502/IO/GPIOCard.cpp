@@ -289,38 +289,14 @@ uint8_t GPIOCard::tick(uint32_t cpuFrequency) {
     }
   }
   
-  // Tick all attachments
+  // Check for attachment interrupts (no tick — attachments are event-driven)
   for (uint8_t i = 0; i < portA_attachmentCount; i++) {
-    if (portA_attachments[i] != nullptr) {
-      portA_attachments[i]->tick(cpuFrequency);
-    }
+    if (portA_attachments[i]->hasCA1Interrupt()) setIRQFlag(IRQ_CA1);
+    if (portA_attachments[i]->hasCA2Interrupt()) setIRQFlag(IRQ_CA2);
   }
   for (uint8_t i = 0; i < portB_attachmentCount; i++) {
-    if (portB_attachments[i] != nullptr) {
-      portB_attachments[i]->tick(cpuFrequency);
-    }
-  }
-  
-  // Check for attachment interrupts
-  for (uint8_t i = 0; i < portA_attachmentCount; i++) {
-    if (portA_attachments[i] != nullptr) {
-      if (portA_attachments[i]->hasCA1Interrupt()) {
-        setIRQFlag(IRQ_CA1);
-      }
-      if (portA_attachments[i]->hasCA2Interrupt()) {
-        setIRQFlag(IRQ_CA2);
-      }
-    }
-  }
-  for (uint8_t i = 0; i < portB_attachmentCount; i++) {
-    if (portB_attachments[i] != nullptr) {
-      if (portB_attachments[i]->hasCB1Interrupt()) {
-        setIRQFlag(IRQ_CB1);
-      }
-      if (portB_attachments[i]->hasCB2Interrupt()) {
-        setIRQFlag(IRQ_CB2);
-      }
-    }
+    if (portB_attachments[i]->hasCB1Interrupt()) setIRQFlag(IRQ_CB1);
+    if (portB_attachments[i]->hasCB2Interrupt()) setIRQFlag(IRQ_CB2);
   }
   
   // Return IRQ status (bit 7 of IFR)

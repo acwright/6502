@@ -164,32 +164,30 @@ input[type="checkbox"] {
   text-align: center;
   font-weight: bold;
   font-size: 18px;
+  padding: 4px 0px;
 }
 .emulator-status.red { color: #ff0000; }
 
 .system-columns {
   display: grid;
-  grid-template-columns: 1fr 1fr 1.2fr;
+  grid-template-columns: 1fr 1fr;
   gap: 8px;
-  align-items: start;
+  align-items: center;
+  height: 100%;
+  padding: 16px 0px;
 }
 
 .system-col {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
-.system-col-cpu .cpu-registers {
-  gap: 6px;
-}
-
-.system-col-buses .cpu-bus {
-  margin-bottom: 8px;
+.system-col-info {
+  justify-items: center;
 }
 
 .emulator-info-row {
-  padding: 3px 0px;
   text-align: left;
 }
 
@@ -220,9 +218,7 @@ input[type="checkbox"] {
 
 #video-canvas {
   image-rendering: pixelated;
-  width: 100%;
-  height: auto;
-  max-height: 100%;
+  height: 100%;
 }
 
 .av-status-disconnected {
@@ -254,10 +250,12 @@ input[type="checkbox"] {
 
 .cpu-registers {
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 0px;
   text-align: center;
-  font-size: 14px;
+  font-size: 12px;
+  padding: 16px;
 }
 
 .cpu-register-hex {
@@ -267,7 +265,6 @@ input[type="checkbox"] {
 
 .cpu-register-dec {
   color: gray;
-  display: inline-block;
   width: 28px;
   text-align: left;
 }

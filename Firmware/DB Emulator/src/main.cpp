@@ -101,6 +101,7 @@ volatile uint8_t freqIndex = FREQ_SIZE - 1;
 bool isRunning = false;
 bool isStepping = false;
 bool autoStart = false;
+volatile bool cartLoaded = false;
 
 uint8_t inputCtx = INPUT_CTX_ROM;
 
@@ -249,7 +250,12 @@ void loop() {
   }
 
   if (isRunning && !timerMode) {
-    tick();
+    // Batch multiple ticks per loop() iteration to amortize USB/button overhead.
+    // At 1MHz each tick is ~0.3-0.5µs on Cortex-M7; 512 ticks ≈ 150-250µs per batch,
+    // leaving loop() responsive at ~4000 iterations/sec for USB and input polling.
+    for (uint16_t i = 0; i < 2048; i++) {
+      tick();
+    }
   }
 }
 
@@ -631,33 +637,25 @@ void reset() {
   }
 }
 
-void tick() {
+FASTRUN void tick() {
   if (freqIndex != cachedCpuFreqIndex) {
     cachedCpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
     cachedCpuFreqIndex = freqIndex;
   }
 
-  uint8_t interrupt = 0x00;
-
   cpu.tick();
 
-  // Tick IO cards and accumulate interrupts
+  // Tick only IO cards that do actual work
+  uint8_t interrupt = 0x00;
   interrupt |= rtcCard.tick(cachedCpuFrequency);
-  interrupt |= storageCard.tick(cachedCpuFrequency);
   interrupt |= serialCard.tick(cachedCpuFrequency);
   interrupt |= gpioCard.tick(cachedCpuFrequency);
   interrupt |= soundCard.tick(cachedCpuFrequency);
   interrupt |= videoCard.tick(cachedCpuFrequency);
-  
-  // Single interrupt processing
-  if (interrupt & 0x40) {
-    cpu.nmiTrigger();
-  }
-  if (interrupt & 0x80) {
-    cpu.irqTrigger();
-  } else {
-    cpu.irqClear();
-  }
+
+  if (interrupt & 0x40) { cpu.nmiTrigger(); }
+  if (interrupt & 0x80) { cpu.irqTrigger(); }
+  else { cpu.irqClear(); }
 }
 
 void startCpuTimer() {
@@ -687,24 +685,17 @@ FASTRUN void cpuTimerISR() {
 
     cpu.tick();
 
-    // Tick IO cards and accumulate interrupts
+    // Tick only IO cards that do actual work
     uint8_t interrupt = 0x00;
-
     interrupt |= rtcCard.tick(cachedCpuFrequency);
-    interrupt |= storageCard.tick(cachedCpuFrequency);
     interrupt |= serialCard.tick(cachedCpuFrequency);
     interrupt |= gpioCard.tick(cachedCpuFrequency);
     interrupt |= soundCard.tick(cachedCpuFrequency);
     interrupt |= videoCard.tick(cachedCpuFrequency);
 
-    if (interrupt & 0x40) {
-      cpu.nmiTrigger();
-    }
-    if (interrupt & 0x80) {
-      cpu.irqTrigger();
-    } else {
-      cpu.irqClear();
-    }
+    if (interrupt & 0x40) { cpu.nmiTrigger(); }
+    if (interrupt & 0x80) { cpu.irqTrigger(); }
+    else { cpu.irqClear(); }
 
     busPhase = 1;
   } else {
@@ -723,9 +714,8 @@ void step() {
     // Calculate CPU frequency from the period (period is in microseconds)
     uint32_t cpuFrequency = (uint32_t)(1000000.0 / FREQ_PERIODS[freqIndex]);
 
-    // Tick IO and check for interrupt
+    // Tick only IO cards that do actual work
     interrupt |= rtcCard.tick(cpuFrequency);
-    interrupt |= storageCard.tick(cpuFrequency);
     interrupt |= serialCard.tick(cpuFrequency);
     interrupt |= gpioCard.tick(cpuFrequency);
     interrupt |= soundCard.tick(cpuFrequency);
@@ -835,6 +825,7 @@ void toggleRunStop() {
 
 void unloadCart() {
   cart.file = "None";
+  cartLoaded = false;
 }
 
 void readROMs() {
@@ -986,6 +977,7 @@ void loadCartFile(String filename) {
   if (!filename.length()) { return; }
 
   cart.file = filename;
+  cartLoaded = true;
 
   loadCartPath("Carts/" + filename);
 }
@@ -1194,7 +1186,7 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
   readWrite = HIGH;
 
   // Priority: Cart overrides ROM from $C000-$FFFF when loaded
-  if (addr >= CART_CODE && addr <= CART_END && cart.file != "None") {
+  if (addr >= CART_CODE && addr <= CART_END && cartLoaded) {
     data = cart.read(addr - CART_START);
     return data;
   }
@@ -1208,34 +1200,19 @@ FASTRUN uint8_t read(uint16_t addr, bool isDbg) {
       data = ram.read(addr - RAM_START);
       break;
     case REGION_IO: {
-      uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
+      uint16_t ioOffset = addr - IO_START;
+      uint8_t ioSlot = ioOffset >> 10;
+      uint16_t slotAddr = ioOffset & 0x3FF;
       switch (ioSlot) {
-        case 0: // IO 1 - RAM Card
-          data = ramCard1.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        case 1: // IO 2 - RAM Card
-          data = ramCard2.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        case 2: // IO 3 - RTC Card
-          data = rtcCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        case 3: // IO 4 - Storage Card
-          data = storageCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        case 4: // IO 5 - Serial Card
-          data = serialCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        case 5: // IO 6 - GPIO Card
-          data = gpioCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        case 6: // IO 7 - Sound Card
-          data = soundCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        case 7: // IO 8 - Video Card
-          data = videoCard.read(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)));
-          break;
-        default:
-          break;
+        case 0: data = ramCard1.read(slotAddr);    break;
+        case 1: data = ramCard2.read(slotAddr);    break;
+        case 2: data = rtcCard.read(slotAddr);     break;
+        case 3: data = storageCard.read(slotAddr); break;
+        case 4: data = serialCard.read(slotAddr);  break;
+        case 5: data = gpioCard.read(slotAddr);    break;
+        case 6: data = soundCard.read(slotAddr);   break;
+        case 7: data = videoCard.read(slotAddr);   break;
+        default: break;
       }
       break;
     }
@@ -1252,7 +1229,7 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
   readWrite = LOW;
 
   // Priority: Cart overrides ROM from $C000-$FFFF when loaded
-  if (addr >= CART_CODE && addr <= CART_END && cart.file != "None") {
+  if (addr >= CART_CODE && addr <= CART_END && cartLoaded) {
     cart.write(addr - CART_START, data);
     return;
   }
@@ -1266,34 +1243,19 @@ FASTRUN void write(uint16_t addr, uint8_t val) {
       ram.write(addr - RAM_START, data);
       break;
     case REGION_IO: {
-      uint8_t ioSlot = floor((addr - IO_START) / IO_SLOT_SIZE);
+      uint16_t ioOffset = addr - IO_START;
+      uint8_t ioSlot = ioOffset >> 10;
+      uint16_t slotAddr = ioOffset & 0x3FF;
       switch (ioSlot) {
-        case 0: // IO 1 - RAM Card
-          ramCard1.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        case 1: // IO 2 - RAM Card
-          ramCard2.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        case 2: // IO 3 - RTC Card
-          rtcCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        case 3: // IO 4 - Storage Card
-          storageCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        case 4: // IO 5 - Serial Card
-          serialCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        case 5: // IO 6 - GPIO Card
-          gpioCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        case 6: // IO 7 - Sound Card
-          soundCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        case 7: // IO 8 - Video Card
-          videoCard.write(addr - (IO_START + (IO_SLOT_SIZE * ioSlot)), data);
-          break;
-        default:
-          break;
+        case 0: ramCard1.write(slotAddr, data);    break;
+        case 1: ramCard2.write(slotAddr, data);    break;
+        case 2: rtcCard.write(slotAddr, data);     break;
+        case 3: storageCard.write(slotAddr, data); break;
+        case 4: serialCard.write(slotAddr, data);  break;
+        case 5: gpioCard.write(slotAddr, data);    break;
+        case 6: soundCard.write(slotAddr, data);   break;
+        case 7: videoCard.write(slotAddr, data);   break;
+        default: break;
       }
       break;
     }
@@ -1589,7 +1551,7 @@ FASTRUN void onServerInfo(AsyncWebServerRequest *request) {
   JsonDocument doc;
 
   doc["address"]            = address;
-  doc["cartEnabled"]        = cart.file != "None";
+  doc["cartEnabled"]        = cartLoaded;
   doc["cartFile"]           = cart.file;
   doc["cpuAccumulator"]     = cpu.accumulator();
   doc["cpuOpcodeCycle"]     = cpu.opcodeCycle();

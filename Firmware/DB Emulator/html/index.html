@@ -24,16 +24,50 @@
         <button id="step" class="button button-blue">Step</button>
         <button id="tick" class="button button-blue">Tick</button>
         <button id="reset" class="button button-red">Reset</button>
+        |
       </span>
     </header>
     <main>
       <!-- SYSTEM Panel (merged Emulator + CPU) -->
       <div class="panel">
         <h2>System</h2>
+        <div id="is-running" class="emulator-status">-- RUNNING --</div>
         <div class="panel-content">
-          <div id="is-running" class="emulator-status">-- RUNNING --</div>
-          <div class="system-columns">
+          <!-- CPU registers -->
+          <div class="cpu-registers">
+            <div class="cpu-register-row">
+              <span>A:</span>
+              <span id="cpu-accumulator-hex" class="cpu-register-hex">$00</span>
+              <span id="cpu-accumulator-dec" class="cpu-register-dec">0</span>
+            </div>
+            <div class="cpu-register-row">
+              <span>X:</span>
+              <span id="cpu-x-hex" class="cpu-register-hex">$00</span>
+              <span id="cpu-x-dec" class="cpu-register-dec">0</span>
+            </div>
+            <div class="cpu-register-row">
+              <span>Y:</span>
+              <span id="cpu-y-hex" class="cpu-register-hex">$00</span>
+              <span id="cpu-y-dec" class="cpu-register-dec">0</span>
+            </div>
+            <div class="cpu-register-row">
+              <span>PC:</span>
+              <span id="cpu-pc-hex" class="cpu-register-hex">$0000</span>
+              <span id="cpu-pc-dec" class="cpu-register-dec">0</span>
+            </div>
+            <div class="cpu-register-row">
+              <span>SP:</span>
+              <span id="cpu-sp-hex" class="cpu-register-hex">$00</span>
+              <span id="cpu-sp-dec" class="cpu-register-dec">0</span>
+            </div>
+            <div class="cpu-register-row">
+              <span>ST:</span>
+              <span id="cpu-status-hex" class="cpu-register-hex">$00</span>
+              <span id="cpu-status-dec" class="cpu-register-dec">0</span>
+            </div>
+          </div>
 
+          <div class="system-columns">
             <!-- Col 1: System info -->
             <div class="system-col system-col-info">
               <div class="emulator-info-row">
@@ -66,40 +100,8 @@
               </div>
             </div>
 
-            <!-- Col 2: CPU registers + flags -->
-            <div class="system-col system-col-cpu">
-              <div class="cpu-registers">
-                <div class="cpu-register-row">
-                  <span>A:</span>
-                  <span id="cpu-accumulator-hex" class="cpu-register-hex">$00</span>
-                  <span id="cpu-accumulator-dec" class="cpu-register-dec">0</span>
-                </div>
-                <div class="cpu-register-row">
-                  <span>X:</span>
-                  <span id="cpu-x-hex" class="cpu-register-hex">$00</span>
-                  <span id="cpu-x-dec" class="cpu-register-dec">0</span>
-                </div>
-                <div class="cpu-register-row">
-                  <span>Y:</span>
-                  <span id="cpu-y-hex" class="cpu-register-hex">$00</span>
-                  <span id="cpu-y-dec" class="cpu-register-dec">0</span>
-                </div>
-                <div class="cpu-register-row">
-                  <span>PC:</span>
-                  <span id="cpu-pc-hex" class="cpu-register-hex">$0000</span>
-                  <span id="cpu-pc-dec" class="cpu-register-dec">0</span>
-                </div>
-                <div class="cpu-register-row">
-                  <span>SP:</span>
-                  <span id="cpu-sp-hex" class="cpu-register-hex">$00</span>
-                  <span id="cpu-sp-dec" class="cpu-register-dec">0</span>
-                </div>
-                <div class="cpu-register-row">
-                  <span>ST:</span>
-                  <span id="cpu-status-hex" class="cpu-register-hex">$00</span>
-                  <span id="cpu-status-dec" class="cpu-register-dec">0</span>
-                </div>
-              </div>
+            <!-- Col 2: Bus indicators -->
+            <div class="system-col system-col-buses">
               <div class="cpu-flags">
                 <div class="cpu-flags-label">Flags:</div>
                 <div class="cpu-flags-values">
@@ -113,10 +115,6 @@
                   <span id="cpu-flag-carry" class="cpu-flag">C</span>
                 </div>
               </div>
-            </div>
-
-            <!-- Col 3: Bus indicators -->
-            <div class="system-col system-col-buses">
               <div class="cpu-bus">
                 <div class="cpu-bus-label">ADDRESS BUS:</div>
                 <div>
