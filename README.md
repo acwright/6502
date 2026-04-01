@@ -13,11 +13,9 @@
 - [Overview](#overview)
 - [Target Audience](#target-audience)
 - [Design Philosophy](#design-philosophy)
-- [Quick Start](#quick-start)
 - [Computer Systems](#computer-systems)
   - [The COB (Computer on a Backplane)](#the-cob-computer-on-a-backplane)
   - [The DEV (Development Environment Vehicle)](#the-dev-development-environment-vehicle)
-  - [The KIM (Keypad Input Monitor)](#the-kim-keypad-input-monitor)
   - [The VCS (Video Computer System)](#the-vcs-video-computer-system)
 - [System Specifications](#system-specifications)
 - [Board Compatibility Matrix](#board-compatibility-matrix)
@@ -27,15 +25,12 @@
   - [Cards](#cards)
   - [Helpers](#helpers)
   - [Carts](#carts)
-- [Assembly & Connection Guide](#assembly--connection-guide)
 - [Firmware](#firmware)
 - [Software & Related Projects](#software--related-projects)
 - [CAD](#cad)
 - [Production](#production)
 - [Schematics](#schematics)
 - [Libraries](#libraries)
-- [Testing Status](#testing-status)
-- [Troubleshooting](#troubleshooting)
 - [Development Workflow](#development-workflow)
 - [Contributing](#contributing)
 - [Licensing](#licensing)
@@ -51,7 +46,7 @@ The project is designed using **KiCad 7.0+** for PCB design and is **open-source
 ### Key Features
 
 - **Modular Design**: Mix and match boards, cards, and helpers to create custom configurations
-- **Multiple System Types**: Build a desktop computer (COB), development emulator (DEV), educational system (KIM), or gaming console (VCS)
+- **Multiple System Types**: Build a desktop computer (COB), development emulator (DEV), or gaming console (VCS)
 - **Common Memory Map**: All systems share a consistent memory architecture for software compatibility
 - **Modern Manufacturing**: Optimized for JLCPCB's assembly services with production-ready files included
 - **Open-Source Hardware**: Complete KiCad schematics, PCB layouts, and 3D models available
@@ -99,38 +94,6 @@ Documentation, schematics, and code are written with clarity in mind. The projec
 
 ---
 
-## Quick Start
-
-**New to the project? Here's the recommended path:**
-
-### Recommended First Build: The "KIM" System
-
-The **KIM (Keypad Input Monitor)** is the ideal starting point because:
-- Fewer boards required (4-6 boards total)
-- Simpler assembly with minimal card stacking
-- Educational focus similar to the classic KIM-1
-- Complete standalone system with display and input
-
-**What you'll need:**
-1. Main Board PCB (assembled by JLCPCB or hand-assembled)
-2. Backplane Helper PCB
-3. GPIO Card PCB + Keypad Helper + Keypad LCD Helper
-4. Serial Card (or Serial Card Pro) PCB
-5. Basic tools: soldering iron, solder, wire cutters, multimeter
-6. Power supply: 5V DC, 2A minimum (USB-C)
-7. USB-to-serial adapter (for serial communication)
-
-**Build Steps:**
-1. Order PCBs from JLCPCB using production files in [Production/](./Production)
-2. Assemble through-hole components if not assembled by JLCPCB
-3. Connect boards via ribbon cables and card slots (see [Assembly Guide](#assembly--connection-guide))
-4. Connect power and serial terminal
-5. Load test programs and start experimenting!
-
-**Note:** The KIM build uses real hardware chips (6502, 6522 VIA, 6551 ACIA) and requires no firmware flashing.
-
----
-
 ## Computer Systems
 
 The project supports the creation of several different computer systems, each optimized for different use cases. All systems share a common memory map and bus architecture, ensuring software compatibility where applicable.
@@ -152,7 +115,7 @@ The COB is the most versatile and expandable system configuration, featuring a b
   * 1x Backplane Helper (adds 2 additional card slots)
   * 1x CPU Card (65c02) or 1x CPU Card Pro (65816, **UNTESTED**)
   * 1x Memory Card (32KB RAM + 32KB ROM with address decoding)
-  * 1x Video Card (composite via TMS9918A) or 1x Video Card Pro (composite via ATmega1284p, **UNTESTED**) or 1x VGA Card (VGA via Pico9918)
+  * 1x Video Card (composite via TMS9918A) or 1x VGA Card (VGA via Pico9918) or 1x Video Card Pro (composite via ATmega1284p, **UNTESTED**)
   * 1x Sound Card (ARMSID audio module)
   * 1x Storage Card (CompactFlash) or 1x Storage Card Pro (SD + Flash + SPI, **UNTESTED**)
   * 1x Serial Card (6551 ACIA) or 1x Serial Card Pro (enhanced serial)
@@ -191,7 +154,7 @@ The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller runn
 - Teensy 4.1 platform (600 MHz ARM Cortex-M7)
 - Variable CPU speed
 - Ethernet connectivity via QNEthernet library
-- Web-based control interface (DB Control) accessible at `http://6502.local`
+- Web-based control interface (DB Emulator) accessible at `http://6502.local`
 - SD card support for loading ROMs, programs, and saving snapshots
 - USB-C keyboard and joystick input (Xbox 360/One controllers)
 - Serial terminal interface (115200 baud)
@@ -210,47 +173,7 @@ The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller runn
 
 **IMPORTANT:**
 
-The DEV works with *some* 6502 project boards and helpers (see compatibility chart) due to emulation bus outputs not strictly following 6502 bus timing. 
-I have made every attempt to make the bus signals as compatible with real hardware as possible but some incompatibility does exist. I have marked boards, cards and helpers in the compatibility chart that I have used successfully.
-The DEV has one bus connector and one card slot with IO 7 ($9800) not being used by the emulation and available for external hardware.
-If you build the DEV and try it with real hardware please share your results!
-
----
-
-### The KIM (Keypad Input Monitor)
-
-**Type:** Educational computer  
-**Complexity:** Beginner-Intermediate  
-**Best For:** Learning 6502 architecture, first-time builders
-
-![The KIM](./CAD/Bases/The%20KIM/The%20KIM.png?raw=true)
-![The KIM](./Assets/Images/KIM.png?raw=true)
-
-A modern homage to the classic KIM-1 computer, the KIM provides a compact, standalone system with hexadecimal keypad input and LCD display. Perfect for learning machine code programming and understanding low-level computer architecture.
-
-**Required Components:**
-  * 1x Main Board (65c02 CPU + 32KB RAM + 32KB ROM)
-  * 1x Backplane Helper (provides card slots for GPIO Card and Serial Card)
-  * 1x GPIO Card (6522 VIA for keypad/display interface)
-    * 1x Keypad Helper (4x4 and 2x4 matrix keypad)
-    * 1x Keypad LCD Helper (LCD display module)
-  * 1x Serial Card (6551 ACIA) or 1x Serial Card Pro (enhanced serial)
-  * 1x Breadboard Helper
-
-**Key Features:**
-- Real 65c02 CPU (variable clock speed)
-- 32KB RAM + 32KB ROM
-- 4x6 keypad with hexadecimal and function keys
-- LCD display for output
-- Serial connectivity for program loading
-- Breadboard area for prototyping
-- True to the spirit of the original KIM-1
-
-**Typical Use Cases:**
-- Learning 6502 assembly language
-- Running classic KIM-1 programs (with adaptations)
-- Educational demonstrations
-- Portable retro computing experiments
+The DEV does not output bus compatible signals (or any signals) for the 6502 backplane system with the current firmware and instead relies entirely on emulation. There is a bus connector and a card slot available on the Dev Board along with level shifters for all signals (see schematic). These are up to end-user to implement if you want to try to talk to real hardware using the bus connections. In past versions of the firmware (see commit history) I have worked with real hardware and it does work so give it try if you would like!
 
 ---
 
@@ -293,28 +216,28 @@ A game-focused configuration designed for playing and developing retro-style gam
 
 Detailed specifications for each system configuration:
 
-| Specification | COB | DEV | KIM | VCS |
-|--------------|-----|-----|-----|-----|
-| **CPU** | 65c02 or 65816* | Teensy 4.1 (ARM Cortex-M7 emulating 65c02) | 65c02 | 65c02 |
-| **Clock Speed** | 0.5-8 MHz (variable) | Emulated: 0 Hz to maximum | 0.5-8 MHz (variable) | 0.5-8 MHz (variable) |
-| **Base RAM** | 32KB (Memory Card) | Up to 32KB (configurable in firmware) | 32KB | 32KB |
-| **Banked RAM** | 512KB (RAM Card) | 32KB (default), up to 512KB with PSRAM | N/A | N/A |
-| **Total RAM** | 544KB | 64KB (default), up to 544KB with PSRAM | 32KB | 32KB |
-| **ROM** | 32KB (Memory Card) | N/A (loads from SD/network) | 32KB | 16KB (ROM Cart, swappable) |
-| **Video Output** | Composite (TMS9918A) or VGA (Pico9918) | 2.4" LCD (VT-AC) | Serial terminal only | VGA (Pico9918) |
-| **Video Resolution** | 256×192 (TMS9918A) or 640×480 VGA | 640×480 VGA or 320×240 LCD | Text via serial | 640×480 VGA |
-| **Audio** | ARMSID (SID emulation) | N/A | N/A | ARMSID |
-| **Storage** | CompactFlash or SD card* | SD card (onboard Teensy 4.1) | Serial load only | ROM cartridges |
-| **Storage Capacity** | Up to 128GB (CF) or 32GB (SD) | Up to 32GB (SD) | N/A | 16KB per cartridge** |
-| **Serial I/O** | 6551 ACIA (RS-232) | USB serial (115200 baud) | 6551 ACIA (RS-232) | N/A |
-| **Network** | N/A | Ethernet (10/100 Mbps) | N/A | N/A |
-| **GPIO Ports** | 6522 VIA (Keyboard / Joystick) | USB (Keyboard / Joystick) | 6522 VIA (for keypad/LCD) | Input Board (Keyboard / Joystick) |
-| **Input Methods** | PS/2 keyboard or matrix keyboard, joysticks | USB keyboard, USB joystick | Keypad (4×4 + 2×4), serial | PS/2 keyboard or matrix keyboard, joysticks |
-| **Real-time Clock** | DS1511Y (Y2K compliant) | TimeLib software RTC | N/A | N/A |
-| **Expansion Slots** | 9 slots (12 available with full backplane configuration) | N/A | 1 slot (via Backplane Helper) | N/A |
-| **Power Requirement** | 5V DC, 2-3A | 5V DC, 2A | 5V DC, 1-2A | 5V DC, 1-2A |
-| **Board Count** | 12+ boards/cards | 2 boards | 4 boards + helpers | 4 boards |
-| **Complexity** | Advanced | Intermediate | Beginner-Intermediate | Intermediate |
+| Specification | COB | DEV | VCS |
+|--------------|-----|-----|-----|
+| **CPU** | 65c02 or 65816* | Teensy 4.1 (ARM Cortex-M7 emulating 65c02) | 65c02 |
+| **Clock Speed** | 0.5-8 MHz (variable) | Emulated: 0 Hz to maximum | 0.5-8 MHz (variable) |
+| **Base RAM** | 32KB (Memory Card) | Up to 32KB (configurable in firmware) | 32KB |
+| **Banked RAM** | 512KB (RAM Card) | 32KB (default), up to 512KB with PSRAM | N/A |
+| **Total RAM** | 544KB | 64KB (default), up to 544KB with PSRAM | 32KB |
+| **ROM** | 32KB (Memory Card) | N/A (loads from SD/network) | 16KB (ROM Cart, swappable) |
+| **Video Output** | Composite (TMS9918A) or VGA (Pico9918) | 2.4" LCD (VT-AC) | VGA (Pico9918) |
+| **Video Resolution** | 256×192 (TMS9918A) or 640×480 VGA | 640×480 VGA or 320×240 LCD | 640×480 VGA |
+| **Audio** | ARMSID (SID emulation) | N/A | ARMSID |
+| **Storage** | CompactFlash or SD card* | SD card (onboard Teensy 4.1) | ROM cartridges |
+| **Storage Capacity** | Up to 128GB (CF) or 32GB (SD) | Up to 32GB (SD) | 16KB per cartridge** |
+| **Serial I/O** | 6551 ACIA (RS-232) | USB serial (115200 baud) | N/A |
+| **Network** | N/A | Ethernet (10/100 Mbps) | N/A |
+| **GPIO Ports** | 6522 VIA (Keyboard / Joystick) | USB (Keyboard / Joystick) | Input Board (Keyboard / Joystick) |
+| **Input Methods** | PS/2 keyboard or matrix keyboard, joysticks | USB keyboard, USB joystick | PS/2 keyboard or matrix keyboard, joysticks |
+| **Real-time Clock** | DS1511Y (Y2K compliant) | TimeLib software RTC | N/A |
+| **Expansion Slots** | 9 slots (12 available with full backplane configuration) | N/A | N/A |
+| **Power Requirement** | 5V DC, 2-3A | 5V DC, 2A | 5V DC, 1-2A |
+| **Board Count** | 12+ boards/cards | 2 boards | 4 boards |
+| **Complexity** | Advanced | Intermediate | Intermediate |
 
 **Legend:**
 - `*` = UNTESTED component or configuration
@@ -329,53 +252,53 @@ This matrix shows which boards, cards, and helpers are compatible with each syst
 
 ### Core Compatibility
 
-| Board/Card/Helper | COB | DEV | KIM | VCS | Notes |
-|-------------------|:---:|:---:|:---:|:---:|-------|
+| Board/Card/Helper | COB | DEV | VCS | Notes |
+|-------------------|:---:|:---:|:---:|-------|
 | **BOARDS** |
-| Main Board | ✓ | — | ✓ | ✓ | Required for COB/KIM/VCS (not DEV) |
-| Dev Board | — | ✓ | — | — | DEV system only |
-| Dev Output Board | — | ✓ | — | — | Pairs with Dev Board for TMS9918A VDP and SID audio output |
-| Input Board | ○ | — | — | ✓ | VCS primary; can be used with COB |
-| Output Board | ○ | — | — | ✓ | VCS primary |
-| LCD Board | ○ | — | — | — | **UNTESTED**; COB optional |
-| Backplane | ✓ | — | ○ | ○ | COB primary |
-| Backplane Pro | ✓ | — | ○ | — | COB primary (enhanced backplane), KIM alternative |
+| Main Board | ✓ | — | ✓ | Required for COB/VCS (not DEV) |
+| Dev Board | — | ✓ | — | DEV system only |
+| Dev Output Board | — | ✓ | — | Pairs with Dev Board for TMS9918A VDP and SID audio output |
+| Input Board | ○ | — | ✓ | VCS primary; can be used with COB |
+| Output Board | ○ | — | ✓ | VCS primary; can be used with COB |
+| LCD Board | ○ | — | — | **UNTESTED**; COB optional, VCS optional |
+| Backplane | ✓ | — | ○ | COB primary; can be used with VCS |
+| Backplane Pro | ✓ | — | — | COB primary (enhanced backplane) |
 | **CARDS** |
-| Backplane Helper | ✓ | ○ | ✓ | ○ | Adds card slots |
-| CPU Card | ✓ | — | ○ | — | COB primary (hosts CPU) |
-| CPU Card Pro | ○ | — | ○ | — | COB primary; 65816 CPU; **UNTESTED** |
-| Memory Card | ✓ | — | ○ | — | COB primary (32K RAM + 32K ROM) |
-| RAM Card | ✓ | ○ | ○ | ○ | COB optional (512KB banked RAM) |
-| RTC Card | ✓ | — | ○ | ○ | COB optional (real-time clock) |
-| GPIO Card | ✓ | ○ | ✓ | — | KIM required; COB required |
-| Serial Card | ✓ | ○ | ✓ | ○ | COB/KIM communication |
-| Serial Card Pro | ✓ | ○ | ✓ | ○ | Enhanced serial; COB/KIM |
-| Video Card | ✓ | — | ○ | — | COB option (TMS9918A composite) |
-| Video Card Pro | ○ | — | ○ | — | COB option; **UNTESTED** |
-| VGA Card | ✓ | ○ | ○ | — | COB option (Pico9918 VGA) |
-| VGA Card Pro | ○ | — | ○ | — | COB option; **UNTESTED** |
-| Sound Card | ✓ | — | ○ | — | COB (ARMSID) |
-| Storage Card | ✓ | ○ | ○ | ○ | COB (CompactFlash) |
-| Storage Card Pro | ○ | ○ | ○ | ○ | SD card; **UNTESTED** |
-| LCD Card | ○ | ○ | ○ | — | COB optional (16×2 LCD) |
-| Blinkenlights Card | ○ | ○ | ○ | ○ | Debug/visual output; any backplane system |
-| Prototype Card | ○ | ○ | ○ | ○ | Custom circuits; any backplane system |
+| Backplane Helper | ✓ | ○ | ○ | Adds card slots |
+| CPU Card | ✓ | — | — | COB primary (hosts CPU) |
+| CPU Card Pro | ○ | — | — | COB primary; 65816 CPU; **UNTESTED** |
+| Memory Card | ✓ | — | — | COB primary (32K RAM + 32K ROM) |
+| RAM Card | ✓ | — | ○ | COB optional (512KB banked RAM) |
+| RTC Card | ✓ | — | ○ | COB optional (real-time clock) |
+| GPIO Card | ✓ | — | — | COB required |
+| Serial Card | ✓ | — | ○ | COB communication |
+| Serial Card Pro | ✓ | — | ○ | Enhanced serial; COB |
+| Video Card | ✓ | — | — | COB option (TMS9918A composite) |
+| Video Card Pro | ○ | — | — | COB option; **UNTESTED** |
+| VGA Card | ✓ | — | — | COB option (Pico9918 VGA) |
+| VGA Card Pro | ○ | — | — | COB option; **UNTESTED** |
+| Sound Card | ✓ | — | — | COB (ARMSID) |
+| Storage Card | ✓ | — | ○ | COB (CompactFlash) |
+| Storage Card Pro | ○ | — | ○ | SD card; **UNTESTED** |
+| LCD Card | ○ | — | — | 16×2 LCD Display |
+| Blinkenlights Card | ○ | — | ○ | Debug/visual output; any backplane system |
+| Prototype Card | ○ | — | ○ | Custom circuits; any backplane system |
 | **HELPERS** |
-| Keyboard Encoder Helper | ✓ | ○ | ○ | — | COB GPIO keyboard input (ATmega1284p) |
-| PS2 Helper | ✓ | ○ | ○ | — | COB GPIO PS/2 keyboard (ATmega328p) |
-| Keyboard Helper | ✓ | ○ | ○ | — | COB 64-key matrix + joysticks |
-| Keypad Helper | — | ○ | ✓ | — | KIM keypad input (4×4 + 2×4) |
-| Keypad LCD Helper | — | ○ | ✓ | — | KIM LCD display |
-| GPIO Helper | ✓ | ○ | ○ | ○ | 8 buttons + 8 LEDs; testing/debug |
-| GPIO Breadboard Helper | ✓ | ○ | ○ | — | Breadboard interface for GPIO |
-| Joystick Helper | ✓ | ○ | ○ | ○ | Atari 2600-style joystick |
-| Clock Helper | ✓ | — | ✓ | ✓ | Manual clock control; any real CPU system |
-| DB25 Helper | ✓ | ○ | ○ | — | GPIO to DB25 connector |
-| Breadboard Helper | ✓ | ✓ | ✓ | ✓ | Bus to breadboard; prototyping |
-| Mega Helper | ✓ | — | ○ | — | Arduino Mega 2560 interface |
-| VERA Helper | ○ | ○ | ○ | — | VERA module adapter |
+| Keyboard Encoder Helper | ✓ | — | ○ | COB GPIO keyboard input (ATmega1284p) |
+| PS2 Helper | ✓ | — | ○ | COB GPIO PS/2 keyboard (ATmega328p) |
+| Keyboard Helper | ✓ | — | ○ | COB 64-key matrix + joysticks |
+| Keypad Helper | ○ | — | ○ | Keypad input (4×4 + 2×4) |
+| Keypad LCD Helper | ○ | — | ○ | Keypad LCD display |
+| GPIO Helper | ✓ | — | ○ | 8 buttons + 8 LEDs; testing/debug |
+| GPIO Breadboard Helper | ✓ | — | — | Breadboard interface for GPIO |
+| Joystick Helper | ✓ | — | ○ | Atari 2600-style joystick |
+| Clock Helper | ✓ | — | ✓ | Manual clock control; any real CPU system |
+| DB25 Helper | ✓ | — | — | GPIO to DB25 connector |
+| Breadboard Helper | ✓ | ✓ | ✓ | Bus to breadboard; prototyping |
+| Mega Helper | ✓ | — | — | Arduino Mega 2560 interface |
+| VERA Helper | ○ | — | — | VERA module adapter |
 | **CARTS** |
-| ROM Cart | ○ | ○ | ○ | ✓ | VCS game cartridges (16KB ROM) |
+| ROM Cart | ✓ | — | ✓ | DEV/VCS game cartridges (16KB ROM) |
 
 **Legend:**
 - `✓` = Required or primary use case
@@ -390,11 +313,6 @@ This matrix shows which boards, cards, and helpers are compatible with each syst
 - 12 total card slots available in full configuration
 - Typical configuration uses 9 slots for: CPU, Memory, Video, Sound, Storage, Serial, RAM, RTC, GPIO cards
 - Additional 3 slots available for expansion or future cards
-
-**KIM System (2 slots typically used, 3 available):**
-- Backplane Helper provides 2 expansion slots
-- Typically used for GPIO Card (with Keypad Helper + Keypad LCD Helper attached) and Serial Card
-- One additional slot available on Main Board for expansion
 
 **DEV and VCS Systems:**
 - No backplane architecture (fixed board configurations)
@@ -461,7 +379,7 @@ $FFFA ├───────────────────────�
 **Banked RAM** (RAM Card, if installed):
 - 512KB total RAM organized as two 256KB banks
 - Bank selection via single latch at $83FF or $87FF (write 0-255)
-- Writing to latch selects which 1KB window (of 256) appears at both IO 1 and IO 2
+- Writing to latch selects which 1KB window (of 256) appears at IO 1 and IO 2
 - IO 1 ($8000-$83FF): 1KB window into first 256KB bank
 - IO 2 ($8400-$87FF): 1KB window into second 256KB bank
 - Both windows show the same bank number from their respective 256KB regions
@@ -480,18 +398,6 @@ The 6502 bus includes:
   - `NMI`: Non-maskable interrupt (active low)
   - `RDY`: Ready signal for clock stretching
   - `SYNC`: Instruction fetch indicator
-
-**Backplane Architecture** (COB system):
-- Ribbon cable connects Main Board to Backplanes
-- Backplane provides bus signals to card slots
-- Each card slot exposes full address, data, and control buses
-- Cards use address decoding logic to respond only to their assigned addresses
-- Backplane Pro adds centralized clock generation and power distribution
-
-**Direct Connection** (KIM, VCS systems):
-- Boards connect via ribbon cables or direct board-to-board connectors
-- Simpler topology suitable for fixed configurations
-- Lower cost and easier assembly
 
 ### Clock & Reset Circuitry
 
@@ -638,7 +544,7 @@ Combines video and audio output on a single board for compact gaming console con
 
 ### Cards
 
-Peripheral cards plug into backplane slots (COB system) or directly onto the Main Board via card slots (KIM system).
+Peripheral cards plug into backplane slots or directly onto the Main Board via single card slot.
 
 #### Blinkenlights Card
 **Purpose:** Visual status LEDs for address, data, and control bus monitoring  
@@ -936,7 +842,7 @@ Essential for KIM-1-style hexadecimal data entry and system control.
 **Interface:** Connects to GPIO Card via parallel interface  
 **Status:** ✓ Tested  
 
-Displays output for KIM system (addresses, data, messages).
+Displays output for KIM-1-style system (addresses, data, messages).
 
 #### Mega Helper
 **Purpose:** Interfaces Arduino Mega 2560 R3 to 6502 bus  
@@ -992,135 +898,6 @@ Allows game cartridge-based operation similar to classic game consoles.
 
 ---
 
-## Assembly & Connection Guide
-
-Building a 6502 system requires careful assembly and proper connections between boards. Follow these guidelines for successful builds.
-
-### General Assembly Steps
-
-1. **Inspect PCBs**: Check for manufacturing defects, damaged traces, or missing components
-2. **Solder Through-Hole Components**: If not assembled by JLCPCB, solder all through-hole parts
-   - Use temperature-controlled soldering iron (330-350°C)
-   - Solder in order: lowest profile components first (resistors, diodes), then ICs, then connectors
-   - Use sockets for expensive or heat-sensitive ICs (CPU, ROM, RAM)
-3. **Clean Flux Residue**: Use isopropyl alcohol and soft brush
-4. **Visual Inspection**: Check for solder bridges, cold joints, or bent pins
-5. **Continuity Testing**: Verify power rails (5V and GND) with multimeter
-   - Check for shorts between 5V and GND (should read open circuit or very high resistance)
-6. **Install ICs**: Insert ICs into sockets (if used), ensuring correct orientation (notch/pin 1)
-
-### Connection Types
-
-**Ribbon Cables:**
-- Standard IDC ribbon cables (2.54mm pitch)
-- Typical lengths: 6", 12", 18"
-- Ensure proper orientation (pin 1 marked on both connectors and PCBs)
-- Common widths: 12-pin, 40-pin
-
-**Card Edge Connectors:**
-- Backplane cards use edge connectors (fingers on PCB edge)
-- Insert cards firmly into backplane slots  
-- Ensure proper seating (all pins making contact and aligned correctly)
-
-### System-Specific Assembly
-
-**COB System:**
-1. Assemble Backplane boards first (Backplane, Backplane Pro, Backplane Helper)
-2. Connect Backplane and Backplane Helper to Backplane Pro via ribbon cable
-3. Install cards:
-   - CPU Card
-   - Memory Card
-   - Video/VGA Card
-   - GPIO Card
-   - Sound/Serial/Storage/RTC cards
-4. Connect helper boards to GPIO Card as needed (Keyboard Encoder Helper, etc.)
-5. Connect power supply (5V DC, 2-3A) to Backplane Pro
-6. Connect video output, audio output, serial cable as required
-
-**DEV System:**
-1. Assemble Dev Board with Teensy 4.1 installed
-2. Flash [DB Emulator firmware](./Firmware/DB%20Emulator/) to Teensy 4.1
-3. Assemble Dev Output Board (if using)
-4. Flash [DOB Display firmware](./Firmware/DOB%20%20Display/) to Dev Output Board
-5. Connect Dev Output Board to Dev Board via ribbon cable
-6. Insert microSD card (formatted FAT32) with ROMs/programs
-7. Connect Ethernet cable (optional, for web interface)
-8. Connect USB keyboard/joystick (optional)
-9. Connect power supply to Teensy (5V DC, 2A) via USB
-
-**KIM System:**
-1. Assemble Main Board
-2. Assemble Backplane Helper
-3. Assemble GPIO Card
-4. Assemble Serial Card
-5. Assemble Keypad Helper and Keypad LCD Helper
-6. Connect Backplane Helper to Main Board
-7. Install GPIO Card into Backplane Helper slot
-8. Connect Keypad Helper and Keypad LCD Helper to GPIO Card
-9. Install Serial Card
-10. Connect power supply (5V DC, 1-2A) to Main Board
-11. Connect serial cable (DB9 or USB-to-serial adapter)
-
-**VCS System:**
-1. Assemble Main Board
-2. Assemble Input Board (flash firmware to ATmega1284P controller)
-3. Assemble Output Board
-4. Assemble ROM Cart with game ROM
-5. Connect Input and Output Boards to Main Board via ribbon cable
-6. Insert ROM Cart into Main Board cart slot
-7. Connect matrix keyboard, PS/2 keyboard, and/or joystick controllers to Input Board
-8. Connect VGA cable and audio cable from Output Board to monitor/speakers
-9. Connect power supply (5V DC, 2A) to Main Board
-
-### Power Requirements
-
-| System | Voltage | Current (Typical) | Current (Maximum) | Connector |
-|--------|---------|-------------------|-------------------|-----------|
-| COB | 5V DC | 1.5-2A | 3A | USB-C via Main Board |
-| DEV | 5V DC | 0.8-1A | 2A | USB via Teensy |
-| KIM | 5V DC | 0.5-1A | 2A | USB-C via Main Board |
-| VCS | 5V DC | 0.8-1.5A | 2A | USB-C via Main Board |
-
-**Power Supply Recommendations:**
-- Use regulated 5V DC supplies (switching power supplies recommended)
-- Ensure adequate current capacity (see table above)
-- Add margin: if system requires 2A, use 2.5-3A supply
-
-### Cables & Connectors Needed
-
-**Common Cables:**
-- IDC ribbon cables (various lengths and widths)
-- VGA cable (male-to-male for monitor connection)
-- Serial cable (DB9 female-to-female or USB-to-serial adapter)
-- RCA audio cable (for sound output to speakers/amplifier)
-- RCA composite video cable (if using composite video output)
-- PS/2 keyboard/mouse cables
-- SNES controller extension cables (if needed)
-- USB cables (USB-C, Mini-USB, Micro-USB for Teensy and microcontroller programming)
-- Ethernet cable (for DEV system networking)
-
-### Troubleshooting Assembly
-
-**System doesn't power on:**
-- Check power supply voltage and polarity
-- Verify no shorts between 5V and GND
-- Check fuses (if equipped)
-- Inspect solder joints on power connectors
-
-**System powers on but doesn't boot:**
-- Verify all ICs properly seated in sockets
-- Check clock signal (use oscilloscope or logic probe on PHI2)
-- Verify reset circuit (RESET line should pulse low briefly at power-on, then stay high)
-- Check ROM contents (verify ROM programmed correctly)
-
-**Intermittent behavior:**
-- Re-seat all ICs and connectors
-- Check for cold solder joints
-- Verify ribbon cable connections (pin 1 alignment)
-- Inspect for oxidation on edge connectors (clean with contact cleaner)
-
----
-
 ## Firmware
 
 The [Firmware](./Firmware) folder contains source code for firmware running on various microcontrollers used in the project (Teensy 4.1, ATmega328p, ATmega1284p, ATTiny85). Firmware is written in C/C++ and is developed using **PlatformIO**.
@@ -1137,7 +914,7 @@ See the [Firmware README](./Firmware/README.md) for detailed information on buil
 | [IB Mouse Controller](./Firmware/IB%20Mouse%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 mouse interface |
 | [KEH Controller](./Firmware/KEH%20Controller/) | Keyboard Encoder Helper, Input Board Rev 1.0 | ATmega1284p | COB/VCS | Dual keyboard (PS/2 + matrix) to ASCII converter |
 | [PS2 Keyboard Controller](./Firmware/PS2%20Keyboard%20Controller/) | PS2 Helper | ATmega328p | COB | PS/2 keyboard to matrix interface |
-| [STP Controller](./Firmware/STP%20Controller/) | Storage Card Pro | ATmega328p | COB | SD card and SPI flash storage controller |
+| [STP Controller](./Firmware/STP%20Controller/) | Storage Card Pro | ATmega328p | COB/VCS | SD card and SPI flash storage controller |
 
 ### Key Firmware Features
 
@@ -1220,35 +997,20 @@ The following repositories contain 6502 assembly code that runs on the hardware:
 - Sample programs demonstrating hardware features
 - Library routines for common tasks
 
-**[6502-COBBIOS](https://github.com/acwright/6502-COBBIOS)**
-- BIOS (Basic Input/Output System) for COB system
+**[6502-BIOS](https://github.com/acwright/6502-COBBIOS)**
+- BIOS (Basic Input/Output System) for all systems
 - Low-level hardware initialization and I/O routines
-- System ROM code providing fundamental services
-
-**[6502-DEVBIOS](https://github.com/acwright/6502-DEVBIOS)**
-- BIOS (Basic Input/Output System) for DEV system
-- Input and LCD display routines
-- System ROM code providing fundamental services
-
-**[6502-KIMBIOS](https://github.com/acwright/6502-KIMBIOS)**
-- BIOS (Basic Input/Output System) for KIM system
-- Hexadecimal keypad input and LCD display routines
-- KIM-1 compatible monitor program
+- System ROM code providing BASIC and machine code monitor
 
 **[6502-NOP](https://github.com/acwright/6502-NOP)**
 - NOP (No Operation) test program
 - Minimal ROM code for hardware testing
 - Useful for verifying basic CPU and memory operation
 
-**[6502-VCSBIOS](https://github.com/acwright/6502-VCSBIOS)**
-- BIOS (Basic Input/Output System) for VCS system
-- Low-level hardware initialization and I/O routines
-- System ROM code providing fundamental services
-
 **[6502-WOZMON](https://github.com/acwright/6502-WOZMON)**
 - Woz Monitor (Apple I monitor program)
 - Classic machine language monitor by Steve Wozniak
-- Adapted for the 6502 project hardware
+- Adapted for the 6502 project hardware using the Serial Card
 
 ### Using the Software
 
@@ -1268,7 +1030,7 @@ See individual repository README files for specific build and usage instructions
 The [CAD](./CAD) folder contains mechanical designs for the project including 3D models and enclosure designs.
 
 **Contents:**
-- **Bases/**: 3D models of complete system assemblies (COB, DEV, KIM, VCS)
+- **Bases/**: 3D models of complete system assemblies (COB, DEV, VCS)
 - **Card/**: 3D models of individual card designs
 - **Enclosures/**: Custom enclosure designs for various systems
 - **Tops/**: Top panel/cover designs
@@ -1366,265 +1128,6 @@ The [Libraries](./Libraries) folder contains KiCad symbol libraries, footprint l
 3. Save and commit changes (if contributing back to project)
 
 See the [Libraries README](./Libraries/README.md) for detailed library usage instructions.
-
----
-
-## Testing Status
-
-The following table indicates the current testing status of all boards, cards, and helpers. **Please exercise caution when building or using boards marked as UNTESTED.**
-
-### Fully Tested ✓ (Verified Working)
-
-**Boards:**
-- Backplane
-- Backplane Pro
-- Dev Board
-- Dev Output Board
-- Input Board
-- Main Board
-
-**Cards:**
-- Blinkenlights Card
-- CPU Card
-- GPIO Card
-- LCD Card
-- Memory Card
-- Prototype Card
-- RAM Card
-- RTC Card
-- Serial Card
-- Serial Card Pro
-- Sound Card
-- Storage Card
-- Video Card
-- VGA Card
-
-**Helpers:**
-- Backplane Helper
-- Breadboard Helper
-- Clock Helper
-- DB25 Helper
-- GPIO Helper
-- GPIO Breadboard Helper
-- Joystick Helper
-- Keyboard Helper
-- Keyboard Encoder Helper
-- Keypad Helper
-- Keypad LCD Helper
-- Mega Helper
-- PS2 Helper
-- VERA Helper
-
-**Carts:**
-- ROM Cart
-
-### Untested ⚠️ (Designs Complete but Not Verified)
-
-**Boards:**
-- LCD Board (ILI9341 via 6522 VIA)
-
-**Cards:**
-- CPU Card Pro (65816 CPU - requires compatible software and memory management)
-- Storage Card Pro (SD + Flash + SPI - firmware untested)
-- VGA Card Pro (Programmable VGA via Pi Pico - requires custom firmware)
-- Video Card Pro (Composite video via ATmega1284p - firmware development incomplete)
-
-### Testing Notes & Warnings
-
-**LCD Board (UNTESTED):**
-- **Concern**: Performance may be poor due to overhead of parallel VIA interface for pixel operations
-- **Status**: Hardware exists but not tested with display-intensive software
-- **Recommendation**: Use VGA Card, or Video Card for better graphics performance
-
-**CPU Card Pro (UNTESTED):**
-- **Concern**: 65816 CPU requires 16-bit aware software and extended memory mapping
-- **Status**: Hardware designed but not tested with actual 65816 CPU or compatible software
-- **Recommendation**: Advanced users only; extensive software development required
-
-**Storage Card Pro (UNTESTED):**
-- **Concern**: More complex than Storage Card; requires SPI interface firmware and SD card drivers
-- **Status**: Hardware exists, firmware is untested
-- **Recommendation**: Use Storage Card (CompactFlash) which is fully tested
-
-**Video Card Pro (UNTESTED):**
-- **Concern**: Microcontroller-generated video is complex; firmware incomplete
-- **Status**: Design complete, firmware not developed yet
-- **Recommendation**: Use Video Card (TMS9918A) or VGA Card (Pico9918) which are tested
-
-**VGA Card Pro (UNTESTED):**
-- **Concern**: Requires custom firmware for Pi Pico
-- **Status**: Hardware designed, firmware is not developed yet
-- **Recommendation**: Use Video Card (TMS9918A) or VGA Card (Pico9918) which are tested
-
-### How You Can Help Test
-
-If you build any **UNTESTED** boards and get them working (or discover issues), please:
-1. Document your findings (what worked, what didn't, any modifications needed)
-2. Capture photos/videos of successful operation
-3. Submit a GitHub issue or pull request with test results
-4. Include:
-   - Board revision number
-   - Component substitutions (if any)
-   - Software/firmware used
-   - Operating conditions (clock speed, power supply, etc.)
-   - Any issues encountered and resolutions
-
-Your testing contributions help the entire community! See [Contributing](#contributing) for how to submit results.
-
----
-
-## Troubleshooting
-
-Common issues and solutions for building and operating 6502 systems.
-
-### Power Issues
-
-**Symptom:** System doesn't power on, no lights/activity  
-**Solutions:**
-- Verify power supply voltage (should be 5.0V ±0.25V)
-- Check power supply current capacity (see [Power Requirements](#power-requirements))
-- Check for short circuits between 5V and GND using multimeter
-- Inspect fuses (if equipped)
-- Verify power switch (if equipped) is in ON position
-
-**Symptom:** System resets randomly or behaves erratically  
-**Solutions:**
-- Power supply may be insufficient current capacity (upgrade to higher amperage)
-- Check for voltage drops under load (use multimeter while system running)
-- Add bulk capacitance (100-1000μF) near power input
-- Check all power connectors for good contact
-- Verify ribbon cable connections (poor contact can cause intermittent issues)
-
-### Boot/Reset Issues
-
-**Symptom:** System powers on but doesn't boot, stays in reset  
-**Solutions:**
-- Check RESET signal (should pulse low briefly at power-on, then stay high ~5V)
-- Verify reset circuit components (RC timing, reset IC)
-- Manually pulse RESET low and release (should trigger boot sequence)
-- Check clock signal (see Clock Issues below)
-
-**Symptom:** System appears to boot but no response  
-**Solutions:**
-- Verify ROM contents (ensure ROM programmed correctly with valid code)
-- Check reset vectors ($FFFC-$FFFD) point to valid code
-- Use Clock Helper to single-step and observe address bus activity
-- Verify ROM chip enable signal is active when addressing ROM range ($8000-$FFFF)
-
-### Clock Issues
-
-**Symptom:** No clock signal or irregular clock  
-**Solutions:**
-- Verify oscillator circuit (crystal, capacitors, connections)
-- Check PHI2 signal with oscilloscope (should be clean square wave)
-- Try different crystal or ceramic resonator
-- If using Clock Helper, verify Run/Stop switch in RUN position
-- Check for excessive capacitive loading on clock line (too many devices)
-
-**Symptom:** Clock frequency wrong
-**Solutions:**
-- Verify correct crystal frequency installed
-- Check crystal load capacitors (typically 22pF for microprocessor crystals)
-- Measure actual frequency with oscilloscope or frequency counter
-
-### Memory Issues
-
-**Symptom:** System boots but crashes or corrupts data  
-**Solutions:**
-- Test RAM using memory test program (write/read patterns to all addresses)
-- Verify RAM chip enable signals
-- Check address decoding logic (RAM should respond only to $0000-$7FFF)
-- Ensure RAM has adequate access time for CPU clock speed (faster clock needs faster RAM)
-- Try reducing clock speed to isolate timing issues
-
-**Symptom:** ROM code doesn't execute properly  
-**Solutions:**
-- Verify ROM programmed correctly (read back and compare to original)
-- Check ROM chip enable signal and address decoding
-- Ensure ROM is inserted in correct orientation (pin 1 to pin 1)
-- Try ROM in known-working board (if available)
-
-### Bus Issues
-
-**Symptom:** Address or data bus lines stuck high or low  
-**Solutions:**
-- Check for solder bridges on CPU socket or bus buffers
-- Verify all bus buffer ICs (74LS245, 74LS244) properly seated and powered
-- Test individual bus lines with multimeter or logic probe
-- Check for damaged traces on PCB
-- Ensure no bent pins on CPU or other ICs
-
-**Symptom:** System works intermittently  
-**Solutions:**
-- Re-seat all ICs (remove and re-insert firmly)
-- Clean edge connectors with contact cleaner (for card-based systems)
-- Check ribbon cable connections (ensure pin 1 aligned correctly on both ends)
-- Inspect for cold solder joints (reflow suspect joints)
-
-### Peripheral Issues
-
-**Symptom:** Serial communication doesn't work  
-**Solutions:**
-- Verify baud rate settings match on both 6502 and terminal (typically 9600 or 19200)
-- Check serial cable wiring (null modem vs. straight-through)
-- Test with loopback (connect TX to RX on Serial Card and send data)
-- Verify 6551 ACIA chip enable and address decoding
-- Check MAX232 level shifter for proper power (should have ±10V on RS-232 pins)
-
-**Symptom:** Keyboard input not working  
-**Solutions:**
-- Verify PS/2 keyboard works (test on PC)
-- Check PS/2 clock and data signals (should idle high, pull low during transmission)
-- Verify microcontroller firmware flashed correctly (KEH, PS2 Helper, IB Keyboard)
-- Check connections between keyboard helper and GPIO Card
-- Use oscilloscope to observe PS/2 clock/data during keypress
-
-**Symptom:** Video output absent or garbled  
-**Solutions:**
-- Verify video chip power (5V on VCC pin)
-- Check video output signal (composite or VGA depending on card)
-- For TMS9918A: Verify crystal oscillator (10.738635 MHz NTSC or 10.7386 MHz PAL)
-- For Pico9918: Verify Pi Pico firmware flashed correctly, check SPI connections
-- Test with known-good monitor
-- Adjust monitor sync settings (some monitors finicky with retro video signals)
-
-**Symptom:** Storage card not recognized  
-**Solutions:**
-- Verify CompactFlash card formatted correctly (FAT16 recommended for compatibility)
-- Check IDE interface signals (CS#, RD#, WR#, address lines)
-- Try different CF card (some cards have compatibility issues)
-- For SD cards: Verify SPI interface, check card detect signal
-- Ensure storage card address decoding is correct
-
-### Firmware Programming Issues
-
-**Symptom:** Cannot upload firmware to microcontroller  
-**Solutions:**
-- Verify USB cable works (try different cable)
-- Check programmer/bootloader (Teensy Loader, Arduino bootloader, etc.)
-- Ensure correct COM port selected in PlatformIO or Arduino IDE
-- Press reset/bootloader button on microcontroller
-- Try different USB port
-- Update USB drivers (Windows) or check permissions (Linux/macOS)
-
-**Symptom:** Firmware uploads but doesn't run  
-**Solutions:**
-- Verify correct firmware for board (DB Emulator for Dev Board, KEH Controller for Keyboard Encoder Helper, etc.)
-- Check PlatformIO environment matches board (devboard_0 vs. devboard_1 for Dev Board)
-- Verify fuses set correctly (for AVR microcontrollers)
-- Check serial monitor for error messages (115200 baud typical)
-- Re-flash firmware (possible corruption)
-
-### Debugging Tips
-
-1. **Use Clock Helper**: Single-step through code cycle-by-cycle to isolate CPU execution issues
-2. **Use Blinkenlights Card**: Visualize bus activity in real-time
-3. **Use Logic Analyzer**: Capture bus transactions for detailed analysis (Saleae, DSLogic, etc.)
-4. **Use Oscilloscope**: Check signal integrity, timing, clock quality
-5. **Test Incrementally**: Build minimal system first (CPU, RAM, ROM only), then add peripherals one at a time
-6. **Verify Power**: Always check 5V rail with multimeter before powering on
-7. **Read Datasheets**: Refer to component datasheets for pin assignments, timing requirements, electrical characteristics
-8. **Check Forums**: Search for similar issues in 6502 hobbyist forums (6502.org, Reddit r/beneater, etc.)
 
 ---
 
