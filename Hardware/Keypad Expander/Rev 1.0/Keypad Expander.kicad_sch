@@ -1586,7 +1586,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "6502 Parts:AT28C256"
+		(symbol "6502 Parts:AT28C64"
 			(pin_names
 				(offset 1.016)
 			)
@@ -1602,7 +1602,7 @@
 					(justify left)
 				)
 			)
-			(property "Value" "AT28C256"
+			(property "Value" "AT28C64"
 				(at 4.826 4.318 0)
 				(effects
 					(font
@@ -1638,11 +1638,11 @@
 					(hide yes)
 				)
 			)
-			(symbol "AT28C256_1_0"
-				(pin bidirectional line
+			(symbol "AT28C64_1_0"
+				(pin no_connect line
 					(at 0 0 0)
 					(length 5.08)
-					(name "A14"
+					(name "NC"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -1927,10 +1927,10 @@
 						)
 					)
 				)
-				(pin bidirectional line
+				(pin no_connect line
 					(at 27.94 -5.08 180)
 					(length 5.08)
-					(name "A13"
+					(name "NC"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -2144,7 +2144,7 @@
 					)
 				)
 			)
-			(symbol "AT28C256_1_1"
+			(symbol "AT28C64_1_1"
 				(rectangle
 					(start 5.08 2.54)
 					(end 22.86 -35.56)
@@ -3452,16 +3452,6 @@
 	)
 	(wire
 		(pts
-			(xy 196.85 45.72) (xy 199.39 45.72)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "020a07b0-e91e-4ce3-ad6e-b7c05dc262d8")
-	)
-	(wire
-		(pts
 			(xy 100.33 39.37) (xy 100.33 58.42)
 		)
 		(stroke
@@ -3509,16 +3499,6 @@
 			(type default)
 		)
 		(uuid "074a97d7-9bd9-4b26-94ea-339aa92efaba")
-	)
-	(wire
-		(pts
-			(xy 234.95 50.8) (xy 227.33 50.8)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "0999967d-c6fc-4ab1-9bc3-8553bf953f96")
 	)
 	(wire
 		(pts
@@ -5696,26 +5676,6 @@
 			)
 		)
 	)
-	(global_label "A14"
-		(shape input)
-		(at 196.85 45.72 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right)
-		)
-		(uuid "4791377d-28c3-41ea-9602-2fb0dadd96d5")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 196.85 45.72 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-	)
 	(global_label "CB2"
 		(shape bidirectional)
 		(at 116.84 85.09 180)
@@ -6642,26 +6602,6 @@
 		(uuid "95bab0be-3387-4a68-82fa-d42bee1e8769")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
 			(at 196.85 76.2 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(hide yes)
-			)
-		)
-	)
-	(global_label "A13"
-		(shape input)
-		(at 234.95 50.8 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left)
-		)
-		(uuid "963c4b15-57db-435a-8144-7483a9e58c9a")
-		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 234.95 50.8 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -7763,11 +7703,11 @@
 		)
 	)
 	(symbol
-		(lib_id "6502 Parts:AT28C256")
+		(lib_id "6502 Parts:AT28C64")
 		(at 199.39 45.72 0)
 		(unit 1)
 		(exclude_from_sim no)
-		(in_bom no)
+		(in_bom yes)
 		(on_board yes)
 		(dnp no)
 		(uuid "00000000-0000-0000-0000-0000606279c8")
@@ -7779,7 +7719,7 @@
 				)
 			)
 		)
-		(property "Value" "AT28C256"
+		(property "Value" "AT28C64"
 			(at 209.804 41.402 0)
 			(effects
 				(font

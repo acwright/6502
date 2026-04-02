@@ -185,6 +185,8 @@
 	(net 63 "unconnected-(U3-~{Y4}-Pad11)")
 	(net 64 "unconnected-(U3-~{Y1}-Pad14)")
 	(net 65 "unconnected-(U3-~{Y0}-Pad15)")
+	(net 66 "unconnected-(U2-NC-Pad1)")
+	(net 67 "unconnected-(U2-NC-Pad26)")
 	(footprint "6502 Logos:6502 Keypad Expander Logo 4mm"
 		(layer "F.Cu")
 		(uuid "00000000-0000-0000-0000-000060668f41")
@@ -2887,7 +2889,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -2900,7 +2902,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -3223,7 +3225,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
@@ -3243,6 +3245,19 @@
 			(effects
 				(font
 					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C49678"
+			(at 0 0 0)
+			(unlocked yes)
+			(layer "F.Fab")
+			(hide yes)
+			(uuid "a9672d2c-8f3d-45fa-b26b-256b61b36a08")
+			(effects
+				(font
+					(size 1 1)
 					(thickness 0.15)
 				)
 			)
@@ -3778,7 +3793,7 @@
 				)
 			)
 		)
-		(property "Value" "AT28C256"
+		(property "Value" "AT28C64"
 			(at 7.62 35.8 90)
 			(layer "F.SilkS")
 			(uuid "718f1d24-acb4-4e76-909f-b20dcf6df1c0")
@@ -3816,7 +3831,7 @@
 		(path "/00000000-0000-0000-0000-0000606279c8")
 		(sheetname "/")
 		(sheetfile "Keypad Expander.kicad_sch")
-		(attr through_hole exclude_from_bom)
+		(attr through_hole)
 		(fp_line
 			(start 13.68 -1.33)
 			(end 8.62 -1.33)
@@ -3979,9 +3994,9 @@
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
 			(roundrect_rratio 0.15625)
-			(net 25 "A14")
-			(pinfunction "A14")
-			(pintype "bidirectional")
+			(net 66 "unconnected-(U2-NC-Pad1)")
+			(pinfunction "NC")
+			(pintype "no_connect")
 			(uuid "000a1cea-aa6f-47c8-b30c-3ae4f89162b2")
 		)
 		(pad "2" thru_hole oval
@@ -4254,9 +4269,9 @@
 			(drill 0.8)
 			(layers "*.Cu" "*.Mask")
 			(remove_unused_layers no)
-			(net 10 "A13")
-			(pinfunction "A13")
-			(pintype "bidirectional")
+			(net 67 "unconnected-(U2-NC-Pad26)")
+			(pinfunction "NC")
+			(pintype "no_connect")
 			(uuid "9a0852bb-9a09-4102-95d1-0613233c83b0")
 		)
 		(pad "27" thru_hole oval
@@ -5270,7 +5285,7 @@
 				)
 			)
 		)
-		(property "Datasheet" ""
+		(property "Datasheet" "~"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -5283,7 +5298,7 @@
 				)
 			)
 		)
-		(property "Description" ""
+		(property "Description" "Generic connector, double row, 02x06, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 0 0 0)
 			(unlocked yes)
 			(layer "F.Fab")
