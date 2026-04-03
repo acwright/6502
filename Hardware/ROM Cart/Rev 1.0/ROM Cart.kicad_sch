@@ -2120,16 +2120,16 @@
 		(uuid "3a8b5e04-8aae-4c85-ab02-4cf7b3bc080a")
 	)
 	(junction
+		(at 187.96 76.2)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "4802686a-466f-451c-bda7-b5fc01c61ff5")
+	)
+	(junction
 		(at 80.01 138.43)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "89cc1f17-cb6e-4a50-b340-8a3edf9176f7")
-	)
-	(junction
-		(at 187.96 71.12)
-		(diameter 0)
-		(color 0 0 0 0)
-		(uuid "9692d4e8-6d2c-49ac-8313-9b24d241f83e")
 	)
 	(junction
 		(at 49.53 162.56)
@@ -2495,16 +2495,6 @@
 	)
 	(wire
 		(pts
-			(xy 187.96 48.26) (xy 187.96 71.12)
-		)
-		(stroke
-			(width 0)
-			(type default)
-		)
-		(uuid "511268e5-76bc-4e33-a2d4-4830252542dc")
-	)
-	(wire
-		(pts
 			(xy 80.01 176.53) (xy 80.01 179.07)
 		)
 		(stroke
@@ -2852,6 +2842,16 @@
 			(type default)
 		)
 		(uuid "a6d6c515-4656-4231-bc20-41c29d2a4b66")
+	)
+	(wire
+		(pts
+			(xy 187.96 76.2) (xy 190.5 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a9e12bf0-c195-461d-aa93-a73768ac6bf5")
 	)
 	(wire
 		(pts
@@ -3585,7 +3585,7 @@
 	)
 	(global_label "REB"
 		(shape input)
-		(at 187.96 48.26 90)
+		(at 190.5 76.2 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -3594,7 +3594,7 @@
 		)
 		(uuid "7d0b4df5-792f-42ea-b360-a957919ea480")
 		(property "Intersheetrefs" "${INTERSHEET_REFS}"
-			(at 187.96 48.26 0)
+			(at 190.5 76.2 90)
 			(effects
 				(font
 					(size 1.27 1.27)
