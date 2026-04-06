@@ -150,6 +150,16 @@ void loop() {
   if (ps2Enabled && !ps2Buffer.isEmpty()) {
     uint8_t ascii = ps2Buffer.shift();
     
+    // Ensure Port A is in output mode (matrix scanning leaves it as INPUT)
+    pinMode(VIA_PA0, OUTPUT);
+    pinMode(VIA_PA1, OUTPUT);
+    pinMode(VIA_PA2, OUTPUT);
+    pinMode(VIA_PA3, OUTPUT);
+    pinMode(VIA_PA4, OUTPUT);
+    pinMode(VIA_PA5, OUTPUT);
+    pinMode(VIA_PA6, OUTPUT);
+    pinMode(VIA_PA7, OUTPUT);
+
     // Write ASCII value to PORT A
     digitalWrite(VIA_PA0, (ascii >> 0) & 1);
     digitalWrite(VIA_PA1, (ascii >> 1) & 1);
