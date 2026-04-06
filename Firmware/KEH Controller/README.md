@@ -8,9 +8,8 @@ The KEH (Keyboard Encoder Helper) Controller is firmware for the ATMega1284P mic
 
 - **Dual Input Support**: Handles both PS/2 keyboards and 8x8 keyboard matrix simultaneously
 - **ASCII Conversion**: Converts PS/2 scancodes and matrix keypresses to ASCII characters
-- **Extended Character Set**: Supports standard ASCII (0x00-0x7F) plus extended codes (0x80-0xFF)
-- **Function Keys**: Full support for F1-F12 function keys with Alt modifier
-- **Modifier Keys**: Complete support for Shift, Ctrl, Alt, Caps Lock, and Fn keys
+- **Always Uppercase Letters**: Letters are always output as uppercase ASCII regardless of modifiers
+- **Modifier Keys**: Shift (symbols/numbers only) and Ctrl (control codes)
 - **Buffered Input**: Uses circular buffers to prevent data loss during rapid typing
 - **Debounced Matrix Scanning**: Hardware debouncing for reliable matrix keyboard operation
 - **Enable/Disable Control**: Independent enable signals for PS/2 and matrix inputs
@@ -71,11 +70,11 @@ Each key connects a row to a column when pressed. The matrix is scanned with row
        PB0    PB1    PB2    PB3    PB4    PB5    PB6    PB7
 PA0:    `      1      2      3      4      5      6      7
 PA1:    8      9      0      -      =      BS     ESC    TAB
-PA2:    q      w      e      r      t      y      u      i
-PA3:    o      p      [      ]      \      INS    CAPS   a
-PA4:    s      d      f      g      h      j      k      l
-PA5:    ;      '    ENTER   DEL   SHIFT    z      x      c
-PA6:    v      b      n      m      ,      .      /      UP
+PA2:    Q      W      E      R      T      Y      U      I
+PA3:    O      P      [      ]      \      INS    CAPS   A
+PA4:    S      D      F      G      H      J      K      L
+PA5:    ;      '    ENTER   DEL   SHIFT    Z      X      C
+PA6:    V      B      N      M      ,      .      /      UP
 PA7:  CTRL   MENU    ALT   SPACE   FN    LEFT   DOWN  RIGHT
 ```
 
@@ -86,9 +85,10 @@ PA7:  CTRL   MENU    ALT   SPACE   FN    LEFT   DOWN  RIGHT
 - INS = Insert (0x1A)
 - DEL = Delete (0x7F)
 - ENTER = Enter (0x0D)
-- CAPS = Caps Lock (toggle)
 - Arrow keys: UP (0x1E), LEFT (0x1C), DOWN (0x1F), RIGHT (0x1D)
-- MENU = Menu/Windows key (0x80, or 0x90 with Alt)
+
+**Ignored Keys:**
+- Caps Lock, Menu/GUI, Alt, Fn — produce no output and track no state
 
 ## Operation Modes
 
@@ -112,9 +112,14 @@ Both keyboards can operate simultaneously if both enable signals are active.
 
 ## ASCII Character Mapping
 
-### Standard ASCII (0x00-0x7F)
+### Modifier Priority
 
-**Control Characters (Ctrl+Key):**
+1. **Ctrl** — If held, produce control code. Shift is ignored.
+2. **Shift** — If held (no Ctrl), produce shifted symbol. Letters unaffected.
+3. **Base** — No modifier: produce base ASCII (letters always uppercase).
+
+### Control Characters (Ctrl+Key)
+
 - Ctrl+2 = 0x00 (NUL)
 - Ctrl+A-Z = 0x01-0x1A
 - Ctrl+[ = 0x1B (ESC)
@@ -123,35 +128,22 @@ Both keyboards can operate simultaneously if both enable signals are active.
 - Ctrl+6 = 0x1E (RS)
 - Ctrl+- = 0x1F (US)
 
-**Printable Characters:**
-- Space, numbers, letters, and symbols follow standard ASCII
+### Shifted Symbols
 
-### Extended Codes (0x80-0xFF)
+Shift only affects number and symbol keys (not letters):
 
-**Function Keys:**
-- F1-F10 = 0x81-0x8A
-- F11-F12 = 0x8B-0x8C
-- Alt+F1-F10 = 0x91-0x9A
-- Alt+F11-F12 = 0x9B-0x9C
+| Base | Shifted | | Base | Shifted |
+|------|---------|-|------|---------|
+| 1 → ! | 2 → @ | | 3 → # | 4 → $ |
+| 5 → % | 6 → ^ | | 7 → & | 8 → * |
+| 9 → ( | 0 → ) | | - → _ | = → + |
+| [ → { | ] → } | | \ → \| | ; → : |
+| ' → " | , → < | | . → > | / → ? |
+| ` → ~ | | | | |
 
-**Matrix Fn Key Combinations:**
-- Fn+1 through Fn+0 = F1-F10 (0x81-0x8A)
-- Alt+Fn+1 through Alt+Fn+0 = Alt+F1-F10 (0x91-0x9A)
-- Fn+ESC = F11 (0x9B)
-- Fn+LEFT = F12 (0x9C)
-- Fn+RIGHT = F13 (0x9D)
-- Fn+UP = F14 (0x9E)
-- Fn+DOWN = F15 (0x9F)
+### Printable Characters
 
-**Special Keys:**
-- Menu/Windows = 0x80
-- Alt+Menu = 0x90
-
-**Alt Key Combinations:**
-- Alt+letters = 0xE1-0xFA (a-z)
-- Alt+numbers = 0xB0-0xB9 (0-9)
-- Alt+Shift+letters = 0xC1-0xDA (A-Z)
-- Alt+other symbols = Various codes in 0xA0-0xFF range
+Letters are always uppercase (A-Z). Numbers, symbols, space, and navigation keys follow standard ASCII.
 
 ## Build Instructions
 

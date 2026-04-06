@@ -168,22 +168,53 @@ void loop() {
   
   // Handle matrix keyboard output on Port B
   if (matrixEnabled && !matrixBuffer.isEmpty()) {
-    uint8_t ascii = matrixBuffer.shift();
+    // When two keys on the same row are held simultaneously, their switches
+    // bridge Port B columns through the shared row wire.  This corrupts the
+    // output byte because the ATmega's output drivers fight each other through
+    // that path.  Defer output until no row has multiple pressed keys.
+    bool hasRowConflict = false;
+    for (uint8_t row = 0; row < 8; row++) {
+      uint8_t count = 0;
+      for (uint8_t col = 0; col < 8; col++) {
+        if (matrixKeyState[row][col] >= MATRIX_DEBOUNCE_COUNT) {
+          if (++count >= 2) {
+            hasRowConflict = true;
+            break;
+          }
+        }
+      }
+      if (hasRowConflict) break;
+    }
+
+    if (!hasRowConflict) {
+      // Set Port A (row lines) to high-impedance to prevent bus contention
+      // through a single pressed key switch when driving data on Port B
+      pinMode(VIA_PA0, INPUT);
+      pinMode(VIA_PA1, INPUT);
+      pinMode(VIA_PA2, INPUT);
+      pinMode(VIA_PA3, INPUT);
+      pinMode(VIA_PA4, INPUT);
+      pinMode(VIA_PA5, INPUT);
+      pinMode(VIA_PA6, INPUT);
+      pinMode(VIA_PA7, INPUT);
+
+      uint8_t ascii = matrixBuffer.shift();
     
-    // Write ASCII value to PORT B
-    digitalWrite(VIA_PB0, (ascii >> 0) & 1);
-    digitalWrite(VIA_PB1, (ascii >> 1) & 1);
-    digitalWrite(VIA_PB2, (ascii >> 2) & 1);
-    digitalWrite(VIA_PB3, (ascii >> 3) & 1);
-    digitalWrite(VIA_PB4, (ascii >> 4) & 1);
-    digitalWrite(VIA_PB5, (ascii >> 5) & 1);
-    digitalWrite(VIA_PB6, (ascii >> 6) & 1);
-    digitalWrite(VIA_PB7, (ascii >> 7) & 1);
+      // Write ASCII value to PORT B
+      digitalWrite(VIA_PB0, (ascii >> 0) & 1);
+      digitalWrite(VIA_PB1, (ascii >> 1) & 1);
+      digitalWrite(VIA_PB2, (ascii >> 2) & 1);
+      digitalWrite(VIA_PB3, (ascii >> 3) & 1);
+      digitalWrite(VIA_PB4, (ascii >> 4) & 1);
+      digitalWrite(VIA_PB5, (ascii >> 5) & 1);
+      digitalWrite(VIA_PB6, (ascii >> 6) & 1);
+      digitalWrite(VIA_PB7, (ascii >> 7) & 1);
     
-    digitalWrite(VIA_CB1, LOW); // Signal that data is ready
-    delayMicroseconds(5);
-    digitalWrite(VIA_CB1, HIGH);
-    delayMicroseconds(100); // Wait before next character
+      digitalWrite(VIA_CB1, LOW); // Signal that data is ready
+      delayMicroseconds(5);
+      digitalWrite(VIA_CB1, HIGH);
+      delayMicroseconds(100); // Wait before next character
+    }
   }
 }
 
@@ -284,38 +315,28 @@ void scanMatrix() {
   }
   matrixLastScan = currentTime;
   
-  // Temporarily save current modifier states
-  bool newShift = false;
-  bool newCtrl = false;
+  uint8_t portAPins[] = {VIA_PA0, VIA_PA1, VIA_PA2, VIA_PA3, VIA_PA4, VIA_PA5, VIA_PA6, VIA_PA7};
+  uint8_t portBPins[] = {VIA_PB0, VIA_PB1, VIA_PB2, VIA_PB3, VIA_PB4, VIA_PB5, VIA_PB6, VIA_PB7};
   
-  // Scan each row
+  // Phase 1: Scan all rows, update debounce state only
   for (uint8_t row = 0; row < 8; row++) {
-    // Set current row LOW (active), all others HIGH
-    // But only if PS/2 is not using Port A for output
-    uint8_t portAPins[] = {VIA_PA0, VIA_PA1, VIA_PA2, VIA_PA3, VIA_PA4, VIA_PA5, VIA_PA6, VIA_PA7};
-    
-    // Configure Port A for scanning
-    if (!ps2Enabled) {
-      for (uint8_t i = 0; i < 8; i++) {
+    // Drive only the active row LOW; all others high-Z to prevent
+    // current leaking through pressed keys on inactive rows (ghosting)
+    for (uint8_t i = 0; i < 8; i++) {
+      if (i == row) {
         pinMode(portAPins[i], OUTPUT);
-        digitalWrite(portAPins[i], (i == row) ? LOW : HIGH);
+        digitalWrite(portAPins[i], LOW);
+      } else {
+        pinMode(portAPins[i], INPUT);
       }
-    } else {
-      // PS/2 is using Port A, skip scanning (shouldn't happen normally)
-      return;
     }
-    
-    // Small delay to let signals stabilize
-    delayMicroseconds(10);
-    
-    // Read all columns
-    uint8_t portBPins[] = {VIA_PB0, VIA_PB1, VIA_PB2, VIA_PB3, VIA_PB4, VIA_PB5, VIA_PB6, VIA_PB7};
     
     // Configure Port B pins as inputs with pullups for reading
     for (uint8_t col = 0; col < 8; col++) {
       pinMode(portBPins[col], INPUT_PULLUP);
     }
     
+    // Small delay to let signals stabilize
     delayMicroseconds(10);
     
     for (uint8_t col = 0; col < 8; col++) {
@@ -332,22 +353,28 @@ void scanMatrix() {
           matrixKeyState[row][col]--;
         }
       }
-      
-      // Key is confirmed pressed if state >= MATRIX_DEBOUNCE_COUNT
+    }
+    
+    // Restore Port B to output mode for data transmission
+    for (uint8_t col = 0; col < 8; col++) {
+      pinMode(portBPins[col], OUTPUT);
+    }
+  }
+  
+  // Release all row lines after scanning
+  for (uint8_t i = 0; i < 8; i++) {
+    pinMode(portAPins[i], INPUT);
+  }
+  
+  // Phase 2: Update modifier states from current debounce results
+  matrixShiftPressed = (matrixKeyState[5][4] >= MATRIX_DEBOUNCE_COUNT);
+  matrixCtrlPressed  = (matrixKeyState[7][0] >= MATRIX_DEBOUNCE_COUNT);
+  
+  // Phase 3: Fire key events with up-to-date modifier state
+  for (uint8_t row = 0; row < 8; row++) {
+    for (uint8_t col = 0; col < 8; col++) {
       bool keyPressed = (matrixKeyState[row][col] >= MATRIX_DEBOUNCE_COUNT);
       bool keyWasPressed = matrixKeyLast[row][col];
-      
-      // Check for modifier keys first
-      if (keyPressed) {
-        // SHIFT is at VIA_PA5/VIA_PB4
-        if (row == 5 && col == 4) {
-          newShift = true;
-        }
-        // CTRL is at VIA_PA7/VIA_PB0
-        else if (row == 7 && col == 0) {
-          newCtrl = true;
-        }
-      }
       
       // Detect key press event (transition from not pressed to pressed)
       if (keyPressed && !keyWasPressed) {
@@ -359,16 +386,7 @@ void scanMatrix() {
       
       matrixKeyLast[row][col] = keyPressed;
     }
-    
-    // Restore Port B to output mode for data transmission
-    for (uint8_t col = 0; col < 8; col++) {
-      pinMode(portBPins[col], OUTPUT);
-    }
   }
-  
-  // Update modifier states
-  matrixShiftPressed = newShift;
-  matrixCtrlPressed = newCtrl;
 }
 
 // Map matrix position to ASCII code based on modifiers
