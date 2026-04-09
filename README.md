@@ -4,7 +4,7 @@
 ## A 65c02 Based 8-Bit Retro Computer Project
 
 ![The 6502 Project](./Assets/Images/6502.png?raw=true)
-*Shown above are some of the systems that can be assembled from the 6502 project*
+*Shown above is "The VCS" from the 6502 project*
 
 ---
 
@@ -104,7 +104,6 @@ The project supports the creation of several different computer systems, each op
 **Complexity:** Advanced  
 **Best For:** Enthusiasts wanting a complete modular 8-bit system
 
-![The COB](./CAD/Bases/The%20COB/The%20COB.png?raw=true)
 ![The COB](./Assets/Images/COB.png?raw=true)
 
 The COB is the most versatile and expandable system configuration, featuring a backplane architecture that allows multiple peripheral cards to be added or swapped. This design provides maximum flexibility for experimentation and expansion.
@@ -140,7 +139,6 @@ The COB is the most versatile and expandable system configuration, featuring a b
 **Complexity:** Intermediate  
 **Best For:** Software developers and debugging workflows
 
-![The DEV](./CAD/Bases/The%20DEV/The%20DEV.png?raw=true)
 ![The DEV](./Assets/Images/DEV.png?raw=true)
 
 The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller running cycle-accurate emulation via [vrEmu6502](https://github.com/visrealm/vrEmu6502).
@@ -183,7 +181,6 @@ The DEV does not output bus compatible signals (or any signals) for the 6502 bac
 **Complexity:** Intermediate  
 **Best For:** Retro game development and gaming
 
-![The VCS](./CAD/Bases/The%20VCS/The%20VCS.png?raw=true)
 ![The VCS](./Assets/Images/VCS.png?raw=true)
 
 A game-focused configuration designed for playing and developing retro-style games. Features cartridge-based ROM loading, multiple input options, and dedicated video/audio output.
