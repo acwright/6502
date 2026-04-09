@@ -39,13 +39,6 @@ DB Emulator transforms a Teensy 4.1 into a powerful 65C02 computer system emulat
 - **Variable Clock Speed**: Adjustable CPU frequency from very slow to maximum speed
 - **Real-Time Clock**: TimeLib integration for timestamped operations
 
-### Hardware Variants
-
-The firmware supports two development board configurations:
-
-- **DevBoard 0** (`devboard_0`): Original development board
-- **DevBoard 1** (`devboard_1`): Latest revision with improved layout and additional features (recommended)
-
 ## Prerequisites
 
 ### Hardware Requirements
@@ -125,20 +118,12 @@ Additional dependencies included in the project:
 
 ## Configuration
 
-### Select Your Development Board
-
-Edit `platformio.ini` or use the PlatformIO environment selector to choose your board configuration:
-
-- **devboard_0**: Original development board
-- **devboard_1**: Latest revision with improved layout and additional features (recommended)
-
 ### Build Flags
 
 You can enable/disable features by uncommenting build flags in `platformio.ini`:
 
 ```ini
 build_flags = 
-    -D DEVBOARD_1           ; Board version
     -D USB_TRIPLE_SERIAL    ; Enable triple serial ports (SerialUSB1 + SerialUSB2 for AV streaming)
     ; -D MOUSE_DEBUG        ; Enable mouse debugging output
     ; -D JOYSTICK_DEBUG     ; Enable joystick debugging output
@@ -168,16 +153,12 @@ build_flags =
 
 1. **Open the project** in VS Code (File → Open Folder)
 
-2. **Select your environment**:
-   - Click the environment selector in the status bar
-   - Choose `devboard_0`, or `devboard_1`
-
-3. **Build the project**:
+2. **Build the project**:
    - Click the ✓ (Build) button in the status bar
    - Or: Terminal → Run Build Task
    - Or: Press `Ctrl+Alt+B` / `Cmd+Alt+B`
 
-4. **Upload to Teensy**:
+3. **Upload to Teensy**:
    - Connect Teensy 4.1 via USB
    - Click the → (Upload) button in the status bar
    - Or: Use the upload task from the command palette
@@ -187,19 +168,19 @@ build_flags =
 
 ```bash
 # Build for DevBoard 1
-platformio run -e devboard_1
+platformio run -e devboard
 
 # Upload to Teensy
-platformio run -e devboard_1 --target upload
+platformio run -e devboard --target upload
 
 # Build and upload
-platformio run -e devboard_1 -t upload
+platformio run -e devboard -t upload
 
 # Open serial monitor
 platformio device monitor -b 115200
 
 # Build, upload, and monitor
-platformio run -e devboard_1 -t upload && platformio device monitor -b 115200
+platformio run -e devboard -t upload && platformio device monitor -b 115200
 ```
 
 ### Manual Upload with Teensy Loader

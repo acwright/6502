@@ -14,9 +14,7 @@ using namespace qindesign::network;
 Button clkButton      = Button();
 Button stepButton     = Button();
 Button runStopButton  = Button();
-#ifdef DEVBOARD_1
 Button resetButton    = Button();
-#endif
 
 USBHost             usb;
 USBHub              hub1(usb);
@@ -223,9 +221,7 @@ void loop() {
   clkButton.update();
   stepButton.update();
   runStopButton.update();
-  #ifdef DEVBOARD_1
   resetButton.update();
-  #endif
 
   if (clkButton.pressed()) {
     decreaseFrequency();
@@ -236,11 +232,9 @@ void loop() {
   if (runStopButton.pressed()) {
     toggleRunStop();
   }
-  #ifdef DEVBOARD_1
   if (resetButton.pressed()) {
     reset();
   }
-  #endif
 
   if (joystick.available()) {
     onJoystick();
@@ -1311,21 +1305,11 @@ void initPins() {
   pinMode(STEP_SWB, INPUT_PULLUP);
   pinMode(RS_SWB, INPUT_PULLUP);
 
-  #ifdef DEVBOARD_0
-  pinMode(OE1, INPUT);
-  pinMode(OE2, INPUT);
-  pinMode(OE3, INPUT);
-  pinMode(GPIO0, INPUT);
-  pinMode(GPIO1, INPUT);
-  #endif
-
-  #ifdef DEVBOARD_1
   pinMode(RESET_SWB, INPUT_PULLUP);
   pinMode(MOSI1, INPUT);
   pinMode(MISO1, INPUT);
   pinMode(SCK1, INPUT);
   pinMode(CS, INPUT);
-  #endif
 }
 
 void initButtons() {
@@ -1341,11 +1325,9 @@ void initButtons() {
   runStopButton.interval(DEBOUNCE);
   runStopButton.setPressedState(LOW);
 
-  #ifdef DEVBOARD_1
   resetButton.attach(RESET_SWB, INPUT_PULLUP);
   resetButton.interval(DEBOUNCE);
   resetButton.setPressedState(LOW);
-  #endif
 }
 
 void initSD() {
