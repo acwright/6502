@@ -910,8 +910,6 @@ See the [Firmware README](./Firmware/README.md) for detailed information on buil
 |-----------------|-----------------|-----------------|--------|-------------|
 | [DB Emulator](./Firmware/DB%20Emulator/) | Dev Board | Teensy 4.1 | DEV | 65C02 emulator with networking, USB I/O, and web control |
 | [DOB Display](./Firmware/DOB%20%20Display/) | Dev Output Board | Teensy 4.0 | DEV | TMS9918A VDP + SID audio emulation on ILI9341 LCD |
-| [IB Keyboard Controller](./Firmware/IB%20Keyboard%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 keyboard to serial interface |
-| [IB Mouse Controller](./Firmware/IB%20Mouse%20Controller/) | Input Board Rev 0.0 | ATTiny85 | VCS | PS/2 mouse interface |
 | [KEH Controller](./Firmware/KEH%20Controller/) | Keyboard Encoder Helper, Input Board Rev 1.0 | ATmega1284p | COB/VCS | Dual keyboard (PS/2 + matrix) to ASCII converter |
 | [PS2 Keyboard Controller](./Firmware/PS2%20Keyboard%20Controller/) | PS2 Helper | ATmega328p | COB | PS/2 keyboard to matrix interface |
 | [STP Controller](./Firmware/STP%20Controller/) | Storage Card Pro | ATmega328p | COB/VCS | SD card and SPI flash storage controller |
