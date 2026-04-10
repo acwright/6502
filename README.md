@@ -4,7 +4,7 @@
 ## A 65c02 Based 8-Bit Retro Computer Project
 
 ![The 6502 Project](./Assets/Images/6502.png?raw=true)
-*Shown above is "The VCS" from the 6502 project*
+*Shown above is "The VCS" from the 6502 project. (AI used to clean up photo background. Computer, keyboard, monitor, and OS screenshot are very real!)*
 
 ---
 
