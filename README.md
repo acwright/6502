@@ -1,10 +1,10 @@
-6502
-====
+ac6502
+======
 
-## A 65c02 Based 8-Bit Retro Computer Project
+## A 65C02 Based 8-Bit Retro Computer Project
 
-![The 6502 Project](./Assets/Images/6502.png?raw=true)
-*Shown above is "The VCS" from the 6502 project. (AI used to clean up photo background. Computer, keyboard, monitor, and OS screenshot are very real!)*
+![The ac6502 Project](./Assets/Images/6502.png?raw=true)
+*Shown above is "The VCS" from the ac6502 project. (AI used to clean up photo background. Computer, keyboard, monitor, and OS screenshot are very real!)*
 
 ---
 
@@ -39,7 +39,7 @@
 
 ## Overview
 
-This project aims to create multiple retro-style 8-bit computers based on the 65(c)02 microprocessor. The project is centered around a number of custom-designed PCBs that can be combined in various configurations to create different computer systems based on a common [memory map](./Assets/Documents/Memory%20Map/Memory%20Map.pdf). The designs are inspired by classic 8-bit computers such as the KIM-1, Commodore 64, and Apple II, but with modern enhancements and flexibility.
+This project aims to create multiple retro-style 8-bit computers based on the 65C02 microprocessor. The project is centered around a number of custom-designed PCBs that can be combined in various configurations to create different computer systems based on a common [memory map](./Assets/Documents/Memory%20Map/Memory%20Map.pdf). The designs are inspired by classic 8-bit computers such as the KIM-1, Commodore 64, and Apple II, but with modern enhancements and flexibility.
 
 The project is designed using **KiCad 7.0+** for PCB design and is **open-source** under the CERN Open Hardware Licence Version 2 - Permissive, allowing enthusiasts to contribute and modify the designs freely. The boards are manufactured by **JLCPCB** and use a combination of surface-mount and through-hole components for optimal assembly flexibility.
 
@@ -72,7 +72,7 @@ This project is designed for:
 
 ## Design Philosophy
 
-The 6502 project is guided by several core principles:
+The ac6502 project is guided by several core principles:
 
 ### 1. **Modularity & Flexibility**
 Rather than designing monolithic systems, the project uses interchangeable boards, cards, and helpers that can be combined in different ways. This allows a single set of PCBs to create vastly different computer systems.
@@ -112,19 +112,19 @@ The COB is the most versatile and expandable system configuration, featuring a b
   * 1x Backplane (provides card slot interconnection)
   * 1x Backplane Pro (enhanced backplane with clock/reset/power)
   * 1x Backplane Helper (adds 2 additional card slots)
-  * 1x CPU Card (65c02)
+  * 1x CPU Card (65C02)
   * 1x Memory Card (32KB RAM + 32KB ROM with address decoding)
   * 1x Video Card (composite via TMS9918A) or 1x VGA Card (VGA via Pico9918)
   * 1x Sound Card (ARMSID audio module)
   * 1x Storage Card (CompactFlash)
-  * 1x Serial Card (6551 ACIA) or 1x Serial Card Pro (enhanced serial)
+  * 1x Serial Card (65C51 ACIA) or 1x Serial Card Pro (enhanced serial)
   * 1x RAM Card (512KB banked RAM)
   * 1x RTC Card (Real-time clock via DS1511Y)
-  * 1x GPIO Card (6522 VIA for I/O)
+  * 1x GPIO Card (65C22 VIA for I/O)
     * 1x Keyboard Encoder Helper (ATmega1284p) or 1x PS2 Helper (ATmega328p)
 
 **Key Features:**
-- Real 65c02 (or 65816) CPU running at variable clock speeds (0.5 MHz - 8 MHz typical)
+- Real 65C02 CPU running at 1 Mhz clock speed
 - Up to 544KB total RAM (32KB base + 512KB banked)
 - Multiple video output options (composite or VGA)
 - Persistent storage via CompactFlash or SD card
@@ -144,7 +144,7 @@ The COB is the most versatile and expandable system configuration, featuring a b
 The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller running cycle-accurate emulation via [vrEmu6502](https://github.com/visrealm/vrEmu6502).
 
 **Required Components:**
-  * 1x Dev Board (Teensy 4.1-based 65c02 emulator)
+  * 1x Dev Board (Teensy 4.1-based 65C02 emulator)
   * 1x Dev Output Board (2.4" LCD with TMS9918A VDP and SID audio emulation)
 
 **Key Features:**
@@ -171,7 +171,7 @@ The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller runn
 
 **IMPORTANT:**
 
-The DEV does not output bus compatible signals (or any signals) for the 6502 backplane system with the current firmware and instead relies entirely on emulation. There is a bus connector and a card slot available on the Dev Board along with level shifters for all signals (see schematic). These are up to end-user to implement if you want to try to talk to real hardware using the bus connections. In past versions of the firmware (see commit history) I have worked with real hardware and it does work so give it try if you would like!
+The DEV does not output bus compatible signals (or any signals) for the ac6502 backplane system with the current firmware and instead relies entirely on emulation. There is a bus connector and a card slot available on the Dev Board along with level shifters for all signals (see schematic). These are up to end-user to implement if you want to try to talk to real hardware using the bus connections. In past versions of the firmware (see commit history) I have worked with real hardware and it does work so give it try if you would like!
 
 ---
 
@@ -186,18 +186,18 @@ The DEV does not output bus compatible signals (or any signals) for the 6502 bac
 A game-focused configuration designed for playing and developing retro-style games. Features cartridge-based ROM loading, multiple input options, and dedicated video/audio output.
 
 **Required Components:**
-  * 1x Main Board (65c02 CPU + 32KB RAM + 32KB ROM)
+  * 1x Main Board (65C02 CPU + 32KB RAM + 32KB ROM)
   * 1x Input Board (Matrix keyboard, PS/2 keyboard, controller ports)
   * 1x Output Board (VGA video via Pico9918 + ARMSID audio)
   * 1x ROM Cart (cartridge for game ROM images)
 
 **Key Features:**
-- Real 65c02 CPU
+- Real 65C02 CPU running at 1 Mhz clock speed
 - Cartridge-based game loading (swappable ROM carts)
 - Multiple input options:
   - Matrix keyboard
   - PS/2 keyboard
-  - Atari 2600 compatible joysticks (via port header and Joystick Helper)
+  - Atari 2600 compatible joysticks (via port header, Keyboard Helper or Joystick Helper)
 - VGA video output (via Pico9918)
 - Audio output via ARMSID
 
@@ -215,7 +215,7 @@ Detailed specifications for each system configuration:
 
 | Specification | COB | DEV | VCS |
 |--------------|-----|-----|-----|
-| **CPU** | 65c02 or 65816* | Teensy 4.1 (ARM Cortex-M7 emulating 65c02) | 65c02 |
+| **CPU** | 65C02 or 65816* | Teensy 4.1 (ARM Cortex-M7 emulating 65C02) | 65C02 |
 | **Clock Speed** | 0.5-8 MHz (variable) | Emulated: 0 Hz to maximum | 0.5-8 MHz (variable) |
 | **Base RAM** | 32KB (Memory Card) | Up to 32KB (configurable in firmware) | 32KB |
 | **Banked RAM** | 512KB (RAM Card) | 32KB (default), up to 512KB with PSRAM | N/A |
@@ -226,9 +226,9 @@ Detailed specifications for each system configuration:
 | **Audio** | ARMSID (SID emulation) | N/A | ARMSID |
 | **Storage** | CompactFlash or SD card* | SD card (onboard Teensy 4.1) | ROM cartridges |
 | **Storage Capacity** | Up to 128GB (CF) or 32GB (SD) | Up to 32GB (SD) | 16KB per cartridge** |
-| **Serial I/O** | 6551 ACIA (RS-232) | USB serial (115200 baud) | N/A |
+| **Serial I/O** | 65C51 ACIA (RS-232) | USB serial (115200 baud) | N/A |
 | **Network** | N/A | Ethernet (10/100 Mbps) | N/A |
-| **GPIO Ports** | 6522 VIA (Keyboard / Joystick) | USB (Keyboard / Joystick) | Input Board (Keyboard / Joystick) |
+| **GPIO Ports** | 65C22 VIA (Keyboard / Joystick) | USB (Keyboard / Joystick) | Input Board (Keyboard / Joystick) |
 | **Input Methods** | PS/2 keyboard or matrix keyboard, joysticks | USB keyboard, USB joystick | PS/2 keyboard or matrix keyboard, joysticks |
 | **Real-time Clock** | DS1511Y (Y2K compliant) | TimeLib software RTC | N/A |
 | **Expansion Slots** | 9 slots (12 available with full backplane configuration) | N/A | N/A |
@@ -313,13 +313,13 @@ This matrix shows which boards, cards, and helpers are compatible with each syst
 
 **DEV and VCS Systems:**
 - No backplane architecture (fixed board configurations)
-- DEV or VCS systems *CAN* however be expanded using Backplane boards and cards
+- DEV or VCS systems *CAN* however be expanded using backplane boards and cards
 
 ---
 
 ## Architecture Overview
 
-All 6502 project systems share a common architecture based on the classic 6502 microprocessor bus design, with modern enhancements for flexibility and expansion.
+All ac6502 project systems share a common architecture based on the classic 65C02 microprocessor bus design, with modern enhancements for flexibility and expansion.
 
 ### Memory Map
 
@@ -368,8 +368,8 @@ $FFFA ├───────────────────────�
 - **IO 2 ($8400-$87FF)**: RAM Card (1KB window into second 256KB bank)
 - **IO 3 ($8800-$8BFF)**: RTC Card (DS1511Y)
 - **IO 4 ($8C00-$8FFF)**: Storage Card (CompactFlash/SD controller)
-- **IO 5 ($9000-$93FF)**: Serial Card (6551 ACIA)
-- **IO 6 ($9400-$97FF)**: GPIO Card (6522 VIA)
+- **IO 5 ($9000-$93FF)**: Serial Card (65C51 ACIA)
+- **IO 6 ($9400-$97FF)**: GPIO Card (65C22 VIA)
 - **IO 7 ($9800-$9BFF)**: Sound Card (ARMSID interface)
 - **IO 8 ($9C00-$9FFF)**: Video Card (TMS9918A or Pico9918)
 
@@ -384,7 +384,7 @@ $FFFA ├───────────────────────�
 
 ### Bus Structure
 
-The 6502 bus includes:
+The ac6502 bus includes:
 - **16-bit Address Bus** (A0-A15): Addresses up to 64KB memory space
 - **8-bit Data Bus** (D0-D7): Bidirectional data transfer
 - **Control Signals**:
@@ -416,7 +416,7 @@ The 6502 bus includes:
 
 ### Interrupt Handling
 
-- **IRQ (Maskable Interrupt)**: Used by serial (6551), timers (6522), and other peripherals
+- **IRQ (Maskable Interrupt)**: Used by serial (65C51), timers (65C22), and other peripherals
 - **NMI (Non-Maskable Interrupt)**: Currently unused but can be configured on some cards
 - Interrupt vectors stored at `$FFFA-$FFFF` in ROM
 
@@ -427,7 +427,7 @@ Each peripheral card uses address decoding logic to respond only to its assigned
 - **Main Board & Memory Card**: Use 74HC00 NAND for RAM/ROM chip select
 - Jumpers or DIP switches allow I/O address reconfiguration on cards
 
-**Example:** Serial Card (6551 ACIA)
+**Example:** Serial Card (65C51 ACIA)
 - Occupies 4 bytes in I/O space ($9000-$9003, IO 5)
 - 74HC138 decoder uses A15-A10 to select I/O slot
 - Address decoder activates chip enable when A15-A10 match configured slot
@@ -496,22 +496,22 @@ Provides dedicated video and audio output for the DEV system, emulating the TMS9
 
 #### Input Board
 **Purpose:** Unified input board for matrix keyboard, PS/2 keyboard, and joysticks
-**Key Components:** 6522 VIA (Versatile Interface Adapter), ATmega1284p microcontroller
+**Key Components:** 65C22 VIA (Versatile Interface Adapter), ATmega1284p microcontroller
 **Inputs:** Matrix keyboard, PS/2 keyboard, and joysticks  
-**Interface:** Parallel I/O to 6502 bus (memory-mapped registers)  
+**Interface:** Parallel I/O to ac6502 bus (memory-mapped registers)  
 **Firmware:** [KEH Controller](./Firmware/KEH%20Controller/)   
 **Status:** ✓ Tested  
 
 Consolidates multiple input devices onto a single board, providing input for gaming and general use.
 
 #### LCD Board
-**Purpose:** 320×240 TFT LCD display interfaced via 6522 VIA  
-**Key Components:** ILI9341 TFT controller, 6522 VIA for I/O  
+**Purpose:** 320×240 TFT LCD display interfaced via 65C22 VIA  
+**Key Components:** ILI9341 TFT controller, 65C22 VIA for I/O  
 **Display:** 320×240 resolution  
-**Interface:** 6522 VIA parallel interface (slower than SPI but directly CPU-addressable)  
+**Interface:** 65C22 VIA parallel interface (slower than SPI but directly CPU-addressable)  
 **Status:** ⚠️ **UNTESTED**  
 
-An experimental board attempting to drive an LCD display directly from 6502 via VIA. Performance may be limited due to parallel interface overhead.
+An experimental board attempting to drive an LCD display directly from 65C02 via VIA. Performance may be limited due to parallel interface overhead.
 
 #### Main Board
 **Purpose:** Core board containing 65(c)02 CPU, RAM, ROM, clock, and reset circuitry  
@@ -531,7 +531,7 @@ The Main Board is a self-contained 6502 computer suitable for standalone use or 
 **Key Components:** Raspberry Pi Pico (Pico9918 firmware), ARMSID module  
 **Video:** VGA 640×480 via [Pico9918](https://github.com/visrealm/pico9918)  
 **Audio:** ARMSID (SID chip emulation)  
-**Interface:** Memory-mapped I/O to 6502 bus  
+**Interface:** Memory-mapped I/O to ac6502 bus  
 **Status:** ✓ Tested  
 **Used In:** VCS (primary), DEV (alternative), COB (alternative)
 
@@ -570,8 +570,8 @@ Allows the CPU to be installed on a card rather than the main board, enabling CP
 Provides 16-bit CPU capability and extended address space. Requires compatible memory and I/O cards to utilize extended features.
 
 #### GPIO Card
-**Purpose:** General-purpose I/O using 6522 VIA chip  
-**Key Components:** 6522 VIA (Versatile Interface Adapter)  
+**Purpose:** General-purpose I/O using 65C22 VIA chip  
+**Key Components:** 65C22 VIA (Versatile Interface Adapter)  
 **I/O Pins:** 20 GPIO pins (2× 8-bit ports + 4 control lines)  
 **Address Range:** IO 6 ($9400-$97FF), configurable via jumpers  
 **Timers:** 2× 16-bit timers with interrupt capability  
@@ -581,10 +581,10 @@ Provides 16-bit CPU capability and extended address space. Requires compatible m
 The GPIO Card is highly versatile, supporting keyboards, displays, custom I/O devices, and timing-critical applications.
 
 #### LCD Card
-**Purpose:** 16×2 character LCD display via 6522 VIA  
-**Key Components:** 6522 VIA, 16×2 LCD module (HD44780-compatible)  
+**Purpose:** 16×2 character LCD display via 65C22 VIA  
+**Key Components:** 65C22 VIA, 16×2 LCD module (HD44780-compatible)  
 **Display:** 16 characters × 2 lines  
-**Interface:** 6522 VIA parallel interface (4-bit or 8-bit mode)  
+**Interface:** 65C22 VIA parallel interface (4-bit or 8-bit mode)  
 **Address Range:** IO 6 ($9400-$97FF), shared with GPIO Card  
 **Status:** ✓ Tested  
 
@@ -632,8 +632,8 @@ Dramatically expands memory capacity beyond the 65C02's 64KB address space. The 
 Provides persistent timekeeping for timestamps, scheduling, and time-based applications.
 
 #### Serial Card
-**Purpose:** RS-232 serial communication via 6551 ACIA  
-**Key Components:** 6551 ACIA (Asynchronous Communications Interface Adapter), MAX232 level shifter  
+**Purpose:** RS-232 serial communication via 65C51 ACIA  
+**Key Components:** 65C51 ACIA (Asynchronous Communications Interface Adapter), MAX232 level shifter  
 **Interface:** RS-232 via DB9 connector  
 **Baud Rate:** 50 - 19200 bps (configurable via software)  
 **Address Range:** IO 5 ($9000-$93FF)  
@@ -643,7 +643,7 @@ Essential for terminal communication, program loading, and interfacing with mode
 
 #### Serial Card Pro
 **Purpose:** Enhanced serial card with full modem control signals  
-**Key Components:** 6551 ACIA, MAX232 (×2) for RS-232 level conversion  
+**Key Components:** 65C51 ACIA, MAX232 (×2) for RS-232 level conversion  
 **Features:** Same as Serial Card plus DTR, DCD, and DSR modem control signals via second MAX232  
 **Status:** ✓ Tested  
 
@@ -742,7 +742,7 @@ Helper boards provide specialized interfaces, connectors, or functionality that 
 Increases expansion capability for systems requiring more peripherals.
 
 #### Breadboard Helper
-**Purpose:** Interfaces 6502 bus to standard breadboard  
+**Purpose:** Interfaces ac6502 bus to standard breadboard  
 **Key Components:** Ribbon cable header, breadboard-compatible headers  
 **Pinout:** Full address, data, and control bus broken out  
 **Status:** ✓ Tested  
@@ -773,7 +773,7 @@ Provides DB25 connectivity for GPIO applications.
 **Key Components:** Tactile switches (×8), LEDs (×8), current-limiting resistors  
 **Inputs:** 8 debounced buttons  
 **Outputs:** 8 indicator LEDs  
-**Interface:** Connects to GPIO Card (6522 VIA)  
+**Interface:** Connects to GPIO Card (65C22 VIA)  
 **Status:** ✓ Tested  
 
 Simple I/O for testing, debugging, or basic user interaction.
@@ -801,7 +801,7 @@ Classic digital joystick interface for retro gaming.
 **Key Components:** Key switches (×64), diodes, DB9 connectors (×2)  
 **Keyboard:** 8×8 matrix (64 keys total)  
 **Joysticks:** 2× Atari-style joystick ports  
-**Interface:** Connects to GPIO Card (6522 VIA)  
+**Interface:** Connects to GPIO Card (65C22 VIA)  
 **Scanning:** Matrix scanning via VIA ports  
 **Status:** ✓ Tested  
 
@@ -811,7 +811,7 @@ Full keyboard input plus joystick support for gaming and general computing.
 **Purpose:** Translates keyboard matrix and PS/2 keyboard to ASCII  
 **Key Components:** ATmega1284p microcontroller, PS/2 connector  
 **Inputs:** PS/2 keyboard OR 8×8 keyboard matrix (Keyboard Helper)  
-**Output:** ASCII characters via 6522 VIA interface  
+**Output:** ASCII characters via 65C22 VIA interface  
 **Firmware:** [KEH Controller](./Firmware/KEH%20Controller/)  
 **Features:**  
   - Dual input support (PS/2 + matrix simultaneously)  
@@ -842,16 +842,16 @@ Essential for KIM-1-style hexadecimal data entry and system control.
 Displays output for KIM-1-style system (addresses, data, messages).
 
 #### Mega Helper
-**Purpose:** Interfaces Arduino Mega 2560 R3 to 6502 bus  
+**Purpose:** Interfaces Arduino Mega 2560 R3 to ac6502 bus  
 **Key Components:** Headers for Arduino Mega  
 **Microcontroller:** Arduino Mega 2560 R3 (user-supplied)  
 **Use Cases:**  
-  - 6502 bus monitoring
+  - 65C02 bus monitoring
   - Custom peripherals programmed in Arduino IDE  
   - I/O expansion  
   - Sensor interfaces  
   - LCD controllers  
-**Interface:** Connects to 6502 bus  
+**Interface:** Connects to ac6502 bus  
 **Status:** ✓ Tested  
 
 Leverages the Arduino ecosystem for easy peripheral development.
@@ -860,7 +860,7 @@ Leverages the Arduino ecosystem for easy peripheral development.
 **Purpose:** PS/2 keyboard interface with ASCII conversion  
 **Key Components:** ATmega328p microcontroller, PS/2 connector  
 **Input:** PS/2 keyboard  
-**Output:** ASCII characters via 6522 VIA or matrix emulation  
+**Output:** ASCII characters via 65C22 VIA or matrix emulation  
 **Firmware:** [PS2 Keyboard Controller](./Firmware/PS2%20Keyboard%20Controller/)  
 **Features:**  
   - PS/2 protocol decoding  
@@ -872,7 +872,7 @@ Leverages the Arduino ecosystem for easy peripheral development.
 Simpler alternative to Keyboard Encoder Helper when only PS/2 input is needed.
 
 #### VERA Helper
-**Purpose:** Adapts the VERA module to 6502 bus  
+**Purpose:** Adapts the VERA module to ac6502 bus  
 **Key Components:** VERA module (from Commander X16 project), level shifters, bus interface  
 **Video:** VERA capabilities (see [Commander X16 VERA](https://github.com/commanderx16/x16-docs/blob/master/VERA%20Programmer's%20Reference.md))  
 **Interface:** Memory-mapped I/O (VERA register interface)  
@@ -974,21 +974,21 @@ See individual firmware project README files for specific build instructions and
 
 ## Software & Related Projects
 
-The 6502 project has several companion repositories containing software that runs on the 6502 systems, as well as development tools.
+The ac6502 project has several companion repositories containing software that runs on the 65C02 systems, as well as development tools.
 
 ### Emulator
 
 **[6502-EMULATOR](https://github.com/acwright/6502-EMULATOR)**
-- Software emulator for the 6502 computer systems
-- Allows running and testing 6502 programs without physical hardware
+- Software emulator for the ac6502 computer systems
+- Allows running and testing 65C02 programs without physical hardware
 - Useful for software development and debugging
 
 ### Assembly Code & BIOS
 
-The following repositories contain 6502 assembly code that runs on the hardware:
+The following repositories contain 65C02 assembly code that runs on the hardware:
 
 **[6502-ASM](https://github.com/acwright/6502-ASM)**
-- General 6502 assembly code examples and utilities
+- General 65C02 assembly code examples and utilities
 - Sample programs demonstrating hardware features
 - Library routines for common tasks
 
@@ -1005,15 +1005,15 @@ The following repositories contain 6502 assembly code that runs on the hardware:
 **[6502-WOZMON](https://github.com/acwright/6502-WOZMON)**
 - Woz Monitor (Apple I monitor program)
 - Classic machine language monitor by Steve Wozniak
-- Adapted for the 6502 project hardware using the Serial Card
+- Adapted for the ac6502 project hardware using the Serial Card
 
 ### Using the Software
 
-To use these programs on your 6502 hardware:
+To use these programs on your ac6502 hardware:
 1. Clone the desired repository
-2. Assemble the code using a 6502 assembler (ca65, vasm, or similar)
+2. Assemble the code using a 65C02 assembler (ca65, vasm, or similar)
 3. Program the resulting binary to EEPROM using TL866 or similar programmer
-4. Install the EEPROM in your 6502 system
+4. Install the EEPROM in your ac6502 system
 5. Power on and test
 
 See individual repository README files for specific build and usage instructions.
@@ -1105,7 +1105,7 @@ See the [Schematics README](./Schematics/README.md) for details on navigating an
 The [Libraries](./Libraries) folder contains KiCad symbol libraries, footprint libraries, and 3D models used throughout the project.
 
 **Contents:**
-- **6502 Parts.kicad_sym**: Symbol library with 6502-specific components
+- **6502 Parts.kicad_sym**: Symbol library with ac6502-specific components
 - **6502 Parts.pretty/=**: Footprint library (PCB footprints)
 - **6502 Logos.pretty/**: Logo footprints for PCB silkscreen
 - **A.C. Wright Logo.pretty/**: A.C. Wright Design logo footprints
@@ -1128,7 +1128,7 @@ See the [Libraries README](./Libraries/README.md) for detailed library usage ins
 
 ## Development Workflow
 
-Contributing to or extending the 6502 project follows these general workflows.
+Contributing to or extending the ac6502 project follows these general workflows.
 
 ### Modifying Existing Boards
 
@@ -1186,7 +1186,7 @@ Contributing to or extending the 6502 project follows these general workflows.
 
 3. **Schematic Design**:
    - Create multi-sheet schematic if complex
-   - Use 6502 Parts library for common components
+   - Use ac6502 Parts library for common components
    - Include address decoding logic
    - Add bus buffers if driving bus signals
    - Follow existing card conventions for connector pinouts
@@ -1274,7 +1274,7 @@ Contributing to or extending the 6502 project follows these general workflows.
 
 ## Contributing
 
-Contributions to the 6502 project are welcome! Whether you're fixing bugs, adding features, testing untested boards, or improving documentation, your help is appreciated.
+Contributions to the ac6502 project are welcome! Whether you're fixing bugs, adding features, testing untested boards, or improving documentation, your help is appreciated.
 
 ### How to Contribute
 
@@ -1320,7 +1320,7 @@ Contributions to the 6502 project are welcome! Whether you're fixing bugs, addin
 - Support for additional peripherals
 
 **Software:**
-- 6502 assembly programs and examples
+- 65C02 assembly programs and examples
 - Test programs
 - BIOS improvements
 - Monitor/debugger enhancements
@@ -1394,7 +1394,7 @@ Contributions to the 6502 project are welcome! Whether you're fixing bugs, addin
 - **6502.org Forums**: General 6502 development discussion
 - **Reddit r/beneater**: Retro computing community
 
-Thank you for contributing to the 6502 project!
+Thank you for contributing to the ac6502 project!
 
 ---
 
