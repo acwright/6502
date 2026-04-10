@@ -215,25 +215,25 @@ Detailed specifications for each system configuration:
 
 | Specification | COB | DEV | VCS |
 |--------------|-----|-----|-----|
-| **CPU** | 65C02 or 65816* | Teensy 4.1 (ARM Cortex-M7 emulating 65C02) | 65C02 |
-| **Clock Speed** | 0.5-8 MHz (variable) | Emulated: 0 Hz to maximum | 0.5-8 MHz (variable) |
-| **Base RAM** | 32KB (Memory Card) | Up to 32KB (configurable in firmware) | 32KB |
-| **Banked RAM** | 512KB (RAM Card) | 32KB (default), up to 512KB with PSRAM | N/A |
-| **Total RAM** | 544KB | 64KB (default), up to 544KB with PSRAM | 32KB |
-| **ROM** | 32KB (Memory Card) | N/A (loads from SD/network) | 16KB (ROM Cart, swappable) |
+| **CPU** | 65C02 | Teensy 4.1 (ARM Cortex-M7 emulating 65C02) | 65C02 |
+| **Clock Speed** | 1 MHz | Emulated: 0 Hz to 1 MHz | 1 MHz |
+| **Base RAM** | 32KB | 32KB | 32KB |
+| **Banked RAM** | 512KB (RAM Card) | 16KB (default), up to 512KB with PSRAM | N/A |
+| **Total RAM** | 544KB | 48KB (default), up to 544KB with PSRAM | 32KB |
+| **ROM** | 32KB (Memory Card) | 32KB | 32KB / 16KB (ROM Cart, swappable) |
 | **Video Output** | Composite (TMS9918A) or VGA (Pico9918) | 2.4" LCD (VT-AC) | VGA (Pico9918) |
 | **Video Resolution** | 256×192 (TMS9918A) or 640×480 VGA | 640×480 VGA or 320×240 LCD | 640×480 VGA |
-| **Audio** | ARMSID (SID emulation) | N/A | ARMSID |
-| **Storage** | CompactFlash or SD card* | SD card (onboard Teensy 4.1) | ROM cartridges |
-| **Storage Capacity** | Up to 128GB (CF) or 32GB (SD) | Up to 32GB (SD) | 16KB per cartridge** |
+| **Audio** | ARMSID | SID emulation | ARMSID |
+| **Storage** | CompactFlash | SD card (onboard Teensy 4.1) | ROM cartridges |
+| **Storage Capacity** | Up to 1MB (CF) | Up to 32GB (SD) | 16KB per cartridge** |
 | **Serial I/O** | 65C51 ACIA (RS-232) | USB serial (115200 baud) | N/A |
 | **Network** | N/A | Ethernet (10/100 Mbps) | N/A |
-| **GPIO Ports** | 65C22 VIA (Keyboard / Joystick) | USB (Keyboard / Joystick) | Input Board (Keyboard / Joystick) |
+| **GPIO Ports** | GPIO Card (Keyboard / Joystick) | USB (Keyboard / Joystick) | Input Board (Keyboard / Joystick) |
 | **Input Methods** | PS/2 keyboard or matrix keyboard, joysticks | USB keyboard, USB joystick | PS/2 keyboard or matrix keyboard, joysticks |
-| **Real-time Clock** | DS1511Y (Y2K compliant) | TimeLib software RTC | N/A |
+| **Real-time Clock** | DS1511Y (Y2K compliant) | Teensy TimeLib software RTC | N/A |
 | **Expansion Slots** | 9 slots (12 available with full backplane configuration) | N/A | N/A |
 | **Power Requirement** | 5V DC, 2-3A | 5V DC, 2A | 5V DC, 1-2A |
-| **Board Count** | 12+ boards/cards | 2 boards | 4 boards |
+| **Board Count** | 12+ boards/cards | 2 boards | 3 boards |
 | **Complexity** | Advanced | Intermediate | Intermediate |
 
 **Legend:**
@@ -370,7 +370,7 @@ $FFFA ├───────────────────────�
 - **IO 4 ($8C00-$8FFF)**: Storage Card (CompactFlash/SD controller)
 - **IO 5 ($9000-$93FF)**: Serial Card (65C51 ACIA)
 - **IO 6 ($9400-$97FF)**: GPIO Card (65C22 VIA)
-- **IO 7 ($9800-$9BFF)**: Sound Card (ARMSID interface)
+- **IO 7 ($9800-$9BFF)**: Sound Card (ARMSID)
 - **IO 8 ($9C00-$9FFF)**: Video Card (TMS9918A or Pico9918)
 
 **Banked RAM** (RAM Card, if installed):
