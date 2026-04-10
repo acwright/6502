@@ -87,7 +87,7 @@ All systems share a common memory map and bus structure. This ensures that softw
 Complete transparency: all schematics, PCB layouts, 3D models, firmware source code, and production files are available under permissive open-source licenses. The community can learn from, modify, and improve any aspect of the project.
 
 ### 5. **Real Hardware + Emulation**
-The project supports both real 65(c)02 hardware and accurate cycle-by-cycle emulation (via Teensy 4.1 + vrEmu6502). This provides flexibility for software development and testing without requiring physical chips.
+The project supports both real 65C02 hardware and accurate cycle-by-cycle emulation (via Teensy 4.1 + vrEmu6502). This provides flexibility for software development and testing without requiring physical chips.
 
 ### 6. **Educational Focus**
 Documentation, schematics, and code are written with clarity in mind. The project serves as a learning platform for understanding computer architecture, digital design, and embedded programming.
@@ -141,7 +141,7 @@ The COB is the most versatile and expandable system configuration, featuring a b
 
 ![The DEV](./Assets/Images/DEV.png?raw=true)
 
-The DEV replaces the physical 65(c)02 CPU with a Teensy 4.1 microcontroller running cycle-accurate emulation via [vrEmu6502](https://github.com/visrealm/vrEmu6502).
+The DEV replaces the physical 65C02 CPU with a Teensy 4.1 microcontroller running cycle-accurate emulation via [vrEmu6502](https://github.com/visrealm/vrEmu6502).
 
 **Required Components:**
   * 1x Dev Board (Teensy 4.1-based 65C02 emulator)
@@ -514,7 +514,7 @@ Consolidates multiple input devices onto a single board, providing input for gam
 An experimental board attempting to drive an LCD display directly from 65C02 via VIA. Performance may be limited due to parallel interface overhead.
 
 #### Main Board
-**Purpose:** Core board containing 65(c)02 CPU, RAM, ROM, clock, and reset circuitry  
+**Purpose:** Core board containing 65C02 CPU, RAM, ROM, clock, and reset circuitry  
 **Key Components:** 65C02 CPU, 32KB SRAM (62256), 32KB EEPROM (28C256), oscillator, reset IC  
 **CPU:** W65C02S or equivalent  
 **Clock Speed:** 1-8 MHz (selectable by swapping oscillator)   
