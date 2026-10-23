@@ -27,6 +27,7 @@ An **AC6502** retro-style 8-bit computer based on the **65C02** microprocessor.
 - [CAD](#cad)
 - [Production](#production)
 - [Schematics](#schematics)
+- [Checking the schematics](#checking-the-schematics)
 - [Libraries](#libraries)
 - [Bill of Materials](#bill-of-materials)
   - [Backplane](#backplane)
@@ -265,6 +266,21 @@ JLCPCB-ready Gerber files and BOM/CPL for PCB fabrication and assembly.
 `Schematics/`
 
 PDF schematics for each board.
+
+## Checking the schematics
+`Tests/check-schematics.mjs`
+
+The RAM Card's bank latch decides which kilobyte of its 512 KB each window shows, and a latch that loads on the wrong address corrupts a bank without any sign. The ACE's equivalent latch was wrong twice while its gates looked right on paper, so this script checks the logic instead of reading it. It asks KiCad for the card's netlist, builds the glue logic from the gates it finds there, fits the card's jumpers, and drives every address, as a read and as a write, with PHI2 high and low. That is 262,144 bus states. For each one it compares the RAM's chip select, read and write strobes and A18, and the latch enable, against the memory map, and checks that the card drives the data bus only on a read of its own window. A net that nothing drives counts as a failure, so a missing wire fails too.
+
+It checks the RAM Card Rev 1.0 with both windows jumpered, IO 1 (`$8000`) and IO 2 (`$8400`), which is the only setting Rev 1.0 supports: R1 and R2 pull the window selects to ground, so a window left without a jumper is selected at every address.
+
+Run it after any change to a checked schematic:
+
+```sh
+node Tests/check-schematics.mjs
+```
+
+It needs Node.js and KiCad's `kicad-cli`, which it finds on the `PATH`, at the macOS default location, or through a `KICAD_CLI` environment variable. It takes a few seconds, prints `ok` or `FAIL` for each check with example bus states for any failure, and exits non-zero on a failure.
 
 ## Libraries
 `Libraries/`
